@@ -14,8 +14,12 @@ pip install -r test_requirements.txt
 
 # Run tests
 pytest
+<<<<<<< HEAD
 ```
 
 
 
 
+=======
+```
+>>>>>>> 1da95ab (PDS-217 - Filename parser and tests added)
