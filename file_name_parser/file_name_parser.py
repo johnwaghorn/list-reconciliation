@@ -26,6 +26,7 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
         InvalidFilename: Raised when filename doesn't match expressions/
                          Raised when invalid dates contained within filename
     """
+    
     FILENAME_EX = "^GPR4([A-Z0-9]{3})1"
 
     EXTENSION_EX = "([A-L][1-9A-V])[A-Z]$"
@@ -59,9 +60,22 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
     day_code = date_indicator[1]
     day = days.index(day_code) + 1
 
-    extract_date = datetime(datetime.now().year, month, day).date()
+    date_now = datetime.now()
 
-    days_difference = (datetime.now().date() - extract_date).days
+    new_year_start_limit = datetime(date_now.year, 1, 1)
+    new_year_end_limit = datetime(date_now.year, 1, 15)
+
+    # If current date is between Jan 1-15, treats extract codes from Dec 18-31 as previous year
+    if date_now >= new_year_start_limit and date_now < new_year_end_limit:
+        if month_code == "L" and day_code in "IJKLMNOPQRSTUV":
+            extract_date = datetime(date_now.year - 1, month, day).date()
+    else:
+        try:
+            extract_date = datetime(date_now.year, month, day).date()
+        except:
+            raise ValueError("The date within the filename is not a valid date")
+
+    days_difference = (date_now.date() - extract_date).days
 
     if days_difference < 0:
         raise InvalidFilename("File date must not be from the future")
