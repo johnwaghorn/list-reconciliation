@@ -26,7 +26,7 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
         InvalidFilename: Raised when filename doesn't match expressions/
                          Raised when invalid dates contained within filename
     """
-    
+
     FILENAME_EX = "^GPR4([A-Z0-9]{3})1"
 
     EXTENSION_EX = "([A-L][1-9A-V])[A-Z]$"

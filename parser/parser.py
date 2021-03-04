@@ -1,6 +1,6 @@
 import os
 
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
@@ -38,25 +38,33 @@ class InvalidGPExtract(Exception):
     pass
 
 
-def _validate_record(record: Record) -> Record:
+def _validate_record(
+    record: Record, process_datetime: datetime, gp_ha_cipher: str = None
+) -> Record:
     """Run pre-mapped validation function against a record.
 
     Args:
         record (Record): Record to validate.
+        process_datetime (datetime): Time of processing.
+        gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
 
     Returns:
         Record: Validated record, with an added field containing validation result.
     """
 
     validated_record = {}
-    # Apply validator functions mapped to each element, default to no
+    # Apply validator functions mapped to each element, default to string
     # conversion if not defined
     validation_errors = {}
     for col, val in record.items():
-        validator_function = VALIDATORS.get(col)
-        coerced_record, invalid_reason = validator_function(val)
+        # Get validator function for each column and coerce data
+        validator_func = VALIDATORS.get(col)
+        coerced_record, invalid_reason = validator_func(
+            val,
+            process_datetime=process_datetime,
+            gp_ha_cipher=gp_ha_cipher,
+        )
         validated_record[col] = coerced_record
-
         if invalid_reason:
             validation_errors[col] = invalid_reason
 
@@ -125,13 +133,13 @@ def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
     """
 
     row = [RECORD_TYPE] + _parse_row_pair(row_pair)
-    # Check empty columns have no values for this row
     assert len(columns) == len(row), "Columns and row must be the same length"
+
     row_cols = list(zip(columns, row))
     _validate_columns(row_cols)
     record = dict(row_cols)
-    # Remove blank-string key resulting from empty columns
     record.pop("", None)
+
     return record
 
 
@@ -163,15 +171,25 @@ def _validate_file_group(file_group: FileGroup):
         raise InvalidGPExtract("File extension identifiers must be sequential, starting from 'A'")
 
 
-def parse_gp_extract_text(gp_extract_text: str, first: bool = True) -> Records:
+def parse_gp_extract_text(
+    gp_extract_text: str,
+    first: bool = True,
+    process_datetime: datetime = None,
+    gp_ha_cipher: str = None,
+) -> Records:
     """Converts text from a GP Extract to records with fieldnames.
 
     Expects unformatted text containing GP extract records.
 
     Args:
         gp_extract_text (str): The raw string from GP extract.
+
         first (bool): This is the first (or only) set of contents from a GP
             extract file. Setting this flag expects to see the 503 header.
+
+        process_datetime (datetime): Time of processing.
+
+        gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
 
     Returns:
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
@@ -186,19 +204,30 @@ def parse_gp_extract_text(gp_extract_text: str, first: bool = True) -> Records:
         start_idx = 1
     else:
         start_idx = 0
-    # Get columns from the first block
+
     columns = _parse_columns(raw_text[start_idx : start_idx + 2])
 
-    return [
-        _validate_record(_parse_row_columns(row, columns))
+    validated_records = [
+        _validate_record(
+            _parse_row_columns(row, columns),
+            process_datetime=process_datetime or datetime.now(),
+            gp_ha_cipher=gp_ha_cipher,
+        )
         for row in pairs(raw_text[start_idx + 2 :])
     ]
 
+    return validated_records
 
-def parse_gp_extract_file_group(filepath_group: FilePathGroup, first: bool = True) -> Records:
+
+def parse_gp_extract_file_group(
+    filepath_group: FilePathGroup,
+    first: bool = True,
+    process_datetime: datetime = None,
+    gp_ha_cipher: str = None,
+) -> Records:
     """Convert GP extract files into records with fieldnames.
 
-    Expects word documents containing GP extract records.
+    Expects unformatted word documents containing GP extract records.
 
     >>> parse_gp_extract_file_group(('path/to/GPR4LA01.CSA', 'path/to/GPR4LA01.CSA'))  # doctest: +SKIP
     [{'RECORD_TYPE': 'DOW', ...}, ...]
@@ -206,9 +235,14 @@ def parse_gp_extract_file_group(filepath_group: FilePathGroup, first: bool = Tru
     Args:
         file_group (FilePathGroup): One or more file paths to GP extracts
             considered to be part of the same extract group.
+
         first (bool): This is the first (or only) set of contents from a GP
             extract file. Setting this flag expects to see the 503 header.
             Only the first file of an extract group should have the header.
+
+        process_datetime (datetime): Time of processing.
+
+        gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
 
     Returns:
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
@@ -221,7 +255,14 @@ def parse_gp_extract_file_group(filepath_group: FilePathGroup, first: bool = Tru
     _validate_file_group([os.path.basename(f) for f in filepath_group])
     first = True
     for path in sorted(filepath_group):
-        results.extend(parse_gp_extract_text(docx2txt.process(path), first=first))
+        results.extend(
+            parse_gp_extract_text(
+                docx2txt.process(path),
+                first=first,
+                process_datetime=process_datetime or datetime.now(),
+                gp_ha_cipher=gp_ha_cipher,
+            )
+        )
         first = False
 
     return results

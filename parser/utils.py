@@ -1,5 +1,7 @@
 from typing import Any, List, Generator, Tuple
 
+__all__ = ["pairs"]
+
 
 def pairs(in_list: List[Any]) -> Generator[Tuple[Any], None, None]:
     """Create a pairwise generator from input list.
