@@ -4,8 +4,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
-import docx2txt
-
 from parser.utils import pairs
 from parser.validators import VALIDATORS, INVALID
 
@@ -257,12 +255,13 @@ def parse_gp_extract_file_group(
     for path in sorted(filepath_group):
         results.extend(
             parse_gp_extract_text(
-                docx2txt.process(path),
+                open(path, "r").read(),
                 first=first,
                 process_datetime=process_datetime or datetime.now(),
                 gp_ha_cipher=gp_ha_cipher,
             )
         )
+
         first = False
 
     return results
