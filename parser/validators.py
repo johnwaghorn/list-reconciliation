@@ -88,8 +88,7 @@ INVALID_TITLE = (
     "or hyphen. Max length 35."
 )
 INVALID_SEX = (
-    'must be "1" for Male, "2" for Female, "0" for Indeterminate/Not Known or'
-    ' "9" for Not Specified.'
+    "must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
 )
 INVALID_DATE_OF_BIRTH = "must be a date in past in the format YYYYMMDD."
 INVALID_ADDRESS_LINE = (

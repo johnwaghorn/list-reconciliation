@@ -1,11 +1,41 @@
+import csv
 import os
 
+from collections import Counter
 from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
 from parser.utils import pairs
-from parser.validators import VALIDATORS, INVALID
+from parser.validators import (
+    VALIDATORS,
+    INVALID,
+    RECORD_TYPE_COL,
+    GP_CODE_COL,
+    HA_CIPHER_COL,
+    TRANS_DATE_COL,
+    PRACTICE_SITE_NUMBER_COL,
+    CLINCAL_SYSTEM_NUMBER_COL,
+    NHS_NUMBER_COL,
+    SURNAME_COL,
+    FORENAMES_COL,
+    PREV_SURNAME_COL,
+    TITLE_COL,
+    SEX_COL,
+    DOB_COL,
+    ADDRESS_LINE1_COL,
+    ADDRESS_LINE2_COL,
+    ADDRESS_LINE3_COL,
+    ADDRESS_LINE4_COL,
+    ADDRESS_LINE5_COL,
+    POSTCODE_COL,
+    DISTANCE_COL,
+    DRUGS_DISPENSED_MARKER,
+    RPP_MILEAGE,
+    BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,
+    WALKING_UNITS,
+    RESIDENTIAL_INSTITUTE_CODE,
+)
 
 Columns = Iterable[str]
 FileGroup = Iterable[str]
@@ -26,7 +56,6 @@ __all__ = [
 ]
 
 SEP = "~"
-RECORD_TYPE_COL = "RECORD_TYPE"
 RECORD_TYPE = "DOW"
 RECORD_1 = "1"
 RECORD_2 = "2"
@@ -265,3 +294,99 @@ def parse_gp_extract_file_group(
         first = False
 
     return results
+
+
+def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
+    """Filter out valid records from a set of records.
+
+    Optionally include a more inormative validation fail reason.
+
+    Args:
+        records (Records): Valid and invalid records to extract invalids from.
+        include_reason (bool): If true, include a verbose description of
+            invalid determination. (default: {False})
+
+    Returns:
+        Tuple[Dict, Records]: First item is a dict of {columns: invalid counts},
+            second item is a records item, containing only invalid records.
+    """
+
+    count = Counter()
+    invalid_records = []
+    for record in records:
+        if invalids := record.get(INVALID):
+            for col in record.keys():
+                count[col] += int(bool(invalids.get(col, {})))
+            if not include_reason:
+                record[INVALID] = {k: k for k in invalids}
+            else:
+                record[INVALID] = {k: f"{k} {v}" for k, v in invalids.items()}
+            invalid_records.append(record)
+
+    count.pop(INVALID)
+
+    return dict(count), invalid_records
+
+
+def output_invalid_records(records: Records, summary_path: Path, include_reason: bool = False):
+    """Create CSV files containing invalids summary and invalid records with reasons.
+
+    Args:
+        records (Records): Valid and invalid records to extract invalids from.
+        out_file (Path): [description]
+        include_reason (bool): If true, include a verbose description of
+            invalid determination. (default: {False})
+
+    Returns:
+        Tuple[Path, Path]: Paths to output files; first the summary, second is
+            the invalid records file.
+    """
+
+    header = [
+        INVALID,
+        RECORD_TYPE_COL,
+        GP_CODE_COL,
+        HA_CIPHER_COL,
+        TRANS_DATE_COL,
+        PRACTICE_SITE_NUMBER_COL,
+        CLINCAL_SYSTEM_NUMBER_COL,
+        NHS_NUMBER_COL,
+        SURNAME_COL,
+        FORENAMES_COL,
+        PREV_SURNAME_COL,
+        TITLE_COL,
+        SEX_COL,
+        DOB_COL,
+        ADDRESS_LINE1_COL,
+        ADDRESS_LINE2_COL,
+        ADDRESS_LINE3_COL,
+        ADDRESS_LINE4_COL,
+        ADDRESS_LINE5_COL,
+        POSTCODE_COL,
+        DISTANCE_COL,
+        DRUGS_DISPENSED_MARKER,
+        RPP_MILEAGE,
+        BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,
+        WALKING_UNITS,
+        RESIDENTIAL_INSTITUTE_CODE,
+    ]
+
+    count, invalid_records = process_invalid_records(records, include_reason)
+
+    for invalid_record in invalid_records:
+        invalid_record[INVALID] = " | ".join(invalid_record[INVALID].values())
+
+    with open(summary_path, "w") as outfile:
+        writer = csv.DictWriter(outfile, header)
+        writer.writeheader()
+        writer.writerows(invalid_records)
+
+    count_dict = [{"COLUMN": k, "COUNT": v} for k, v in count.items()]
+
+    base_path, ext = os.path.splitext(summary_path)
+    with open(f"{base_path}_counts{ext}", "w") as count_path:
+        writer = csv.DictWriter(count_path, ["COLUMN", "COUNT"])
+        writer.writeheader()
+        writer.writerows(count_dict)
+
+    return summary_path, count_path
