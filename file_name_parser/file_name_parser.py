@@ -7,7 +7,7 @@ class InvalidFilename(Exception):
     pass
 
 
-def validate_filenames(file_group: List[str]) -> datetime.date:
+def validate_filenames(file_group: List[str]) -> datetime:
     """Validates a list of filenames and returns the file group date
 
     Checks the following rules:
@@ -30,6 +30,8 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
     FILENAME_EX = "^GPR4([A-Z0-9]{3})1"
 
     EXTENSION_EX = "([A-L][1-9A-V])[A-Z]$"
+
+    file_group = [filename.upper() for filename in file_group]
 
     if len({f[:-1] for f in file_group}) != 1:
         raise InvalidFilename("All filenames must be identical up to the penultimate character")
@@ -55,10 +57,10 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
     days = "123456789ABCDEFGHIJKLMNOPQRSTUV"
 
     month_code = date_indicator[0]
-    month = months.index(month_code) + 1
+    extract_month = months.index(month_code) + 1
 
     day_code = date_indicator[1]
-    day = days.index(day_code) + 1
+    extract_day = days.index(day_code) + 1
 
     date_now = datetime.now()
 
@@ -68,14 +70,14 @@ def validate_filenames(file_group: List[str]) -> datetime.date:
     # If current date is between Jan 1-15, treats extract codes from Dec 18-31 as previous year
     if date_now >= new_year_start_limit and date_now < new_year_end_limit:
         if month_code == "L" and day_code in "IJKLMNOPQRSTUV":
-            extract_date = datetime(date_now.year - 1, month, day).date()
+            extract_date = datetime(date_now.year - 1, extract_month, extract_day)
     else:
         try:
-            extract_date = datetime(date_now.year, month, day).date()
+            extract_date = datetime(date_now.year, extract_month, extract_day)
         except:
             raise ValueError("The date within the filename is not a valid date")
 
-    days_difference = (date_now.date() - extract_date).days
+    days_difference = (date_now.date() - extract_date.date()).days
 
     if days_difference < 0:
         raise InvalidFilename("File date must not be from the future")

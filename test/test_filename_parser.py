@@ -9,14 +9,44 @@ from file_name_parser.file_name_parser import (
 
 
 @freeze_time("2020-02-01")
-def test_validate_filenames_valid_filegroup_returns_valid_date():
+def test_validate_filenames_valid_uppercase_filegroup_returns_valid_date():
     filegroup = [
         "GPR4BRF1.B1A",
         "GPR4BRF1.B1B",
         "GPR4BRF1.B1C",
     ]
 
-    expected = datetime.now().date()
+    expected = datetime.now()
+
+    actual = validate_filenames(filegroup)
+
+    assert expected == actual
+
+
+@freeze_time("2020-02-01")
+def test_validate_filenames_valid_lowercase_filegroup_returns_valid_date():
+    filegroup = [
+        "gpr4brf1.b1a",
+        "gpr4brf1.b1b",
+        "gpr4brf1.b1c",
+    ]
+
+    expected = datetime.now()
+
+    actual = validate_filenames(filegroup)
+
+    assert expected == actual
+
+
+@freeze_time("2020-02-01")
+def test_validate_filenames_valid_mixcase_filegroup_returns_valid_date():
+    filegroup = [
+        "Gpr4brf1.b1A",
+        "gpR4brf1.b1b",
+        "gPr4brf1.B1c",
+    ]
+
+    expected = datetime.now()
 
     actual = validate_filenames(filegroup)
 
@@ -111,7 +141,7 @@ def test_validate_filenames_valid_month_indicator_parses_date_correctly():
 
     filegroup = [f"GPR4BRF1.{valid_month_indicator}5A"]
 
-    expected = datetime.now().date()
+    expected = datetime.now()
 
     actual = validate_filenames(filegroup)
 
@@ -124,7 +154,7 @@ def test_validate_filenames_valid_day_indicator_parses_date_correctly():
 
     filegroup = [f"GPR4BRF1.L{valid_day_indicator}A"]
 
-    expected = datetime.now().date()
+    expected = datetime.now()
 
     actual = validate_filenames(filegroup)
 
@@ -153,7 +183,7 @@ def test_validate_filenames_new_year_start_indicator_returns_valid_date():
         "GPR4BRF1.LIC",
     ]
 
-    expected = datetime(2019, 12, 18).date()
+    expected = datetime(2019, 12, 18)
 
     actual = validate_filenames(filegroup)
 
@@ -169,7 +199,7 @@ def test_validate_filenames_new_year_limit_indicator_returns_valid_date():
         "GPR4BRF1.LVC",
     ]
 
-    expected = datetime(2019, 12, 31).date()
+    expected = datetime(2019, 12, 31)
 
     actual = validate_filenames(filegroup)
 
