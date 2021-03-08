@@ -8,7 +8,7 @@ SPECIFICATION section 3.10 OUT-GOING GENERATED DOWNLOAD TRANSACTIONS.
 """
 from datetime import datetime, timedelta
 import re
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 import warnings
 
 __all__ = [
@@ -32,7 +32,6 @@ warnings.warn("Blocked Route/Special District Marker not defined in test records
 warnings.warn("Walking Units not defined in test records")
 warnings.warn("Residential Institute Code not defined in test records")
 warnings.warn("PRACTICE_SITE_NUMBER_COL defined but not specified")
-warnings.warn("CLINCAL_SYSTEM_NUMBER_COL defined but not specified")
 warnings.warn("DISTANCE defined but not specified")
 
 
@@ -41,7 +40,7 @@ GP_CODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
 HA_CIPHER_COL = "TRADING_PARTNER_NHAIS_CIPHER"
 TRANS_DATE_COL = "DATE_OF_DOWNLOAD"
 PRACTICE_SITE_NUMBER_COL = "PRACTICE_SITE_NUMBER"
-CLINCAL_SYSTEM_NUMBER_COL = "CLINCAL_SYSTEM_NUMBER"
+TRANS_ID_COL = "TRANS_ID"
 NHS_NUMBER_COL = "NHS_NUMBER"
 SURNAME_COL = "SURNAME"
 FORENAMES_COL = "FORENAMES"
@@ -106,6 +105,7 @@ INVALID_WALKING_UNITS = "must be between 3 and 99 inclusive and be divisible by 
 INVALID_RESIDENTIAL_INSTITUTE_CODE = (
     "must be a 2-character string and valid code for the patients Health Authority."
 )
+INVALID_TRANS_ID = "must be a unique not-null integer greater than 0."
 
 
 ValidatedRecord = Tuple[str, Union[str, None]]
@@ -550,6 +550,31 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     return residential_institute_code_val, invalid_reason
 
 
+@not_null
+def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> ValidatedRecord:
+    """Coerce and validate transaction id.
+
+    Validation rules: Must be a unique not-null 2-character integer greater than 0.
+
+    Args:
+        other_ids (List[str]): All other record id's seen so far for checking uniqueness.
+
+    Returns:
+        ValidatedRecord: Tuple of coerced value and invalid reason if any.
+    """
+
+    invalid_reason = None
+    if not re.match(r"^([1-9]{1}[0-9]*)$", str(transaction_id_val)):
+        invalid_reason = INVALID_TRANS_ID
+    else:
+        transaction_id_val = int(transaction_id_val)
+
+    if transaction_id_val in other_ids:
+        invalid_reason = INVALID_TRANS_ID
+
+    return transaction_id_val, invalid_reason
+
+
 def undefined_valildator(val, **kwargs):
     return val, None
 
@@ -561,7 +586,7 @@ VALIDATORS = {
     HA_CIPHER_COL: ha_cipher,
     TRANS_DATE_COL: transaction_datetime,
     PRACTICE_SITE_NUMBER_COL: undefined_valildator,
-    CLINCAL_SYSTEM_NUMBER_COL: undefined_valildator,
+    TRANS_ID_COL: transaction_id,
     NHS_NUMBER_COL: nhs_number,
     SURNAME_COL: surname,
     FORENAMES_COL: forename,

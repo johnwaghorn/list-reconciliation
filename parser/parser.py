@@ -15,7 +15,7 @@ from parser.validators import (
     HA_CIPHER_COL,
     TRANS_DATE_COL,
     PRACTICE_SITE_NUMBER_COL,
-    CLINCAL_SYSTEM_NUMBER_COL,
+    TRANS_ID_COL,
     NHS_NUMBER_COL,
     SURNAME_COL,
     FORENAMES_COL,
@@ -66,7 +66,10 @@ class InvalidGPExtract(Exception):
 
 
 def _validate_record(
-    record: Record, process_datetime: datetime, gp_ha_cipher: str = None
+    record: Record,
+    process_datetime: datetime,
+    gp_ha_cipher: str = None,
+    other_ids: List[str] = None,
 ) -> Record:
     """Run pre-mapped validation function against a record.
 
@@ -74,6 +77,7 @@ def _validate_record(
         record (Record): Record to validate.
         process_datetime (datetime): Time of processing.
         gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
+        other_ids (List[str]): All other record id's seen so far for checking uniqueness.
 
     Returns:
         Record: Validated record, with an added field containing validation result.
@@ -83,13 +87,16 @@ def _validate_record(
     # Apply validator functions mapped to each element, default to string
     # conversion if not defined
     validation_errors = {}
+
     for col, val in record.items():
         # Get validator function for each column and coerce data
-        validator_func = VALIDATORS.get(col)
+        try:
+            validator_func = VALIDATORS[col]
+        except KeyError:
+            raise InvalidGPExtract(f"Unrecognised column {col}")
+
         coerced_record, invalid_reason = validator_func(
-            val,
-            process_datetime=process_datetime,
-            gp_ha_cipher=gp_ha_cipher,
+            val, process_datetime=process_datetime, gp_ha_cipher=gp_ha_cipher, other_ids=other_ids
         )
         validated_record[col] = coerced_record
         if invalid_reason:
@@ -234,14 +241,17 @@ def parse_gp_extract_text(
 
     columns = _parse_columns(raw_text[start_idx : start_idx + 2])
 
-    validated_records = [
-        _validate_record(
+    ids = []
+    validated_records = []
+    for row in pairs(raw_text[start_idx + 2 :]):
+        validated_record = _validate_record(
             _parse_row_columns(row, columns),
             process_datetime=process_datetime or datetime.now(),
             gp_ha_cipher=gp_ha_cipher,
+            other_ids=ids,
         )
-        for row in pairs(raw_text[start_idx + 2 :])
-    ]
+        validated_records.append(validated_record)
+        ids.append(validated_record[TRANS_ID_COL])
 
     return validated_records
 
@@ -349,7 +359,7 @@ def output_invalid_records(records: Records, summary_path: Path, include_reason:
         HA_CIPHER_COL,
         TRANS_DATE_COL,
         PRACTICE_SITE_NUMBER_COL,
-        CLINCAL_SYSTEM_NUMBER_COL,
+        TRANS_ID_COL,
         NHS_NUMBER_COL,
         SURNAME_COL,
         FORENAMES_COL,

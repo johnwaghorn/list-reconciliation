@@ -376,3 +376,26 @@ def test_not_null_decorator_return_values(val, expected):
     actual = dummy(val)
 
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "val,ids,expected",
+    (
+        ("1", [], (1, None)),
+        (1, [], (1, None)),
+        ("123", [], (123, None)),
+        ("", [], (None, v.INVALID_NULL)),
+        (None, [], (None, v.INVALID_NULL)),
+        (" ", [], (" ", v.INVALID_TRANS_ID)),
+        ("0", [], ("0", v.INVALID_TRANS_ID)),
+        ("-1", [], ("-1", v.INVALID_TRANS_ID)),
+        ("1.5", [], ("1.5", v.INVALID_TRANS_ID)),
+        (1.5, [], (1.5, v.INVALID_TRANS_ID)),
+        ("0123", [], ("0123", v.INVALID_TRANS_ID)),
+        ("A", [], ("A", v.INVALID_TRANS_ID)),
+        ("1", [2, 3, 4], (1, None)),
+        ("1", [1, 2, 3, 4], (1, v.INVALID_TRANS_ID)),
+    ),
+)
+def test_transaction_id_validators_return_values(val, ids, expected):
+    assert v.VALIDATORS[v.TRANS_ID_COL](val, ids) == expected
