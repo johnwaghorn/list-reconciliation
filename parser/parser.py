@@ -14,7 +14,7 @@ from parser.validators import (
     GP_CODE_COL,
     HA_CIPHER_COL,
     TRANS_DATE_COL,
-    PRACTICE_SITE_NUMBER_COL,
+    TRANS_TIME_COL,
     TRANS_ID_COL,
     NHS_NUMBER_COL,
     SURNAME_COL,
@@ -29,7 +29,6 @@ from parser.validators import (
     ADDRESS_LINE4_COL,
     ADDRESS_LINE5_COL,
     POSTCODE_COL,
-    DISTANCE_COL,
     DRUGS_DISPENSED_MARKER,
     RPP_MILEAGE,
     BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,
@@ -83,11 +82,10 @@ def _validate_record(
         Record: Validated record, with an added field containing validation result.
     """
 
+    validation_errors = {}
     validated_record = {}
     # Apply validator functions mapped to each element, default to string
     # conversion if not defined
-    validation_errors = {}
-
     for col, val in record.items():
         # Get validator function for each column and coerce data
         try:
@@ -131,20 +129,6 @@ def _parse_row_pair(row_pair: RowPair) -> Row:
     assert row_2[1] == RECORD_2, f"Row part 2 must be identified with '{RECORD_2}'"
 
     return row_1[2:] + row_2[2:]
-
-
-def _parse_columns(row_pair: RowPair) -> Columns:
-    """Convert a row pair into column names.
-
-    Args:
-        row_pair (RowPair): Pair of strings containing row 1 and 2 representing
-            a single record from a GP extract.
-
-    Returns:
-        Columns: List of column names.
-    """
-
-    return [RECORD_TYPE_COL] + _parse_row_pair(row_pair)
 
 
 def _validate_columns(row_columns: RowColumns):
@@ -239,11 +223,41 @@ def parse_gp_extract_text(
     else:
         start_idx = 0
 
-    columns = _parse_columns(raw_text[start_idx : start_idx + 2])
+    # Skip column names record if it exists
+    if NHS_NUMBER_COL in raw_text[start_idx]:
+        start_idx += 2
+
+    columns = [
+        RECORD_TYPE_COL,
+        GP_CODE_COL,
+        HA_CIPHER_COL,
+        TRANS_DATE_COL,
+        TRANS_TIME_COL,
+        TRANS_ID_COL,
+        NHS_NUMBER_COL,
+        SURNAME_COL,
+        FORENAMES_COL,
+        PREV_SURNAME_COL,
+        TITLE_COL,
+        SEX_COL,
+        DOB_COL,
+        ADDRESS_LINE1_COL,
+        ADDRESS_LINE2_COL,
+        ADDRESS_LINE3_COL,
+        ADDRESS_LINE4_COL,
+        ADDRESS_LINE5_COL,
+        POSTCODE_COL,
+        DRUGS_DISPENSED_MARKER,
+        RPP_MILEAGE,
+        BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,
+        WALKING_UNITS,
+        RESIDENTIAL_INSTITUTE_CODE,
+    ]
 
     ids = []
     validated_records = []
-    for row in pairs(raw_text[start_idx + 2 :]):
+
+    for row in pairs(raw_text[start_idx:]):
         validated_record = _validate_record(
             _parse_row_columns(row, columns),
             process_datetime=process_datetime or datetime.now(),
@@ -358,7 +372,7 @@ def output_invalid_records(records: Records, summary_path: Path, include_reason:
         GP_CODE_COL,
         HA_CIPHER_COL,
         TRANS_DATE_COL,
-        PRACTICE_SITE_NUMBER_COL,
+        TRANS_TIME_COL,
         TRANS_ID_COL,
         NHS_NUMBER_COL,
         SURNAME_COL,
@@ -373,7 +387,6 @@ def output_invalid_records(records: Records, summary_path: Path, include_reason:
         ADDRESS_LINE4_COL,
         ADDRESS_LINE5_COL,
         POSTCODE_COL,
-        DISTANCE_COL,
         DRUGS_DISPENSED_MARKER,
         RPP_MILEAGE,
         BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,

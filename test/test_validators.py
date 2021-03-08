@@ -286,14 +286,15 @@ def test_walking_units_validator_return_values(val, expected):
 @pytest.mark.parametrize(
     "val,expected",
     (
-        ("", (None, v.INVALID_NULL)),
-        (None, (None, v.INVALID_NULL)),
+        ("", (None, None)),
+        (None, (None, None)),
         ("A1", ("A1", None)),
         ("AA", ("AA", None)),
         ("11", ("11", None)),
         ("A", ("A", v.INVALID_RESIDENTIAL_INSTITUTE_CODE)),
         ("1", ("1", v.INVALID_RESIDENTIAL_INSTITUTE_CODE)),
         ("A11", ("A11", v.INVALID_RESIDENTIAL_INSTITUTE_CODE)),
+        ("AAA", ("AAA", v.INVALID_RESIDENTIAL_INSTITUTE_CODE)),
         ([], ([], v.INVALID_RESIDENTIAL_INSTITUTE_CODE)),
     ),
 )

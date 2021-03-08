@@ -19,14 +19,9 @@ DATA = os.path.join(ROOT, "data")
 
 def test_parse_gp_extract_text_parses_correctly():
     text = (
-        "503\\*\n\nDOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
-        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~PRACTICE_SITE_NUMBER~"
-        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
-        "TITLE~SEX_(1=MALE,2=FEMALE)~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
-        "DOW~2~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
-        "DISTANCE~~~  \n\nDOW~1~1111111,1234~LNA~202004061530~1340~1557490~"
+        "503\\*\n\nDOW~1~1111111,1234~LNA~202004061340~1340~1557490~"
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
-        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061530"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061340"
         "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
     )
@@ -36,15 +31,15 @@ def test_parse_gp_extract_text_parses_correctly():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557490,
             "NHS_NUMBER": "1234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT A",
             "ADDRESS_LINE2": "THE STREET",
@@ -52,21 +47,25 @@ def test_parse_gp_extract_text_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557491,
             "NHS_NUMBER": "1234567891",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "JANE",
             "PREV_SURNAME": "FOE",
             "TITLE": "MISS",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "FLAT B",
             "ADDRESS_LINE2": "THE STREET",
@@ -74,12 +73,92 @@ def test_parse_gp_extract_text_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=datetime(2020, 4, 6, 15, 30), gp_ha_cipher="LNA"
+        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+    )
+
+    assert actual == expected
+
+
+def test_parse_gp_extract_text_with_columns_parses_correctly():
+    text = (
+        "503\\*\n\nDOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
+        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~TIME_OF_DOWNLOAD~"
+        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
+        "TITLE~SEX~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
+        "DOW~2~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
+        "RPP_MILEAGE~~~  \n\nDOW~1~1111111,1234~LNA~202004061340~1340~1557490~"
+        "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061340"
+        "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
+        "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
+    )
+
+    expected = [
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557490,
+            "NHS_NUMBER": "1234567890",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 1,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT A",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557491,
+            "NHS_NUMBER": "1234567891",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JANE",
+            "PREV_SURNAME": "FOE",
+            "TITLE": "MISS",
+            "SEX": 1,
+            "DOB": datetime(2012, 2, 11).date(),
+            "ADDRESS_LINE1": "FLAT B",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+    ]
+
+    actual = parse_gp_extract_text(
+        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
     )
 
     assert actual == expected
@@ -88,14 +167,9 @@ def test_parse_gp_extract_text_parses_correctly():
 @pytest.mark.parametrize("header", ["", "502\\*", "503*", "503"])
 def test_parse_gp_extract_text_garbled_503_raises_assertionerror(header):
     text = (
-        header + "DOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
-        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~PRACTICE_SITE_NUMBER~"
-        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
-        "TITLE~SEX_(1=MALE,2=FEMALE)~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
-        "DOW~2~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
-        "DISTANCE~~~  \n\nDOW~1~1111111,1234~LNA~202004061530~1340~155749~"
+        header + "DOW~1~1111111,1234~LNA~202004061340~1340~155749~"
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
-        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061530"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061340"
         "~1340~155749~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
     )
@@ -107,14 +181,9 @@ def test_parse_gp_extract_text_garbled_503_raises_assertionerror(header):
 @pytest.mark.parametrize("record_type", ["", "NOT"])
 def test_parse_gp_extract_text_garbled_record_type1_raises_assertionerror(record_type):
     text = (
-        f"503\\*\n\n{record_type}~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
-        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~PRACTICE_SITE_NUMBER~"
-        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
-        "TITLE~SEX_(1=MALE,2=FEMALE)~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
-        "DOW~2~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
-        "DISTANCE~~~  \n\nDOW~1~1111111,1234~LNA~20200406~1340~155749"
+        f"503\\*\n\n{record_type}~1111111,1234~LNA~202004061340~1340~155749~"
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
-        "\n\nDOW~2~~EAST~~E1 1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
+        "\n\nDOW~2~~EAST~~E1 1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061340"
         "~1340~155749~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1 1AA~~3~~~   "
     )
@@ -126,14 +195,9 @@ def test_parse_gp_extract_text_garbled_record_type1_raises_assertionerror(record
 @pytest.mark.parametrize("record_type", ["", "NOT"])
 def test_parse_gp_extract_text_garbled_record_type2_raises_assertionerror(record_type):
     text = (
-        "503\\*\n\nDOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
-        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~PRACTICE_SITE_NUMBER~"
-        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
-        "TITLE~SEX_(1=MALE,2=FEMALE)~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
-        f"{record_type}~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
-        "DISTANCE~~~  \n\nDOW~1~1111111,1234~LNA~20200406~1340~155749"
+        "503\\*\n\nDOW~1~1111111,1234~LNA~202004061340~1340~155749~"
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
-        "\n\nDOW~2~~EAST~~E1 1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
+        f"\n\n{record_type}~EAST~~E1 1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~202004061340"
         "~1340~155749~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1 1AA~~3~~~   "
     )
@@ -177,15 +241,15 @@ def test_parse_gp_extract_file_group_parses_correctly():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557492,
             "NHS_NUMBER": "1234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT A",
             "ADDRESS_LINE2": "THE STREET",
@@ -193,21 +257,25 @@ def test_parse_gp_extract_file_group_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557493,
             "NHS_NUMBER": "1234567891",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "JANE",
             "PREV_SURNAME": "FOE",
             "TITLE": "MISS",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "FLAT B",
             "ADDRESS_LINE2": "THE STREET",
@@ -215,21 +283,25 @@ def test_parse_gp_extract_file_group_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557494,
             "NHS_NUMBER": "8234567890",
             "SURNAME": "PHILIP",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 2,
+            "SEX": 2,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT 1",
             "ADDRESS_LINE2": "MAIN STREET",
@@ -237,21 +309,25 @@ def test_parse_gp_extract_file_group_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
             "TRANS_ID": 1557495,
             "NHS_NUMBER": "9234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "SAM",
             "PREV_SURNAME": "FOE",
             "TITLE": "MS",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "12",
             "ADDRESS_LINE2": "LONG STREET",
@@ -259,13 +335,17 @@ def test_parse_gp_extract_file_group_parses_correctly():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
     ]
 
     actual = parse_gp_extract_file_group(
         file_group,
-        process_datetime=datetime(2020, 4, 6, 15, 30),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -296,15 +376,15 @@ def records():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557491",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557491,
             "NHS_NUMBER": "8234567890",
             "SURNAME": "PHILIP",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 10,
+            "SEX": 10,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT 1",
             "ADDRESS_LINE2": "MAIN STREET",
@@ -312,9 +392,13 @@ def records():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
             "_INVALID_": {
-                "SEX_(1=MALE,2=FEMALE)": "must be 1 for Male, 2 for Female, 0 "
+                "SEX": "must be 1 for Male, 2 for Female, 0 "
                 "for Indeterminate/Not Known or 9 for Not Specified."
             },
         },
@@ -322,15 +406,15 @@ def records():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LONG",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557492",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557492,
             "NHS_NUMBER": "9234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "SAM",
             "PREV_SURNAME": "FOE",
             "TITLE": "MS",
-            "SEX_(1=MALE,2=FEMALE)": 5,
+            "SEX": 5,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "12",
             "ADDRESS_LINE2": "LONG STREET",
@@ -338,9 +422,13 @@ def records():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
             "_INVALID_": {
-                "SEX_(1=MALE,2=FEMALE)": "must be 1 for Male, 2 for Female, 0 "
+                "SEX": "must be 1 for Male, 2 for Female, 0 "
                 "for Indeterminate/Not Known or 9 for Not Specified.",
                 "TRADING_PARTNER_NHAIS_CIPHER": "must be a 3-digit alphanumeric code and match the GP HA cipher",
             },
@@ -349,15 +437,15 @@ def records():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557493",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557493,
             "NHS_NUMBER": "8234567890",
             "SURNAME": "PHILIP",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 1,
+            "SEX": 1,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT 1",
             "ADDRESS_LINE2": "MAIN STREET",
@@ -365,7 +453,11 @@ def records():
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
         },
     ]
 
@@ -377,14 +469,14 @@ def expected_count_dict():
         "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": 0,
         "TRADING_PARTNER_NHAIS_CIPHER": 1,
         "DATE_OF_DOWNLOAD": 0,
-        "PRACTICE_SITE_NUMBER": 0,
+        "TIME_OF_DOWNLOAD": 0,
         "TRANS_ID": 0,
         "NHS_NUMBER": 0,
         "SURNAME": 0,
         "FORENAMES": 0,
         "PREV_SURNAME": 0,
         "TITLE": 0,
-        "SEX_(1=MALE,2=FEMALE)": 2,
+        "SEX": 2,
         "DOB": 0,
         "ADDRESS_LINE1": 0,
         "ADDRESS_LINE2": 0,
@@ -392,7 +484,11 @@ def expected_count_dict():
         "ADDRESS_LINE4": 0,
         "ADDRESS_LINE5": 0,
         "POSTCODE": 0,
-        "DISTANCE": 0,
+        "DRUGS_DISPENSED_MARKER": 0,
+        "RPP_MILEAGE": 0,
+        "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": 0,
+        "WALKING_UNITS": 0,
+        "RESIDENTIAL_INSTITUTE_CODE": 0,
     }
 
 
@@ -402,15 +498,15 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557491",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557491,
             "NHS_NUMBER": "8234567890",
             "SURNAME": "PHILIP",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 10,
+            "SEX": 10,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT 1",
             "ADDRESS_LINE2": "MAIN STREET",
@@ -418,22 +514,26 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
-            "_INVALID_": {"SEX_(1=MALE,2=FEMALE)": "SEX_(1=MALE,2=FEMALE)"},
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+            "_INVALID_": {"SEX": "SEX"},
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LONG",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557492",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557492,
             "NHS_NUMBER": "9234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "SAM",
             "PREV_SURNAME": "FOE",
             "TITLE": "MS",
-            "SEX_(1=MALE,2=FEMALE)": 5,
+            "SEX": 5,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "12",
             "ADDRESS_LINE2": "LONG STREET",
@@ -441,9 +541,13 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
             "_INVALID_": {
-                "SEX_(1=MALE,2=FEMALE)": "SEX_(1=MALE,2=FEMALE)",
+                "SEX": "SEX",
                 "TRADING_PARTNER_NHAIS_CIPHER": "TRADING_PARTNER_NHAIS_CIPHER",
             },
         },
@@ -461,15 +565,15 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557491",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557491,
             "NHS_NUMBER": "8234567890",
             "SURNAME": "PHILIP",
             "FORENAMES": "JOHN",
             "PREV_SURNAME": "SOMEONE",
             "TITLE": "MR",
-            "SEX_(1=MALE,2=FEMALE)": 10,
+            "SEX": 10,
             "DOB": datetime(2002, 1, 1).date(),
             "ADDRESS_LINE1": "FLAT 1",
             "ADDRESS_LINE2": "MAIN STREET",
@@ -477,24 +581,28 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
             "_INVALID_": {
-                "SEX_(1=MALE,2=FEMALE)": "SEX_(1=MALE,2=FEMALE) must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+                "SEX": "SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
             },
         },
         {
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LONG",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 15, 30),
-            "PRACTICE_SITE_NUMBER": "1340",
-            "TRANS_ID": "1557492",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TIME_OF_DOWNLOAD": "1340",
+            "TRANS_ID": 1557492,
             "NHS_NUMBER": "9234567890",
             "SURNAME": "SOMEBODY",
             "FORENAMES": "SAM",
             "PREV_SURNAME": "FOE",
             "TITLE": "MS",
-            "SEX_(1=MALE,2=FEMALE)": 5,
+            "SEX": 5,
             "DOB": datetime(2012, 2, 11).date(),
             "ADDRESS_LINE1": "12",
             "ADDRESS_LINE2": "LONG STREET",
@@ -502,9 +610,13 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
             "ADDRESS_LINE4": "EAST",
             "ADDRESS_LINE5": None,
             "POSTCODE": "E1   1AA",
-            "DISTANCE": "3",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
             "_INVALID_": {
-                "SEX_(1=MALE,2=FEMALE)": "SEX_(1=MALE,2=FEMALE) must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",
+                "SEX": "SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",
                 "TRADING_PARTNER_NHAIS_CIPHER": "TRADING_PARTNER_NHAIS_CIPHER must be a 3-digit alphanumeric code and match the GP HA cipher",
             },
         },
@@ -524,14 +636,14 @@ def expected_counts_csv():
         '"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",0\n'
         "TRADING_PARTNER_NHAIS_CIPHER,1\n"
         "DATE_OF_DOWNLOAD,0\n"
-        "PRACTICE_SITE_NUMBER,0\n"
+        "TIME_OF_DOWNLOAD,0\n"
         "TRANS_ID,0\n"
         "NHS_NUMBER,0\n"
         "SURNAME,0\n"
         "FORENAMES,0\n"
         "PREV_SURNAME,0\n"
         "TITLE,0\n"
-        '"SEX_(1=MALE,2=FEMALE)",2\n'
+        "SEX,2\n"
         "DOB,0\n"
         "ADDRESS_LINE1,0\n"
         "ADDRESS_LINE2,0\n"
@@ -539,7 +651,11 @@ def expected_counts_csv():
         "ADDRESS_LINE4,0\n"
         "ADDRESS_LINE5,0\n"
         "POSTCODE,0\n"
-        "DISTANCE,0\n"
+        "DRUGS_DISPENSED_MARKER,0\n"
+        "RPP_MILEAGE,0\n"
+        "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,0\n"
+        "WALKING_UNITS,0\n"
+        "RESIDENTIAL_INSTITUTE_CODE,0\n"
     )
 
 
@@ -548,9 +664,9 @@ def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, exp
     output_invalid_records(records, summary_path=out_file_path, include_reason=False)
 
     expected_out_file = (
-        '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,PRACTICE_SITE_NUMBER,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,"SEX_(1=MALE,2=FEMALE)",DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DISTANCE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
-        '"SEX_(1=MALE,2=FEMALE)",DOW,"1111111,1234",LNA,2020-04-06 15:30:00,1340,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,3,,,,,\n'
-        '"SEX_(1=MALE,2=FEMALE) | TRADING_PARTNER_NHAIS_CIPHER",DOW,"1111111,1234",LONG,2020-04-06 15:30:00,1340,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,3,,,,,\n'
+        '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TIME_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
+        'SEX,DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1340,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
+        'SEX | TRADING_PARTNER_NHAIS_CIPHER,DOW,"1111111,1234",LONG,2020-04-06 13:40:00,1340,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,,3,,,\n'
     )
 
     with open(out_file_path, "r") as out_file:
@@ -572,9 +688,9 @@ def test_output_invalid_records_with_invalid_reason_correct(tmp_path, records, e
     output_invalid_records(records, summary_path=out_file_path, include_reason=True)
 
     expected_out_file = (
-        '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,PRACTICE_SITE_NUMBER,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,"SEX_(1=MALE,2=FEMALE)",DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DISTANCE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
-        '"SEX_(1=MALE,2=FEMALE) must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",DOW,"1111111,1234",LNA,2020-04-06 15:30:00,1340,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,3,,,,,\n'
-        '"SEX_(1=MALE,2=FEMALE) must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified. | TRADING_PARTNER_NHAIS_CIPHER must be a 3-digit alphanumeric code and match the GP HA cipher",DOW,"1111111,1234",LONG,2020-04-06 15:30:00,1340,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,3,,,,,\n'
+        '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TIME_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
+        '"SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1340,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
+        '"SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified. | TRADING_PARTNER_NHAIS_CIPHER must be a 3-digit alphanumeric code and match the GP HA cipher",DOW,"1111111,1234",LONG,2020-04-06 13:40:00,1340,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,,3,,,\n'
     )
 
     with open(out_file_path, "r") as out_file:

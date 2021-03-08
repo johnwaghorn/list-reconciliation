@@ -17,36 +17,18 @@ __all__ = [
 ]
 
 
-warnings.warn("Transaction number is not defined in test records")
-warnings.warn("First forename is not defined in test records")
-warnings.warn("Second forename is not defined in test records")
-warnings.warn("Other forename is not defined in test records")
-warnings.warn("House is not defined in test records")
-warnings.warn("Road is not defined in test records")
-warnings.warn("Locality is not defined in test records")
-warnings.warn("Post town is not defined in test records")
-warnings.warn("County is not defined in test records")
-warnings.warn("Drugs dispensed marker not defined in test records")
-warnings.warn("RPP Mileage not defined in test records")
-warnings.warn("Blocked Route/Special District Marker not defined in test records")
-warnings.warn("Walking Units not defined in test records")
-warnings.warn("Residential Institute Code not defined in test records")
-warnings.warn("PRACTICE_SITE_NUMBER_COL defined but not specified")
-warnings.warn("DISTANCE defined but not specified")
-
-
 RECORD_TYPE_COL = "RECORD_TYPE"
 GP_CODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
 HA_CIPHER_COL = "TRADING_PARTNER_NHAIS_CIPHER"
 TRANS_DATE_COL = "DATE_OF_DOWNLOAD"
-PRACTICE_SITE_NUMBER_COL = "PRACTICE_SITE_NUMBER"
+TRANS_TIME_COL = "TIME_OF_DOWNLOAD"
 TRANS_ID_COL = "TRANS_ID"
 NHS_NUMBER_COL = "NHS_NUMBER"
 SURNAME_COL = "SURNAME"
 FORENAMES_COL = "FORENAMES"
 PREV_SURNAME_COL = "PREV_SURNAME"
 TITLE_COL = "TITLE"
-SEX_COL = "SEX_(1=MALE,2=FEMALE)"
+SEX_COL = "SEX"
 DOB_COL = "DOB"
 ADDRESS_LINE1_COL = "ADDRESS_LINE1"
 ADDRESS_LINE2_COL = "ADDRESS_LINE2"
@@ -54,7 +36,6 @@ ADDRESS_LINE3_COL = "ADDRESS_LINE3"
 ADDRESS_LINE4_COL = "ADDRESS_LINE4"
 ADDRESS_LINE5_COL = "ADDRESS_LINE5"
 POSTCODE_COL = "POSTCODE"
-DISTANCE_COL = "DISTANCE"
 DRUGS_DISPENSED_MARKER = "DRUGS_DISPENSED_MARKER"
 RPP_MILEAGE = "RPP_MILEAGE"
 BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER = "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER"
@@ -201,7 +182,6 @@ def transaction_datetime(
         ValidatedRecord: Tuple of coerced value and invalid reason if any.
     """
 
-    warnings.warn("Transaction datetime not defined in test data provided")
     invalid_reason = None
     if len(transaction_datetime_val) != 12:
         invalid_reason = INVALID_TRANS_DATETIME
@@ -463,7 +443,6 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
 
     invalid_reason = None
     if rpp_mileage_val in (None, ""):
-        warnings.warn("RPP mileage might not be nullable")
         rpp_mileage_val = None
     else:
         try:
@@ -526,7 +505,6 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
     return walking_units_val, invalid_reason
 
 
-@not_null
 def residential_institute_code(residential_institute_code_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate residential institute code.
 
@@ -541,11 +519,14 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     """
 
     invalid_reason = None
-    try:
-        if not re.match(r"^([A-Z0-9]{2})$", residential_institute_code_val):
+    if residential_institute_code_val in (None, ""):
+        residential_institute_code_val = None
+    else:
+        try:
+            if not re.match(r"^([A-Z0-9]{2})$", residential_institute_code_val):
+                invalid_reason = INVALID_RESIDENTIAL_INSTITUTE_CODE
+        except TypeError:
             invalid_reason = INVALID_RESIDENTIAL_INSTITUTE_CODE
-    except TypeError:
-        invalid_reason = INVALID_RESIDENTIAL_INSTITUTE_CODE
 
     return residential_institute_code_val, invalid_reason
 
@@ -575,7 +556,7 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
     return transaction_id_val, invalid_reason
 
 
-def undefined_valildator(val, **kwargs):
+def undefined_validator(val, *args, **kwargs):
     return val, None
 
 
@@ -585,7 +566,7 @@ VALIDATORS = {
     GP_CODE_COL: gp_code,
     HA_CIPHER_COL: ha_cipher,
     TRANS_DATE_COL: transaction_datetime,
-    PRACTICE_SITE_NUMBER_COL: undefined_valildator,
+    TRANS_TIME_COL: undefined_validator,
     TRANS_ID_COL: transaction_id,
     NHS_NUMBER_COL: nhs_number,
     SURNAME_COL: surname,
@@ -600,7 +581,6 @@ VALIDATORS = {
     ADDRESS_LINE4_COL: address_line,
     ADDRESS_LINE5_COL: address_line,
     POSTCODE_COL: postcode,
-    DISTANCE_COL: undefined_valildator,
     DRUGS_DISPENSED_MARKER: drugs_dispensed_marker,
     RPP_MILEAGE: rpp_mileage,
     BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER: blocked_route_special_district_marker,
