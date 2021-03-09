@@ -1,13 +1,13 @@
 import re
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 
 class InvalidFilename(Exception):
     pass
 
 
-def validate_filenames(file_group: List[str]) -> datetime:
+def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
     """Validates a list of filenames and returns the file group date
 
     Checks the following rules:
@@ -84,4 +84,6 @@ def validate_filenames(file_group: List[str]) -> datetime:
     elif days_difference > 14:
         raise InvalidFilename("File date must not be older than 14 days")
 
-    return extract_date
+    ha_cipher = file_group[0][4:7]
+
+    return extract_date, ha_cipher

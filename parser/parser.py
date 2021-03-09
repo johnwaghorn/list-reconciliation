@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
+from file_name_parser.file_name_parser import validate_filenames
 from parser.utils import pairs
 from parser.validators import (
     VALIDATORS,
@@ -161,34 +162,6 @@ def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
     return record
 
 
-def _validate_file_group(file_group: FileGroup):
-    """Validate the filenames in a file group.
-
-    Checks the following rules:
-        - All filenames contain a 3-character file extension
-        - All filenames are identical up to the penultimate character
-        - When grouping the last character of each file extension, the
-            result is alphabetically sequential, starting at 'A'
-
-    Args:
-        file_group (FileGroup): One or more filenames for GP extracts.
-
-    Raises:
-        InvalidGPExtract: Raised when invalid combinations of filenames or
-            filenames have disallowed patterns.
-    """
-
-    if not all({len(f.split(".")[-1]) == 3 for f in file_group}):
-        raise InvalidGPExtract("Filenames must contain a 3-character file extension")
-
-    if len({f[:-1] for f in file_group}) != 1:
-        raise InvalidGPExtract("All filenames must be identical up to the penultimate character")
-
-    file_ids = "".join(sorted([f[-1] for f in file_group]))
-    if file_ids not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or not file_ids.startswith("A"):
-        raise InvalidGPExtract("File extension identifiers must be sequential, starting from 'A'")
-
-
 def parse_gp_extract_text(
     gp_extract_text: str,
     first: bool = True,
@@ -271,9 +244,7 @@ def parse_gp_extract_text(
 
 
 def parse_gp_extract_file_group(
-    filepath_group: FilePathGroup,
-    gp_ha_cipher: str,
-    process_datetime: datetime = None,
+    filepath_group: FilePathGroup, process_datetime: datetime = None
 ) -> Records:
     """Convert GP extract files into records with fieldnames.
 
@@ -290,7 +261,6 @@ def parse_gp_extract_file_group(
 
         process_datetime (datetime): Time of processing.
 
-
     Returns:
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
 
@@ -299,7 +269,8 @@ def parse_gp_extract_file_group(
     """
 
     results = []
-    _validate_file_group([os.path.basename(f) for f in filepath_group])
+    _, gp_ha_cipher = validate_filenames([os.path.basename(f) for f in filepath_group])
+
     first = True
     for path in sorted(filepath_group):
         results.extend(

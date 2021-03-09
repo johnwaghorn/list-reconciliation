@@ -16,7 +16,7 @@ def test_validate_filenames_valid_uppercase_filegroup_returns_valid_date():
         "GPR4BRF1.B1C",
     ]
 
-    expected = datetime.now()
+    expected = datetime.now(), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -31,7 +31,7 @@ def test_validate_filenames_valid_lowercase_filegroup_returns_valid_date():
         "gpr4brf1.b1c",
     ]
 
-    expected = datetime.now()
+    expected = datetime.now(), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -46,7 +46,7 @@ def test_validate_filenames_valid_mixcase_filegroup_returns_valid_date():
         "gPr4brf1.B1c",
     ]
 
-    expected = datetime.now()
+    expected = datetime.now(), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -141,7 +141,7 @@ def test_validate_filenames_valid_month_indicator_parses_date_correctly():
 
     filegroup = [f"GPR4BRF1.{valid_month_indicator}5A"]
 
-    expected = datetime.now()
+    expected = datetime.now(), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -154,7 +154,7 @@ def test_validate_filenames_valid_day_indicator_parses_date_correctly():
 
     filegroup = [f"GPR4BRF1.L{valid_day_indicator}A"]
 
-    expected = datetime.now()
+    expected = datetime.now(), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -183,7 +183,7 @@ def test_validate_filenames_new_year_start_indicator_returns_valid_date():
         "GPR4BRF1.LIC",
     ]
 
-    expected = datetime(2019, 12, 18)
+    expected = datetime(2019, 12, 18), "BRF"
 
     actual = validate_filenames(filegroup)
 
@@ -199,7 +199,7 @@ def test_validate_filenames_new_year_limit_indicator_returns_valid_date():
         "GPR4BRF1.LVC",
     ]
 
-    expected = datetime(2019, 12, 31)
+    expected = datetime(2019, 12, 31), "BRF"
 
     actual = validate_filenames(filegroup)
 

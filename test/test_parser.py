@@ -1,11 +1,10 @@
 from datetime import datetime
 import os
 import pytest
+from freezegun import freeze_time
 
 from parser.parser import (
     parse_gp_extract_text,
-    InvalidGPExtract,
-    _validate_file_group,
     parse_gp_extract_file_group,
     _validate_columns,
     output_invalid_records,
@@ -206,35 +205,9 @@ def test_parse_gp_extract_text_garbled_record_type2_raises_assertionerror(record
         parse_gp_extract_text(text)
 
 
-@pytest.mark.parametrize(
-    "group,expect_raise",
-    [
-        (("GPR4LA01.CSA", "GPR4LA01.CSB"), False),
-        (("GPR4LA01.CSB", "GPR4LA01.CSA"), False),
-        (("GPR4LA01.CSA",), False),
-        (("GPR4LA01.CSA", "XPR4LA01.CSB"), InvalidGPExtract),
-        (("GPR4LA01.CSA", "GPR4LA01.CXB"), InvalidGPExtract),
-        (("GPR4LA01.CSA", "GPR4LA01.CSC"), InvalidGPExtract),
-        (("GPR4LA01.CSB", "GPR4LA01.CSC"), InvalidGPExtract),
-        (("GPR4LA01.CSB",), InvalidGPExtract),
-        (("GPR4LA01.CS",), InvalidGPExtract),
-        (("GPR4LA01.CA",), InvalidGPExtract),
-        (("GPR4LA01CSA",), InvalidGPExtract),
-        (("",), InvalidGPExtract),
-        ([], InvalidGPExtract),
-        ("GPR4LA01.CSA", InvalidGPExtract),
-    ],
-)
-def test_validate_file_group(group, expect_raise):
-    if expect_raise:
-        with pytest.raises(expect_raise):
-            _validate_file_group(group)
-    else:
-        _validate_file_group(group)
-
-
+@freeze_time("2020-04-08")
 def test_parse_gp_extract_file_group_parses_correctly():
-    files = ("GPEXTRACT.CSA", "GPEXTRACT.CSB")
+    files = ("GPR4LNA1.CSA", "GPR4LNA1.CSB")
     file_group = [os.path.join(DATA, f) for f in files]
     expected = [
         {
@@ -345,8 +318,7 @@ def test_parse_gp_extract_file_group_parses_correctly():
 
     actual = parse_gp_extract_file_group(
         file_group,
-        "LNA",
-        process_datetime=datetime(2020, 4, 6, 15, 30),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
     )
 
     assert actual == expected
