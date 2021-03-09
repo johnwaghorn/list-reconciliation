@@ -272,9 +272,8 @@ def parse_gp_extract_text(
 
 def parse_gp_extract_file_group(
     filepath_group: FilePathGroup,
-    first: bool = True,
+    gp_ha_cipher: str,
     process_datetime: datetime = None,
-    gp_ha_cipher: str = None,
 ) -> Records:
     """Convert GP extract files into records with fieldnames.
 
@@ -287,13 +286,10 @@ def parse_gp_extract_file_group(
         file_group (FilePathGroup): One or more file paths to GP extracts
             considered to be part of the same extract group.
 
-        first (bool): This is the first (or only) set of contents from a GP
-            extract file. Setting this flag expects to see the 503 header.
-            Only the first file of an extract group should have the header.
+        gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
 
         process_datetime (datetime): Time of processing.
 
-        gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
 
     Returns:
         Records: List of records: [{record1: ...}, {record2: ...}, ...]

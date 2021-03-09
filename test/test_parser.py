@@ -345,8 +345,8 @@ def test_parse_gp_extract_file_group_parses_correctly():
 
     actual = parse_gp_extract_file_group(
         file_group,
-        process_datetime=datetime(2020, 4, 6, 13, 40),
-        gp_ha_cipher="LNA",
+        "LNA",
+        process_datetime=datetime(2020, 4, 6, 15, 30),
     )
 
     assert actual == expected
