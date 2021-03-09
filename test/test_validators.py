@@ -330,7 +330,7 @@ def test_residential_institute_code_validator_return_values(val, expected):
     ),
 )
 def test_transaction_datetime_validators_return_values(val, process_datetime, expected):
-    assert v.VALIDATORS[v.TRANS_DATE_COL](val, process_datetime) == expected
+    assert v.VALIDATORS[v.TRANS_DATETIME_COL](val, process_datetime) == expected
 
 
 @pytest.mark.parametrize(

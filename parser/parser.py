@@ -14,8 +14,7 @@ from parser.validators import (
     RECORD_TYPE_COL,
     GP_CODE_COL,
     HA_CIPHER_COL,
-    TRANS_DATE_COL,
-    TRANS_TIME_COL,
+    TRANS_DATETIME_COL,
     TRANS_ID_COL,
     NHS_NUMBER_COL,
     SURNAME_COL,
@@ -129,6 +128,9 @@ def _parse_row_pair(row_pair: RowPair) -> Row:
     assert row_2[0] == RECORD_TYPE, f"Row part 2 must start with '{RECORD_TYPE}'"
     assert row_2[1] == RECORD_2, f"Row part 2 must be identified with '{RECORD_2}'"
 
+    trans_datetime = row_1[4] + row_1.pop(5)
+    row_1[4] = trans_datetime
+
     return row_1[2:] + row_2[2:]
 
 
@@ -204,8 +206,7 @@ def parse_gp_extract_text(
         RECORD_TYPE_COL,
         GP_CODE_COL,
         HA_CIPHER_COL,
-        TRANS_DATE_COL,
-        TRANS_TIME_COL,
+        TRANS_DATETIME_COL,
         TRANS_ID_COL,
         NHS_NUMBER_COL,
         SURNAME_COL,
@@ -338,8 +339,7 @@ def output_invalid_records(records: Records, summary_path: Path, include_reason:
         RECORD_TYPE_COL,
         GP_CODE_COL,
         HA_CIPHER_COL,
-        TRANS_DATE_COL,
-        TRANS_TIME_COL,
+        TRANS_DATETIME_COL,
         TRANS_ID_COL,
         NHS_NUMBER_COL,
         SURNAME_COL,

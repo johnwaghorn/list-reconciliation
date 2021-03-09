@@ -20,7 +20,7 @@ __all__ = [
 RECORD_TYPE_COL = "RECORD_TYPE"
 GP_CODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
 HA_CIPHER_COL = "TRADING_PARTNER_NHAIS_CIPHER"
-TRANS_DATE_COL = "DATE_OF_DOWNLOAD"
+TRANS_DATETIME_COL = "DATE_OF_DOWNLOAD"
 TRANS_TIME_COL = "TIME_OF_DOWNLOAD"
 TRANS_ID_COL = "TRANS_ID"
 NHS_NUMBER_COL = "NHS_NUMBER"
@@ -556,17 +556,12 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
     return transaction_id_val, invalid_reason
 
 
-def undefined_validator(val, *args, **kwargs):
-    return val, None
-
-
 # Callables for validating fields
 VALIDATORS = {
     RECORD_TYPE_COL: record_type,
     GP_CODE_COL: gp_code,
     HA_CIPHER_COL: ha_cipher,
-    TRANS_DATE_COL: transaction_datetime,
-    TRANS_TIME_COL: undefined_validator,
+    TRANS_DATETIME_COL: transaction_datetime,
     TRANS_ID_COL: transaction_id,
     NHS_NUMBER_COL: nhs_number,
     SURNAME_COL: surname,
