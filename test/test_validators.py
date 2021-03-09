@@ -197,7 +197,7 @@ def test_address_line_validator_return_values(val, expected):
         ("", (None, None)),
         (None, (None, None)),
         ("HP15 6QX", ("HP15 6QX", None)),
-        ("HP8  6QX", ("HP8  6QX", None)),
+        ("HP8 6QX", ("HP8 6QX", None)),
         ("HP15 6QX", ("HP15 6QX", None)),
         ("HP   6QX", ("HP   6QX", None)),
         ("HP156QX", ("HP156QX", v.INVALID_POSTCODE)),

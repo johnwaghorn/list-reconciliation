@@ -76,7 +76,7 @@ INVALID_ADDRESS_LINE = (
     "hyphen, comma or full-stop. Max length 35."
 )
 INVALID_POSTCODE = (
-    "must be in one of the following 8-char formats: AN NAA, ANN NAA, AAN NAA, "
+    "must be in one of the following formats: AN NAA, ANN NAA, AAN NAA, "
     "AANN NAA, ANA NAA, AANA ANA."
 )
 INVALID_DRUGS_DISPENSED_MARKER = "must be 'Y' or blank."
@@ -384,7 +384,7 @@ def address_line(address_line_val: str, **kwargs) -> ValidatedRecord:  #
 def postcode(postcode_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate postcode.
 
-    Validation rules: Must be in one of the following 8-char formats: AN NAA,
+    Validation rules: Must be in one of the following formats: AN NAA,
     ANN NAA, AAN NAA, AANN NAA, ANA NAA, AANA ANA.
 
     Args:
@@ -401,7 +401,7 @@ def postcode(postcode_val: str, **kwargs) -> ValidatedRecord:
     elif not isinstance(postcode_val, str):
         invalid_reason = INVALID_POSTCODE
 
-    elif len(postcode_val) != 8 or len(postcode_val.split()) != 2:
+    elif len(postcode_val.split()) != 2:
         invalid_reason = INVALID_POSTCODE
 
     return postcode_val, invalid_reason
