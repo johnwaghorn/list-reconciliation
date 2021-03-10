@@ -7,7 +7,7 @@ from parser.parser import (
     parse_gp_extract_text,
     parse_gp_extract_file_group,
     _validate_columns,
-    output_invalid_records,
+    output_records,
     process_invalid_records,
 )
 
@@ -452,7 +452,9 @@ def expected_count_dict():
     }
 
 
-def test_process_invalid_records_no_invalid_reason_correct(records, expected_count_dict):
+def test_process_invalid_records_no_invalid_reason_invalids_only_correct(
+    records, expected_count_dict
+):
     expected_invalid_records = [
         {
             "RECORD_TYPE": "DOW",
@@ -511,7 +513,101 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
         },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=False)
+    actual_count, actual_invalid_records = process_invalid_records(
+        records, include_reason=False, invalids_only=True
+    )
+
+    assert actual_count == expected_count_dict
+    assert actual_invalid_records == expected_invalid_records
+
+
+def test_process_invalid_records_no_invalid_reason_correct(records, expected_count_dict):
+    expected_invalid_records = [
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557491,
+            "NHS_NUMBER": "8234567890",
+            "SURNAME": "PHILIP",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 10,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT 1",
+            "ADDRESS_LINE2": "MAIN STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+            "_INVALID_": {"SEX": "SEX"},
+        },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LONG",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557492,
+            "NHS_NUMBER": "9234567890",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "SAM",
+            "PREV_SURNAME": "FOE",
+            "TITLE": "MS",
+            "SEX": 5,
+            "DOB": datetime(2012, 2, 11).date(),
+            "ADDRESS_LINE1": "12",
+            "ADDRESS_LINE2": "LONG STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+            "_INVALID_": {
+                "SEX": "SEX",
+                "TRADING_PARTNER_NHAIS_CIPHER": "TRADING_PARTNER_NHAIS_CIPHER",
+            },
+        },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557493,
+            "NHS_NUMBER": "8234567890",
+            "SURNAME": "PHILIP",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 1,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT 1",
+            "ADDRESS_LINE2": "MAIN STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+    ]
+
+    actual_count, actual_invalid_records = process_invalid_records(
+        records, include_reason=False, invalids_only=False
+    )
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
@@ -578,7 +674,9 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
         },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=True)
+    actual_count, actual_invalid_records = process_invalid_records(
+        records, include_reason=True, invalids_only=True
+    )
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
@@ -615,8 +713,8 @@ def expected_counts_csv():
 
 
 def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, expected_counts_csv):
-    out_file_path = os.path.join(tmp_path, "out.csv")
-    output_invalid_records(records, summary_path=out_file_path, include_reason=False)
+    out_file_path = os.path.join(tmp_path, "invalids.csv")
+    output_records(records, summary_path=tmp_path, include_reason=False, invalids_only=True)
 
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
@@ -629,8 +727,7 @@ def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, exp
 
     assert actual_out_file == expected_out_file
 
-    base_path, ext = os.path.splitext(out_file_path)
-    count_path = f"{base_path}_counts{ext}"
+    count_path = os.path.join(tmp_path, "invalid_counts.csv")
 
     with open(count_path, "r") as count_file:
         actual_counts = count_file.read()
@@ -639,8 +736,8 @@ def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, exp
 
 
 def test_output_invalid_records_with_invalid_reason_correct(tmp_path, records, expected_counts_csv):
-    out_file_path = os.path.join(tmp_path, "out.csv")
-    output_invalid_records(records, summary_path=out_file_path, include_reason=True)
+    out_file_path = os.path.join(tmp_path, "invalids.csv")
+    output_records(records, summary_path=tmp_path, include_reason=True, invalids_only=True)
 
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
@@ -653,8 +750,7 @@ def test_output_invalid_records_with_invalid_reason_correct(tmp_path, records, e
 
     assert actual_out_file == expected_out_file
 
-    base_path, ext = os.path.splitext(out_file_path)
-    count_path = f"{base_path}_counts{ext}"
+    count_path = os.path.join(tmp_path, "invalid_counts.csv")
 
     with open(count_path, "r") as count_file:
         actual_counts = count_file.read()

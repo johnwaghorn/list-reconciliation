@@ -6,7 +6,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
-from file_name_parser.file_name_parser import validate_filenames
+from parser.file_name_parser import validate_filenames
 from parser.utils import pairs
 from parser.validators import (
     VALIDATORS,
@@ -288,7 +288,9 @@ def parse_gp_extract_file_group(
     return results
 
 
-def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
+def process_invalid_records(
+    records: Records, include_reason: bool = False, invalids_only=False
+) -> Tuple[Dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more inormative validation fail reason.
@@ -297,6 +299,8 @@ def process_invalid_records(records: Records, include_reason: bool = False) -> T
         records (Records): Valid and invalid records to extract invalids from.
         include_reason (bool): If true, include a verbose description of
             invalid determination. (default: {False})
+        invalids_only (bool): If true, only output invalid records. If false,
+            output all records.
 
     Returns:
         Tuple[Dict, Records]: First item is a dict of {columns: invalid counts},
@@ -304,30 +308,38 @@ def process_invalid_records(records: Records, include_reason: bool = False) -> T
     """
 
     count = Counter()
-    invalid_records = []
+    out_records = []
     for record in records:
-        if invalids := record.get(INVALID):
-            for col in record.keys():
-                count[col] += int(bool(invalids.get(col, {})))
-            if not include_reason:
-                record[INVALID] = {k: k for k in invalids}
-            else:
-                record[INVALID] = {k: f"{k} {v}" for k, v in invalids.items()}
-            invalid_records.append(record)
+        invalids = record.get(INVALID, {})
+        for col in record.keys():
+            count[col] += int(bool(invalids.get(col, {})))
+            if invalids:
+                if not include_reason:
+                    record[INVALID] = {k: k for k in invalids}
+                else:
+                    record[INVALID] = {k: f"{k} {v}" for k, v in invalids.items()}
+        if invalids_only and not invalids:
+            continue
+
+        out_records.append(record)
 
     count.pop(INVALID)
 
-    return dict(count), invalid_records
+    return dict(count), out_records
 
 
-def output_invalid_records(records: Records, summary_path: Path, include_reason: bool = False):
+def output_records(
+    records: Records, summary_path: Path, include_reason: bool = False, invalids_only=False
+) -> Tuple[Path, Path]:
     """Create CSV files containing invalids summary and invalid records with reasons.
 
     Args:
         records (Records): Valid and invalid records to extract invalids from.
-        out_file (Path): [description]
+        summary_path (Path): Output folder.
         include_reason (bool): If true, include a verbose description of
             invalid determination. (default: {False})
+        invalids_only (bool): If true, only output invalid records. If false,
+            output all records.
 
     Returns:
         Tuple[Path, Path]: Paths to output files; first the summary, second is
@@ -361,22 +373,25 @@ def output_invalid_records(records: Records, summary_path: Path, include_reason:
         RESIDENTIAL_INSTITUTE_CODE,
     ]
 
-    count, invalid_records = process_invalid_records(records, include_reason)
+    count, records = process_invalid_records(records, include_reason, invalids_only)
 
-    for invalid_record in invalid_records:
-        invalid_record[INVALID] = " | ".join(invalid_record[INVALID].values())
+    for record in records:
+        if invalid := record.get(INVALID):
+            record[INVALID] = " | ".join(invalid.values())
 
-    with open(summary_path, "w") as outfile:
-        writer = csv.DictWriter(outfile, header)
+    if not os.path.isdir(summary_path):
+        os.makedirs(summary_path)
+
+    with open(os.path.join(summary_path, "invalids.csv"), "w", newline="\n") as invalids_file:
+        writer = csv.DictWriter(invalids_file, header)
         writer.writeheader()
-        writer.writerows(invalid_records)
+        writer.writerows(records)
 
     count_dict = [{"COLUMN": k, "COUNT": v} for k, v in count.items()]
 
-    base_path, ext = os.path.splitext(summary_path)
-    with open(f"{base_path}_counts{ext}", "w") as count_path:
-        writer = csv.DictWriter(count_path, ["COLUMN", "COUNT"])
+    with open(os.path.join(summary_path, "invalid_counts.csv"), "w", newline="\n") as count_file:
+        writer = csv.DictWriter(count_file, ["COLUMN", "COUNT"])
         writer.writeheader()
         writer.writerows(count_dict)
 
-    return summary_path, count_path
+    return summary_path, count_file
