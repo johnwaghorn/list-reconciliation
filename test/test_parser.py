@@ -9,6 +9,7 @@ from listrec.parser.parser import (
     _validate_columns,
     output_records,
     process_invalid_records,
+    InvalidGPExtract
 )
 
 
@@ -85,6 +86,85 @@ def test_parse_gp_extract_text_parses_correctly():
     assert actual == expected
 
 
+def test_parse_gp_extract_text_with_junk_parses_correctly():
+    text = (
+        "503\\*\n\nDOW~1~1111111,1234~LNA~20200406~1340~1557490~"
+        "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
+        "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
+        "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   \n***\n**\n*\n\n\n"
+    )
+
+    expected = [
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557490,
+            "NHS_NUMBER": "1234567890",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 1,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT A",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557491,
+            "NHS_NUMBER": "1234567891",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JANE",
+            "PREV_SURNAME": "FOE",
+            "TITLE": "MISS",
+            "SEX": 1,
+            "DOB": datetime(2012, 2, 11).date(),
+            "ADDRESS_LINE1": "FLAT B",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+    ]
+
+    actual = parse_gp_extract_text(
+        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+    )
+
+    assert actual == expected
+
+
+def test_parse_gp_extract_text_no_valid_records_raises_InvalidGPExtract():
+    text = (
+        "503\\*\n\n***\n**\n*\n\n***\n**\n*\n\n"
+    )
+    with pytest.raises(InvalidGPExtract):
+        parse_gp_extract_text(
+            text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+        )
+
+
 def test_parse_gp_extract_text_with_columns_parses_correctly():
     text = (
         "503\\*\n\nDOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
@@ -97,6 +177,80 @@ def test_parse_gp_extract_text_with_columns_parses_correctly():
         "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
         "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
+    )
+
+    expected = [
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557490,
+            "NHS_NUMBER": "1234567890",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 1,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT A",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557491,
+            "NHS_NUMBER": "1234567891",
+            "SURNAME": "SOMEBODY",
+            "FORENAMES": "JANE",
+            "PREV_SURNAME": "FOE",
+            "TITLE": "MISS",
+            "SEX": 1,
+            "DOB": datetime(2012, 2, 11).date(),
+            "ADDRESS_LINE1": "FLAT B",
+            "ADDRESS_LINE2": "THE STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
+    ]
+
+    actual = parse_gp_extract_text(
+        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+    )
+
+    assert actual == expected
+
+
+def test_parse_gp_extract_text_with_columns_and_junk_parses_correctly():
+    text = (
+        "503\\*\n\nDOW~1~REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE~"
+        "TRADING_PARTNER_NHAIS_CIPHER~DATE_OF_DOWNLOAD~TIME_OF_DOWNLOAD~"
+        "TRANS_ID~NHS_NUMBER~SURNAME~FORENAMES~PREV_SURNAME~"
+        "TITLE~SEX~DOB~ADDRESS_LINE1~ADDRESS_LINE2\n\n"
+        "DOW~2~ADDRESS_LINE3~ADDRESS_LINE4~ADDRESS_LINE5~POSTCODE~~"
+        "RPP_MILEAGE~~~  \n\nDOW~1~1111111,1234~LNA~20200406~1340~1557490~"
+        "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
+        "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
+        "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   \n*\n\n\n*\n\n\n*\n**\n*"
     )
 
     expected = [

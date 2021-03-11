@@ -228,6 +228,19 @@ def parse_gp_extract_text(
         RESIDENTIAL_INSTITUTE_CODE,
     ]
 
+    raw_text = list(filter(None, raw_text))
+
+    raw_text.reverse()
+
+    for count, line in enumerate(raw_text):
+        if line.startswith('DOW'):
+            raw_text = raw_text[count:]
+            break
+    else:
+        raise InvalidGPExtract('GP extract does not contain any valid records for processing')
+
+    raw_text.reverse()
+
     ids = []
     validated_records = []
 
