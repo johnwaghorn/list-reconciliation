@@ -6,9 +6,9 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Dict, List, Union, Tuple
 
-from parser.file_name_parser import validate_filenames
-from parser.utils import pairs
-from parser.validators import (
+from listrec.parser.file_name_parser import validate_filenames
+from listrec.parser.utils import pairs
+from listrec.parser.validators import (
     VALIDATORS,
     INVALID,
     RECORD_TYPE_COL,

@@ -250,10 +250,10 @@ def surname(surname_val: str, **kwargs) -> ValidatedRecord:
 
 
 def forename(forename_val: str, **kwargs) -> ValidatedRecord:
-    """Coerce and validate forename.
+    """Coerce and validate forenames.
 
-    Validation rules: Must contain only uppercase alphabetic characters and
-    space, apostrophe, hyphen, comma or full-stop. Max length 35.
+    Validation rules: Must contain only uppercase alphabetic characters,
+        apostrophe, hyphen, comma or full-stop.
 
     Args:
         forename_val (str): Forename to validate.
@@ -267,9 +267,15 @@ def forename(forename_val: str, **kwargs) -> ValidatedRecord:
         forename_val = None
     else:
         try:
-            if not re.match(r"^([A-Z\s\'\-\.,]{1,35})$", forename_val):
+            forenames = forename_val.split()
+
+            if forenames:
+                for name in forenames:
+                    if not re.match(r"^([A-Z\'\-\.,]+)$", name):
+                        invalid_reason = INVALID_FORENAME
+            else:
                 invalid_reason = INVALID_FORENAME
-        except TypeError:
+        except (TypeError, AttributeError):
             invalid_reason = INVALID_FORENAME
 
     return forename_val, invalid_reason

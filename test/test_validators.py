@@ -1,8 +1,8 @@
 from datetime import datetime
 import pytest
 
-from parser import validators as v
-from parser.parser import _validate_record
+from listrec.parser import validators as v
+from listrec.parser.parser import _validate_record
 
 
 @pytest.mark.parametrize(
@@ -97,10 +97,13 @@ def test_surname_validator_return_values(val, expected):
         ("O'CONNOR", ("O'CONNOR", None)),
         ("SMITH" * 7, ("SMITH" * 7, None)),
         ("'- ,.", ("'- ,.", None)),
-        ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", v.INVALID_FORENAME)),
+        ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", None)),
+        ("JOHN O'CONNOR", ("JOHN O'CONNOR", None)),
+        ("JOHN O-CONNOR", ("JOHN O-CONNOR", None)),
+        ("PETER " + ("SMITH" * 7) + "EXTRA", ("PETER "+ ("SMITH" * 7)+ "EXTRA", None)),
         ("Smith", ("Smith", v.INVALID_FORENAME)),
         (1, (1, v.INVALID_FORENAME)),
-        (" ", (" ", None)),
+        (" ", (" ", v.INVALID_FORENAME)),
     ),
 )
 def test_forename_validator_return_values(val, expected):

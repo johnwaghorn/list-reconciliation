@@ -3,7 +3,7 @@ import os
 import pytest
 from freezegun import freeze_time
 
-from parser.parser import (
+from listrec.parser.parser import (
     parse_gp_extract_text,
     parse_gp_extract_file_group,
     _validate_columns,

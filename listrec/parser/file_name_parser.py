@@ -27,10 +27,6 @@ def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
                          Raised when invalid dates contained within filename
     """
 
-    FILENAME_EX = "^GPR4([A-Z0-9]{3})1"
-
-    EXTENSION_EX = "([A-L][1-9A-V])[A-Z]$"
-
     file_group = [filename.upper() for filename in file_group]
 
     if len({f[:-1] for f in file_group}) != 1:
@@ -41,12 +37,12 @@ def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
     if file_ids not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or not file_ids.startswith("A"):
         raise InvalidFilename("File extension identifiers must be sequential, starting from 'A'")
 
-    valid_names = [re.search(FILENAME_EX, extract) for extract in file_group]
+    valid_names = [re.search(r"^GPR4([A-Z0-9]{3})1", extract) for extract in file_group]
 
     if not valid_names or not all(valid_names):
         raise InvalidFilename("All filenames must have the correct format")
 
-    valid_extensions = [re.search(EXTENSION_EX, extract) for extract in file_group]
+    valid_extensions = [re.search(r"([A-L][1-9A-V])[A-Z]$", extract) for extract in file_group]
 
     if not valid_extensions or not all(valid_extensions):
         raise InvalidFilename("All filenames must have the correct extension format")

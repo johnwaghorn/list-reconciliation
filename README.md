@@ -1,20 +1,30 @@
 # PDS - List reconciliation
 
 
-## Installation
-There is no installation use case yet as these modules will be included as source code to AWS lambda.
-
-
-## Testing
-Tests are runnable with `pytest`.
-
+## Development installation
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+virtualenv env
+source env/bin/activate
+
+git clone https://github.com/answer-digital/list-reconciliation
+cd list-reconciliation
+
+# Install package in editable mode
+pip install -e .
 
 # Install test dependencies
 pip install -r test_requirements.txt
 
 # Run tests
 pytest
+```
+
+## Deployment Installation
+```bash
+virtualenv env
+source env/bin/activate
+
+git clone https://github.com/answer-digital/list-reconciliation
+cd list-reconciliation
+pip install .
 ```
