@@ -7,7 +7,9 @@ class InvalidFilename(Exception):
     pass
 
 
-def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
+def validate_filenames(
+    file_group: List[str], process_datetime: datetime = None
+) -> Tuple[datetime, str]:
     """Validates a list of filenames and returns the file group date
 
     Checks the following rules:
@@ -18,6 +20,7 @@ def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
 
     Args:
         file_group (List): List of filenames
+        process_datetime (datetime): Time of processing.
 
     Returns:
         extract_date (date): Formatted date
@@ -58,7 +61,7 @@ def validate_filenames(file_group: List[str]) -> Tuple[datetime, str]:
     day_code = date_indicator[1]
     extract_day = days.index(day_code) + 1
 
-    date_now = datetime.now()
+    date_now = process_datetime or datetime.now()
 
     new_year_start_limit = datetime(date_now.year, 1, 1)
     new_year_end_limit = datetime(date_now.year, 1, 15)

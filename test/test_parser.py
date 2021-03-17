@@ -9,7 +9,7 @@ from listrec.parser.parser import (
     _validate_columns,
     output_records,
     process_invalid_records,
-    InvalidGPExtract
+    InvalidGPExtract,
 )
 
 
@@ -156,9 +156,7 @@ def test_parse_gp_extract_text_with_junk_parses_correctly():
 
 
 def test_parse_gp_extract_text_no_valid_records_raises_InvalidGPExtract():
-    text = (
-        "503\\*\n\n***\n**\n*\n\n***\n**\n*\n\n"
-    )
+    text = "503\\*\n\n***\n**\n*\n\n***\n**\n*\n\n"
     with pytest.raises(InvalidGPExtract):
         parse_gp_extract_text(
             text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
@@ -606,75 +604,6 @@ def expected_count_dict():
     }
 
 
-def test_process_invalid_records_no_invalid_reason_invalids_only_correct(
-    records, expected_count_dict
-):
-    expected_invalid_records = [
-        {
-            "RECORD_TYPE": "DOW",
-            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
-            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
-            "TRANS_ID": 1557491,
-            "NHS_NUMBER": "8234567890",
-            "SURNAME": "PHILIP",
-            "FORENAMES": "JOHN",
-            "PREV_SURNAME": "SOMEONE",
-            "TITLE": "MR",
-            "SEX": 10,
-            "DOB": datetime(2002, 1, 1).date(),
-            "ADDRESS_LINE1": "FLAT 1",
-            "ADDRESS_LINE2": "MAIN STREET",
-            "ADDRESS_LINE3": None,
-            "ADDRESS_LINE4": "EAST",
-            "ADDRESS_LINE5": None,
-            "POSTCODE": "E1   1AA",
-            "DRUGS_DISPENSED_MARKER": None,
-            "RPP_MILEAGE": 3,
-            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
-            "WALKING_UNITS": None,
-            "RESIDENTIAL_INSTITUTE_CODE": None,
-            "_INVALID_": {"SEX": "SEX"},
-        },
-        {
-            "RECORD_TYPE": "DOW",
-            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
-            "TRADING_PARTNER_NHAIS_CIPHER": "LONG",
-            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
-            "TRANS_ID": 1557492,
-            "NHS_NUMBER": "9234567890",
-            "SURNAME": "SOMEBODY",
-            "FORENAMES": "SAM",
-            "PREV_SURNAME": "FOE",
-            "TITLE": "MS",
-            "SEX": 5,
-            "DOB": datetime(2012, 2, 11).date(),
-            "ADDRESS_LINE1": "12",
-            "ADDRESS_LINE2": "LONG STREET",
-            "ADDRESS_LINE3": None,
-            "ADDRESS_LINE4": "EAST",
-            "ADDRESS_LINE5": None,
-            "POSTCODE": "E1   1AA",
-            "DRUGS_DISPENSED_MARKER": None,
-            "RPP_MILEAGE": 3,
-            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
-            "WALKING_UNITS": None,
-            "RESIDENTIAL_INSTITUTE_CODE": None,
-            "_INVALID_": {
-                "SEX": "SEX",
-                "TRADING_PARTNER_NHAIS_CIPHER": "TRADING_PARTNER_NHAIS_CIPHER",
-            },
-        },
-    ]
-
-    actual_count, actual_invalid_records = process_invalid_records(
-        records, include_reason=False, invalids_only=True
-    )
-
-    assert actual_count == expected_count_dict
-    assert actual_invalid_records == expected_invalid_records
-
-
 def test_process_invalid_records_no_invalid_reason_correct(records, expected_count_dict):
     expected_invalid_records = [
         {
@@ -759,9 +688,7 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
         },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(
-        records, include_reason=False, invalids_only=False
-    )
+    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=False)
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
@@ -826,11 +753,34 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
                 "TRADING_PARTNER_NHAIS_CIPHER": "TRADING_PARTNER_NHAIS_CIPHER must be a 3-digit alphanumeric code and match the GP HA cipher",
             },
         },
+        {
+            "RECORD_TYPE": "DOW",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
+            "DATE_OF_DOWNLOAD": datetime(2020, 4, 6, 13, 40),
+            "TRANS_ID": 1557493,
+            "NHS_NUMBER": "8234567890",
+            "SURNAME": "PHILIP",
+            "FORENAMES": "JOHN",
+            "PREV_SURNAME": "SOMEONE",
+            "TITLE": "MR",
+            "SEX": 1,
+            "DOB": datetime(2002, 1, 1).date(),
+            "ADDRESS_LINE1": "FLAT 1",
+            "ADDRESS_LINE2": "MAIN STREET",
+            "ADDRESS_LINE3": None,
+            "ADDRESS_LINE4": "EAST",
+            "ADDRESS_LINE5": None,
+            "POSTCODE": "E1   1AA",
+            "DRUGS_DISPENSED_MARKER": None,
+            "RPP_MILEAGE": 3,
+            "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
+            "WALKING_UNITS": None,
+            "RESIDENTIAL_INSTITUTE_CODE": None,
+        },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(
-        records, include_reason=True, invalids_only=True
-    )
+    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=True)
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
@@ -867,8 +817,8 @@ def expected_counts_csv():
 
 
 def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, expected_counts_csv):
-    out_file_path = os.path.join(tmp_path, "invalids.csv")
-    output_records(records, summary_path=tmp_path, include_reason=False, invalids_only=True)
+    out_file_path = os.path.join(tmp_path, "records.csv")
+    output_records(records, summary_path=tmp_path, include_reason=False, invalid_threshold=0)
 
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
@@ -889,14 +839,41 @@ def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, exp
     assert actual_counts == expected_counts_csv
 
 
-def test_output_invalid_records_with_invalid_reason_correct(tmp_path, records, expected_counts_csv):
-    out_file_path = os.path.join(tmp_path, "invalids.csv")
-    output_records(records, summary_path=tmp_path, include_reason=True, invalids_only=True)
-
+def test_output_invalid_records_with_invalid_reason_low_threshold_correct(
+    tmp_path, records, expected_counts_csv
+):
+    out_file_path = os.path.join(tmp_path, "records.csv")
+    output_records(records, summary_path=tmp_path, include_reason=True, invalid_threshold=3)
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
         '"SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
         '"SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified. | TRADING_PARTNER_NHAIS_CIPHER must be a 3-digit alphanumeric code and match the GP HA cipher",DOW,"1111111,1234",LONG,2020-04-06 13:40:00,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,,3,,,\n'
+    )
+
+    with open(out_file_path, "r") as out_file:
+        actual_out_file = out_file.read()
+
+    assert actual_out_file == expected_out_file
+
+    count_path = os.path.join(tmp_path, "invalid_counts.csv")
+
+    with open(count_path, "r") as count_file:
+        actual_counts = count_file.read()
+
+    assert actual_counts == expected_counts_csv
+
+
+def test_output_invalid_records_no_invalid_reason_high_threshold_correct(
+    tmp_path, records, expected_counts_csv
+):
+    out_file_path = os.path.join(tmp_path, "records.csv")
+    output_records(records, summary_path=tmp_path, include_reason=False, invalid_threshold=4)
+
+    expected_out_file = (
+        '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
+        'SEX,DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
+        'SEX | TRADING_PARTNER_NHAIS_CIPHER,DOW,"1111111,1234",LONG,2020-04-06 13:40:00,1557492,9234567890,SOMEBODY,SAM,FOE,MS,5,2012-02-11,12,LONG STREET,,EAST,,E1   1AA,,3,,,\n'
+        ',DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1557493,8234567890,PHILIP,JOHN,SOMEONE,MR,1,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
     )
 
     with open(out_file_path, "r") as out_file:

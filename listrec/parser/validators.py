@@ -9,7 +9,6 @@ SPECIFICATION section 3.10 OUT-GOING GENERATED DOWNLOAD TRANSACTIONS.
 from datetime import datetime, timedelta
 import re
 from typing import Tuple, Union, List
-import warnings
 
 __all__ = [
     "INVALID",
@@ -51,9 +50,7 @@ INVALID_GP_CODE = (
     "alphanumeric Local GP code separated by a comma."
 )
 INVALID_HA_CIPHER = "must be a 3-digit alphanumeric code and match the GP HA cipher"
-INVALID_TRANS_DATETIME = (
-    "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old."
-)
+INVALID_TRANS_DATETIME = "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
 INVALID_NHS_NO = "must be a valid NHS number. Max length 10."
 INVALID_SURNAME = (
     "must contain only uppercase alphabetic characters and space, apostrophe "
@@ -172,7 +169,7 @@ def transaction_datetime(
     """Coerce and validate Transaction datetime.
 
     Validation rules: Must be a datetime in the format YYYYMMDDHHMM and be less
-    than 14 days old.
+    than 14 days old and not in the future.
 
     Args:
         transaction_datetime_val (str): Transaction datetime to validate.
@@ -191,7 +188,9 @@ def transaction_datetime(
         except ValueError:
             invalid_reason = INVALID_TRANS_DATETIME
         else:
-            if transaction_datetime_val < process_datetime - timedelta(days=14):
+            if (
+                transaction_datetime_val < process_datetime - timedelta(days=14)
+            ) or transaction_datetime_val > process_datetime:
                 invalid_reason = INVALID_TRANS_DATETIME
 
     return transaction_datetime_val, invalid_reason
@@ -209,7 +208,6 @@ def nhs_number(nhs_number_val: str, **kwargs) -> ValidatedRecord:
         ValidatedRecord: Tuple of coerced value and invalid reason if any.
     """
 
-    warnings.warn("Minimum old style number length not defined")
     invalid_reason = None
     if nhs_number_val in (None, ""):
         nhs_number_val = None

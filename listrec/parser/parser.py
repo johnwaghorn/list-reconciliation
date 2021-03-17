@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 
 from collections import Counter
@@ -35,6 +36,8 @@ from listrec.parser.validators import (
     WALKING_UNITS,
     RESIDENTIAL_INSTITUTE_CODE,
 )
+
+LOG = logging.getLogger("listrec")
 
 Columns = Iterable[str]
 FileGroup = Iterable[str]
@@ -233,11 +236,11 @@ def parse_gp_extract_text(
     raw_text.reverse()
 
     for count, line in enumerate(raw_text):
-        if line.startswith('DOW'):
+        if line.startswith("DOW"):
             raw_text = raw_text[count:]
             break
     else:
-        raise InvalidGPExtract('GP extract does not contain any valid records for processing')
+        raise InvalidGPExtract("GP extract does not contain any valid records for processing")
 
     raw_text.reverse()
 
@@ -270,9 +273,7 @@ def parse_gp_extract_file_group(
     Args:
         file_group (FilePathGroup): One or more file paths to GP extracts
             considered to be part of the same extract group.
-
         gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
-
         process_datetime (datetime): Time of processing.
 
     Returns:
@@ -280,13 +281,25 @@ def parse_gp_extract_file_group(
 
     Raises:
         AssertionError: If any abortive errors are found.
+        InvalidGPExtract: If any files are not found.
     """
 
+    # Check files exist and are readable
+    try:
+        for f in filepath_group:
+            with open(f):
+                pass
+    except FileNotFoundError as err:
+        raise InvalidGPExtract(str(err).replace("[Errno 2]", "").strip())
+
     results = []
-    _, gp_ha_cipher = validate_filenames([os.path.basename(f) for f in filepath_group])
+    extract_date, gp_ha_cipher = validate_filenames(
+        [os.path.basename(f) for f in filepath_group], process_datetime
+    )
+    LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
 
     first = True
-    for path in sorted(filepath_group):
+    for path in sorted(filepath_group, key=lambda x: x.upper()):
         results.extend(
             parse_gp_extract_text(
                 open(path, "r").read(),
@@ -301,9 +314,7 @@ def parse_gp_extract_file_group(
     return results
 
 
-def process_invalid_records(
-    records: Records, include_reason: bool = False, invalids_only=False
-) -> Tuple[Dict, Records]:
+def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more inormative validation fail reason.
@@ -312,8 +323,6 @@ def process_invalid_records(
         records (Records): Valid and invalid records to extract invalids from.
         include_reason (bool): If true, include a verbose description of
             invalid determination. (default: {False})
-        invalids_only (bool): If true, only output invalid records. If false,
-            output all records.
 
     Returns:
         Tuple[Dict, Records]: First item is a dict of {columns: invalid counts},
@@ -331,18 +340,20 @@ def process_invalid_records(
                     record[INVALID] = {k: k for k in invalids}
                 else:
                     record[INVALID] = {k: f"{k} {v}" for k, v in invalids.items()}
-        if invalids_only and not invalids:
-            continue
 
         out_records.append(record)
 
-    count.pop(INVALID)
+    if INVALID in count:
+        count.pop(INVALID)
 
     return dict(count), out_records
 
 
 def output_records(
-    records: Records, summary_path: Path, include_reason: bool = False, invalids_only=False
+    records: Records,
+    summary_path: Path,
+    include_reason: bool = False,
+    invalid_threshold: int = None,
 ) -> Tuple[Path, Path]:
     """Create CSV files containing invalids summary and invalid records with reasons.
 
@@ -351,12 +362,8 @@ def output_records(
         summary_path (Path): Output folder.
         include_reason (bool): If true, include a verbose description of
             invalid determination. (default: {False})
-        invalids_only (bool): If true, only output invalid records. If false,
-            output all records.
-
-    Returns:
-        Tuple[Path, Path]: Paths to output files; first the summary, second is
-            the invalid records file.
+        invalid_threshold (int): If the number of invalid records is greater than or
+            equal to this value, only invalid records are output.
     """
 
     header = [
@@ -386,7 +393,13 @@ def output_records(
         RESIDENTIAL_INSTITUTE_CODE,
     ]
 
-    count, records = process_invalid_records(records, include_reason, invalids_only)
+    count, records = process_invalid_records(records, include_reason=include_reason)
+
+    invalid_count = sum(count.values())
+    LOG.info(f"Invalid/total records: {invalid_count}/{len(records)}")
+    if invalid_threshold is not None and (invalid_threshold <= invalid_count):
+        records = list(filter(lambda x: x.get(INVALID), records))
+        LOG.info("Invalids threshold exceeded, only outputting invalid records")
 
     for record in records:
         if invalid := record.get(INVALID):
@@ -395,16 +408,43 @@ def output_records(
     if not os.path.isdir(summary_path):
         os.makedirs(summary_path)
 
-    with open(os.path.join(summary_path, "invalids.csv"), "w", newline="\n") as invalids_file:
-        writer = csv.DictWriter(invalids_file, header)
+    records_path = os.path.abspath(os.path.join(summary_path, "records.csv"))
+    with open(records_path, "w", newline="\n") as records_file:
+        writer = csv.DictWriter(records_file, header)
         writer.writeheader()
         writer.writerows(records)
+        LOG.info(f"Records file: {records_path}")
 
     count_dict = [{"COLUMN": k, "COUNT": v} for k, v in count.items()]
 
-    with open(os.path.join(summary_path, "invalid_counts.csv"), "w", newline="\n") as count_file:
+    count_path = os.path.abspath(os.path.join(summary_path, "invalid_counts.csv"))
+    with open(count_path, "w", newline="\n") as count_file:
         writer = csv.DictWriter(count_file, ["COLUMN", "COUNT"])
         writer.writeheader()
         writer.writerows(count_dict)
+        LOG.info(f"Summary file: {count_path}")
 
-    return summary_path, count_file
+
+def process_gp_extract(
+    files: FileGroup,
+    out_dir: Path,
+    include_reason: bool,
+    invalid_threshold: int,
+    process_datetime: datetime,
+):
+    """Create CSV files containing invalids summary and invalid records with reasons.
+
+    Args:
+        files (FileGroup): One or more file paths to GP extracts
+            considered to be part of the same extract group.
+        out_dir (Path): Output folder.
+        include_reason (bool): If true, include a verbose description of
+            invalid determination. (default: {False})
+        invalid_threshold (int): If the number of invalid records is greater than or
+            equal to this value, only invalid records are output.
+        process_datetime (datetime): Time of processing.
+    """
+
+    file_paths = [os.path.abspath(f) for f in files]
+    records = parse_gp_extract_file_group(file_paths, process_datetime)
+    output_records(records, out_dir, include_reason, invalid_threshold)

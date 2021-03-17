@@ -100,7 +100,7 @@ def test_surname_validator_return_values(val, expected):
         ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", None)),
         ("JOHN O'CONNOR", ("JOHN O'CONNOR", None)),
         ("JOHN O-CONNOR", ("JOHN O-CONNOR", None)),
-        ("PETER " + ("SMITH" * 7) + "EXTRA", ("PETER "+ ("SMITH" * 7)+ "EXTRA", None)),
+        ("PETER " + ("SMITH" * 7) + "EXTRA", ("PETER " + ("SMITH" * 7) + "EXTRA", None)),
         ("Smith", ("Smith", v.INVALID_FORENAME)),
         (1, (1, v.INVALID_FORENAME)),
         (" ", (" ", v.INVALID_FORENAME)),
@@ -329,6 +329,11 @@ def test_residential_institute_code_validator_return_values(val, expected):
             "000000000000",
             datetime(2012, 6, 20, 1, 1, 1),
             ("000000000000", v.INVALID_TRANS_DATETIME),
+        ),
+        (
+            "201306060101",
+            datetime(2012, 6, 20, 1, 1, 1),
+            (datetime(2013, 6, 6, 1, 1), v.INVALID_TRANS_DATETIME),
         ),
     ),
 )
