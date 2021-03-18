@@ -308,7 +308,6 @@ package-lock.json
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
 
 # Installer logs
 pip-log.txt
@@ -452,6 +451,7 @@ override.tf.json
 !.vscode/extensions.json
 *.code-workspace
 
+
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
@@ -489,3 +489,18 @@ tokenizers
 pgdocker_db.py
 .terraform.lock.hcl
 
+# Gauge - metadata dir
+.gauge
+
+# Gauge - log files dir
+logs
+
+# Gauge - reports dir
+*reports*
+
+# Gauge - python compiled files
+*.pyc
+
+# Gauge - vscode
+*reports*
+*.gauge*
