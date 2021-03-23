@@ -31,3 +31,25 @@ git clone https://github.com/answer-digital/list-reconciliation
 cd list-reconciliation
 pip install .
 ```
+
+
+## Databricks libraries
+Setup secrets for accessing S3 bucket
+
+```bash
+databricks secrets put --scope aws --key aws_public_key
+databricks secrets put --scope aws --key aws_private_key
+```
+
+Build and upload python egg to cluster
+
+```bash
+python setup.py bdist_egg
+```
+
+Once the egg has been created it must be uploaded to Databricks as a [library](https://docs.databricks.com/libraries/index.html) which can then be imported as normal.
+
+```python
+from listrec.utils import save_to_s3_csv
+...
+```
