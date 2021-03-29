@@ -504,3 +504,4 @@ logs
 # Gauge - vscode
 *reports*
 *.gauge*
+/.vscode
