@@ -402,7 +402,8 @@ def output_records(
         LOG.info("Invalids threshold exceeded, only outputting invalid records")
 
     for record in records:
-        if invalid := record.get(INVALID):
+        invalid = record.get(INVALID)
+        if invalid:
             record[INVALID] = " | ".join(invalid.values())
 
     if not os.path.isdir(summary_path):
