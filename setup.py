@@ -11,5 +11,7 @@ setup(
     license="",
     packages=find_packages(),
     install_requires=dependencies,
-    entry_points={"console_scripts": ["gpextract = listrec.main:main"]},
+    entry_points={
+        "console_scripts": ["gpextract = listrec.main:main", "mock_data = listrec.mock_data:main"]
+    },
 )

@@ -8,6 +8,7 @@ source env/bin/activate
 
 git clone https://github.com/answer-digital/list-reconciliation
 cd list-reconciliation
+pip install -r requirements.txt
 
 # Install package in editable mode
 pip install -e .
@@ -29,6 +30,7 @@ source env/bin/activate
 
 git clone https://github.com/answer-digital/list-reconciliation
 cd list-reconciliation
+pip install -r requirements.txt
 pip install .
 ```
 
