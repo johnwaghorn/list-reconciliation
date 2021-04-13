@@ -41,20 +41,49 @@ def test_pds_gp_mismatches_records_correct():
 
     expected = spark.createDataFrame(
         [
-            ("Y06922", "8582405340", "date_of_birth", "2916-08-17", "19160817"),
-            ("Y06922", "8582405340", "sex", "1", "9"),
-            ("Y06922", "8582405340", "postcode", "NotZE2 9AR", "ZE2 9AR"),
-            ("Y06922", "8582405340", "surname", "NotBondley", "Bondley"),
-            ("Y06922", "8582405340", "forenames", "NotTerrye", "Terrye"),
+            (
+                "Y06922",
+                "8582405340",
+                "date_of_birth",
+                "2916-08-17",
+                "19160817",
+                "Further validation required",
+            ),
+            ("Y06922", "8582405340", "sex", "1", "9", None),
+            (
+                "Y06922",
+                "8582405340",
+                "postcode",
+                "NotZE2 9AR",
+                "ZE2 9AR",
+                None,
+            ),
+            (
+                "Y06922",
+                "8582405340",
+                "surname",
+                "NotBondley",
+                "Bondley",
+                None,
+            ),
+            (
+                "Y06922",
+                "8582405340",
+                "forenames",
+                "NotTerrye",
+                "Terrye",
+                None,
+            ),
             (
                 "Y06922",
                 "8582405340",
                 "address",
                 "NotRedwing NotWolverhampton NotWinchester",
                 "Redwing Wolverhampton Winchester",
+                None,
             ),
         ],
-        ["practice", "nhs_number", "item", "gp_value", "pds_value"],
+        ["practice", "nhs_number", "item", "gp_value", "pds_value", "action"],
     )
 
     actual = pds_gp_mismatches(gp, pds)

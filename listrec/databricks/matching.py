@@ -3,7 +3,7 @@ from pathlib import Path
 
 import os
 
-from pyspark.sql.functions import to_date, col, concat_ws
+from pyspark.sql.functions import to_date, col, concat_ws, lit
 
 import pyspark
 
@@ -15,11 +15,50 @@ spark = pyspark.sql.SparkSession.builder.config(
 ).getOrCreate()
 
 
+ACTION_COLUMN = "action"
+ACTION_REQUIRES_VALIDATION = "Further validation required"
+
+
+spark = pyspark.sql.SparkSession.builder.config(
+    "spark.driver.bindAddress", "127.0.0.1"
+).getOrCreate()
+
+
+def compare_gp_pds_date_of_birth(
+    gp_pds_df: pyspark.sql.DataFrame, gp_col: pyspark.sql.Column, pds_col: pyspark.sql.Column
+) -> pyspark.sql.DataFrame:
+    """Check date of birth differences between PDS and GP data and flag records
+    for further action, creating a dataframe.
+
+    Args:
+        gp_pds_df (pyspark.sql.DataFrame): Dataframe containing GP and PDS
+            records joined on NHS number
+        gp_col (pyspark.sql.Column): Column from GP data for date of birth.
+        pds_col (pyspark.sql.Column): Column from GP data for date of birth.
+
+    Returns:
+        pyspark.sql.DataFrame: Dataframe containing only records where the date of birth
+            is different, with a further action flag
+    """
+    return (
+        gp_pds_df.filter(gp_col != pds_col)
+        .withColumn(ACTION_COLUMN, lit(ACTION_REQUIRES_VALIDATION))
+        .withColumn("item", lit("date_of_birth"))
+        .select(
+            "practice",
+            "nhs_number",
+            "item",
+            col("date_of_birth").alias("gp_value"),
+            col("pds_date_of_birth").alias("pds_value"),
+            ACTION_COLUMN,
+        )
+    )
+
+
 def get_record_mismatch_summary(
     gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame
 ) -> pyspark.sql.DataFrame:
-    """Create a dataframe containing records present in PDS but not GDPPR for
-    a given GP practice.
+    """Create a dataframe containing summary of record mismatches between PDS and GDPPR.
 
     Args:
         gp_df (pyspark.sql.DataFrame): GP Practice dataframe.
@@ -163,8 +202,10 @@ def pds_gp_mismatches(
 
     gp_pds_df = gp_df.join(pds_df, on="nhs_number", how="inner")
 
-    date_of_birth = gp_pds_df.filter(
-        col("date_of_birth") != to_date(col("pds_date_of_birth").cast("string"), "yyyyMMdd")
+    date_of_birth = compare_gp_pds_date_of_birth(
+        gp_pds_df,
+        col("date_of_birth"),
+        to_date(col("pds_date_of_birth").cast("string"), "yyyyMMdd"),
     )
     date_of_birth.createOrReplaceTempView("vw_date_of_birth")
 
@@ -190,7 +231,8 @@ def pds_gp_mismatches(
             nhs_number,
             'surname' AS item,
             surname AS gp_value,
-            name.familyName AS pds_value
+            name.familyName AS pds_value,
+            null as action
         FROM vw_surname
         UNION
         SELECT
@@ -198,15 +240,17 @@ def pds_gp_mismatches(
             nhs_number,
             'forenames' AS item,
             forename AS gp_value,
-            forenames AS pds_value
+            forenames AS pds_value,
+            null as action
         FROM vw_forename
         UNION
         SELECT
             practice,
             nhs_number,
-            'date_of_birth' AS item,
-            date_of_birth AS gp_value,
-            pds_date_of_birth AS pds_value
+            item,
+            gp_value,
+            pds_value,
+            action AS action
         FROM vw_date_of_birth
         UNION
         SELECT
@@ -214,7 +258,8 @@ def pds_gp_mismatches(
             nhs_number,
             'sex' AS item,
             sex AS gp_value,
-            gender.gender AS pds_value
+            gender.gender AS pds_value,
+            null as action
         FROM vw_sex
         UNION
         SELECT
@@ -222,7 +267,8 @@ def pds_gp_mismatches(
             nhs_number,
             'address' AS item,
             gp_address AS gp_value,
-            address_lines AS pds_value
+            address_lines AS pds_value,
+            null as action
         FROM vw_address
         UNION
         SELECT
@@ -230,7 +276,8 @@ def pds_gp_mismatches(
             nhs_number,
             'postcode' AS item,
             postcode AS gp_value,
-            address.postcode AS pds_value
+            address.postcode AS pds_value,
+            null as action
         FROM vw_postcode
         """
     ).orderBy(["practice", "nhs_number"])
@@ -297,8 +344,8 @@ def output_registration_differences(
         gp_practice (str): GP Practice to filter.
         bucket (str): Bucket to save the file to.
         directory (str): Target output directory in bucket. If targeting root, use ''
-        access_key (str): AWS public key.
-        secret_key (str): AWS private key.
+        aws_access_key (str): AWS public key.
+        aws_secret_key (str): AWS private key.
     """
 
     date = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
@@ -324,6 +371,7 @@ def output_demographic_mismatches(
     aws_secret_key: str,
 ):
     """Writes demographic differences csv files to an S3 bucket.
+
     Args:
         demographic_mismatches (pyspark.sql.DataFrame): Demographic differences DataFrame.
         gp_practice (str): GP Practice to filter.
