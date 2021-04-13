@@ -1,8 +1,68 @@
+import csv
+import os
+
 import pandas
 import pyspark
 
-from listrec.databricks.matching import get_pds_records_status
+from listrec.databricks.matching import pds_gp_mismatches, get_pds_records_status
 from listrec.databricks.utils import format_pds_mock_data
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(ROOT, "data")
+
+
+def test_pds_gp_mismatches_records_correct():
+    spark = pyspark.sql.SparkSession.builder.getOrCreate()
+
+    with open(os.path.join(DATA, "gdppr.csv")) as infile:
+        reader = csv.reader(infile)
+        header = next(reader)
+        rows = [r for r in reader]
+
+    gp = spark.createDataFrame(
+        rows,
+        header,
+    )
+
+    gp.createOrReplaceTempView("vw_gdppr")
+
+    with open(os.path.join(DATA, "pds.csv")) as infile:
+        reader = csv.reader(infile)
+        header = next(reader)
+        rows = [r for r in reader]
+
+    pds = spark.createDataFrame(
+        rows,
+        header,
+    )
+
+    pds = format_pds_mock_data(pds)
+    pds.createOrReplaceTempView("vw_pds")
+
+    expected = spark.createDataFrame(
+        [
+            ("Y06922", "8582405340", "date_of_birth", "2916-08-17", "19160817"),
+            ("Y06922", "8582405340", "sex", "1", "9"),
+            ("Y06922", "8582405340", "postcode", "NotZE2 9AR", "ZE2 9AR"),
+            ("Y06922", "8582405340", "surname", "NotBondley", "Bondley"),
+            ("Y06922", "8582405340", "forenames", "NotTerrye", "Terrye"),
+            (
+                "Y06922",
+                "8582405340",
+                "address",
+                "NotRedwing NotWolverhampton NotWinchester",
+                "Redwing Wolverhampton Winchester",
+            ),
+        ],
+        ["practice", "nhs_number", "item", "gp_value", "pds_value"],
+    )
+
+    actual = pds_gp_mismatches(gp, pds)
+
+    pandas.testing.assert_frame_equal(
+        actual.toPandas().sort_values(["nhs_number", "item"]).reset_index(drop=True),
+        expected.toPandas().sort_values(["nhs_number", "item"]).reset_index(drop=True),
+    )
 
 
 def test_get_pds_exclusive_records_correct():

@@ -4,7 +4,10 @@ import shutil
 from pathlib import Path
 from uuid import uuid4
 
-from pyspark.sql.functions import from_json, col
+import boto3
+import pyspark
+
+from pyspark.sql.functions import when, from_json, col
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -13,8 +16,9 @@ from pyspark.sql.types import (
     IntegerType,
 )
 
-import boto3
-import pyspark
+
+def blank_as_null(x):
+    return when(col(x) != "", col(x)).otherwise(None)
 
 
 def upload_to_s3(path: Path, bucket: str, filename: str, access_key: str, secret_key: str):
