@@ -61,18 +61,10 @@ def test_pds_gp_mismatches_records_correct():
             (
                 "Y06922",
                 "8582405340",
-                "surname",
-                "NotBondley",
-                "Bondley",
-                None,
-            ),
-            (
-                "Y06922",
-                "8582405340",
-                "forenames",
-                "NotTerrye",
-                "Terrye",
-                None,
+                "name",
+                "Bondley, NotTerry",
+                "Bondley, Terry",
+                'Further validation required',
             ),
             (
                 "Y06922",
@@ -80,8 +72,72 @@ def test_pds_gp_mismatches_records_correct():
                 "address",
                 "NotRedwing NotWolverhampton NotWinchester",
                 "Redwing Wolverhampton Winchester",
-                None,
+                None
             ),
+            (
+                "Y06922",
+                "8761038776",
+                "name",
+                "Kidwell, Lucais",
+                "Lucais, Kidwell",
+                'Update PDS name with GP name'
+            ),
+            (
+                "Y06922",
+                "2797516451",
+                "name",
+                "Rich Marvell, Kerwinn",
+                "Marvell, Kerwinn",
+                'Update PDS name with GP name'
+            ),
+            (
+                "Y06922",
+                "4698144396",
+                "name",
+                "Astridge, Nata Jones",
+                "Astridge, Nata",
+                'Update PDS name with GP name'
+            ),
+            (
+                "Y06922",
+                "0486072339",
+                "name",
+                ", Nelle",
+                "Brumen, Nelle",
+                'Update GP name with PDS name'),
+            (
+                "Y06922",
+                "6414799785",
+                "name",
+                "De Mullett, Abe",
+                "De Mullett, Abe-Rich",
+                'Update GP name with PDS name'
+            ),
+            (
+                "Y06922",
+                "1304672999",
+                "name",
+                "Pavey, Nikki-Stevens",
+                "Pavey, Nikki",
+                'Update PDS name with GP name'
+            ),
+            (
+                "Y06922",
+                "4682621238",
+                "name",
+                "Das-Lee, Brianne",
+                "Das Lee, Brianne",
+                'Update PDS name with GP name'
+            ),
+            (
+                "Y06922",
+                "6472621238",
+                "name",
+                "Das, Brian Lee",
+                "Das, Brian-Lee",
+                'Update PDS name with GP name'
+            ),
+
         ],
         ["practice", "nhs_number", "item", "gp_value", "pds_value", "action"],
     )

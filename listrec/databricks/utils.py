@@ -77,6 +77,7 @@ def save_to_csv(
         os.remove(databricks_filename)
     except:
         pass
+
     # coalesce(1) creates a single output csv file
     dataframe.coalesce(1).write.format("csv").save(filename, header="true")
 

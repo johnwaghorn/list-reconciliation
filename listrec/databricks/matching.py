@@ -3,16 +3,13 @@ from pathlib import Path
 
 import os
 
-from pyspark.sql.functions import to_date, col, concat_ws, lit
+from pyspark.sql.functions import to_date, col, concat_ws, udf, lit
+from pyspark.sql.types import StringType
 
 import pyspark
 
 from listrec.databricks.utils import blank_as_null, save_to_csv, upload_to_s3
-
-
-spark = pyspark.sql.SparkSession.builder.config(
-    "spark.driver.bindAddress", "127.0.0.1"
-).getOrCreate()
+from listrec.databricks.comparison_utils.compare_name import compare_patient_name
 
 
 ACTION_COLUMN = "action"
@@ -50,6 +47,49 @@ def compare_gp_pds_date_of_birth(
             "item",
             col("date_of_birth").alias("gp_value"),
             col("pds_date_of_birth").alias("pds_value"),
+            ACTION_COLUMN,
+        )
+    )
+
+
+def compare_gp_pds_names(
+    gp_pds_df: pyspark.sql.DataFrame,
+    gp_surname: pyspark.sql.Column,
+    pds_surname: pyspark.sql.Column,
+    gp_forenames: pyspark.sql.Column,
+    pds_forenames: pyspark.sql.Column,
+) -> pyspark.sql.DataFrame:
+    """Check for name differences between PDS and GP data and flag records
+    for further action, creating a dataframe.
+
+    Args:
+        gp_pds_df (pyspark.sql.DataFrame): Dataframe containing GP and PDS
+            records joined on NHS number
+        gp_surname (pyspark.sql.Column): GP surname column.
+        pds_surname (pyspark.sql.Column): PDS surname column.
+        gp_forenames (pyspark.sql.Column): GP forename column.
+        pds_forenames (pyspark.sql.Column): PDS forename column.
+        
+    Returns:
+        pyspark.sql.DataFrame: Dataframe containing only records where the date of birth
+            is different, with a further action flag
+    """
+
+    udf_compare_patient_name = udf(compare_patient_name, StringType())
+
+    return (
+        gp_pds_df.where((gp_surname != pds_surname) | (gp_forenames != pds_forenames))
+        .withColumn(
+            ACTION_COLUMN,
+            udf_compare_patient_name(gp_forenames, gp_surname, pds_forenames, pds_surname),
+        )
+        .withColumn("item", lit("name"))
+        .select(
+            "practice",
+            "nhs_number",
+            "item",
+            concat_ws(", ", col("surname"), col("forename")).alias("gp_value"),
+            concat_ws(", ", col("name.familyName"), col("forenames")).alias("pds_value"),
             ACTION_COLUMN,
         )
     )
@@ -108,6 +148,7 @@ def get_record_mismatch_summary(
 
     gp_df.createOrReplaceTempView("gp_vw")
     pds.createOrReplaceTempView("pds_vw")
+    
     # Get count of records per practice, total
     gdppr_counts = spark.sql(
         """
@@ -161,7 +202,7 @@ def pds_gp_mismatches(
     Returns:
         pyspark.sql.DataFrame
     """
-
+    
     pds_df = (
         pds_df.withColumn("pds_date_of_birth", col("date_of_birth"))
         .drop("date_of_birth")
@@ -187,7 +228,7 @@ def pds_gp_mismatches(
             col("name.givenNames").getItem(4),
         ),
     )
-
+    
     gp_df = gp_df.withColumn(
         "gp_address",
         concat_ws(
@@ -209,11 +250,10 @@ def pds_gp_mismatches(
     )
     date_of_birth.createOrReplaceTempView("vw_date_of_birth")
 
-    surname = gp_pds_df.filter(col("surname") != col("name.familyName"))
-    surname.createOrReplaceTempView("vw_surname")
-
-    forename = gp_pds_df.filter(col("forename") != col("forenames"))
-    forename.createOrReplaceTempView("vw_forename")
+    name = compare_gp_pds_names(
+        gp_pds_df, col("surname"), col("name.familyName"), col("forename"), col("forenames")
+    )
+    name.createOrReplaceTempView("vw_name")
 
     sex = gp_pds_df.filter(col("sex") != col("gender.gender"))
     sex.createOrReplaceTempView("vw_sex")
@@ -229,20 +269,11 @@ def pds_gp_mismatches(
         SELECT
             practice,
             nhs_number,
-            'surname' AS item,
-            surname AS gp_value,
-            name.familyName AS pds_value,
-            null as action
-        FROM vw_surname
-        UNION
-        SELECT
-            practice,
-            nhs_number,
-            'forenames' AS item,
-            forename AS gp_value,
-            forenames AS pds_value,
-            null as action
-        FROM vw_forename
+            item,
+            gp_value,
+            pds_value, 
+            action AS action
+        FROM vw_name
         UNION
         SELECT
             practice,
@@ -259,7 +290,7 @@ def pds_gp_mismatches(
             'sex' AS item,
             sex AS gp_value,
             gender.gender AS pds_value,
-            null as action
+            null AS action            
         FROM vw_sex
         UNION
         SELECT
@@ -268,7 +299,7 @@ def pds_gp_mismatches(
             'address' AS item,
             gp_address AS gp_value,
             address_lines AS pds_value,
-            null as action
+            null AS action
         FROM vw_address
         UNION
         SELECT
@@ -277,7 +308,7 @@ def pds_gp_mismatches(
             'postcode' AS item,
             postcode AS gp_value,
             address.postcode AS pds_value,
-            null as action
+            null AS action
         FROM vw_postcode
         """
     ).orderBy(["practice", "nhs_number"])
