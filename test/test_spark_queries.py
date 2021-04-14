@@ -19,10 +19,10 @@ def test_pds_gp_mismatches_records_correct():
         header = next(reader)
         rows = [r for r in reader]
 
-    gp = spark.createDataFrame(
-        rows,
-        header,
-    )
+        gp = spark.createDataFrame(
+            rows,
+            header,
+        )
 
     gp.createOrReplaceTempView("vw_gdppr")
 
@@ -56,7 +56,7 @@ def test_pds_gp_mismatches_records_correct():
                 "postcode",
                 "NotZE2 9AR",
                 "ZE2 9AR",
-                None,
+                "Further validation required",
             ),
             (
                 "Y06922",
@@ -72,7 +72,7 @@ def test_pds_gp_mismatches_records_correct():
                 "address",
                 "NotRedwing NotWolverhampton NotWinchester",
                 "Redwing Wolverhampton Winchester",
-                None
+                "Further validation required",
             ),
             (
                 "Y06922",
@@ -155,7 +155,9 @@ def test_get_pds_exclusive_records_correct():
         "spark.driver.bindAddress", "127.0.0.1"
     ).getOrCreate()
 
-    sex_lkp = spark.createDataFrame([[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"])
+    sex_lkp = spark.createDataFrame(
+        [[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"]
+    )
 
     gp = spark.createDataFrame(
         [
@@ -165,7 +167,6 @@ def test_get_pds_exclusive_records_correct():
         ],
         ["NHS_Number", "practice"],
     )
-
     pds = spark.createDataFrame(
         [
             (
@@ -204,7 +205,6 @@ def test_get_pds_exclusive_records_correct():
         ["NHS_Number", "name", "date_of_birth", "address", "gender", "gp"],
     )
     pds = format_pds_mock_data(pds)
-
     expected = spark.createDataFrame(
         [
             (
@@ -270,7 +270,6 @@ def test_get_pds_exclusive_records_correct():
         ],
     )
     actual = get_pds_records_status(gp, pds, sex_lkp)
-
     pandas.testing.assert_frame_equal(
         actual.toPandas().sort_values("NHS NO.").reset_index(drop=True),
         expected.toPandas().sort_values("NHS NO.").reset_index(drop=True),

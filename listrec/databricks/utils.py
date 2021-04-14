@@ -1,3 +1,5 @@
+from pyspark.sql.functions import when, from_json, col
+
 import os
 import shutil
 
@@ -8,6 +10,7 @@ import boto3
 import pyspark
 
 from pyspark.sql.functions import when, from_json, col
+
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -21,9 +24,10 @@ def blank_as_null(x):
     return when(col(x) != "", col(x)).otherwise(None)
 
 
-def upload_to_s3(path: Path, bucket: str, filename: str, access_key: str, secret_key: str):
+def upload_to_s3(
+    path: Path, bucket: str, filename: str, access_key: str, secret_key: str
+):
     """Upload a file to an S3 bucket.
-
     Args:
         path (Path): Path to file to upload.
         bucket (str): Bucket to save the file to.
@@ -44,13 +48,11 @@ def save_to_csv(
     dataframe: pyspark.sql.DataFrame, filename: str, on_databricks: bool = False
 ) -> Path:
     """Save a dataframe to CSV file.
-
     Args:
         dataframe (pyspark.sql.DataFrame): Pyspark DataFrame.
         filename (str): Target filename.
         on_databricks (bool): Set to True if this is running on databricks, to account for
             manipulation of file save locations.
-
     Returns:
         Path: Path to output file.
     """
@@ -59,9 +61,7 @@ def save_to_csv(
     # for manual operations
     if on_databricks:
         databricks_filename = f"/dbfs/{filename.strip('/')}"
-        temp_filename = (
-            f"/dbfs/{os.path.dirname(filename.strip('/'))}/{uuid4()}_{os.path.basename(filename)}"
-        )
+        temp_filename = f"/dbfs/{os.path.dirname(filename.strip('/'))}/{uuid4()}_{os.path.basename(filename)}"
     else:
         databricks_filename = filename
         temp_filename = os.path.join(
@@ -151,3 +151,35 @@ def format_pds_mock_data(df):
     )
 
     return vw_pds
+
+
+def format_pds_address_data(pds: pyspark.sql.DataFrame):
+
+    pds_addr_schema = StructType(
+        [
+            StructField("code", StringType(), True),
+            StructField("from", StringType(), True),
+            StructField("lines", ArrayType(StringType()), True),
+            StructField("postcode", StringType(), True),
+        ]
+    )
+
+    pds = (
+        pds.withColumn("NHS_NUMBER", col("NHS_NUMBER").cast(StringType()))
+        .withColumn("CODE", from_json(col("gp"), pds_addr_schema))
+        .drop("gp")
+        .withColumn("addresses", from_json(col("address"), pds_addr_schema))
+        .drop("address")
+        .withColumn("address", col("addresses"))
+        .drop("addresses")
+    )
+
+    return pds
+
+
+def update_spaces(item: str):
+    return item.replace(" ", "")
+
+
+def update_caps(item: str):
+    return item.upper()
