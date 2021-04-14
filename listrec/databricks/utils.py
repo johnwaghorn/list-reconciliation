@@ -9,8 +9,6 @@ from uuid import uuid4
 import boto3
 import pyspark
 
-from pyspark.sql.functions import when, from_json, col
-
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -183,3 +181,19 @@ def update_spaces(item: str):
 
 def update_caps(item: str):
     return item.upper()
+
+def format_pds_data(pds: pyspark.sql.DataFrame):
+    
+    pds_schema = StructType(
+        [
+            StructField("code", StringType(), True),
+            StructField("from", StringType(), True),
+        ],
+    )
+    
+    pds = (
+        pds.withColumn("CODE", from_json(col("gp"), pds_schema))
+        .drop("gp")
+        .withColumn("gp", col("CODE"))
+    )
+    return pds
