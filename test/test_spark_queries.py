@@ -49,7 +49,7 @@ def test_pds_gp_mismatches_records_correct():
                 "19160817",
                 "Further validation required",
             ),
-            ("Y06922", "8582405340", "sex", "1", "9", None),
+            ("Y06922", "8582405340", "sex", "1", "9", "Further validation required"),
             (
                 "Y06922",
                 "8582405340",
@@ -64,7 +64,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Bondley, NotTerry",
                 "Bondley, Terry",
-                'Further validation required',
+                "Further validation required",
             ),
             (
                 "Y06922",
@@ -80,7 +80,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Kidwell, Lucais",
                 "Lucais, Kidwell",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
             (
                 "Y06922",
@@ -88,7 +88,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Rich Marvell, Kerwinn",
                 "Marvell, Kerwinn",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
             (
                 "Y06922",
@@ -96,7 +96,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Astridge, Nata Jones",
                 "Astridge, Nata",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
             (
                 "Y06922",
@@ -104,14 +104,15 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 ", Nelle",
                 "Brumen, Nelle",
-                'Update GP name with PDS name'),
+                "Update GP name with PDS name",
+            ),
             (
                 "Y06922",
                 "6414799785",
                 "name",
                 "De Mullett, Abe",
                 "De Mullett, Abe-Rich",
-                'Update GP name with PDS name'
+                "Update GP name with PDS name",
             ),
             (
                 "Y06922",
@@ -119,7 +120,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Pavey, Nikki-Stevens",
                 "Pavey, Nikki",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
             (
                 "Y06922",
@@ -127,7 +128,7 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Das-Lee, Brianne",
                 "Das Lee, Brianne",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
             (
                 "Y06922",
@@ -135,9 +136,8 @@ def test_pds_gp_mismatches_records_correct():
                 "name",
                 "Das, Brian Lee",
                 "Das, Brian-Lee",
-                'Update PDS name with GP name'
+                "Update PDS name with GP name",
             ),
-
         ],
         ["practice", "nhs_number", "item", "gp_value", "pds_value", "action"],
     )
@@ -155,9 +155,7 @@ def test_get_pds_exclusive_records_correct():
         "spark.driver.bindAddress", "127.0.0.1"
     ).getOrCreate()
 
-    sex_lkp = spark.createDataFrame(
-        [[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"]
-    )
+    sex_lkp = spark.createDataFrame([[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"])
 
     gp = spark.createDataFrame(
         [

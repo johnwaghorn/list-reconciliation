@@ -7,6 +7,7 @@ from pyspark.sql.functions import to_date, col, concat_ws, udf, lit, from_json
 from pyspark.sql.types import StringType
 from listrec.databricks.comparison_utils.compare_name import compare_patient_name
 
+from listrec.databricks.comparison_utils.compare_name import compare_patient_name
 from listrec.databricks.utils import (
     blank_as_null,
     save_to_csv,
@@ -123,34 +124,43 @@ def output_gp_records_status(
     upload_to_s3(saved_file, bucket, out_path, aws_access_key, aws_secret_key)
 
 
-def compare_gp_pds_date_of_birth(
+spark = pyspark.sql.SparkSession.builder.config(
+    "spark.driver.bindAddress", "127.0.0.1"
+).getOrCreate()
+
+
+def gp_pds_comparison_with_unionable_result(
     gp_pds_df: pyspark.sql.DataFrame,
     gp_col: pyspark.sql.Column,
     pds_col: pyspark.sql.Column,
-) -> pyspark.sql.DataFrame:
+    og_gp_col: pyspark.sql.Column,
+    og_pds_col: pyspark.sql.Column,
+    item,
+    action,
+):
+    """Creates a result dataframe containing rows filtered by simple equality
+    comparison of gp_col with pds_col, literally `gp_col != pds_col`.
 
-    """Check date of birth differences between PDS and GP data and flag records
-    for further action, creating a dataframe.
     Args:
         gp_pds_df (pyspark.sql.DataFrame): Dataframe containing GP and PDS
             records joined on NHS number
-        gp_col (pyspark.sql.Column): Column from GP data for date of birth.
-        pds_col (pyspark.sql.Column): Column from GP data for date of birth.
-
-    Returns:
-        pyspark.sql.DataFrame: Dataframe containing only records where the date of birth
-            is different, with a further action flag
+        gp_col (pyspark.sql.Column): Column from GP data, formatted for comparison if needed.
+        pds_col (pyspark.sql.Column): Column from PDS data, formatted for comparison if needed.
+        og_gp_col (pyspark.sql.Column): Original column from GP data.
+        og_pds_col (pyspark.sql.Column): Original column from PDS data.
+        item: Name of the item being compared.
+        action: Action to take if the comparison is not equal.
     """
     return (
         gp_pds_df.filter(gp_col != pds_col)
         .withColumn(ACTION_COLUMN, lit(ACTION_REQUIRES_VALIDATION))
-        .withColumn("item", lit("date_of_birth"))
+        .withColumn("item", lit(item))
         .select(
             "practice",
             "nhs_number",
             "item",
-            col("date_of_birth").alias("gp_value"),
-            col("pds_date_of_birth").alias("pds_value"),
+            og_gp_col.alias("gp_value"),
+            og_pds_col.alias("pds_value"),
             ACTION_COLUMN,
         )
     )
@@ -173,7 +183,7 @@ def compare_gp_pds_names(
         pds_surname (pyspark.sql.Column): PDS surname column.
         gp_forenames (pyspark.sql.Column): GP forename column.
         pds_forenames (pyspark.sql.Column): PDS forename column.
-        
+
     Returns:
         pyspark.sql.DataFrame: Dataframe containing only records where the date of birth
             is different, with a further action flag
@@ -213,9 +223,7 @@ def get_record_mismatch_summary(
     """
 
     pds = (
-        pds_df.withColumn(
-            "dob", to_date(col("date_of_birth").cast("string"), "yyyyMMdd")
-        )
+        pds_df.withColumn("dob", to_date(col("date_of_birth").cast("string"), "yyyyMMdd"))
         .drop("date_of_birth")
         .withColumn(
             "address_lines",
@@ -254,7 +262,7 @@ def get_record_mismatch_summary(
 
     gp_df.createOrReplaceTempView("gp_vw")
     pds.createOrReplaceTempView("pds_vw")
-    
+
     # Get count of records per practice, total
 
     gdppr_counts = spark.sql(
@@ -287,9 +295,9 @@ def get_record_mismatch_summary(
         """
     )
 
-    gpes_pds_match_stats = gdppr_counts.join(
-        gp_match_counts, "practice", how="inner"
-    ).withColumn("diffs", col("total") - col("same"))
+    gpes_pds_match_stats = gdppr_counts.join(gp_match_counts, "practice", how="inner").withColumn(
+        "diffs", col("total") - col("same")
+    )
 
     return gpes_pds_match_stats
 
@@ -304,7 +312,7 @@ def pds_gp_mismatches(
     Returns:
         pyspark.sql.DataFrame
     """
-    
+
     pds_df = (
         pds_df.withColumn("pds_date_of_birth", col("date_of_birth"))
         .drop("date_of_birth")
@@ -330,7 +338,7 @@ def pds_gp_mismatches(
             col("name.givenNames").getItem(4),
         ),
     )
-    
+
     gp_df = gp_df.withColumn(
         "gp_address",
         concat_ws(
@@ -345,10 +353,14 @@ def pds_gp_mismatches(
 
     gp_pds_df = gp_df.join(pds_df, on="nhs_number", how="inner")
 
-    date_of_birth = compare_gp_pds_date_of_birth(
+    date_of_birth = gp_pds_comparison_with_unionable_result(
         gp_pds_df,
         col("date_of_birth"),
         to_date(col("pds_date_of_birth").cast("string"), "yyyyMMdd"),
+        col("date_of_birth"),
+        col("pds_date_of_birth"),
+        "date_of_birth",
+        ACTION_REQUIRES_VALIDATION,
     )
     date_of_birth.createOrReplaceTempView("vw_date_of_birth")
 
@@ -357,17 +369,21 @@ def pds_gp_mismatches(
     )
     name.createOrReplaceTempView("vw_name")
 
-    sex = gp_pds_df.filter(col("sex") != col("gender.gender"))
+    sex = gp_pds_comparison_with_unionable_result(
+        gp_pds_df,
+        col("sex"),
+        col("gender.gender"),
+        col("sex"),
+        col("gender.gender"),
+        "sex",
+        ACTION_REQUIRES_VALIDATION,
+    )
     sex.createOrReplaceTempView("vw_sex")
 
-    address_2 = compare_gp_pds_address(
-        gp_pds_df, col("gp_address"), col("address_lines")
-    )
+    address_2 = compare_gp_pds_address(gp_pds_df, col("gp_address"), col("address_lines"))
     address_2.createOrReplaceTempView("vw_address")
 
-    postcode = compare_gp_pds_postcode(
-        gp_pds_df, col("POSTCODE"), col("address.postcode")
-    )
+    postcode = compare_gp_pds_postcode(gp_pds_df, col("POSTCODE"), col("address.postcode"))
     postcode.createOrReplaceTempView("vw_postcode")
 
     gp_mismatched_data = spark.sql(
@@ -377,8 +393,8 @@ def pds_gp_mismatches(
             nhs_number,
             item,
             gp_value,
-            pds_value, 
-            action AS action
+            pds_value,
+            action
         FROM vw_name
         UNION
         SELECT
@@ -387,16 +403,16 @@ def pds_gp_mismatches(
             item,
             gp_value,
             pds_value,
-            action AS action
+            action
         FROM vw_date_of_birth
         UNION
         SELECT
             practice,
             nhs_number,
-            'sex' AS item,
-            sex AS gp_value,
-            gender.gender AS pds_value,
-            null AS action            
+            item,
+            gp_value,
+            pds_value,
+            action
         FROM vw_sex
         UNION
         SELECT
@@ -521,9 +537,7 @@ def output_demographic_mismatches(
     date = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     mismatch_filename = f"{gp_practice}_Mismatch_{date}.csv"
 
-    df = demographic_mismatches.filter(col("PRACTICE") == gp_practice).drop(
-        col("PRACTICE")
-    )
+    df = demographic_mismatches.filter(col("PRACTICE") == gp_practice).drop(col("PRACTICE"))
     saved_file = save_to_csv(df, mismatch_filename, on_databricks=True)
 
     upload_to_s3(
