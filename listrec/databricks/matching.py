@@ -7,7 +7,7 @@ from pyspark.sql.functions import to_date, col, concat_ws, udf, lit, from_json
 from pyspark.sql.types import StringType
 from listrec.databricks.comparison_utils.compare_name import compare_patient_name
 
-from listrec.databricks.comparison_utils.compare_name import compare_patient_name
+
 from listrec.databricks.utils import (
     blank_as_null,
     save_to_csv,
@@ -36,23 +36,23 @@ def get_gp_registration_output_records(
 
     df = spark.sql(
         f"""
-        SELECT GP.SURNAME, 
-               GP.FORENAME AS FORENAMES, 
+        SELECT GP.SURNAME,
+               GP.FORENAME AS FORENAMES,
                date_format(to_date(cast(GP.DATE_OF_BIRTH as string),'yyyy-MM-dd'),'dd/MM/yyyy') `DOB`,
-               GP.NHS_NUMBER AS `NHS NO.`, 
-               ADDRESS_1 as `ADD 1`,  
-               ADDRESS_2  as `ADD 2`, 
-               ADDRESS_3  as `ADD 3`, 
-               ADDRESS_4  as `ADD 4`,  
-               ADDRESS_5  as `ADD 5`, 
-               GP.POSTCODE, 
+               GP.NHS_NUMBER AS `NHS NO.`,
+               ADDRESS_1 as `ADD 1`,
+               ADDRESS_2  as `ADD 2`,
+               ADDRESS_3  as `ADD 3`,
+               ADDRESS_4  as `ADD 4`,
+               ADDRESS_5  as `ADD 5`,
+               GP.POSTCODE,
                SLKP.sex AS SEX,
-               CASE 
+               CASE
                     WHEN (PDS.NHS_Number IS NULL) THEN 'Unmatched'
                     WHEN (GP.NHS_Number = PDS.NHS_Number AND GP.PRACTICE IS NOT NULL AND (PDS.gp.code IS NULL OR PDS.gp.code = "")) THEN 'Deducted Patient Match'
                     WHEN (GP.NHS_Number = PDS.NHS_Number AND (GP.PRACTICE <> PDS.gp.code AND (PDS.gp.code IS NOT NULL OR PDS.gp.code != ""))) THEN 'Partnership Mismatch'
                 END AS STATUS,
-                CASE 
+                CASE
                     WHEN (PDS.NHS_Number IS NULL) THEN ''
                     WHEN (GP.NHS_Number = PDS.NHS_Number AND GP.PRACTICE <> PDS.gp.code) THEN date_format(to_date(cast(date 'today' as string),'yyyy-MM-dd'),'dd/MM/yyyy')
                     WHEN (GP.NHS_Number = PDS.NHS_Number AND PDS.gp.code IS NULL) THEN date_format(to_date(cast(date 'today' as string),'yyyy-MM-dd'),'dd/MM/yyyy')
@@ -64,40 +64,10 @@ def get_gp_registration_output_records(
         OR (GP.NHS_Number=PDS.NHS_Number AND (GP.PRACTICE IS NOT NULL AND (PDS.gp.code IS NULL OR PDS.gp.code = "")))
         OR (GP.NHS_Number=PDS.NHS_Number AND GP.PRACTICE <> PDS.gp.code AND (PDS.gp.code IS NOT NULL OR PDS.gp.code != ""))
         """
-        )
+    )
 
     return df
 
-def output_gp_registration_differences(
-    gp_records_status: pyspark.sql.DataFrame,
-    pds_practice: str,
-    bucket: str,
-    directory: Path,
-    aws_access_key: str,
-    aws_secret_key: str,
-):
-    """Writes registration differences csv files to an S3 bucket.
-    Args:
-        gp_records_status (pyspark.sql.DataFrame): GP registration differences DataFrame.
-        pds_practice (str): GP Practice to filter.
-        bucket (str): Bucket to save the file to.
-        directory (str): Target output directory in bucket. If targeting root, use ''
-        access_key (str): AWS public key.
-        secret_key (str): AWS private key.
-    """
-
-    date = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-    gp_filename = f"{pds_practice}_OnlyOnGP_{date}.csv"
-    pds_filename = f"{pds_practice}_OnlyOnPDS_{date}.csv"
-
-    output_gp_records_status(
-        gp_records_status,
-        pds_practice,
-        bucket,
-        os.path.join(directory, gp_filename),
-        aws_access_key,
-        aws_secret_key,
-    )
 
 def output_gp_records_status(
     gp_records_status: pyspark.sql.DataFrame,
@@ -195,7 +165,9 @@ def compare_gp_pds_names(
         gp_pds_df.where((gp_surname != pds_surname) | (gp_forenames != pds_forenames))
         .withColumn(
             ACTION_COLUMN,
-            udf_compare_patient_name(gp_forenames, gp_surname, pds_forenames, pds_surname),
+            udf_compare_patient_name(
+                gp_forenames, gp_surname, pds_forenames, pds_surname
+            ),
         )
         .withColumn("item", lit("name"))
         .select(
@@ -203,7 +175,9 @@ def compare_gp_pds_names(
             "nhs_number",
             "item",
             concat_ws(", ", col("surname"), col("forename")).alias("gp_value"),
-            concat_ws(", ", col("name.familyName"), col("forenames")).alias("pds_value"),
+            concat_ws(", ", col("name.familyName"), col("forenames")).alias(
+                "pds_value"
+            ),
             ACTION_COLUMN,
         )
     )
@@ -365,7 +339,11 @@ def pds_gp_mismatches(
     date_of_birth.createOrReplaceTempView("vw_date_of_birth")
 
     name = compare_gp_pds_names(
-        gp_pds_df, col("surname"), col("name.familyName"), col("forename"), col("forenames")
+        gp_pds_df,
+        col("surname"),
+        col("name.familyName"),
+        col("forename"),
+        col("forenames"),
     )
     name.createOrReplaceTempView("vw_name")
 
@@ -380,8 +358,8 @@ def pds_gp_mismatches(
     )
     sex.createOrReplaceTempView("vw_sex")
 
-    address_2 = compare_gp_pds_address(gp_pds_df, col("gp_address"), col("address_lines"))
-    address_2.createOrReplaceTempView("vw_address")
+    address = compare_gp_pds_address(gp_pds_df, col("gp_address"), col("address_lines"))
+    address.createOrReplaceTempView("vw_address")
 
     postcode = compare_gp_pds_postcode(gp_pds_df, col("POSTCODE"), col("address.postcode"))
     postcode.createOrReplaceTempView("vw_postcode")
@@ -447,7 +425,7 @@ def get_pds_records_status(
     Args:
         gp (pyspark.sql.DataFrame): GDPPR dataframe.
         pds (pyspark.sql.DataFrame): PDS dataframe.
-
+        sex_lkp (pyspark.sql.DataFrame): Sex lookup dataframe.
     Returns:
         pyspark.sql.DataFrame
     """
@@ -485,6 +463,7 @@ def get_pds_records_status(
 
 def output_registration_differences(
     pds_records_status: pyspark.sql.DataFrame,
+    gp_records_status: pyspark.sql.DataFrame,
     gp_practice: str,
     bucket: str,
     directory: Path,
@@ -494,6 +473,7 @@ def output_registration_differences(
     """Writes registration differences csv files to an S3 bucket.
     Args:
         pds_records_status (pyspark.sql.DataFrame): PDS registration differences DataFrame.
+        gp_records_status: (pyspark.sql.DataFrame): GP registration differences DataFrame.
         gp_practice (str): GP Practice to filter.
         bucket (str): Bucket to save the file to.
         directory (str): Target output directory in bucket. If targeting root, use ''
@@ -510,6 +490,15 @@ def output_registration_differences(
         gp_practice,
         bucket,
         os.path.join(directory, pds_filename),
+        aws_access_key,
+        aws_secret_key,
+    )
+
+    output_gp_records_status(
+        gp_records_status,
+        gp_practice,
+        bucket,
+        os.path.join(directory, gp_filename),
         aws_access_key,
         aws_secret_key,
     )
