@@ -1,17 +1,19 @@
 import re
 
+from typing import Tuple
 
 ACTION_UPDATE_PDS = "Update PDS name with GP name"
 ACTION_UPDATE_GP = "Update GP name with PDS name"
 ACTION_REQUIRES_VALIDATION = "Further validation required"
 
+FORENAME = "Only forename mismatch"
+SURNAME = "Only surname mismatch"
+BOTH_NAMES = "Both names mismatched"
+
 
 def compare_patient_name(
-    gp_forename: str,
-    gp_surname: str,
-    pds_givenNames: str,
-    pds_familyName: str
-) -> str:
+    gp_forename: str, gp_surname: str, pds_givenNames: str, pds_familyName: str
+) -> Tuple[str, str]:
     """Check for name differences between PDS and GP data and flag data
     for further action.
 
@@ -22,85 +24,95 @@ def compare_patient_name(
         pds_familyName (str): PDS surname string.
 
     Returns:
-        str: Action to be taken based on comparison rules
+        Tuple[str, str]: Action to be taken, Name item
     """
 
     surname_match = _check_match(gp_surname, pds_familyName)
     forename_match = _check_match(gp_forename, pds_givenNames)
 
-    valid_gp_names = (
-        _validate_name_case(gp_forename),
-        _validate_name_case(gp_surname)
-    )
+    valid_gp_names = (_validate_name_case(gp_forename), _validate_name_case(gp_surname))
 
-    valid_pds_names = (
-        _validate_name_case(pds_givenNames),
-        _validate_name_case(pds_familyName)
-    )
+    valid_pds_names = (_validate_name_case(pds_givenNames), _validate_name_case(pds_familyName))
 
     if not surname_match and not forename_match:
-        if all([
-            _check_match(gp_forename, pds_familyName),
-            _check_match(gp_surname, pds_givenNames)
-        ]):
+        if all(
+            [_check_match(gp_forename, pds_familyName), _check_match(gp_surname, pds_givenNames)]
+        ):
             if all(valid_gp_names) and all(valid_pds_names):
-                return ACTION_UPDATE_PDS
+                return ACTION_UPDATE_PDS, BOTH_NAMES
 
-        return ACTION_REQUIRES_VALIDATION
+        return ACTION_REQUIRES_VALIDATION, BOTH_NAMES
 
     if surname_match and forename_match:
-        if not all(valid_gp_names) and all(valid_pds_names):
-            return ACTION_UPDATE_GP
-
         if all(valid_gp_names) and not all(valid_pds_names):
-            return ACTION_UPDATE_PDS
+            if not _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
+                return ACTION_UPDATE_PDS, BOTH_NAMES
 
-        return ACTION_REQUIRES_VALIDATION
+            if _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
+                return ACTION_UPDATE_PDS, SURNAME
+
+            if not _validate_name_case(pds_givenNames) and _validate_name_case(pds_familyName):
+                return ACTION_UPDATE_PDS, FORENAME
+
+        if not all(valid_gp_names) and all(valid_pds_names):
+            if not _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):
+                return ACTION_UPDATE_GP, BOTH_NAMES
+
+            if _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):
+                return ACTION_UPDATE_GP, SURNAME
+
+            if not _validate_name_case(gp_forename) and _validate_name_case(gp_surname):
+                return ACTION_UPDATE_GP, FORENAME
+
+        return ACTION_REQUIRES_VALIDATION, BOTH_NAMES
 
     if surname_match and not forename_match:
-        if any([
-            not gp_forename,
-            _check_additional_name_hyphenated(gp_forename, pds_givenNames)
-        ]):
-            return ACTION_UPDATE_GP
+        if any([not gp_forename, _check_additional_name_hyphenated(gp_forename, pds_givenNames)]):
+            return ACTION_UPDATE_GP, FORENAME
 
-        if any([
-            not pds_givenNames,
-            _check_match_hyphenated(pds_givenNames, gp_forename),
-            _check_match_hyphenated(gp_forename, pds_givenNames),
-            _check_additional_name_hyphenated(pds_givenNames, gp_forename),
-            _check_additional_name(gp_forename, pds_givenNames),
-            _check_additional_name(pds_givenNames, gp_forename)
-        ]):
-            return ACTION_UPDATE_PDS
+        if any(
+            [
+                not pds_givenNames,
+                _check_match_hyphenated(pds_givenNames, gp_forename),
+                _check_match_hyphenated(gp_forename, pds_givenNames),
+                _check_additional_name_hyphenated(pds_givenNames, gp_forename),
+                _check_additional_name(gp_forename, pds_givenNames),
+                _check_additional_name(pds_givenNames, gp_forename),
+            ]
+        ):
+            return ACTION_UPDATE_PDS, FORENAME
 
         if _check_positional_mismatch(gp_forename, pds_givenNames):
-            return ACTION_REQUIRES_VALIDATION
+            return ACTION_REQUIRES_VALIDATION, FORENAME
 
-        return ACTION_REQUIRES_VALIDATION
+        return ACTION_REQUIRES_VALIDATION, FORENAME
 
     if forename_match and not surname_match:
-        if any([
-            not gp_surname,
-            _check_match_apostrophe(gp_surname, pds_familyName),
-            _check_additional_name_hyphenated(gp_surname, pds_familyName),
-            _check_additional_name(gp_surname, pds_familyName)
-        ]):
-            return ACTION_UPDATE_GP
+        if any(
+            [
+                not gp_surname,
+                _check_match_apostrophe(gp_surname, pds_familyName),
+                _check_additional_name_hyphenated(gp_surname, pds_familyName),
+                _check_additional_name(gp_surname, pds_familyName),
+            ]
+        ):
+            return ACTION_UPDATE_GP, SURNAME
 
-        if any([
-            not pds_familyName,
-            _check_match_apostrophe(pds_familyName, gp_surname),
-            _check_match_hyphenated(gp_surname, pds_familyName),
-            _check_match_hyphenated(pds_familyName, gp_surname),
-            _check_positional_mismatch(pds_familyName, gp_surname),
-            _check_positional_mismatch(gp_surname, pds_familyName),
-            _check_additional_name_hyphenated(pds_familyName, gp_surname),
-            _check_additional_name(pds_familyName, gp_surname)
-        ]):
-            return ACTION_UPDATE_PDS
+        if any(
+            [
+                not pds_familyName,
+                _check_match_apostrophe(pds_familyName, gp_surname),
+                _check_match_hyphenated(gp_surname, pds_familyName),
+                _check_match_hyphenated(pds_familyName, gp_surname),
+                _check_positional_mismatch(pds_familyName, gp_surname),
+                _check_positional_mismatch(gp_surname, pds_familyName),
+                _check_additional_name_hyphenated(pds_familyName, gp_surname),
+                _check_additional_name(pds_familyName, gp_surname),
+            ]
+        ):
+            return ACTION_UPDATE_PDS, SURNAME
 
-        return ACTION_REQUIRES_VALIDATION
+        return ACTION_REQUIRES_VALIDATION, SURNAME
 
 
 def _check_match(first: str, second: str) -> bool:

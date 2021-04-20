@@ -4,9 +4,15 @@ import pyspark
 from datetime import datetime
 from pathlib import Path
 from pyspark.sql.functions import to_date, col, concat_ws, udf, lit, from_json
-from pyspark.sql.types import StringType
-from listrec.databricks.comparison_utils.compare_name import compare_patient_name
+from pyspark.sql.types import StringType, ArrayType
 
+from listrec.databricks.comparison_utils.compare_name import (
+    compare_patient_name,
+    ACTION_REQUIRES_VALIDATION,
+    FORENAME,
+    SURNAME,
+    BOTH_NAMES,
+)
 
 from listrec.databricks.utils import (
     blank_as_null,
@@ -17,7 +23,6 @@ from listrec.databricks.utils import (
 )
 
 ACTION_COLUMN = "action"
-ACTION_REQUIRES_VALIDATION = "Further validation required"
 
 spark = pyspark.sql.SparkSession.builder.config(
     "spark.driver.bindAddress", "127.0.0.1"
@@ -94,11 +99,6 @@ def output_gp_records_status(
     upload_to_s3(saved_file, bucket, out_path, aws_access_key, aws_secret_key)
 
 
-spark = pyspark.sql.SparkSession.builder.config(
-    "spark.driver.bindAddress", "127.0.0.1"
-).getOrCreate()
-
-
 def gp_pds_comparison_with_unionable_result(
     gp_pds_df: pyspark.sql.DataFrame,
     gp_col: pyspark.sql.Column,
@@ -155,32 +155,61 @@ def compare_gp_pds_names(
         pds_forenames (pyspark.sql.Column): PDS forename column.
 
     Returns:
-        pyspark.sql.DataFrame: Dataframe containing only records where the date of birth
+        pyspark.sql.DataFrame: Dataframe containing only records where the name
             is different, with a further action flag
     """
 
-    udf_compare_patient_name = udf(compare_patient_name, StringType())
+    udf_compare_patient_name = udf(compare_patient_name, ArrayType(StringType()))
 
-    return (
+    df = (
         gp_pds_df.where((gp_surname != pds_surname) | (gp_forenames != pds_forenames))
         .withColumn(
-            ACTION_COLUMN,
-            udf_compare_patient_name(
-                gp_forenames, gp_surname, pds_forenames, pds_surname
-            ),
+            "actions_items",
+            udf_compare_patient_name(gp_forenames, gp_surname, pds_forenames, pds_surname),
         )
-        .withColumn("item", lit("name"))
+        .withColumn("actions", col("actions_items").getItem(0))
+        .withColumn("items", col("actions_items").getItem(1))
+    )
+
+    both = df.where(col("items") == BOTH_NAMES)
+
+    surname = (
+        both.withColumn(ACTION_COLUMN, col("actions"))
+        .withColumn("item", lit("surname"))
+        .unionAll(
+            df.where(col("items") == SURNAME)
+            .withColumn(ACTION_COLUMN, col("actions"))
+            .withColumn("item", lit("surname"))
+        )
         .select(
             "practice",
             "nhs_number",
             "item",
-            concat_ws(", ", col("surname"), col("forename")).alias("gp_value"),
-            concat_ws(", ", col("name.familyName"), col("forenames")).alias(
-                "pds_value"
-            ),
+            col("surname").alias("gp_value"),
+            col("name.familyName").alias("pds_value"),
             ACTION_COLUMN,
         )
     )
+
+    forename = (
+        both.withColumn(ACTION_COLUMN, col("actions"))
+        .withColumn("item", lit("forenames"))
+        .unionAll(
+            df.where(col("items") == FORENAME)
+            .withColumn(ACTION_COLUMN, col("actions"))
+            .withColumn("item", lit("forenames"))
+        )
+        .select(
+            "practice",
+            "nhs_number",
+            "item",
+            col("forename").alias("gp_value"),
+            col("forenames").alias("pds_value"),
+            ACTION_COLUMN,
+        )
+    )
+
+    return surname.unionAll(forename)
 
 
 def get_record_mismatch_summary(
@@ -280,9 +309,11 @@ def pds_gp_mismatches(
     gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame
 ) -> pyspark.sql.DataFrame:
     """Generate a GP-PDS mismatches dataframe.
+
     Args:
         gp_df (pyspark.sql.DataFrame): GP Practice dataframe.
         pds_df (pyspark.sql.DataFrame): PDS dataframe.
+
     Returns:
         pyspark.sql.DataFrame
     """
@@ -422,10 +453,12 @@ def get_pds_records_status(
     sex_lkp: pyspark.sql.DataFrame,
 ) -> pyspark.sql.DataFrame:
     """Create a dataframe containing PDS record mismatch details.
+
     Args:
         gp (pyspark.sql.DataFrame): GDPPR dataframe.
         pds (pyspark.sql.DataFrame): PDS dataframe.
         sex_lkp (pyspark.sql.DataFrame): Sex lookup dataframe.
+
     Returns:
         pyspark.sql.DataFrame
     """
@@ -471,6 +504,7 @@ def output_registration_differences(
     aws_secret_key: str,
 ):
     """Writes registration differences csv files to an S3 bucket.
+
     Args:
         pds_records_status (pyspark.sql.DataFrame): PDS registration differences DataFrame.
         gp_records_status: (pyspark.sql.DataFrame): GP registration differences DataFrame.
@@ -547,6 +581,7 @@ def output_pds_records_status(
     aws_secret_key: str,
 ):
     """Writes PDS registration differences csv files to an S3 bucket.
+
     Args:
         pds_records_status (pyspark.sql.DataFrame): PDS registration differences DataFrame.
         gp_practice (str): GP Practice to filter.
@@ -569,11 +604,13 @@ def compare_gp_pds_address(
 ) -> pyspark.sql.DataFrame:
     """Check address differences between PDS and GP data and flag records
     for further action, creating a dataframe.
+
     Args:
         gp_pds_df (pyspark.sql.DataFrame): Dataframe containing GP and PDS
             records joined on NHS number
         gp_col (pyspark.sql.Column): Column from GP data for address.
         pds_col (pyspark.sql.Column): Column from PDS data for address.
+
     Returns:
         pyspark.sql.DataFrame: Dataframe containing only records where the address
             is different, with a further action flag
@@ -604,11 +641,13 @@ def compare_gp_pds_postcode(
 ) -> pyspark.sql.DataFrame:
     """Check postcode differences between PDS and GP data and flag records
     for further action, creating a dataframe.
+
     Args:
         gp_pds_df (pyspark.sql.DataFrame): Dataframe containing GP and PDS
             records joined on NHS number
         gp_col (pyspark.sql.Column): Column from GP data for postcode.
         pds_col (pyspark.sql.Column): Column from PDS data for postcode.
+
     Returns:
         pyspark.sql.DataFrame: Dataframe containing only records where the postcode
             is different, with a further action flag
