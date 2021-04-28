@@ -3,11 +3,7 @@
 
 name: Python package
 
-on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -38,6 +34,9 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
+        AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
       run: |
         pytest
     - name: Test with gauge

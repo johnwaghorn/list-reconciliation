@@ -81,8 +81,10 @@ def output_gp_records_status(
     out_path: Path,
     aws_access_key: str,
     aws_secret_key: str,
+    on_databricks: bool = False,
 ):
     """Writes PDS registration differences csv files to an S3 bucket.
+
     Args:
         gp_records_status (pyspark.sql.DataFrame): GP registration differences DataFrame.
         pds_practice (str): GP Practice to filter.
@@ -90,11 +92,13 @@ def output_gp_records_status(
         out_path (Path): Target output file in bucket.
         access_key (str): AWS public key.
         secret_key (str): AWS private key.
+        on_databricks (bool): Set to True if this is running on databricks, to account for
+            manipulation of file save locations.
     """
     filename = os.path.basename(out_path)
     df = gp_records_status.filter(col("PRACTICE") == pds_practice).drop(col("PRACTICE"))
 
-    saved_file = save_to_csv(df, filename, on_databricks=True)
+    saved_file = save_to_csv(df, filename, on_databricks=on_databricks)
 
     upload_to_s3(saved_file, bucket, out_path, aws_access_key, aws_secret_key)
 
@@ -502,6 +506,7 @@ def output_registration_differences(
     directory: Path,
     aws_access_key: str,
     aws_secret_key: str,
+    on_databricks: bool = False,
 ):
     """Writes registration differences csv files to an S3 bucket.
 
@@ -513,6 +518,8 @@ def output_registration_differences(
         directory (str): Target output directory in bucket. If targeting root, use ''
         aws_access_key (str): AWS public key.
         aws_secret_key (str): AWS private key.
+        on_databricks (bool): Set to True if this is running on databricks, to account for
+            manipulation of file save locations.
     """
 
     date = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
@@ -526,6 +533,7 @@ def output_registration_differences(
         os.path.join(directory, pds_filename),
         aws_access_key,
         aws_secret_key,
+        on_databricks=on_databricks,
     )
 
     output_gp_records_status(
@@ -535,6 +543,7 @@ def output_registration_differences(
         os.path.join(directory, gp_filename),
         aws_access_key,
         aws_secret_key,
+        on_databricks=on_databricks,
     )
 
 
@@ -545,6 +554,7 @@ def output_demographic_mismatches(
     directory: Path,
     aws_access_key: str,
     aws_secret_key: str,
+    on_databricks: bool = False,
 ):
     """Writes demographic differences csv files to an S3 bucket.
 
@@ -555,13 +565,15 @@ def output_demographic_mismatches(
         directory (str): Target output directory in bucket. If targeting root, use ''
         aws_access_key (str): AWS public key.
         aws_secret_key (str): AWS private key.
+        on_databricks (bool): Set to True if this is running on databricks, to account for
+            manipulation of file save locations.
     """
 
     date = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     mismatch_filename = f"{gp_practice}_Mismatch_{date}.csv"
 
     df = demographic_mismatches.filter(col("PRACTICE") == gp_practice).drop(col("PRACTICE"))
-    saved_file = save_to_csv(df, mismatch_filename, on_databricks=True)
+    saved_file = save_to_csv(df, mismatch_filename, on_databricks=on_databricks)
 
     upload_to_s3(
         saved_file,
@@ -579,6 +591,7 @@ def output_pds_records_status(
     out_path: Path,
     aws_access_key: str,
     aws_secret_key: str,
+    on_databricks: bool = False,
 ):
     """Writes PDS registration differences csv files to an S3 bucket.
 
@@ -589,10 +602,12 @@ def output_pds_records_status(
         out_path (Path): Target output file in bucket.
         aws_access_key (str): AWS public key.
         aws_secret_key (str): AWS private key.
+        on_databricks (bool): Set to True if this is running on databricks, to account for
+            manipulation of file save locations.
     """
     filename = os.path.basename(out_path)
     df = pds_records_status.filter(col("PRACTICE") == gp_practice).drop(col("PRACTICE"))
-    saved_file = save_to_csv(df, filename, on_databricks=True)
+    saved_file = save_to_csv(df, filename, on_databricks=on_databricks)
 
     upload_to_s3(saved_file, bucket, out_path, aws_access_key, aws_secret_key)
 
