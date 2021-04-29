@@ -505,3 +505,9 @@ logs
 *reports*
 *.gauge*
 /.vscode
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+*.terraform/

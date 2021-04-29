@@ -55,3 +55,17 @@ Once the egg has been created it must be uploaded to Databricks as a [library](h
 from listrec.utils import save_to_s3_csv
 ...
 ```
+
+
+## Terraform usage
+Note: The `-chdir` command isn't required if you are in the `terraform` directory
+
+```bash
+terraform -chdir=terraform\ init
+```
+
+Your AWS credentials need to be up to date before being able to `apply`
+
+```bash
+terraform -chdir=terraform\ apply
+```
