@@ -1,7 +1,6 @@
 import pandas
 import pyspark
 from datetime import datetime
-from pathlib import Path
 
 from listrec.databricks.matching import get_gp_registration_output_records
 from listrec.databricks.utils import format_pds_data
@@ -31,8 +30,6 @@ def test_get_gp_registration_output_records():
                 None,
                 "TW12 4DP",
                 "0",
-                "Deducted Patient Match",
-                "04/04/2021",
                 "P123",
             ),
             (
@@ -47,8 +44,6 @@ def test_get_gp_registration_output_records():
                 "London",
                 "SN1 3SE",
                 "1",
-                "Deducted Patient Match",
-                "04/04/2021",
                 "P731",
             ),
             (
@@ -63,8 +58,6 @@ def test_get_gp_registration_output_records():
                 "London",
                 "WS1 3ED",
                 "2",
-                "Unmatched",
-                "",
                 "P849",
             ),
             (
@@ -79,8 +72,6 @@ def test_get_gp_registration_output_records():
                 "London",
                 "PE1 3WS",
                 "2",
-                "Partnership Mismatch",
-                "04/04/2021",
                 "P849",
             ),
             (
@@ -95,8 +86,6 @@ def test_get_gp_registration_output_records():
                 "London",
                 "PE1 3WS",
                 "9",
-                "Partnership Mismatch",
-                "04/04/2021",
                 "P849",
             ),
         ],
@@ -112,8 +101,6 @@ def test_get_gp_registration_output_records():
             "ADDRESS_5",
             "POSTCODE",
             "SEX",
-            "STATUS",
-            "STATUS DATE",
             "PRACTICE",
         ],
     )
@@ -192,6 +179,104 @@ def test_get_gp_registration_output_records():
                 "PE1 3WS",
                 "N",
                 "Partnership Mismatch",
+                datetime.now().strftime("%d/%m/%Y"),
+            ),
+        ],
+        [
+            "SURNAME",
+            "FORENAMES",
+            "DOB",
+            "NHS NO.",
+            "ADD 1",
+            "ADD 2",
+            "ADD 3",
+            "ADD 4",
+            "ADD 5",
+            "POSTCODE",
+            "SEX",
+            "STATUS",
+            "STATUS DATE",
+        ],
+    )
+
+    pandas.testing.assert_frame_equal(
+        actual.toPandas().sort_values("NHS NO.").reset_index(drop=True),
+        expected.toPandas().sort_values("NHS NO.").reset_index(drop=True),
+    )
+
+
+def test_get_gp_registration_output_records_with_gp_practice_filter():
+
+    spark = pyspark.sql.SparkSession.builder.config(
+        "spark.driver.bindAddress", "127.0.0.1"
+    ).getOrCreate()
+
+    sex_lkp = spark.createDataFrame(
+        [["1", "M"], ["2", "F"], ["0", "I"], ["9", "N"]], ["code", "sex"]
+    )
+
+    gp = spark.createDataFrame(
+        [
+            (
+                "Pete",
+                "Sampras",
+                "2011-10-11",
+                "2316305156",
+                "31 Cray Street",
+                "Haydon",
+                "Tooting",
+                "London",
+                "London",
+                "SN1 3SE",
+                "1",
+                "P731",
+            ),
+        ],
+        [
+            "SURNAME",
+            "FORENAME",
+            "DATE_OF_BIRTH",
+            "NHS_Number",
+            "ADDRESS_1",
+            "ADDRESS_2",
+            "ADDRESS_3",
+            "ADDRESS_4",
+            "ADDRESS_5",
+            "POSTCODE",
+            "SEX",
+            "PRACTICE",
+        ],
+    )
+
+    pds = spark.createDataFrame(
+        [
+            ("6937065701", '{"code": "P123", "from": 20040506}'),
+            ("2316305156", '{"code": "", "from": 20040506}'),
+            ("2316305155", '{"code": "P980", "from": 20040506}'),
+            ("2316305150", '{"code": "P850", "from": 20040506}'),
+        ],
+        ["NHS_Number", "gp"],
+    )
+
+    pds = format_pds_data(pds)
+
+    actual = get_gp_registration_output_records(gp, pds, sex_lkp, gp_practice="P731")
+
+    expected = spark.createDataFrame(
+        [
+            (
+                "Pete",
+                "Sampras",
+                "11/10/2011",
+                "2316305156",
+                "31 Cray Street",
+                "Haydon",
+                "Tooting",
+                "London",
+                "London",
+                "SN1 3SE",
+                "M",
+                "Deducted Patient Match",
                 datetime.now().strftime("%d/%m/%Y"),
             ),
         ],

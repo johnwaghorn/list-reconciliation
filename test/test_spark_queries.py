@@ -3,6 +3,7 @@ import os
 
 import pandas
 import pyspark
+import pytest
 
 from listrec.databricks.matching import pds_gp_mismatches, get_pds_records_status
 from listrec.databricks.utils import format_pds_mock_data
@@ -11,9 +12,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 
 
-def test_pds_gp_mismatches_records_correct():
-    spark = pyspark.sql.SparkSession.builder.getOrCreate()
+spark = pyspark.sql.SparkSession.builder.config(
+    "spark.driver.bindAddress", "127.0.0.1"
+).getOrCreate()
 
+
+@pytest.fixture
+def gp_df():
     with open(os.path.join(DATA, "gdppr.csv")) as infile:
         reader = csv.reader(infile)
         header = next(reader)
@@ -24,8 +29,11 @@ def test_pds_gp_mismatches_records_correct():
             header,
         )
 
-    gp.createOrReplaceTempView("vw_gdppr")
+    return gp
 
+
+@pytest.fixture
+def pds_df():
     with open(os.path.join(DATA, "pds.csv")) as infile:
         reader = csv.reader(infile)
         header = next(reader)
@@ -37,7 +45,19 @@ def test_pds_gp_mismatches_records_correct():
     )
 
     pds = format_pds_mock_data(pds)
-    pds.createOrReplaceTempView("vw_pds")
+
+    return pds
+
+
+@pytest.fixture
+def sex_df():
+    return spark.createDataFrame([[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"])
+
+
+def test_pds_gp_mismatches_records_correct(gp_df, pds_df):
+
+    gp_df.createOrReplaceTempView("vw_gdppr")
+    pds_df.createOrReplaceTempView("vw_pds")
 
     expected = spark.createDataFrame(
         [
@@ -146,11 +166,19 @@ def test_pds_gp_mismatches_records_correct():
                 "Brian-Lee",
                 "Update PDS name with GP name",
             ),
+            (
+                "B03857",
+                "2123864726",
+                "date_of_birth",
+                "1981-11-10",
+                "19801110",
+                "Further validation required",
+            ),
         ],
         ["practice", "nhs_number", "item", "gp_value", "pds_value", "action"],
     )
 
-    actual = pds_gp_mismatches(gp, pds)
+    actual = pds_gp_mismatches(gp_df, pds_df)
 
     pandas.testing.assert_frame_equal(
         actual.toPandas().sort_values(["nhs_number", "item"]).reset_index(drop=True),
@@ -158,13 +186,7 @@ def test_pds_gp_mismatches_records_correct():
     )
 
 
-def test_get_pds_exclusive_records_correct():
-    spark = pyspark.sql.SparkSession.builder.config(
-        "spark.driver.bindAddress", "127.0.0.1"
-    ).getOrCreate()
-
-    sex_lkp = spark.createDataFrame([[1, "M"], [2, "F"], [0, "I"], [9, "N"]], ["code", "sex"])
-
+def test_get_pds_exclusive_records_correct(sex_df):
     gp = spark.createDataFrame(
         [
             ("123", "ABC"),
@@ -210,6 +232,7 @@ def test_get_pds_exclusive_records_correct():
         ],
         ["NHS_Number", "name", "date_of_birth", "address", "gender", "gp"],
     )
+
     pds = format_pds_mock_data(pds)
     expected = spark.createDataFrame(
         [
@@ -275,8 +298,126 @@ def test_get_pds_exclusive_records_correct():
             "DATE_ACCEPT.",
         ],
     )
-    actual = get_pds_records_status(gp, pds, sex_lkp)
+
+    actual = get_pds_records_status(gp, pds, sex_df)
     pandas.testing.assert_frame_equal(
         actual.toPandas().sort_values("NHS NO.").reset_index(drop=True),
         expected.toPandas().sort_values("NHS NO.").reset_index(drop=True),
+    )
+
+
+def test_get_pds_exclusive_records_with_gp_practice_filter_correct(sex_df):
+    gp = spark.createDataFrame(
+        [
+            ("123", "ABC"),
+            ("789", "DEF"),
+            ("012", None),
+        ],
+        ["NHS_Number", "practice"],
+    )
+
+    pds = spark.createDataFrame(
+        [
+            (
+                "123",
+                '{"familyName": "Jones", "givenNames": ["John"]}',
+                "20010423",
+                '{"lines": ["21 Hay Street", "Claydon", "Bury"], "postCode": "HP22 4QS"}',
+                '{"gender": 1}',
+                '{"code": "ABC", "from": 20040506}',
+            ),
+            (
+                "456",
+                '{"familyName": "Smith", "givenNames": ["Anne"]}',
+                "19990423",
+                '{"lines": ["31 Cray Street", "Haydon", "Tooting", "London", "London"], "postCode": "HP44 4QS"}',
+                '{"gender": 2}',
+                '{"code": "ABC", "from": 20040506}',
+            ),
+            (
+                "789",
+                '{"familyName": "Hogan", "givenNames": ["Joe", "Peter"]}',
+                "19980423",
+                '{"lines": ["45 Bay Street", "Haydon", "Barking", "London"], "postCode": "YO44 4QS"}',
+                '{"gender": 1}',
+                '{"code": "HIJ", "from": 20040506}',
+            ),
+            (
+                "012",
+                '{"familyName": "Bogan", "givenNames": ["Jan"]}',
+                "19970423",
+                '{"lines": ["43 Bay Street", "Haydon", "Barking", "London", "London"], "postCode": "YO44 4QS"}',
+                '{"gender": 0}',
+                '{"code": "KLM", "from": 20040506}',
+            ),
+        ],
+        ["NHS_Number", "name", "date_of_birth", "address", "gender", "gp"],
+    )
+
+    pds = format_pds_mock_data(pds)
+    expected = spark.createDataFrame(
+        [
+            (
+                "Bogan",
+                "Jan",
+                "23/04/1997",
+                "012",
+                "KLM",
+                "43 Bay Street",
+                "Haydon",
+                "Barking",
+                "London",
+                "London",
+                "YO44 4QS",
+                "I",
+                "06/05/2004",
+            ),
+        ],
+        [
+            "SURNAME",
+            "FORENAMES",
+            "DOB",
+            "NHS NO.",
+            "PRACTICE",
+            "ADD 1",
+            "ADD 2",
+            "ADD 3",
+            "ADD 4",
+            "ADD 5",
+            "POSTCODE",
+            "SEX",
+            "DATE_ACCEPT.",
+        ],
+    )
+
+    actual = get_pds_records_status(gp, pds, sex_df, gp_practice="KLM")
+    pandas.testing.assert_frame_equal(
+        actual.toPandas().sort_values("NHS NO.").reset_index(drop=True),
+        expected.toPandas().sort_values("NHS NO.").reset_index(drop=True),
+    )
+
+
+def test_pds_gp_mismatches_records_with_gp_practice_filter_correct(gp_df, pds_df):
+    gp_df.createOrReplaceTempView("vw_gdppr")
+    pds_df.createOrReplaceTempView("vw_pds")
+
+    expected = spark.createDataFrame(
+        [
+            (
+                "B03857",
+                "2123864726",
+                "date_of_birth",
+                "1981-11-10",
+                "19801110",
+                "Further validation required",
+            ),
+        ],
+        ["practice", "nhs_number", "item", "gp_value", "pds_value", "action"],
+    )
+
+    actual = pds_gp_mismatches(gp_df, pds_df, gp_practice="B03857")
+
+    pandas.testing.assert_frame_equal(
+        actual.toPandas().sort_values(["nhs_number", "item"]).reset_index(drop=True),
+        expected.toPandas().sort_values(["nhs_number", "item"]).reset_index(drop=True),
     )

@@ -3,7 +3,7 @@ import pyspark
 
 from datetime import datetime
 from pathlib import Path
-from pyspark.sql.functions import to_date, col, concat_ws, udf, lit, from_json
+from pyspark.sql.functions import to_date, col, concat_ws, udf, lit
 from pyspark.sql.types import StringType, ArrayType
 
 from listrec.databricks.comparison_utils.compare_name import (
@@ -33,7 +33,22 @@ def get_gp_registration_output_records(
     gp_data: pyspark.sql.DataFrame,
     pds_data: pyspark.sql.DataFrame,
     sex_data: pyspark.sql.DataFrame,
+    gp_practice: str = None,
 ):
+    """Create a dataframe containing PDS record mismatch details.
+
+    Args:
+        gp_data (pyspark.sql.DataFrame): GDPPR dataframe.
+        pds_data (pyspark.sql.DataFrame): PDS dataframe.
+        sex_data (pyspark.sql.DataFrame): Sex codes lookup dataframe.
+        gp_practice (str): Only process records from this GP practice.
+
+    Returns:
+        pyspark.sql.DataFrame
+    """
+
+    if gp_practice:
+        gp_data = gp_data.where(col("practice") == gp_practice)
 
     gp_data.createOrReplaceTempView("gpddr")
     pds_data.createOrReplaceTempView("pds")
@@ -109,8 +124,8 @@ def gp_pds_comparison_with_unionable_result(
     pds_col: pyspark.sql.Column,
     og_gp_col: pyspark.sql.Column,
     og_pds_col: pyspark.sql.Column,
-    item,
-    action,
+    item: str,
+    action: str,
 ):
     """Creates a result dataframe containing rows filtered by simple equality
     comparison of gp_col with pds_col, literally `gp_col != pds_col`.
@@ -217,17 +232,22 @@ def compare_gp_pds_names(
 
 
 def get_record_mismatch_summary(
-    gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame
+    gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame, gp_practice: str = None
 ) -> pyspark.sql.DataFrame:
     """Create a dataframe containing summary of record mismatches between PDS and GDPPR.
 
     Args:
         gp_df (pyspark.sql.DataFrame): GP Practice dataframe.
         pds_df (pyspark.sql.DataFrame): PDS dataframe.
+        gp_practice (str): Only process records from this GP practice.
 
     Returns:
         pyspark.sql.DataFrame
     """
+
+    if gp_practice:
+        pds_df = pds_df.where(col("gp.code") == gp_practice)
+        gp_df = gp_df.where(col("practice") == gp_practice)
 
     pds = (
         pds_df.withColumn("dob", to_date(col("date_of_birth").cast("string"), "yyyyMMdd"))
@@ -310,17 +330,22 @@ def get_record_mismatch_summary(
 
 
 def pds_gp_mismatches(
-    gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame
+    gp_df: pyspark.sql.DataFrame, pds_df: pyspark.sql.DataFrame, gp_practice: str = None
 ) -> pyspark.sql.DataFrame:
     """Generate a GP-PDS mismatches dataframe.
 
     Args:
         gp_df (pyspark.sql.DataFrame): GP Practice dataframe.
         pds_df (pyspark.sql.DataFrame): PDS dataframe.
+        gp_practice (str): Only process records from this GP practice.
 
     Returns:
         pyspark.sql.DataFrame
     """
+
+    if gp_practice:
+        pds_df = pds_df.where(col("gp.code") == gp_practice)
+        gp_df = gp_df.where(col("practice") == gp_practice)
 
     pds_df = (
         pds_df.withColumn("pds_date_of_birth", col("date_of_birth"))
@@ -452,22 +477,28 @@ def pds_gp_mismatches(
 
 
 def get_pds_records_status(
-    gp: pyspark.sql.DataFrame,
-    pds: pyspark.sql.DataFrame,
+    gp_df: pyspark.sql.DataFrame,
+    pds_df: pyspark.sql.DataFrame,
     sex_lkp: pyspark.sql.DataFrame,
+    gp_practice: str = None,
 ) -> pyspark.sql.DataFrame:
     """Create a dataframe containing PDS record mismatch details.
 
     Args:
-        gp (pyspark.sql.DataFrame): GDPPR dataframe.
-        pds (pyspark.sql.DataFrame): PDS dataframe.
+        gp_df (pyspark.sql.DataFrame): GDPPR dataframe.
+        pds_df (pyspark.sql.DataFrame): PDS dataframe.
+        gp_practice (str): Only process records from this GP practice.
         sex_lkp (pyspark.sql.DataFrame): Sex lookup dataframe.
 
     Returns:
         pyspark.sql.DataFrame
     """
-    gp.createOrReplaceTempView("gp_vw")
-    pds.createOrReplaceTempView("pds_vw")
+
+    if gp_practice:
+        pds_df = pds_df.where(col("gp.code") == gp_practice)
+
+    gp_df.createOrReplaceTempView("gp_vw")
+    pds_df.createOrReplaceTempView("pds_vw")
     sex_lkp.createOrReplaceTempView("sex_lkp_vw")
 
     df = spark.sql(
