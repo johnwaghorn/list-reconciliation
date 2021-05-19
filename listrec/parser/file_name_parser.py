@@ -7,57 +7,48 @@ class InvalidFilename(Exception):
     pass
 
 
-def validate_filenames(
-    file_group: List[str], process_datetime: datetime = None
+def validate_filename(
+    filename: str, process_datetime: datetime = None
 ) -> Tuple[datetime, str]:
-    """Validates a list of filenames and returns the file group date
+    """Validates a GP extract filename 
 
     Checks the following rules:
-        - Filenames must match expression
+        - Filename must match expression
         - File extension must match expression
-        - Dates must not exceed the current date
+        - Date must not exceed the current date
         - Date must not be older than 14 days
 
     Args:
-        file_group (List): List of filenames
+        filename (str): GP extract filename
         process_datetime (datetime): Time of processing.
 
     Returns:
-        extract_date (date): Formatted date
+        Tuple: extract date (date), HA cipher (str)
 
     Raises:
         InvalidFilename: Raised when filename doesn't match expressions/
                          Raised when invalid dates contained within filename
     """
 
-    file_group = [filename.upper() for filename in file_group]
+    filename = filename.upper()
 
-    if len({f[:-1] for f in file_group}) != 1:
-        raise InvalidFilename("All filenames must be identical up to the penultimate character")
+    valid_name = re.search(r"^GPR4([A-Z0-9]{3})1", filename)
 
-    file_ids = "".join(sorted([f[-1] for f in file_group]))
+    if not valid_name:
+        raise InvalidFilename("Filename must have the correct format")
 
-    if file_ids not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or not file_ids.startswith("A"):
-        raise InvalidFilename("File extension identifiers must be sequential, starting from 'A'")
+    valid_extension = re.search(r"([A-L][1-9A-V])[A-Z]$", filename)
 
-    valid_names = [re.search(r"^GPR4([A-Z0-9]{3})1", extract) for extract in file_group]
+    if not valid_extension:
+        raise InvalidFilename("Filename must have the correct extension format")
 
-    if not valid_names or not all(valid_names):
-        raise InvalidFilename("All filenames must have the correct format")
-
-    valid_extensions = [re.search(r"([A-L][1-9A-V])[A-Z]$", extract) for extract in file_group]
-
-    if not valid_extensions or not all(valid_extensions):
-        raise InvalidFilename("All filenames must have the correct extension format")
-
-    date_indicator = valid_extensions[0].group(1)
+    date_indicator = valid_extension.group(1)
 
     months = "ABCDEFGHIJKL"
-    days = "123456789ABCDEFGHIJKLMNOPQRSTUV"
-
     month_code = date_indicator[0]
     extract_month = months.index(month_code) + 1
 
+    days = "123456789ABCDEFGHIJKLMNOPQRSTUV"
     day_code = date_indicator[1]
     extract_day = days.index(day_code) + 1
 
@@ -83,6 +74,6 @@ def validate_filenames(
     elif days_difference > 14:
         raise InvalidFilename("File date must not be older than 14 days")
 
-    ha_cipher = file_group[0][4:7]
+    ha_cipher = filename[4:7]
 
     return extract_date, ha_cipher

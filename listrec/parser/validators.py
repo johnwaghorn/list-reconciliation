@@ -185,6 +185,7 @@ def transaction_datetime(
     else:
         try:
             transaction_datetime_val = datetime.strptime(transaction_datetime_val, "%Y%m%d%H%M")
+            
         except ValueError:
             invalid_reason = INVALID_TRANS_DATETIME
         else:
@@ -192,6 +193,8 @@ def transaction_datetime(
                 transaction_datetime_val < process_datetime - timedelta(days=14)
             ) or transaction_datetime_val > process_datetime:
                 invalid_reason = INVALID_TRANS_DATETIME
+
+            transaction_datetime_val = str(transaction_datetime_val)
 
     return transaction_datetime_val, invalid_reason
 
@@ -355,6 +358,7 @@ def date_of_birth(date_of_birth_val: str, **kwargs) -> ValidatedRecord:
             date_of_birth_val = datetime.strptime(date_of_birth_val, "%Y%m%d").date()
             if date_of_birth_val > datetime.now().date():
                 invalid_reason = INVALID_DATE_OF_BIRTH
+            date_of_birth_val = str(date_of_birth_val)
 
     return date_of_birth_val, invalid_reason
 

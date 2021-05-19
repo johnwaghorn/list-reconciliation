@@ -15,7 +15,7 @@ def main():
     )
 
     parser.add_argument(
-        "files", nargs="+", type=str, help="List of GP extract files to be processed"
+        "files", type=str, help="List of GP extract files to be processed"
     )
 
     parser.add_argument(

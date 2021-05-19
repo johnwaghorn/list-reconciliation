@@ -1,13 +1,15 @@
 import csv
 import logging
 import os
+import boto3
+import json
 
-from collections import Counter
-from datetime import date, datetime
 from pathlib import Path
+from datetime import date, datetime
+from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
-from listrec.parser.file_name_parser import validate_filenames
+from listrec.parser.file_name_parser import validate_filename
 from listrec.parser.utils import pairs
 from listrec.parser.validators import (
     VALIDATORS,
@@ -38,10 +40,11 @@ from listrec.parser.validators import (
 )
 
 LOG = logging.getLogger("listrec")
+LOG.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 Columns = Iterable[str]
 FileGroup = Iterable[str]
-FilePathGroup = Iterable[Path]
 Record = Dict[str, Union[str, date, int, float, dict]]
 Records = List[Record]
 Row = List[str]
@@ -50,9 +53,8 @@ RowColumns = Tuple[List[str], List[str]]
 
 __all__ = [
     "InvalidGPExtract",
-    "parse_gp_extract_file_group",
+    "parse_gp_extract_file",
     "parse_gp_extract_text",
-    "FilePathGroup",
     "Records",
     "INVALID",
 ]
@@ -61,6 +63,10 @@ SEP = "~"
 RECORD_TYPE = "DOW"
 RECORD_1 = "1"
 RECORD_2 = "2"
+
+INBOUND_PREFIX = "inbound/"
+PASSED_PREFIX = "passed/"
+FAILED_PREFIX = "failed/"
 
 
 class InvalidGPExtract(Exception):
@@ -126,10 +132,14 @@ def _parse_row_pair(row_pair: RowPair) -> Row:
     row_1, row_2 = row_pair
     row_1 = row_pair[0].split(SEP)
     row_2 = row_pair[1].split(SEP)
-    assert row_1[0] == RECORD_TYPE, f"Row part 1 must start with '{RECORD_TYPE}'"
-    assert row_1[1] == RECORD_1, f"Row part 1 must be identified with '{RECORD_1}'"
-    assert row_2[0] == RECORD_TYPE, f"Row part 2 must start with '{RECORD_TYPE}'"
-    assert row_2[1] == RECORD_2, f"Row part 2 must be identified with '{RECORD_2}'"
+
+    assert (
+        row_1[0] == RECORD_TYPE and row_1[1] == RECORD_1
+    ), f"Row 1 for all records must start with '{RECORD_TYPE}~{RECORD_1}'"
+
+    assert (
+        row_2[0] == RECORD_TYPE and row_2[1] == RECORD_2
+    ), f"Row 2 for all records must start with '{RECORD_TYPE}~{RECORD_2}'"
 
     trans_datetime = row_1[4] + row_1.pop(5)
     row_1[4] = trans_datetime
@@ -160,7 +170,9 @@ def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
     assert len(columns) == len(row), "Columns and row must be the same length"
 
     row_cols = list(zip(columns, row))
+
     _validate_columns(row_cols)
+
     record = dict(row_cols)
     record.pop("", None)
 
@@ -169,7 +181,6 @@ def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
 
 def parse_gp_extract_text(
     gp_extract_text: str,
-    first: bool = True,
     process_datetime: datetime = None,
     gp_ha_cipher: str = None,
 ) -> Records:
@@ -179,9 +190,6 @@ def parse_gp_extract_text(
 
     Args:
         gp_extract_text (str): The raw string from GP extract.
-
-        first (bool): This is the first (or only) set of contents from a GP
-            extract file. Setting this flag expects to see the 503 header.
 
         process_datetime (datetime): Time of processing.
 
@@ -195,11 +203,9 @@ def parse_gp_extract_text(
     """
 
     raw_text = [r.strip() for r in gp_extract_text.split("\n") if r]
-    if first:
-        assert raw_text[0] == "503\\*", "Header must contain 503\\*"
-        start_idx = 1
-    else:
-        start_idx = 0
+
+    assert raw_text[0] == "503\\*", "Header must contain 503\\*"
+    start_idx = 1
 
     # Skip column names record if it exists
     if NHS_NUMBER_COL in raw_text[start_idx]:
@@ -260,18 +266,16 @@ def parse_gp_extract_text(
     return validated_records
 
 
-def parse_gp_extract_file_group(
-    filepath_group: FilePathGroup, process_datetime: datetime = None
-) -> Records:
-    """Convert GP extract files into records with fieldnames.
+def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> Records:
+    """Convert a GP extract file into records with fieldnames.
 
     Expects unformatted word documents containing GP extract records.
 
-    >>> parse_gp_extract_file_group(('path/to/GPR4LA01.CSA', 'path/to/GPR4LA01.CSA'))  # doctest: +SKIP
+    >>> parse_gp_extract_file('path/to/GPR4LA01.CSA')  # doctest: +SKIP
     [{'RECORD_TYPE': 'DOW', ...}, ...]
 
     Args:
-        file_group (FilePathGroup): One or more file paths to GP extracts
+        filepath (Path): A file paths to the GP extract
             considered to be part of the same extract group.
         gp_ha_cipher (str): GP HA cipher for checking matching patient ciphers.
         process_datetime (datetime): Time of processing.
@@ -285,31 +289,25 @@ def parse_gp_extract_file_group(
     """
 
     # Check files exist and are readable
+
     try:
-        for f in filepath_group:
-            with open(f):
-                pass
+        with open(filepath):
+            pass
     except FileNotFoundError as err:
         raise InvalidGPExtract(str(err).replace("[Errno 2]", "").strip())
 
     results = []
-    extract_date, gp_ha_cipher = validate_filenames(
-        [os.path.basename(f) for f in filepath_group], process_datetime
-    )
+    extract_date, gp_ha_cipher = validate_filename(os.path.basename(filepath), process_datetime)
+
     LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
 
-    first = True
-    for path in sorted(filepath_group, key=lambda x: x.upper()):
-        results.extend(
-            parse_gp_extract_text(
-                open(path, "r").read(),
-                first=first,
-                process_datetime=process_datetime or datetime.now(),
-                gp_ha_cipher=gp_ha_cipher,
-            )
+    results.extend(
+        parse_gp_extract_text(
+            open(filepath, "r").read(),
+            process_datetime=process_datetime or datetime.now(),
+            gp_ha_cipher=gp_ha_cipher,
         )
-
-        first = False
+    )
 
     return results
 
@@ -328,9 +326,10 @@ def process_invalid_records(records: Records, include_reason: bool = False) -> T
         Tuple[Dict, Records]: First item is a dict of {columns: invalid counts},
             second item is a records item, containing only invalid records.
     """
-
     count = Counter()
+
     out_records = []
+
     for record in records:
         invalids = record.get(INVALID, {})
         for col in record.keys():
@@ -427,7 +426,7 @@ def output_records(
 
 
 def process_gp_extract(
-    files: FileGroup,
+    file_path: Path,
     out_dir: Path,
     include_reason: bool,
     invalid_threshold: int,
@@ -436,8 +435,8 @@ def process_gp_extract(
     """Create CSV files containing invalids summary and invalid records with reasons.
 
     Args:
-        files (FileGroup): One or more file paths to GP extracts
-            considered to be part of the same extract group.
+        file_path (Path): One file path to a GP extract considered to be part of
+            the same extract group.
         out_dir (Path): Output folder.
         include_reason (bool): If true, include a verbose description of
             invalid determination. (default: {False})
@@ -446,6 +445,126 @@ def process_gp_extract(
         process_datetime (datetime): Time of processing.
     """
 
-    file_paths = [os.path.abspath(f) for f in files]
-    records = parse_gp_extract_file_group(file_paths, process_datetime)
+    records = parse_gp_extract_file(file_path, process_datetime)
     output_records(records, out_dir, include_reason, invalid_threshold)
+
+
+def parse_gp_extract_file_s3(
+    access_key: str,
+    secret_key: str,
+    session_token: str,
+    bucket_name: str,
+    file_key: Path,
+    process_datetime: datetime = None,
+):
+    """Convert a GP extract file into records with fieldnames.
+
+    Args:
+        access_key (str): aws access key
+        secret_key (str): aws secret key
+        bucket_name (str): s3 bucket name
+        file_key (Path): A path to the s3 file key object
+        process_datetime (datetime): Time of processing.
+
+    Returns:
+        Records: List of records: [{record1: ...}, {record2: ...}, ...]
+    """
+
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token,
+    )
+
+    extract_date, gp_ha_cipher = validate_filename(
+        file_key.replace(INBOUND_PREFIX, ""), process_datetime
+    )
+
+    LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
+
+    file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+
+    file_data = file_obj["Body"].read()
+
+    results = []
+
+    results.extend(
+        parse_gp_extract_text(
+            file_data.decode("utf-8"),
+            process_datetime=process_datetime or datetime.now(),
+            gp_ha_cipher=gp_ha_cipher,
+        )
+    )
+
+    return results
+
+
+def handle_invalid_extract(
+    access_key: str,
+    secret_key: str,
+    session_token: str,
+    bucket_name: str,
+    file_key: str,
+    message: str,
+):
+    """Handle an invalid GP extract file. Moves invalid file from
+        inbound/ -> failed/, and creates log file containing errors.
+
+    Args:
+        access_key (str): aws access key
+        secret_key (str): aws secret key
+        bucket_name (str): s3 bucket name
+        file_key (Path): A path to the s3 file key object
+        message (str): Message to write to log file.
+    """
+
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token,
+    )
+
+    upload_filename = file_key.replace(INBOUND_PREFIX, "")
+
+    failed_key = FAILED_PREFIX + upload_filename
+
+    s3_client.copy_object(
+        Bucket=bucket_name, Key=failed_key, CopySource={"Bucket": bucket_name, "Key": file_key}
+    )
+
+    s3_client.delete_object(Bucket=bucket_name, Key=file_key)
+
+    log_filename = upload_filename + "_LOG.txt"
+
+    log_key = FAILED_PREFIX + log_filename
+
+    s3_client.put_object(Body=message, Bucket=bucket_name, Key=log_key)
+
+
+def process_invalid_message(exception: Exception) -> str:
+    """Create a formatted error message string based on raised
+        exception
+
+    Args:
+        exception (Exception): exception raised
+
+    Returns:
+        str: Error message as formatted string.
+    """
+
+    if isinstance(exception, AssertionError):
+        msg = "DOW file content structure is invalid:\n" + str(exception)
+
+    elif isinstance(exception, InvalidGPExtract):
+        msg = "DOW file contains invalid records:\n"
+
+        invalids = json.loads(str(exception))
+
+        for i in invalids:
+            msg += str(i) + "\n"
+    else:
+        msg = "DOW file is invalid:\n" + str(exception)
+
+    return msg

@@ -157,12 +157,12 @@ def test_sex_validator_return_values(val, expected):
 @pytest.mark.parametrize(
     "val,expected",
     (
-        ("20120105", (datetime(2012, 1, 5).date(), None)),
+        ("20120105", ("2012-01-05", None)),
         ("", (None, None)),
         (None, (None, None)),
         ("2012015", ("2012015", v.INVALID_DATE_OF_BIRTH)),
         ("25", ("25", v.INVALID_DATE_OF_BIRTH)),
-        ("21500105", (datetime(2150, 1, 5).date(), v.INVALID_DATE_OF_BIRTH)),
+        ("21500105", ("2150-01-05", v.INVALID_DATE_OF_BIRTH)),
         (" ", (" ", v.INVALID_DATE_OF_BIRTH)),
         (1, (1, v.INVALID_DATE_OF_BIRTH)),
     ),
@@ -313,12 +313,12 @@ def test_residential_institute_code_validator_return_values(val, expected):
         (
             "201206060101",
             datetime(2012, 6, 20, 1, 1),
-            (datetime(2012, 6, 6, 1, 1), None),
+            ("2012-06-06 01:01:00", None),
         ),
         (
             "201206060101",
             datetime(2012, 6, 20, 1, 1, 1),
-            (datetime(2012, 6, 6, 1, 1), v.INVALID_TRANS_DATETIME),
+            ("2012-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
         (
             "2012060601",
@@ -333,7 +333,7 @@ def test_residential_institute_code_validator_return_values(val, expected):
         (
             "201306060101",
             datetime(2012, 6, 20, 1, 1, 1),
-            (datetime(2013, 6, 6, 1, 1), v.INVALID_TRANS_DATETIME),
+            ("2013-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
     ),
 )
