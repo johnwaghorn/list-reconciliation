@@ -40,8 +40,11 @@ jobs:
       run: |
         pytest
     - name: Test with gauge
+      env:
+        AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
+        AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
       run: |
         curl -SsL https://downloads.gauge.org/stable | sh
         gauge install python
         cd test/integrationtests
-        gauge run specs
+        gauge run --tags "!wip" specs
