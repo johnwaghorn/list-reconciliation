@@ -2,8 +2,8 @@ import argparse
 import datetime
 import logging
 
-from listrec.parser.parser import process_gp_extract, LOG, InvalidGPExtract
-from listrec.parser.file_name_parser import InvalidFilename
+from gp_file_parser.parser import process_gp_extract, LOG, InvalidGPExtract
+from gp_file_parser.file_name_parser import InvalidFilename
 
 
 def main():
@@ -14,9 +14,7 @@ def main():
         help="Output directory, will contain the files 'records.csv' and 'invalid_counts.csv",
     )
 
-    parser.add_argument(
-        "files", type=str, help="List of GP extract files to be processed"
-    )
+    parser.add_argument("files", type=str, help="List of GP extract files to be processed")
 
     parser.add_argument(
         "-t",

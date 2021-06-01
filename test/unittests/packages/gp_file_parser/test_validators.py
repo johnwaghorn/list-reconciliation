@@ -1,8 +1,8 @@
 from datetime import datetime
 import pytest
 
-from listrec.parser import validators as v
-from listrec.parser.parser import _validate_record
+from gp_file_parser import validators as v
+from gp_file_parser.parser import _validate_record
 
 
 @pytest.mark.parametrize(

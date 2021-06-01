@@ -9,9 +9,9 @@ from datetime import date, datetime
 from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
-from listrec.parser.file_name_parser import validate_filename
-from listrec.parser.utils import pairs
-from listrec.parser.validators import (
+from gp_file_parser.file_name_parser import validate_filename
+from gp_file_parser.utils import pairs
+from gp_file_parser.validators import (
     VALIDATORS,
     INVALID,
     RECORD_TYPE_COL,

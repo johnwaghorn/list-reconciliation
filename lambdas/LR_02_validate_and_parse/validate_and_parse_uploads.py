@@ -7,8 +7,8 @@ import os
 from botocore.exceptions import ClientError
 from datetime import datetime
 
-from listrec.parser.file_name_parser import InvalidFilename
-from listrec.parser.parser import (
+from gp_file_parser.file_name_parser import InvalidFilename
+from gp_file_parser.parser import (
     InvalidGPExtract,
     parse_gp_extract_file_s3,
     handle_invalid_extract,
@@ -25,7 +25,7 @@ SESSION_TOKEN = os.environ.get("AWS_SESSION_TOKEN")
 REGISTRATION_EXTRACT_BUCKET = os.environ.get("AWS_S3_REGISTRATION_EXTRACT_BUCKET")
 
 
-def lambda_handler(event, context):
+def validate_and_parse_uploads(event, context):
     """Handler to process and validate an uploaded S3 object containing a GP flat
     file extract
 

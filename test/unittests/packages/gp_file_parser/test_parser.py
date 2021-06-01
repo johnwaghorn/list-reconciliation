@@ -3,7 +3,7 @@ import os
 import pytest
 from freezegun import freeze_time
 
-from listrec.parser.parser import (
+from gp_file_parser.parser import (
     parse_gp_extract_text,
     parse_gp_extract_file,
     _validate_columns,
@@ -31,7 +31,7 @@ def test_parse_gp_extract_text_parses_correctly():
             "RECORD_TYPE": "DOW",
             "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
-            "DATE_OF_DOWNLOAD": "2020-04-06 13:40:00", 
+            "DATE_OF_DOWNLOAD": "2020-04-06 13:40:00",
             "TRANS_ID": 1557490,
             "NHS_NUMBER": "1234567890",
             "SURNAME": "SOMEBODY",
@@ -407,7 +407,7 @@ def test_parse_gp_extract_file_parses_correctly():
             "BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER": None,
             "WALKING_UNITS": None,
             "RESIDENTIAL_INSTITUTE_CODE": None,
-        }
+        },
     ]
 
     actual = parse_gp_extract_file(

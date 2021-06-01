@@ -9,9 +9,13 @@ setup(
     description="List Reconciliation",
     author="Answer Digital",
     license="",
-    packages=find_packages(),
+    packages=find_packages(where="./packages"),
+    package_dir={"": "packages"},
     install_requires=dependencies,
     entry_points={
-        "console_scripts": ["gpextract = listrec.main:main", "mock_data = listrec.mock_data:main"]
+        "console_scripts": [
+            "gpextract = gp_file_parser.main:main",
+            "mock_data = listrec.mock_data:main",
+        ]
     },
 )

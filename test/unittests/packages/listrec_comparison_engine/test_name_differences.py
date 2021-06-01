@@ -1,4 +1,4 @@
-from listrec.databricks.comparison_utils.compare_name import (
+from listrec_comparison_engine.comparison_rules.compare_name import (
     compare_patient_name,
     ACTION_UPDATE_PDS,
     ACTION_UPDATE_GP,

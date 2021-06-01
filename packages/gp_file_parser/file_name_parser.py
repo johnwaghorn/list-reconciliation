@@ -1,16 +1,14 @@
 import re
 from datetime import datetime
-from typing import List, Tuple
+from typing import Tuple
 
 
 class InvalidFilename(Exception):
     pass
 
 
-def validate_filename(
-    filename: str, process_datetime: datetime = None
-) -> Tuple[datetime, str]:
-    """Validates a GP extract filename 
+def validate_filename(filename: str, process_datetime: datetime = None) -> Tuple[datetime, str]:
+    """Validates a GP extract filename
 
     Checks the following rules:
         - Filename must match expression
@@ -64,7 +62,7 @@ def validate_filename(
     else:
         try:
             extract_date = datetime(date_now.year, extract_month, extract_day)
-        except:
+        except Exception:
             raise ValueError("The date within the filename is not a valid date")
 
     days_difference = (date_now.date() - extract_date.date()).days

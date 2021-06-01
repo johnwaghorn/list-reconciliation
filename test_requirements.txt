@@ -3,4 +3,6 @@ pytest
 pytest-cov
 freezegun
 getgauge
-requests
+moto
+pytest-env
+docker

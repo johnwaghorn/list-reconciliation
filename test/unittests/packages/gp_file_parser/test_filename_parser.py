@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from freezegun import freeze_time
 
-from listrec.parser.file_name_parser import (
+from gp_file_parser.file_name_parser import (
     InvalidFilename,
     validate_filename,
 )

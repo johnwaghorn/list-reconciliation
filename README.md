@@ -35,25 +35,46 @@ pip install .
 ```
 
 
-## Databricks libraries
-Setup secrets for accessing S3 bucket
+# Comparison engine
 
-```bash
-databricks secrets put --scope aws --key aws_public_key
-databricks secrets put --scope aws --key aws_private_key
-```
+The core comparison engine provides a lightweight framework for defining representations of records and one or more comparison functions to apply to the records to produce a result. The left and right records, and comparison functions are defined in a regular python module, while usage of the framework allows the objects to be collected and handled using introspection at runtime.
 
-Build and upload python egg to cluster
 
-```bash
-python setup.py bdist_egg
-```
+## LeftRecord and RightRecord
 
-Once the egg has been created it must be uploaded to Databricks as a [library](https://docs.databricks.com/libraries/index.html) which can then be imported as normal.
+These two special classes must be subclassed exactly once, each one representing a record to be compared to the other. Like other ORMs, columns are defined as class attributes. This is the only point at which the user references the real column names as found in the dictionary representing the record. Once defined, columns are referred to by the attribute name within square brackets.
 
 ```python
-from listrec.utils import save_to_s3_csv
-...
+from datetime import datetime
+from comparison_engine.schema import LeftRecord, RightRecord, IntegerColumn, StringColumn, DateTimeColumn
+
+
+class GPRecord(LeftRecord):
+    ID = IntegerColumn("id", primary_key=True)
+    DATE_OF_BIRTH = DateTimeColumn(
+        "date_of_birth", format=lambda x: datetime.strptime(str(x), "%Y-%m-%d")
+    )
+    NAME = StringColumn(["name1", "name2"], format=lambda x: " ".join(x).strip())
+    SURNAME = StringColumn("surname")
+
+
+class PDSRecord(RightRecord):
+    ID = IntegerColumn("id", primary_key=True)
+    DATE_OF_BIRTH = DateTimeColumn("dob", format=lambda x: datetime.strptime(str(x), "%Y%m%d"))
+    NAME = StringColumn("forename")
+    SURNAME = StringColumn("surname")
+```
+
+## Comparison functions
+
+These functions are defined by the user. There must be exactly 2 arguments, `left` and `right`, and within the function the user sets out the logic to compare both sides, referencing the previously defined class attributes as the column names. Any comparison functions must be decorated with the `comparison` decorator for the function to be applied to the record pair. The `comparison` decorator must have a unique ID as an argument. The comparison function must return a boolean; `True` if the result of the comparison indicates that the record needs further action (i.e. the values are not equal); `False` if the values are equal and no further action is needed.
+
+```python
+from comparison_engine.core import comparison
+
+@comparison('ABC123')
+def date_of_birth_not_equal(left: LeftRecord, right: RightRecord):
+    return left["DATE_OF_BIRTH"] != right["DATE_OF_BIRTH"]
 ```
 
 
