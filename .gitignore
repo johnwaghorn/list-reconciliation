@@ -5,7 +5,15 @@
 *.zip
 openapi.tpl
 *.pem
-
+output.json
+plan.out
+plan.out.json
+.python-version
+.terraform.lock.hcl
+.coverage
+.DS_Store
+lambda_layer/
+__MACOSX
 ### direnv ###
 .direnv
 .envrc
