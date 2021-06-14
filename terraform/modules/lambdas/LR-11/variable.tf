@@ -6,12 +6,11 @@ variable "package_layer_arn" {
   type = string
 }
 
-variable "patient_sqs" {
+variable "lambda_name" {
   type = string
-  default = "Patient_Records.fifo"
 }
 
-variable "lambda_name" {
+variable "registrations_output_bucket" {
   type = string
 }
 
@@ -19,11 +18,15 @@ variable "demographics_table_arn" {
   type = string
 }
 
-variable "errors_table_arn" {
+variable "jobs_table_arn" {
   type = string
 }
 
-variable "demographicsdifferences_table_arn" {
+variable "job_stats_table_arn" {
+  type = string
+}
+
+variable "errors_table_arn" {
   type = string
 }
 
@@ -31,10 +34,14 @@ variable "demographics_table_name" {
   type = string
 }
 
-variable "errors_table_name" {
+variable "jobs_table_name" {
   type = string
 }
 
-variable "demographicsdifferences_table_name" {
+variable "job_stats_table_name" {
+  type = string
+}
+
+variable "errors_table_name" {
   type = string
 }

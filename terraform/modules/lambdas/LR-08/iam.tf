@@ -51,6 +51,37 @@ resource "aws_iam_policy" "policy" {
                  "lambda:InvokeFunction"
             ],
             "Resource":"arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:DescribeTable",
+            "Resource": [
+                "${var.demographics_table_arn}",
+                "${var.demographicsdifferences_table_arn}",
+                "${var.errors_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:GetItem",
+            "Resource": [
+                "${var.demographics_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:UpdateItem",
+            "Resource": [
+                "${var.demographics_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:PutItem",
+            "Resource": [
+                "${var.demographicsdifferences_table_arn}",
+                "${var.errors_table_arn}"
+            ]
         }
     ]
     }

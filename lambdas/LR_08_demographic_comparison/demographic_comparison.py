@@ -1,10 +1,28 @@
 from uuid import uuid4
 from typing import Dict
 
+import json
+
 from comparison_engine.core import compare_records
-from utils.logger import LOG, success
+from utils.logger import LOG, success, log_dynamodb_error, UNHANDLED_ERROR
 from listrec_comparison_engine import listrec_comparisons
 from utils.models import DemographicsDifferences, Demographics
+
+
+def lambda_handler(event, context):
+    from demographic_comparison import demographic_comparisons
+
+    job_id = str(event["job_id"])
+    patient_id = str(event["patient_id"])
+
+    try:
+        return json.dumps(demographic_comparisons(job_id, patient_id))
+
+    except Exception as err:
+        msg = f"Unhandled error patient_id: {patient_id}"
+        error_response = log_dynamodb_error(job_id, UNHANDLED_ERROR, msg)
+
+        raise type(err)(error_response) from err
 
 
 def demographic_comparisons(job_id: str, patient_id: str) -> Dict[str, str]:
@@ -37,7 +55,10 @@ def demographic_comparisons(job_id: str, patient_id: str) -> Dict[str, str]:
             pds_record[col] = val
 
     if gp_record["GP_GpCode"] != pds_record["PDS_GpCode"]:
-        msg = f"GP Codes for job_id: {job_id} patient_id: {patient_id} do not match (GP: {gp_record['GP_GpCode']}, PDS: {pds_record['PDS_GpCode']})"
+        msg = (
+            f"GP Codes for job_id: {job_id} patient_id: {patient_id} do not "
+            f"match (GP: {gp_record['GP_GpCode']}, PDS: {pds_record['PDS_GpCode']})"
+        )
         LOG.info(msg)
 
         return {"status": "success", "message": msg}

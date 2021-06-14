@@ -1,12 +1,12 @@
-from utils.models import Errors, Jobs
-
-from datetime import datetime
 from typing import Dict
 from uuid import uuid4
 
 import logging
 import sys
 import traceback
+
+from utils.models import Errors, Jobs
+from utils.datetimezone import get_datetime_now
 
 VALIDATION_ERROR = "VALIDATION_ERROR"
 UNHANDLED_ERROR = "UNHANDLED_ERROR"
@@ -43,7 +43,7 @@ def log_dynamodb_error(job_id: str, name: str, msg: str) -> Dict:
             Name=name,
             Description=msg,
             Traceback=tb,
-            Timestamp=str(datetime.now()),
+            Timestamp=get_datetime_now(),
         )
         item.save()
 

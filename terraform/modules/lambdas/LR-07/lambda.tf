@@ -11,7 +11,7 @@ data "archive_file" "lambda_zip"{
 resource "aws_lambda_function" "Lambda" {
   function_name     = "${var.lambda_name}-${terraform.workspace}"
   filename          = data.archive_file.lambda_zip.output_path
-  handler           = "main.lambda_handler"
+  handler           = "pds_hydrate.lambda_handler"
   role              = aws_iam_role.role.arn
   runtime           = var.runtime
   timeout           = local.lambda_timeout
@@ -20,9 +20,10 @@ resource "aws_lambda_function" "Lambda" {
 
   environment {
     variables = {
+      DEMOGRAPHICS_TABLE            = var.demographics_table_name
+      ERRORS_TABLE                  = var.errors_table_name
       DEMOGRAPHIC_COMPARISON_LAMBDA = var.lr_08_lambda
       PDS_API_URL                   = var.pds_url
     }
   }
 }
-

@@ -1,11 +1,10 @@
-locals {
-  patient_sqs_queue = "arn:aws:sqs:::${var.patient_sqs}"
-}
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
 
 resource "aws_iam_role" "role" {
   name = "iam-role-${var.lambda_name}-${terraform.workspace}"
   description = "Execution Role for ${var.lambda_name} Lambda."
-
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -22,15 +21,14 @@ resource "aws_iam_role" "role" {
 EOF
 
   tags = {
-    name = "Lambda role for ${var.lambda_name} - ${terraform.workspace}"
+    name = "Lambda role for LR-11-${terraform.workspace}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
   name = "iam-policy-${var.lambda_name}-${terraform.workspace}"
-  description = "Policy for LR-07 ${var.lambda_name} Lambda Role."
-
-  policy = <<-EOF
+  description = "Policy for LR-11-${terraform.workspace} Lambda Role."
+  policy = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -46,49 +44,52 @@ resource "aws_iam_policy" "policy" {
         {
             "Effect": "Allow",
             "Action": [
-                 "sqs:ChangeMessageVisibility",
-                 "sqs:DeleteMessage",
-                 "sqs:GetQueueAttributes",
-                 "sqs:ReceiveMessage"
+                "s3:PutObject",
+                "s3:DeleteObject"
             ],
-            "Resource":"${var.patient_sqs_arn}"
+            "Resource": "${var.registrations_output_bucket}/*"
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.demographics_table_arn}",
+                "${var.jobs_table_arn}",
                 "${var.errors_table_arn}"
             ]
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:GetItem",
+            "Action": "dynamodb:Query",
             "Resource": [
-                "${var.demographics_table_arn}"
+                "${var.demographics_table_arn}",
+                "${var.demographics_table_arn}/index/*",
+                "${var.jobs_table_arn}",
+                "${var.errors_table_arn}",
+                "${var.jobs_table_arn}/index/*"
             ]
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:UpdateItem",
             "Resource": [
-                "${var.demographics_table_arn}"
+                "${var.job_stats_table_arn}"
             ]
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
+                "${var.job_stats_table_arn}",
                 "${var.errors_table_arn}"
             ]
         }
     ]
-  }
-  EOF
+    }
+EOF
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment" {
   role = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }
-

@@ -6,6 +6,13 @@ locals {
       projection_type = "ALL"
     }
   ]
+  demographics_gsi = [
+    {
+      name = "JobId-index",
+      hash_key = "JobId"
+      projection_type = "ALL"
+    }
+  ]
 }
 
 module "Jobs_Table" {
@@ -40,7 +47,7 @@ module "Demographics_Table" {
   table_name      = "Demographics-${terraform.workspace}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
-  secondary_index = []
+  secondary_index = local.demographics_gsi
   attributes      = var.demographic_attribute
 }
 

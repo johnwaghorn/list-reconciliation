@@ -32,3 +32,19 @@ variable "lambda_name" {
 variable "lr_08_lambda" {
   type = string
 }
+
+variable "demographics_table_arn" {
+  type = string
+}
+
+variable "errors_table_arn" {
+  type = string
+}
+
+variable "demographics_table_name" {
+  type = string
+}
+
+variable "errors_table_name" {
+  type = string
+}

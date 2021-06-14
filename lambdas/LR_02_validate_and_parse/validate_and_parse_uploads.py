@@ -1,6 +1,4 @@
 import boto3
-import csv
-import io
 import json
 import os
 
@@ -17,6 +15,7 @@ from gp_file_parser.parser import (
     PASSED_PREFIX,
     LOG,
 )
+from utils import write_to_mem_csv
 
 ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
 SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -91,12 +90,7 @@ def validate_and_parse_uploads(event, context):
         LOG.info(f"{upload_filename} results collected, parsing {len(results)} records")
 
         try:
-            headers = list(results[0].keys())
-
-            stream = io.StringIO()
-            writer = csv.DictWriter(stream, fieldnames=headers)
-            writer.writeheader()
-            writer.writerows(results)
+            stream = write_to_mem_csv(results, list(results[0].keys()))
 
             csv_results_string = stream.getvalue()
 

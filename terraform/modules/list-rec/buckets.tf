@@ -5,12 +5,22 @@ variable "s3_folders" {
 }
 
 resource "aws_s3_bucket" "LR-01" {
-  bucket="lr-01-${terraform.workspace}"
+  bucket= "lr-01-${terraform.workspace}"
   acl = "private"
   force_destroy = true
 
   tags={
-    Name="S3 Input Bucket for LR-02 - ${terraform.workspace}"
+    Name = "S3 Input Bucket for LR-02 - ${terraform.workspace}"
+  }
+}
+
+resource "aws_s3_bucket" "LR-13" {
+  bucket = "lr-13-registration-differences-output-${terraform.workspace}"
+  acl = "private"
+  force_destroy = true
+
+  tags={
+    Name = "Output file storage for LR-11 LR12 and LR14"
   }
 }
 

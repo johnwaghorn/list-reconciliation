@@ -5,7 +5,7 @@ locals {
 resource "aws_iam_role" "role" {
   name                = "iam-role-${var.lambda_name}-${terraform.workspace}"
   description         = "Execution Role for ${var.lambda_name} Lambda."
-  assume_role_policy  = <<EOF
+  assume_role_policy  = <<-EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -29,7 +29,7 @@ resource "aws_iam_policy" "policy" {
   name        = "iam-policy-${var.lambda_name}-${terraform.workspace}"
   description = "Policy for LR-02 ${var.lambda_name} Lambda Role."
 
-  policy      = <<-EOF
+  policy      = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [

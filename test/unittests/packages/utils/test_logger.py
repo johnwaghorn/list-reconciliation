@@ -1,3 +1,6 @@
+from datetime import datetime
+from pytz import timezone
+
 from moto import mock_dynamodb2
 
 import pytest
@@ -16,7 +19,13 @@ def create_dynamodb_tables():
 
 @pytest.fixture
 def job_record(create_dynamodb_tables):
-    obj = Jobs("1", PracticeCode="ABC", Filename="test.csv", StatusId="1", Timestamp="20210527")
+    obj = Jobs(
+        "1",
+        PracticeCode="ABC",
+        FileName="test.csv",
+        StatusId="1",
+        Timestamp=datetime(2021, 4, 1, tzinfo=timezone("Europe/London")),
+    )
     obj.save()
     yield
 

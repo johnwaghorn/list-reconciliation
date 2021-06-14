@@ -40,19 +40,17 @@ def get_mock_pds_record(url: str, nhs_number: str, *args, **kwargs) -> Dict:
     for row in reader:
         if row["nhs_number"] == nhs_number:
             return {
-                "surname": row["surname"],
-                "forenames": row["forename"].split(","),
-                "title": row["prefix"].split(","),
-                "gender": row["gender"],
-                "date_of_birth": row["birthdate"],
-                "address": row["address"].split(","),
-                "postcode": row["postcode"],
-                "gp_code": row["gp"],
-                "gp_registered_date": row["gp_registered_date"],
-                "is_sensitive": row["display"] in ("restricted", "sensitive"),
+                "surname": row["surname"] or None,
+                "forenames": row["forename"].split(",") or None,
+                "title": row["prefix"].split(",") or None,
+                "gender": row["gender"] or None,
+                "date_of_birth": row["birthdate"] or None,
+                "address": row["address"].split(",") or None,
+                "postcode": row["postcode"] or None,
+                "gp_code": row["gp"] or None,
+                "gp_registered_date": row["gp_registered_date"] or None,
+                "is_sensitive": row["code"] in ("R", "V", "REDACTED"),
             }
-    else:
-        raise PDSAPIError(f"NHS number {nhs_number} does not exist in mock data")
 
 
 def get_pds_fhir_record(
@@ -76,7 +74,18 @@ def get_pds_fhir_record(
     session.mount("https://", HTTPAdapter(max_retries=retries))
 
     response = session.get(f"{url}/Patient/{nhs_number}")
-    response.raise_for_status()
+
+    try:
+        response.raise_for_status()
+
+    except requests.HTTPError as err:
+        details = json.loads(err.response.content)["issue"][0]["details"]["coding"][0]
+        if details["code"] == "RESOURCE_NOT_FOUND":
+            return
+        else:
+            error = PDSAPIError()
+            error.details = details
+            raise error
 
     content = json.loads(response.content)
 
@@ -90,7 +99,7 @@ def get_pds_fhir_record(
         "postcode": content["address"][0]["postalCode"],
         "gp_code": content["generalPractitioner"][0]["identifier"]["value"],
         "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"]["start"],
-        "is_sensitive": content["meta"]["security"][0]["display"] in ("restricted", "sensitive"),
+        "is_sensitive": content["meta"]["security"][0]["code"] in ("R", "V", "REDACTED"),
     }
 
 
