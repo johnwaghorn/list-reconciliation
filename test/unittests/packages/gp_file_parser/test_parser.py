@@ -1,8 +1,10 @@
-from datetime import datetime
 import os
 import pytest
+
+from datetime import datetime
 from freezegun import freeze_time
 
+from utils.datetimezone import get_datetime_now, localize_date
 from gp_file_parser.parser import (
     parse_gp_extract_text,
     parse_gp_extract_file,
@@ -12,7 +14,6 @@ from gp_file_parser.parser import (
     InvalidGPExtract,
 )
 
-
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 
@@ -21,7 +22,7 @@ def test_parse_gp_extract_text_parses_correctly():
     text = (
         "503\\*\n\nDOW~1~1111111,1234~LNA~20200406~1340~1557490~"
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
-        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111111,1234~LNA~20200406"
+        "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111112,1235~LNA~20200406"
         "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
         "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
     )
@@ -54,7 +55,7 @@ def test_parse_gp_extract_text_parses_correctly():
         },
         {
             "RECORD_TYPE": "DOW",
-            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111111,1234",
+            "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE": "1111112,1235",
             "TRADING_PARTNER_NHAIS_CIPHER": "LNA",
             "DATE_OF_DOWNLOAD": "2020-04-06 13:40:00",
             "TRANS_ID": 1557491,
@@ -80,7 +81,7 @@ def test_parse_gp_extract_text_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
     )
 
     assert actual == expected
@@ -149,7 +150,7 @@ def test_parse_gp_extract_text_with_junk_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
     )
 
     assert actual == expected
@@ -159,7 +160,7 @@ def test_parse_gp_extract_text_no_valid_records_raises_InvalidGPExtract():
     text = "503\\*\n\n***\n**\n*\n\n***\n**\n*\n\n"
     with pytest.raises(InvalidGPExtract):
         parse_gp_extract_text(
-            text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+            text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
         )
 
 
@@ -231,7 +232,7 @@ def test_parse_gp_extract_text_with_columns_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
     )
 
     assert actual == expected
@@ -305,7 +306,7 @@ def test_parse_gp_extract_text_with_columns_and_junk_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=datetime(2020, 4, 6, 13, 40), gp_ha_cipher="LNA"
+        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
     )
 
     assert actual == expected
@@ -412,7 +413,7 @@ def test_parse_gp_extract_file_parses_correctly():
 
     actual = parse_gp_extract_file(
         file_path,
-        process_datetime=datetime(2020, 4, 6, 13, 40),
+        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
     )
 
     assert actual == expected

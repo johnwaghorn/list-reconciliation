@@ -59,6 +59,7 @@ def log_dynamodb_status(job_id: str, practice_code: str, status: str) -> Dict:
 
     Args:
         job_id (str): ID of the job to log the error for.
+        practice_code (str): GP practice code
         status (str): Status message to log.
     """
 

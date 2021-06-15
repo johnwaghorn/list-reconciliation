@@ -17,19 +17,28 @@ data "archive_file" "packages" {
 resource "aws_lambda_layer_version" "package_layer" {
   filename            = data.archive_file.packages.output_path
   layer_name          = "lambda_layer_${terraform.workspace}"
-  compatible_runtimes = [ "python3.8"]
+  compatible_runtimes = ["python3.8"]
   source_code_hash    = data.archive_file.packages.output_base64sha256
 }
 
 # -----------------------Lambda LR-02 ----------------------
 module "LR-02" {
-  source                 = "../lambdas/LR-02"
-  lambda_name            = local.lambda_name.LR-02
-  package_layer_arn      = aws_lambda_layer_version.package_layer.arn
-  runtime                = var.runtime
-  source_bucket          = aws_s3_bucket.LR-01.bucket
-  lr_01_inbound_folder   = aws_s3_bucket_object.inbound.key
-  patient_sqs_arn        = aws_sqs_queue.Patient_Records_Queue.arn
+  source                  = "../lambdas/LR-02"
+  lambda_name             = local.lambda_name.LR-02
+  package_layer_arn       = aws_lambda_layer_version.package_layer.arn
+  runtime                 = var.runtime
+  source_bucket           = aws_s3_bucket.LR-01.bucket
+  lr_01_inbound_folder    = aws_s3_bucket_object.inbound.key
+  patient_sqs_arn         = aws_sqs_queue.Patient_Records_Queue.arn
+  patient_sqs_name        = aws_sqs_queue.Patient_Records_Queue.name
+  demographics_table_arn  = module.Demographics_Table.dynamo_table_arn
+  demographics_table_name = module.Demographics_Table.dynamo_table_name
+  errors_table_arn        = module.Errors_Table.dynamo_table_arn
+  errors_table_name       = module.Errors_Table.dynamo_table_name
+  inflight_table_arn      = module.In_Flight_Table.dynamo_table_arn
+  inflight_table_name     = module.In_Flight_Table.dynamo_table_name
+  jobs_table_arn          = module.Jobs_Table.dynamo_table_arn
+  jobs_table_name         = module.Jobs_Table.dynamo_table_name
 }
 
 # -----------------------Lambda LR-07----------------------

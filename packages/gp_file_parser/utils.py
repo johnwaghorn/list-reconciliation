@@ -1,6 +1,6 @@
 from typing import Any, List, Generator, Tuple
 
-__all__ = ["pairs"]
+__all__ = ["pairs", "empty_string"]
 
 
 def pairs(in_list: List[Any]) -> Generator[Tuple[Any], None, None]:
@@ -18,3 +18,13 @@ def pairs(in_list: List[Any]) -> Generator[Tuple[Any], None, None]:
     """
     for k, v in zip(in_list[::2], in_list[1::2]):
         yield k, v
+
+
+def empty_string(s: str) -> str:
+    """Return an empty string if s is None"""
+
+    if str(s).replace(" ", "") == "":
+        return ""
+
+    else:
+        return str(s) if s else ""

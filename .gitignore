@@ -2,6 +2,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,terraform,terragrunt,intellij,visualstudiocode,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,terraform,terragrunt,intellij,visualstudiocode,python
 
+
+### Local Lambdas ###
+lambdas/**/local_main.py
+
 *.zip
 openapi.tpl
 *.pem
@@ -452,6 +456,7 @@ override.tf.json
 **/.terragrunt-cache/*
 
 ### VisualStudioCode ###
+.vs
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
