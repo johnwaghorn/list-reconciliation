@@ -8,3 +8,27 @@ resource "aws_sqs_queue" "Patient_Records_Queue" {
   visibility_timeout_seconds  = 300
   receive_wait_time_seconds   = 0
 }
+
+resource "aws_sqs_queue_policy" "Patient_Records_Queue_Policy" {
+  queue_url = aws_sqs_queue.Patient_Records_Queue.id
+  policy    = <<EOF
+{
+      "Version": "2012-10-17",
+      "Id": "sqspolicy",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "SQS:*",
+          "Resource": "${aws_sqs_queue.Patient_Records_Queue.arn}",
+          "Condition": {
+            "ArnEquals": {
+              "aws:SourceArn": "${aws_sqs_queue.Patient_Records_Queue.name}"
+            }
+          }
+        }
+      ]
+  }
+  EOF
+}
+

@@ -6,15 +6,18 @@ Validation rules are taken from HA/GP LINKS - REGISTRATION - GP SYSTEMS
 SPECIFICATION section 3.10 OUT-GOING GENERATED DOWNLOAD TRANSACTIONS.
 
 """
-from datetime import datetime, timedelta
+
 import re
+import string
+
 from typing import Tuple, Union, List
+from datetime import datetime, timedelta
+from utils.datetimezone import localize_date
 
 __all__ = [
     "INVALID",
     "VALIDATORS",
 ]
-
 
 RECORD_TYPE_COL = "RECORD_TYPE"
 GP_CODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
@@ -73,8 +76,8 @@ INVALID_ADDRESS_LINE = (
     "hyphen, comma or full-stop. Max length 35."
 )
 INVALID_POSTCODE = (
-    "must be in one of the following formats: AN NAA, ANN NAA, AAN NAA, "
-    "AANN NAA, ANA NAA, AANA ANA."
+    "must be 8 characters and in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, "
+    "AANN NAA, ANA  NAA, AANA NAA"
 )
 INVALID_DRUGS_DISPENSED_MARKER = "must be 'Y' or blank."
 INVALID_RPP_MILEAGE = "must be between 3 and 50 inclusive."
@@ -85,7 +88,6 @@ INVALID_RESIDENTIAL_INSTITUTE_CODE = (
 )
 INVALID_TRANS_ID = "must be a unique not-null integer greater than 0."
 
-
 ValidatedRecord = Tuple[str, Union[str, None]]
 
 
@@ -95,6 +97,7 @@ def not_null(func):
     def wraps(val, *args, **kwargs):
         if val in (None, ""):
             return None, INVALID_NULL
+
         else:
             return func(val, *args, **kwargs)
 
@@ -150,6 +153,7 @@ def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> Validat
 
     Args:
         ha_cipher_val (str): HA cipher to validate.
+        gp_ha_cipher (str): GP Extract filenames' HA cipher.
 
     Returns:
         ValidatedRecord: Tuple of coerced value and invalid reason if any.
@@ -163,9 +167,7 @@ def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> Validat
 
 
 @not_null
-def transaction_datetime(
-    transaction_datetime_val: str, process_datetime: datetime = None, **kwargs
-):
+def transaction_datetime(transaction_datetime_val: str, process_datetime: datetime = None, **kwargs):
     """Coerce and validate Transaction datetime.
 
     Validation rules: Must be a datetime in the format YYYYMMDDHHMM and be less
@@ -182,18 +184,21 @@ def transaction_datetime(
     invalid_reason = None
     if len(transaction_datetime_val) != 12:
         invalid_reason = INVALID_TRANS_DATETIME
+
     else:
         try:
             transaction_datetime_val = datetime.strptime(transaction_datetime_val, "%Y%m%d%H%M")
-            
-        except ValueError:
-            invalid_reason = INVALID_TRANS_DATETIME
-        else:
-            if (
-                transaction_datetime_val < process_datetime - timedelta(days=14)
-            ) or transaction_datetime_val > process_datetime:
-                invalid_reason = INVALID_TRANS_DATETIME
 
+        except (TypeError, ValueError):
+            invalid_reason = INVALID_TRANS_DATETIME
+
+        else:
+            localized_transaction_date = localize_date(transaction_datetime_val)
+
+            if (
+                    localized_transaction_date < process_datetime - timedelta(days=14)
+            ) or localized_transaction_date > process_datetime:
+                invalid_reason = INVALID_TRANS_DATETIME
             transaction_datetime_val = str(transaction_datetime_val)
 
     return transaction_datetime_val, invalid_reason
@@ -214,10 +219,12 @@ def nhs_number(nhs_number_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if nhs_number_val in (None, ""):
         nhs_number_val = None
+
     else:
         try:
             if not re.match(r"^([A-Z0-9\?\/]{1,15})$|^([0-9]{10})$", nhs_number_val):
                 invalid_reason = INVALID_NHS_NO
+
         except TypeError:
             invalid_reason = INVALID_NHS_NO
 
@@ -240,11 +247,18 @@ def surname(surname_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if surname_val in (None, ""):
         surname_val = None
+
     else:
         try:
-            if not re.match(r"^([A-Z\s\'\-]{1,35})$", surname_val):
+            if not re.match(r"^([A-ZÀ-Ö\s\'\-]{1,35})$", surname_val):
                 invalid_reason = INVALID_SURNAME
-        except TypeError:
+
+            non_punctuated_val = surname_val.translate(str.maketrans('', '', string.punctuation)).replace(" ", "")
+            if non_punctuated_val not in (None, ""):
+                if not non_punctuated_val.isupper():
+                    invalid_reason = INVALID_SURNAME
+
+        except (TypeError, ValueError):
             invalid_reason = INVALID_SURNAME
 
     return surname_val, invalid_reason
@@ -266,17 +280,25 @@ def forename(forename_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if forename_val in (None, ""):
         forename_val = None
+
     else:
         try:
             forenames = forename_val.split()
 
             if forenames:
                 for name in forenames:
-                    if not re.match(r"^([A-Z\'\-\.,]+)$", name):
+                    if not re.match(r'^([A-ZÀ-Ö\s\'\-\.,]{1,35})$', name):
                         invalid_reason = INVALID_FORENAME
+
+                    non_punctuated_val = name.translate(str.maketrans('', '', string.punctuation)).replace(" ", "")
+                    if non_punctuated_val not in (None, ""):
+                        if not non_punctuated_val.isupper():
+                            invalid_reason = INVALID_FORENAME
+
             else:
                 invalid_reason = INVALID_FORENAME
-        except (TypeError, AttributeError):
+
+        except (TypeError, AttributeError, ValueError):
             invalid_reason = INVALID_FORENAME
 
     return forename_val, invalid_reason
@@ -298,11 +320,13 @@ def title(title_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if title_val in (None, ""):
         title_val = None
+
     else:
         try:
             if not re.match(r"^([A-Z\s\'\-]{1,35})$", title_val):
                 invalid_reason = INVALID_TITLE
-        except TypeError:
+
+        except (TypeError, ValueError):
             invalid_reason = INVALID_TITLE
 
     return title_val, invalid_reason
@@ -327,6 +351,7 @@ def sex(sex_val: str, **kwargs) -> ValidatedRecord:
 
     elif sex_val not in ("1", "2", "0", "9"):
         invalid_reason = INVALID_SEX
+
     else:
         sex_val = int(sex_val)
 
@@ -351,13 +376,20 @@ def date_of_birth(date_of_birth_val: str, **kwargs) -> ValidatedRecord:
 
     elif not isinstance(date_of_birth_val, str):
         invalid_reason = INVALID_DATE_OF_BIRTH
+
     else:
         if len(date_of_birth_val) != 8:
             invalid_reason = INVALID_DATE_OF_BIRTH
+
         else:
-            date_of_birth_val = datetime.strptime(date_of_birth_val, "%Y%m%d").date()
-            if date_of_birth_val > datetime.now().date():
+            try:
+                date_of_birth_val = datetime.strptime(date_of_birth_val, "%Y%m%d").date()
+                if date_of_birth_val > datetime.now().date():
+                    invalid_reason = INVALID_DATE_OF_BIRTH
+
+            except ValueError:
                 invalid_reason = INVALID_DATE_OF_BIRTH
+
             date_of_birth_val = str(date_of_birth_val)
 
     return date_of_birth_val, invalid_reason
@@ -379,10 +411,12 @@ def address_line(address_line_val: str, **kwargs) -> ValidatedRecord:  #
     invalid_reason = None
     if address_line_val in (None, ""):
         address_line_val = None
+
     else:
         try:
             if not re.match(r"^([A-Z0-9\s\'\-\.,]{1,35})$", address_line_val):
                 invalid_reason = INVALID_ADDRESS_LINE
+
         except TypeError:
             invalid_reason = INVALID_ADDRESS_LINE
 
@@ -406,11 +440,33 @@ def postcode(postcode_val: str, **kwargs) -> ValidatedRecord:
     if postcode_val in (None, ""):
         postcode_val = None
 
-    elif not isinstance(postcode_val, str):
-        invalid_reason = INVALID_POSTCODE
+    else:
+        while True:
+            if not isinstance(postcode_val, str):
+                invalid_reason = INVALID_POSTCODE
+                break
 
-    elif len(postcode_val.split()) != 2:
-        invalid_reason = INVALID_POSTCODE
+            elif len(postcode_val) != 8:
+                invalid_reason = INVALID_POSTCODE
+                break
+
+            split_postcode = postcode_val.split()
+
+            if len(split_postcode) != 2:
+                invalid_reason = INVALID_POSTCODE
+                break
+
+            postcode_seg_1 = r"^([A-Z][0-9])$|^([A-Z][0-9][0-9])$|^([A-Z][A-Z][0-9])$|^([A-Z][A-Z][0-9][0-9])$|" \
+                             r"^([A-Z][0-9][A-Z])$|^([A-Z][A-Z][0-9][A-Z])$"
+            postcode_seg_2 = r"^[0-9][A-Z][A-Z]$"
+
+            if not re.match(postcode_seg_1, split_postcode[0]):
+                invalid_reason = INVALID_POSTCODE
+
+            elif not re.match(postcode_seg_2, split_postcode[1]):
+                invalid_reason = INVALID_POSTCODE
+
+            break
 
     return postcode_val, invalid_reason
 
@@ -430,6 +486,7 @@ def drugs_dispensed_marker(drugs_dispensed_marker_val: str, **kwargs) -> Validat
     invalid_reason = None
     if drugs_dispensed_marker_val in (None, ""):
         drugs_dispensed_marker_val = None
+
     else:
         if drugs_dispensed_marker_val != "Y":
             invalid_reason = INVALID_DRUGS_DISPENSED_MARKER
@@ -452,11 +509,14 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if rpp_mileage_val in (None, ""):
         rpp_mileage_val = None
+
     else:
         try:
             rpp_mileage_val = int(rpp_mileage_val)
+
         except (TypeError, ValueError):
             invalid_reason = INVALID_RPP_MILEAGE
+
         else:
             if not 3 <= rpp_mileage_val <= 50:
                 invalid_reason = INVALID_RPP_MILEAGE
@@ -479,6 +539,7 @@ def blocked_route_special_district_marker(blocked_route_special_district_marker_
     invalid_reason = None
     if blocked_route_special_district_marker_val in (None, ""):
         blocked_route_special_district_marker_val = None
+
     else:
         if blocked_route_special_district_marker_val not in ("B", "S"):
             invalid_reason = INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER
@@ -501,11 +562,14 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
     invalid_reason = None
     if walking_units_val in (None, ""):
         walking_units_val = None
+
     else:
         try:
             walking_units_val = int(walking_units_val)
-        except TypeError:
+
+        except (TypeError, ValueError):
             invalid_reason = INVALID_WALKING_UNITS
+
         else:
             if not 3 <= walking_units_val <= 99 or (walking_units_val % 3):
                 invalid_reason = INVALID_WALKING_UNITS
@@ -529,10 +593,12 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     invalid_reason = None
     if residential_institute_code_val in (None, ""):
         residential_institute_code_val = None
+
     else:
         try:
             if not re.match(r"^([A-Z0-9]{2})$", residential_institute_code_val):
                 invalid_reason = INVALID_RESIDENTIAL_INSTITUTE_CODE
+
         except TypeError:
             invalid_reason = INVALID_RESIDENTIAL_INSTITUTE_CODE
 
@@ -555,8 +621,13 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
     invalid_reason = None
     if not re.match(r"^([1-9]{1}[0-9]*)$", str(transaction_id_val)):
         invalid_reason = INVALID_TRANS_ID
+
     else:
-        transaction_id_val = int(transaction_id_val)
+        try:
+            transaction_id_val = int(transaction_id_val)
+
+        except (TypeError, ValueError):
+            invalid_reason = INVALID_TRANS_ID
 
     if transaction_id_val in other_ids:
         invalid_reason = INVALID_TRANS_ID

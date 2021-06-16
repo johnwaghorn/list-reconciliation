@@ -14,5 +14,5 @@ output "lr_01_bucket_retry" {
   value = module.List-Recon.LR_01_Bucket_retry
 }
 output "patients_queue" {
-  value = module.List-Recon.sqs_queue
+  value = module.List-Recon.sqs_queue_name
 }

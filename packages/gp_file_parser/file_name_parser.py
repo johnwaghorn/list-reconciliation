@@ -1,6 +1,9 @@
 import re
+
 from datetime import datetime
 from typing import Tuple
+
+from utils.datetimezone import get_datetime_now, localize_date
 
 
 class InvalidFilename(Exception):
@@ -50,10 +53,10 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> Tuple
     day_code = date_indicator[1]
     extract_day = days.index(day_code) + 1
 
-    date_now = process_datetime or datetime.now()
+    date_now = process_datetime or get_datetime_now()
 
-    new_year_start_limit = datetime(date_now.year, 1, 1)
-    new_year_end_limit = datetime(date_now.year, 1, 15)
+    new_year_start_limit = localize_date(datetime(date_now.year, 1, 1))
+    new_year_end_limit = localize_date(datetime(date_now.year, 1, 15))
 
     # If current date is between Jan 1-15, treats extract codes from Dec 18-31 as previous year
     if date_now >= new_year_start_limit and date_now < new_year_end_limit:

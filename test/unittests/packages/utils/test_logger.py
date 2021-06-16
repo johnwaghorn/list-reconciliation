@@ -1,12 +1,11 @@
-from datetime import datetime
-from pytz import timezone
+import pytest
+import datetime
 
 from moto import mock_dynamodb2
 
-import pytest
-
 from utils.logger import log_dynamodb_error, log_dynamodb_status, success
 from utils.models import Errors, Jobs
+from utils.datetimezone import localize_date
 
 
 @pytest.fixture
@@ -24,7 +23,7 @@ def job_record(create_dynamodb_tables):
         PracticeCode="ABC",
         FileName="test.csv",
         StatusId="1",
-        Timestamp=datetime(2021, 4, 1, tzinfo=timezone("Europe/London")),
+        Timestamp=localize_date(datetime.datetime(2021, 5, 27))
     )
     obj.save()
     yield

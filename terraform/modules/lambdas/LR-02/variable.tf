@@ -23,6 +23,42 @@ variable "patient_sqs_arn" {
   type = string
 }
 
+variable "patient_sqs_name" {
+  type = string
+}
+
 variable "source_bucket" {
+  type = string
+}
+
+variable "demographics_table_arn" {
+  type = string
+}
+
+variable "jobs_table_arn" {
+  type = string
+}
+
+variable "inflight_table_arn" {
+  type = string
+}
+
+variable "errors_table_arn" {
+  type = string
+}
+
+variable "demographics_table_name" {
+  type = string
+}
+
+variable "jobs_table_name" {
+  type = string
+}
+
+variable "inflight_table_name" {
+  type = string
+}
+
+variable "errors_table_name" {
   type = string
 }

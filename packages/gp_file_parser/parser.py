@@ -9,6 +9,7 @@ from datetime import date, datetime
 from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
+from utils.datetimezone import get_datetime_now
 from gp_file_parser.file_name_parser import validate_filename
 from gp_file_parser.utils import pairs
 from gp_file_parser.validators import (
@@ -55,6 +56,7 @@ __all__ = [
     "InvalidGPExtract",
     "parse_gp_extract_file",
     "parse_gp_extract_text",
+    "parse_gp_extract_file_s3",
     "Records",
     "INVALID",
 ]
@@ -65,8 +67,6 @@ RECORD_1 = "1"
 RECORD_2 = "2"
 
 INBOUND_PREFIX = "inbound/"
-PASSED_PREFIX = "passed/"
-FAILED_PREFIX = "failed/"
 
 
 class InvalidGPExtract(Exception):
@@ -256,7 +256,7 @@ def parse_gp_extract_text(
     for row in pairs(raw_text[start_idx:]):
         validated_record = _validate_record(
             _parse_row_columns(row, columns),
-            process_datetime=process_datetime or datetime.now(),
+            process_datetime=process_datetime or get_datetime_now(),
             gp_ha_cipher=gp_ha_cipher,
             other_ids=ids,
         )
@@ -304,7 +304,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     results.extend(
         parse_gp_extract_text(
             open(filepath, "r").read(),
-            process_datetime=process_datetime or datetime.now(),
+            process_datetime=process_datetime or get_datetime_now(),
             gp_ha_cipher=gp_ha_cipher,
         )
     )
@@ -353,7 +353,7 @@ def output_records(
     summary_path: Path,
     include_reason: bool = False,
     invalid_threshold: int = None,
-) -> Tuple[Path, Path]:
+):
     """Create CSV files containing invalids summary and invalid records with reasons.
 
     Args:
@@ -450,20 +450,15 @@ def process_gp_extract(
 
 
 def parse_gp_extract_file_s3(
-    access_key: str,
-    secret_key: str,
-    session_token: str,
     bucket_name: str,
-    file_key: Path,
+    file_key: str,
     process_datetime: datetime = None,
-):
+) -> Tuple[Records, str]:
     """Convert a GP extract file into records with fieldnames.
 
     Args:
-        access_key (str): aws access key
-        secret_key (str): aws secret key
         bucket_name (str): s3 bucket name
-        file_key (Path): A path to the s3 file key object
+        file_key (str): s3 object file key
         process_datetime (datetime): Time of processing.
 
     Returns:
@@ -472,99 +467,30 @@ def parse_gp_extract_file_s3(
 
     s3_client = boto3.client(
         "s3",
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        aws_session_token=session_token,
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+        aws_session_token=os.environ.get("AWS_SESSION_TOKEN")
     )
 
     extract_date, gp_ha_cipher = validate_filename(
         file_key.replace(INBOUND_PREFIX, ""), process_datetime
     )
 
-    LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
-
     file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-
     file_data = file_obj["Body"].read()
 
     results = []
-
     results.extend(
         parse_gp_extract_text(
             file_data.decode("utf-8"),
-            process_datetime=process_datetime or datetime.now(),
+            process_datetime=process_datetime or get_datetime_now(),
             gp_ha_cipher=gp_ha_cipher,
         )
     )
 
-    return results
+    invalid_records = [r for r in results if "_INVALID_" in list(r.keys())]
 
+    if invalid_records:
+        raise InvalidGPExtract(json.dumps(invalid_records))
 
-def handle_invalid_extract(
-    access_key: str,
-    secret_key: str,
-    session_token: str,
-    bucket_name: str,
-    file_key: str,
-    message: str,
-):
-    """Handle an invalid GP extract file. Moves invalid file from
-        inbound/ -> failed/, and creates log file containing errors.
-
-    Args:
-        access_key (str): aws access key
-        secret_key (str): aws secret key
-        bucket_name (str): s3 bucket name
-        file_key (Path): A path to the s3 file key object
-        message (str): Message to write to log file.
-    """
-
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        aws_session_token=session_token,
-    )
-
-    upload_filename = file_key.replace(INBOUND_PREFIX, "")
-
-    failed_key = FAILED_PREFIX + upload_filename
-
-    s3_client.copy_object(
-        Bucket=bucket_name, Key=failed_key, CopySource={"Bucket": bucket_name, "Key": file_key}
-    )
-
-    s3_client.delete_object(Bucket=bucket_name, Key=file_key)
-
-    log_filename = upload_filename + "_LOG.txt"
-
-    log_key = FAILED_PREFIX + log_filename
-
-    s3_client.put_object(Body=message, Bucket=bucket_name, Key=log_key)
-
-
-def process_invalid_message(exception: Exception) -> str:
-    """Create a formatted error message string based on raised
-        exception
-
-    Args:
-        exception (Exception): exception raised
-
-    Returns:
-        str: Error message as formatted string.
-    """
-
-    if isinstance(exception, AssertionError):
-        msg = "DOW file content structure is invalid:\n" + str(exception)
-
-    elif isinstance(exception, InvalidGPExtract):
-        msg = "DOW file contains invalid records:\n"
-
-        invalids = json.loads(str(exception))
-
-        for i in invalids:
-            msg += str(i) + "\n"
-    else:
-        msg = "DOW file is invalid:\n" + str(exception)
-
-    return msg
+    return results, gp_ha_cipher

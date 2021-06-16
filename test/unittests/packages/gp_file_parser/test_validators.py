@@ -1,8 +1,10 @@
-from datetime import datetime
 import pytest
+
+from datetime import datetime
 
 from gp_file_parser import validators as v
 from gp_file_parser.parser import _validate_record
+from utils.datetimezone import get_datetime_now, localize_date
 
 
 @pytest.mark.parametrize(
@@ -73,11 +75,13 @@ def test_nhs_number_validator_return_values(val, expected):
         ("", (None, None)),
         (None, (None, None)),
         ("SMITH", ("SMITH", None)),
+        ("ÀÈÇÑÖ", ("ÀÈÇÑÖ", None)),
         ("O'CONNOR", ("O'CONNOR", None)),
         ("SMITH" * 7, ("SMITH" * 7, None)),
         ("'- ", ("'- ", None)),
         ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", v.INVALID_SURNAME)),
         ("Smith", ("Smith", v.INVALID_SURNAME)),
+        ("SMITHȧ", ("SMITHȧ", v.INVALID_SURNAME)),
         (1, (1, v.INVALID_SURNAME)),
         (" ", (" ", None)),
     ),
@@ -97,11 +101,17 @@ def test_surname_validator_return_values(val, expected):
         ("O'CONNOR", ("O'CONNOR", None)),
         ("SMITH" * 7, ("SMITH" * 7, None)),
         ("'- ,.", ("'- ,.", None)),
-        ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", None)),
+        ("À-È Ç'ÑÖ", ("À-È Ç'ÑÖ", None)),
         ("JOHN O'CONNOR", ("JOHN O'CONNOR", None)),
         ("JOHN O-CONNOR", ("JOHN O-CONNOR", None)),
-        ("PETER " + ("SMITH" * 7) + "EXTRA", ("PETER " + ("SMITH" * 7) + "EXTRA", None)),
+        ("PETER " + ("SMITH" * 6), ("PETER " + ("SMITH" * 6), None)),
+        ("SMITH" * 7 + "Y", ("SMITH" * 7 + "Y", v.INVALID_FORENAME)),
+        (
+            "PETER " + ("SMITH" * 7) + "EXTRA",
+            ("PETER " + ("SMITH" * 7) + "EXTRA", v.INVALID_FORENAME),
+        ),
         ("Smith", ("Smith", v.INVALID_FORENAME)),
+        ("SMITHȧ", ("SMITHȧ", v.INVALID_FORENAME)),
         (1, (1, v.INVALID_FORENAME)),
         (" ", (" ", v.INVALID_FORENAME)),
     ),
@@ -160,6 +170,7 @@ def test_sex_validator_return_values(val, expected):
         ("20120105", ("2012-01-05", None)),
         ("", (None, None)),
         (None, (None, None)),
+        ("%3error", ("%3error", v.INVALID_DATE_OF_BIRTH)),
         ("2012015", ("2012015", v.INVALID_DATE_OF_BIRTH)),
         ("25", ("25", v.INVALID_DATE_OF_BIRTH)),
         ("21500105", ("2150-01-05", v.INVALID_DATE_OF_BIRTH)),
@@ -200,10 +211,16 @@ def test_address_line_validator_return_values(val, expected):
         ("", (None, None)),
         (None, (None, None)),
         ("HP15 6QX", ("HP15 6QX", None)),
-        ("HP8 6QX", ("HP8 6QX", None)),
+        ("HP8  6QX", ("HP8  6QX", None)),
         ("HP15 6QX", ("HP15 6QX", None)),
-        ("HP   6QX", ("HP   6QX", None)),
-        ("HP156QX", ("HP156QX", v.INVALID_POSTCODE)),
+        ("H8A  6QX", ("H8A  6QX", None)),
+        ("HP8A 6QX", ("HP8A 6QX", None)),
+        ("H8   6QX", ("H8   6QX", None)),
+        ("HP8 6QX", ("HP8 6QX", v.INVALID_POSTCODE)),
+        ("H   6QX", ("H   6QX", v.INVALID_POSTCODE)),
+        ("H.5 6QX", ("H.5 6QX", v.INVALID_POSTCODE)),
+        ("HP15 6QXXE", ("HP15 6QXXE", v.INVALID_POSTCODE)),
+        ("HP156QXX", ("HP156QXX", v.INVALID_POSTCODE)),
         ("HP D  QX", ("HP D  QX", v.INVALID_POSTCODE)),
         (" ", (" ", v.INVALID_POSTCODE)),
         (1, (1, v.INVALID_POSTCODE)),
@@ -275,6 +292,7 @@ def test_blocked_route_special_district_marker_validator_return_values(val, expe
         (None, (None, None)),
         ("3", (3, None)),
         ("99", (99, None)),
+        ("3%", ("3%", v.INVALID_WALKING_UNITS)),
         ("2", (2, v.INVALID_WALKING_UNITS)),
         ("100", (100, v.INVALID_WALKING_UNITS)),
         ([], ([], v.INVALID_WALKING_UNITS)),
@@ -312,27 +330,27 @@ def test_residential_institute_code_validator_return_values(val, expected):
     (
         (
             "201206060101",
-            datetime(2012, 6, 20, 1, 1),
+            localize_date(datetime(2012, 6, 20, 1, 1)),
             ("2012-06-06 01:01:00", None),
         ),
         (
             "201206060101",
-            datetime(2012, 6, 20, 1, 1, 1),
+            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
             ("2012-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
         (
             "2012060601",
-            datetime(2012, 6, 20, 1, 1, 1),
+            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
             ("2012060601", v.INVALID_TRANS_DATETIME),
         ),
         (
             "000000000000",
-            datetime(2012, 6, 20, 1, 1, 1),
+            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
             ("000000000000", v.INVALID_TRANS_DATETIME),
         ),
         (
             "201306060101",
-            datetime(2012, 6, 20, 1, 1, 1),
+            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
             ("2013-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
     ),
@@ -362,7 +380,7 @@ def test_ha_cipher_validators_return_values(val, gp_ha_cipher, expected):
 
 
 def test_validate_record_contains_invalid_dict():
-    assert _validate_record({"RECORD_TYPE": "Not"}, datetime.now()) == {
+    assert _validate_record({"RECORD_TYPE": "Not"}, get_datetime_now()) == {
         "RECORD_TYPE": "Not",
         "_INVALID_": {"RECORD_TYPE": v.INVALID_RECORD_TYPE},
     }

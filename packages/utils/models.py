@@ -1,11 +1,11 @@
 import os
 
 from pynamodb.attributes import (
-    ListAttribute,
     UnicodeAttribute,
-    BooleanAttribute,
     UTCDateTimeAttribute,
     NumberAttribute,
+    ListAttribute,
+    BooleanAttribute,
 )
 from pynamodb.models import Model
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
@@ -84,7 +84,6 @@ class Demographics(Model):
     PDS_IsSensitive = BooleanAttribute(null=True)
     PDS_Address = ListAttribute(null=True)
     PDS_PostCode = UnicodeAttribute(null=True)
-
     JobIDIndex = JobIDIndex()
 
 
