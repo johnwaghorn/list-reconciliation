@@ -1,12 +1,10 @@
-from typing import Dict
-
 import json
 import os
 
 import boto3
 
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
-from utils.logger import success, log_dynamodb_error, UNHANDLED_ERROR
+from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
 from utils.models import Demographics, Jobs, JobStats
 from utils.registration_status import GPRegistrationStatus
 
@@ -31,7 +29,7 @@ def lambda_handler(event, context):
         raise type(err)(error_response) from err
 
 
-def get_gp_exclusive_registrations(job_id: str) -> Dict[str, str]:
+def get_gp_exclusive_registrations(job_id: str) -> Success:
     """Create a GP-only registration differences file
 
     Args:
@@ -40,7 +38,7 @@ def get_gp_exclusive_registrations(job_id: str) -> Dict[str, str]:
     """
     practice_code = Jobs.query(job_id).next().PracticeCode
 
-    results = Demographics.JobIDIndex.query(
+    results = Demographics.JobIdIndex.query(
         job_id,
         filter_condition=Demographics.GP_RegistrationStatus != GPRegistrationStatus.MATCHED.value,
     )

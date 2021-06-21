@@ -4,7 +4,7 @@
 
 
 ### Local Lambdas ###
-lambdas/**/local_main.py
+local_main.py
 
 *.zip
 openapi.tpl

@@ -1,11 +1,9 @@
-from typing import Dict
-
 import json
 import os
 
 import boto3
 
-from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
+from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
 from utils.models import Demographics
 from utils.pds_api_service import get_pds_record, PDSAPIError
 from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
@@ -49,7 +47,7 @@ def lambda_handler(event, context):
         raise type(err)(error_response) from err
 
 
-def pds_hydrate(nhs_number: str, job_id: str, patient_id: str) -> Dict[str, str]:
+def pds_hydrate(nhs_number: str, job_id: str, patient_id: str) -> Success:
     """Populate an existing Demographics DynamoDB record with PDS data and trigger LR08.
 
     Args:
@@ -58,7 +56,7 @@ def pds_hydrate(nhs_number: str, job_id: str, patient_id: str) -> Dict[str, str]
         job_id (str): ID of the job the comparison is being applied under.
 
     Returns:
-        Dict: A result containing a status and message
+        Success
 
     Raises:
         PDSAPIError: If the PDS FHIR API call fails, the error message contains

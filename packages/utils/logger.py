@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict
 from uuid import uuid4
 
@@ -11,19 +12,21 @@ from utils.datetimezone import get_datetime_now
 VALIDATION_ERROR = "VALIDATION_ERROR"
 UNHANDLED_ERROR = "UNHANDLED_ERROR"
 
+Success = Dict[str, str]
 
 LOG = logging.getLogger()
 LOG.setLevel(logging.INFO)
 logging.basicConfig(level=logging.INFO)
 
 
-def log_dynamodb_error(job_id: str, name: str, msg: str) -> Dict:
+def log_dynamodb_error(job_id: str, name: str, msg: str, time: datetime = get_datetime_now()) -> Dict:
     """Log an error to DynamoDB for the List Reconciliation process.
 
     Args:
         job_id (str): ID of the job to log the error for.
         name (str): Name of the error to log.
         msg (str): Error message to log.
+        time (datetime): Time of error, optional, will be populated if not provided.
     """
 
     error_id = str(uuid4())
@@ -43,7 +46,7 @@ def log_dynamodb_error(job_id: str, name: str, msg: str) -> Dict:
             Name=name,
             Description=msg,
             Traceback=tb,
-            Timestamp=get_datetime_now(),
+            Timestamp=time,
         )
         item.save()
 
@@ -54,7 +57,7 @@ def log_dynamodb_error(job_id: str, name: str, msg: str) -> Dict:
     return {"status": "error", "message": msg, "error_id": error_id, "traceback": tb}
 
 
-def log_dynamodb_status(job_id: str, practice_code: str, status: str) -> Dict:
+def log_dynamodb_status(job_id: str, practice_code: str, status: str) -> Success:
     """Update a status to DynamoDB for the List Reconciliation process.
 
     Args:
@@ -75,14 +78,14 @@ def log_dynamodb_status(job_id: str, practice_code: str, status: str) -> Dict:
     return success("Updated status")
 
 
-def success(message: str) -> Dict[str, str]:
+def success(message: str) -> Success:
     """Create a success message as a dictionary.
 
     Args:
         message (str): Message to add.
 
     Returns:
-        Dict[str, str]
+        Success
     """
 
     return {"status": "success", "message": message}

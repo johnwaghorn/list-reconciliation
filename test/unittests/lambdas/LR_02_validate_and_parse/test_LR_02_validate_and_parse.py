@@ -64,7 +64,7 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
     assert expected_inflight_attributes == actual_inflight_attributes
 
     # Test Demographics validity
-    actual_demographics = [d for d in Demographics.JobIDIndex.query(JOB_ID)]
+    actual_demographics = [d for d in Demographics.JobIdIndex.query(JOB_ID)]
     actual_demographics_attributes = actual_demographics[0].attribute_values
 
     expected_demographics = Demographics(

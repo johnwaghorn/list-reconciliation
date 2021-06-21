@@ -14,7 +14,7 @@ from gp_file_parser.parser import InvalidGPExtract, parse_gp_extract_file_s3
 from gp_file_parser.file_name_parser import InvalidFilename
 
 from utils.models import Jobs, InFlight, Demographics
-from utils.logger import LOG, log_dynamodb_error, success
+from utils.logger import LOG, log_dynamodb_error, success, Success
 from utils.datetimezone import get_datetime_now
 
 ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -69,7 +69,7 @@ def lambda_handler(event, context):
         raise type(err)(error_response) from err
 
 
-def validate_and_process_extract(upload_key: str, job_id: str) -> success:
+def validate_and_process_extract(upload_key: str, job_id: str) -> Success:
     """Handler to process and validate an uploaded S3 object containing a GP flat
         file extract
 
@@ -119,7 +119,7 @@ def handle_validated_records(
         job_id: str,
         gp_ha_cipher: str,
         records: list
-) -> success:
+) -> Success:
     """Handler to process validated patient records
 
     Args:
@@ -130,7 +130,7 @@ def handle_validated_records(
         records (list): List of validated record dicts
 
     Returns:
-        success: A dict result containing a status and message
+        Success
     """
 
     num_of_records = len(records)

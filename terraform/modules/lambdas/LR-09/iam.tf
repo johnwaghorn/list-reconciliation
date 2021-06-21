@@ -21,15 +21,15 @@ resource "aws_iam_role" "role" {
  EOF
 
   tags = {
-    name = "Lambda role for LR-08-${terraform.workspace}"
+    name = "Lambda role for LR-09-${terraform.workspace}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
   name = "iam-policy-${var.lambda_name}-${terraform.workspace}"
-  description = "Policy for LR-08-${terraform.workspace} Lambda Role."
+  description = "Policy for LR-09-${terraform.workspace} Lambda Role."
   policy = <<-EOF
-{
+  {
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -43,44 +43,61 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
-            "Action": [
-                 "lambda:InvokeFunction"
-            ],
-            "Resource":"arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:*"
-        },
-        {
-            "Effect": "Allow",
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.demographics_table_arn}",
-                "${var.demographics_differences_table_arn}",
+                "${var.inflight_table_arn}",
+                "${var.jobs_table_arn}",
+                "${var.job_stats_table_arn}",
                 "${var.errors_table_arn}"
             ]
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:GetItem",
+            "Action": "dynamodb:Scan",
             "Resource": [
-                "${var.demographics_table_arn}"
+                "${var.inflight_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:Query",
+            "Resource": [
+                "${var.demographics_table_arn}",
+                "${var.demographics_table_arn}/index/*",
+                "${var.jobs_table_arn}",
+                "${var.jobs_table_arn}/index/*"
             ]
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:UpdateItem",
             "Resource": [
-                "${var.demographics_table_arn}"
+                "${var.jobs_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:DeleteItem",
+            "Resource": [
+                "${var.inflight_table_arn}"
             ]
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
-                "${var.demographics_differences_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.errors_table_arn}",
+                "${var.job_stats_table_arn}"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "states:StartExecution",
+            "Resource":"${var.lr_10_step_function_arn}"
         }
     ]
-    }
+  }
   EOF
 }
 

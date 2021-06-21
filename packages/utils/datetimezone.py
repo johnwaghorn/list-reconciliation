@@ -15,7 +15,7 @@ def get_datetime_now(specified_timezone: str = "Europe/London") -> datetime:
     return datetime.now(timezone(specified_timezone))
 
 
-def localize_date(unlocalized_date: datetime, specified_timezone: str = "Europe/London") -> datetime:
+def localize_date(unlocalized_date: datetime = get_datetime_now(), specified_timezone: str = "Europe/London") -> datetime:
     """Localizes a specified datetime
 
         Args:

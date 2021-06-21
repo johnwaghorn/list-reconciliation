@@ -14,16 +14,36 @@ AWS_REGION = os.getenv("AWS_REGION")
 
 DEMOGRAPHICS_TABLE = os.getenv("DEMOGRAPHICS_TABLE")
 JOBS_TABLE = os.getenv("JOBS_TABLE")
-JOBSTATS_TABLE = os.getenv("JOBSTATS_TABLE")
+JOB_STATS_TABLE = os.getenv("JOB_STATS_TABLE")
 ERRORS_TABLE = os.getenv("ERRORS_TABLE")
 STATUSES_TABLE = os.getenv("STATUSES_TABLE")
-DEMOGRAPHICSDIFFERENCES_TABLE = os.getenv("DEMOGRAPHICSDIFFERENCES_TABLE")
+DEMOGRAPHICS_DIFFERENCES_TABLE = os.getenv("DEMOGRAPHICS_DIFFERENCES_TABLE")
 INFLIGHT_TABLE = os.getenv("INFLIGHT_TABLE")
+
+
+class DemographicsJobIdIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "demographics-job_id-index"
+        projection = AllProjection()
+        read_capacity_units = 100
+        write_capacity_units = 100
+
+    JobId = UnicodeAttribute(hash_key=True)
+
+
+class JobsIdIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "jobs-id-index"
+        projection = AllProjection()
+        read_capacity_units = 100
+        write_capacity_units = 100
+
+    Id = UnicodeAttribute(hash_key=True)
 
 
 class DemographicsDifferences(Model):
     class Meta:
-        table_name = DEMOGRAPHICSDIFFERENCES_TABLE
+        table_name = DEMOGRAPHICS_DIFFERENCES_TABLE
         region = AWS_REGION
         read_capacity_units = 1
         write_capacity_units = 1
@@ -32,16 +52,6 @@ class DemographicsDifferences(Model):
     JobId = UnicodeAttribute()
     PatientId = UnicodeAttribute()
     RuleId = UnicodeAttribute()
-
-
-class JobIDIndex(GlobalSecondaryIndex):
-    class Meta:
-        index_name = "JobId-index"
-        projection = AllProjection()
-        read_capacity_units = 1
-        write_capacity_units = 1
-
-    JobId = UnicodeAttribute(hash_key=True)
 
 
 class Demographics(Model):
@@ -84,7 +94,7 @@ class Demographics(Model):
     PDS_IsSensitive = BooleanAttribute(null=True)
     PDS_Address = ListAttribute(null=True)
     PDS_PostCode = UnicodeAttribute(null=True)
-    JobIDIndex = JobIDIndex()
+    JobIdIndex = DemographicsJobIdIndex()
 
 
 class Errors(Model):
@@ -126,11 +136,12 @@ class Jobs(Model):
     FileName = UnicodeAttribute()
     Timestamp = UTCDateTimeAttribute()
     StatusId = UnicodeAttribute()
+    IdIndex = JobsIdIndex()
 
 
 class JobStats(Model):
     class Meta:
-        table_name = JOBSTATS_TABLE
+        table_name = JOB_STATS_TABLE
         region = AWS_REGION
         read_capacity_units = 1
         write_capacity_units = 1

@@ -2,6 +2,10 @@ variable "runtime" {
   type = string
 }
 
+variable "lambda_timeout" {
+  type = number
+}
+
 variable "package_layer_arn" {
   type = string
 }

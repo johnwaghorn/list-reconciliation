@@ -1,7 +1,3 @@
-locals {
-  lambda_timeout = 300
-}
-
 data "archive_file" "lambda_zip" {
   type = "zip"
   source_dir = "${path.module}/../../../../lambdas/${var.lambda_name}"
@@ -14,16 +10,15 @@ resource "aws_lambda_function" "LR-08-Lambda" {
   handler = "demographic_comparison.lambda_handler"
   role = aws_iam_role.role.arn
   runtime = var.runtime
-  timeout = local.lambda_timeout
-  layers = [
-    var.package_layer_arn]
+  timeout = var.lambda_timeout
+  layers = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
     variables = {
       DEMOGRAPHICS_TABLE = var.demographics_table_name
       ERRORS_TABLE = var.errors_table_name
-      DEMOGRAPHICSDIFFERENCES_TABLE = var.demographicsdifferences_table_name
+      DEMOGRAPHICS_DIFFERENCES_TABLE = var.demographics_differences_table_name
     }
   }
 }

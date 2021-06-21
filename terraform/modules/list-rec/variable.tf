@@ -2,6 +2,11 @@ variable "runtime" {
   type = string
 }
 
+variable "lambda_timeout" {
+  type = number
+  default = 300
+}
+
 variable "patient_sqs" {
   type = string
 }

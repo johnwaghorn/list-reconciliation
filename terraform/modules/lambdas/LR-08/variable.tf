@@ -2,13 +2,12 @@ variable "runtime" {
   type = string
 }
 
-variable "package_layer_arn" {
-  type = string
+variable "lambda_timeout" {
+  type = number
 }
 
-variable "patient_sqs" {
+variable "package_layer_arn" {
   type = string
-  default = "Patient_Records.fifo"
 }
 
 variable "lambda_name" {
@@ -23,7 +22,7 @@ variable "errors_table_arn" {
   type = string
 }
 
-variable "demographicsdifferences_table_arn" {
+variable "demographics_differences_table_arn" {
   type = string
 }
 
@@ -35,6 +34,6 @@ variable "errors_table_name" {
   type = string
 }
 
-variable "demographicsdifferences_table_name" {
+variable "demographics_differences_table_name" {
   type = string
 }

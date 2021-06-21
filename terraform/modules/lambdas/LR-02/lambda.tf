@@ -1,6 +1,6 @@
 locals {
   source_bucket  = "arn:aws:s3:::${var.source_bucket}"
-  lambda_timeout = 300
+  lambda_timeout = 900
 }
 
 data "archive_file" "lambda_zip" {

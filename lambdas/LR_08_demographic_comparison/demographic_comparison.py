@@ -4,7 +4,7 @@ from typing import Dict
 import json
 
 from comparison_engine.core import compare_records
-from utils.logger import LOG, success, log_dynamodb_error, UNHANDLED_ERROR
+from utils.logger import LOG, success, Success, log_dynamodb_error, UNHANDLED_ERROR
 from listrec_comparison_engine import listrec_comparisons
 from utils.models import DemographicsDifferences, Demographics
 
@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         raise type(err)(error_response) from err
 
 
-def demographic_comparisons(job_id: str, patient_id: str) -> Dict[str, str]:
+def demographic_comparisons(job_id: str, patient_id: str) -> Success:
     """Compare PDS and GP demographic data for a record, logging the result to
     DynamoDB.
 
