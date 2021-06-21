@@ -1,52 +1,76 @@
 from getgauge.python import step
 from getgauge.python import Messages
+from utils.datetimezone import get_datetime_now
+
 import boto3
 import json
 import os
 from tempfile import gettempdir
 import os
-import datetime
-import pytz
+from datetime import timedelta
+import time
 
-# On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
-# Uncomment the below line to run locally and provide the respective profile_name
-# dev = boto3.session.Session(profile_name="247275863148_PDS-PoC")
-
-#Region & Timezone
+# Region & Timezone
 region_name = "eu-west-2"
-datetime = datetime.datetime.now(pytz.timezone('Europe/London'))
-
+test_datetime = get_datetime_now()
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-bucket = 'test-extract-input-bucket'
+bucket = "test-extract-input-bucket"
 temp_dir = gettempdir()
+now = test_datetime - timedelta(hours=1)
+day = "123456789ABCDEFGHIJKLMNOPQRSTUV"[now.day - 1]
+month = "ABCDEFGHIJKL"[now.month - 1]
+
+
+def get_gppractice_out_path(filename_no_ext):
+    file_out_path = os.path.join(gettempdir(), f"{filename_no_ext}.{month}{day}A")
+    return file_out_path
 
 
 @step("connect and trigger lambda LR-02")
-def connect_to_lambda_lr02():
+def connect_to_lambda_lr02_with_valid_payload():
     client = dev.client("lambda", region_name)
-    payload_file = 'LR_02_Lambda_Payload.txt'
+    payload_file = "LR_02_Lambda_Payload.txt"
     payload_temp = os.path.join(DATA, payload_file)
-    
+
     with open(payload_temp) as jsonfile:
         payload_dict = json.load(jsonfile)
-    
+
     lr_02_response = client.invoke(
         FunctionName="arn:aws:lambda:eu-west-2:247275863148:function:LR-02-validate-and-parse",
         InvocationType="Event",
-        Payload =json.dumps(payload_dict))
+        Payload=json.dumps(payload_dict),
+    )
+
+    return lr_02_response
+
+
+@step("connect and trigger lambda LR-02 with invalid payload")
+def connect_to_lambda_lr02_with_invalid_payload():
+    client = dev.client("lambda", region_name)
+    payload_file = "LR_02_Lambda_Invalid_Payload.txt"
+    payload_temp = os.path.join(DATA, payload_file)
+
+    with open(payload_temp) as jsonfile:
+        payload_dict = json.load(jsonfile)
+
+    lr_02_response = client.invoke(
+        FunctionName="arn:aws:lambda:eu-west-2:247275863148:function:LR-02-validate-and-parse",
+        InvocationType="Event",
+        Payload=json.dumps(payload_dict),
+    )
 
     return lr_02_response
 
 
 @step("trigger lambda LR-02 and assert response status code is <StatusCode>")
 def assert_lambda_lr_02_response_statuscode(expstatuscode):
-    lr_02_response = connect_to_lambda_lr02()
+    lr_02_response = connect_to_lambda_lr02_with_invalid_payload()
 
     for key, value in lr_02_response.items():
         print(key, value)
@@ -54,9 +78,11 @@ def assert_lambda_lr_02_response_statuscode(expstatuscode):
             assert value == int(expstatuscode)
 
 
-@step("trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>")
-def assert_lambda_lr_02_response_metadata_statuscode(expstatuscode):
-    lr_02_response = connect_to_lambda_lr02()
+@step(
+    "trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>"
+)
+def assert_lambda_lr_02_response_metadata_httpstatuscode(expstatuscode):
+    lr_02_response = connect_to_lambda_lr02_with_invalid_payload()
 
     for key in lr_02_response.items():
         if key == "ResponseMetadata":
@@ -64,47 +90,113 @@ def assert_lambda_lr_02_response_metadata_statuscode(expstatuscode):
                 expstatuscode
             )
 
-@step(
-    "create the gp_practice file <testfile> for the current date"
-)
-def create_gp_file_with_current_date(testfile):
+
+@step("create gpextract file")
+def create_gp_file(testfile, row, invalid_item=None, field_loc=None):
     path = os.path.join(DATA, testfile)
     dir_, filename = os.path.split(path)
     filename_no_ext, ext = os.path.splitext(filename)
-    now = datetime.datetime.now()
-    day = "123456789ABCDEFGHIJKLMNOPQRSTUV"[now.day - 1]
-    month = "ABCDEFGHIJKL"[now.month - 1]
-    out_path = os.path.join(gettempdir(), f"{filename_no_ext}.{month}{day}A")
-    with open(path) as infile, open(out_path, 'w') as outfile:
-        outfile.write(infile.read().replace('xxxxxxxx', now.strftime('%Y%m%d')))
-    return out_path
+    file_out_path = get_gppractice_out_path(filename_no_ext)
 
-@step("connect to s3 and upload file <testfile> into inbound folder for LR-02 to pick and validate the file")
+    with open(path) as infile:
+        in_text = infile.readlines()
+        out_lines = []
+        ldate = now.strftime("%Y%m%d")
+        ltime = now.strftime("%H%M")
+
+    for line in in_text:
+        if line.startswith(row) and row == "DOW~1":
+            split_line = line.split("~")
+            if invalid_item and field_loc:
+                split_line[int(field_loc)] = invalid_item
+                if field_loc != "4":
+                    split_line[4] = ldate
+                    split_line[5] = ltime
+            line = "~".join(split_line)
+
+        elif line.startswith(row) and row == "DOW~2":
+            split_line = line.split("~")
+            split_line[int(field_loc)] = invalid_item
+            line = "~".join(split_line)
+
+        out_lines.append(line)
+
+    with open(path) as infile, open(file_out_path, "w") as outfile:
+        outfile.writelines(out_lines)
+    return file_out_path
+
+
+@step(
+    "connect to s3 and upload file <testfile> into inbound folder for LR-02 to pick and validate the file"
+)
 def upload_gpextract_file_into_s3(testfile):
-  temp_destdir = create_gp_file_with_current_date(testfile)
-  destination_filename = os.path.basename(temp_destdir)
-  s3 = dev.client('s3', region_name)
-  try:
-        s3.upload_file(temp_destdir, bucket, 'inbound/'+destination_filename)
-        print("Upload Successful")
+    row = "DOW~1"
+    temp_destdir = create_gp_file(testfile, row)
+    destination_filename = os.path.basename(temp_destdir)
+    s3 = dev.client("s3", region_name)
+    try:
+        s3.upload_file(temp_destdir, bucket, "inbound/" + destination_filename)
         Messages.write_message("Upload Successful")
-        assert True
-  except FileNotFoundError:
-        print('File not found')
+    except FileNotFoundError:
+        Messages.write_message("File not found")
         raise
 
-@step("connect and trigger lambda LR-02 with invalid payload")
-def connect_to_lambda_lr02_with_invalid_payload():
-    client = dev.client("lambda", region_name)
-    payload_file = 'LR_02_Lambda_Invalid_Payload.txt'
-    payload_temp = os.path.join(DATA, payload_file)
-    
-    with open(payload_temp) as jsonfile:
-        payload_dict = json.load(jsonfile)
-    
-    lr_02_response = client.invoke(
-        FunctionName="arn:aws:lambda:eu-west-2:247275863148:function:LR-02-validate-and-parse",
-        InvocationType="Event",
-        Payload =json.dumps(payload_dict))
 
-    return lr_02_response
+@step(
+    "connect to s3 and upload gp file with invalid item <invalid_item> in row <row1> at position <fieldlc>"
+)
+def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
+    testfile = "GPR4LNA1.EIA"
+    temp_destdir = create_gp_file(testfile, row, invalid_item, fieldlc)
+
+    global destination_filename
+    destination_filename = os.path.basename(temp_destdir)
+
+    s3 = dev.client("s3", region_name)
+    try:
+        s3.upload_file(temp_destdir, bucket, "inbound/" + destination_filename)
+        Messages.write_message("Upload Successful")
+    except FileNotFoundError:
+        Messages.write_message("File not found")
+        raise
+    return temp_destdir, destination_filename
+
+
+@step("connect to s3 failed folder and assert failure message <search_word>")
+def readfile_in_s3_failed_invalid_item(search_word):
+    time.sleep(20)
+    s3 = dev.client("s3", region_name)
+    result = s3.list_objects(
+        Bucket=bucket, Prefix="failed/" + destination_filename + "_LOG.txt"
+    )
+
+    if result:
+        for o in result.get("Contents"):
+            data = s3.get_object(Bucket=bucket, Key=o.get("Key"))
+            contents = data["Body"].read().decode("utf-8").splitlines()
+            len_content = len(contents)
+            actual_line = []
+            line_num = 0
+            val = 0
+
+            for line in contents:
+                actual_line.append(line)
+                actual_key = actual_line[line_num]
+
+                if search_word in actual_key:
+                    Messages.write_message(
+                        "Actual validation error messagein is :" + str(actual_key)
+                    )
+                    Messages.write_message("row validation successful")
+                    val += 1
+                    assert search_word in actual_key
+
+                if (
+                    line_num != len_content
+                    or line == "DOW file contains invalid records:"
+                ):
+                    line_num += 1
+
+            if val == 0:
+                Messages.write_message("Actual value was :" + str(actual_key))
+                assert val, "No value found"

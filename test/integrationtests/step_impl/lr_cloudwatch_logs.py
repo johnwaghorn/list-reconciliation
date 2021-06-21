@@ -1,102 +1,137 @@
-from getgauge.python import Messages, step
-from datetime import date, datetime, timedelta
-
+from getgauge.python import step
+from datetime import timedelta
+from utils.datetimezone import get_datetime_now
+import os
 
 import boto3
 import time
 import os
-import pytz
+import sys
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
-# Uncomment the below line to run locally and provide the respective profile_name
-#dev = boto3.session.Session(profile_name="247275863148_PDS-PoC")
-
-#Region & Timezone
+# Region & Timezone
 region_name = "eu-west-2"
-datetime = datetime.now(pytz.timezone('Europe/London'))
+test_datetime = get_datetime_now()
 
 # log groups
 log_group = "/aws/lambda/LR-02-validate-and-parse"
 
-client = dev.client('logs', region_name)
+client = dev.client("logs", region_name)
 request_id = "46753b65-cdb2-4ced-b783-71f7ecd29b7d"
+invalid_file_success = "Successfully handled invalid file: GPR4LNA1.EQA"
 
-# Queries
-query = f"fields @timestamp, @message | filter @requestId = '{request_id}' | filter @message like /GPR4LNA1.EPA processed successfully/ | sort @timestamp desc | limit 20"
-query_requestid = f"fields @timestamp, @message |sort @timestamp desc | limit 20"
-query_lr02_invalid_payload =f"fields @timestamp, @message | sort @timestamp desc | filter @message like /ERROR/ |filter @message like /error_id: 94abeed7-edb6-4dd6-afa0-833bc94a6b25/ |filter @message like /KeyError: 's3'/ | limit 20"
+# Cloud watch Queries
+QUERY = f"fields @timestamp, @message | filter @requestId = '{request_id}' | filter @message like /GPR4LNA1.EPA processed successfully/ | sort @timestamp desc | limit 20"
+QUERY_LR02_INVALID_PAYLOAD = f"fields @timestamp, @message | sort @timestamp desc | filter @message like /ERROR/ |filter @message like /error_id: 94abeed7-edb6-4dd6-afa0-833bc94a6b25/ |filter @message like /KeyError: 's3'/ | limit 20"
+QUERY_LR02_INVALID_DOD = f"fields @timestamp, @message | filter @requestId = '11377ae4-d840-4c8a-82da-00d4a6c95dd2' | filter @message like /{invalid_file_success}/ | sort @timestamp desc | limit 20"
 
 
-@step("connect to cloudwatch log and assert the response the file is processed successfully")
-def connect_to_cloudwatch_file_processed_successfully():
+@step(
+    "connect to cloudwatch log and assert the response the file is processed successfully"
+)
+def cloudwatch_file_processed_successfully():
     start_query_response = client.start_query(
         logGroupName=log_group,
-        startTime=int((datetime.today() - timedelta(days=365)).timestamp()),
-        endTime=int(datetime.now().timestamp()),
-        queryString=query,
-        )
-    query_id = start_query_response['queryId']
+        startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
+        endTime=int(test_datetime.now().timestamp()),
+        queryString=QUERY,
+    )
+    query_id = start_query_response["queryId"]
     response = None
-    while response == None or response['status'] == 'Running':
-        print('Waiting for query to complete ...')
+    while response == None or response["status"] == "Running":
+        print("Waiting for query to complete ...")
         time.sleep(10)
-        response = client.get_query_results(
-            queryId=query_id
-                )
-    
+        response = client.get_query_results(queryId=query_id)
+
     for key, value in response.items():
-        if (key == "results"):
+        if key == "results":
             if not value:
                 assert False
-            else : print(*value[0],sep='\n')
-            
-@step("connect to cloudwatch log and assert the response for the key error for the key S3 on lambda lr-02")
-def connect_to_cloudwatch_file_processed_successfully():
+            else:
+                print(*value[0], sep="\n")
+
+
+@step(
+    "connect to cloudwatch log and assert the response for the key error for the key S3 on lambda lr-02"
+)
+def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
     start_query_response = client.start_query(
         logGroupName=log_group,
-        startTime=int((datetime.today() - timedelta(days=365)).timestamp()),
-        endTime=int(datetime.now().timestamp()),
-        queryString=query_lr02_invalid_payload,
-        )
-    query_id = start_query_response['queryId']
+        startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
+        endTime=int(test_datetime.now().timestamp()),
+        queryString=QUERY_LR02_INVALID_PAYLOAD,
+    )
+    query_id = start_query_response["queryId"]
     response = None
-    while response == None or response['status'] == 'Running':
-            print('Waiting for query to complete ...')
-            time.sleep(10)
-            response = client.get_query_results(
-                queryId=query_id
-                )
+    while response == None or response["status"] == "Running":
+        print("Waiting for query to complete ...")
+        time.sleep(10)
+        response = client.get_query_results(queryId=query_id)
     for key, value in response.items():
-        if (key == "results"):
+        if key == "results":
             if not value:
                 assert False
-            else : print(*value[0],sep='\n')
-@step("connect to cloudwatch log and get the request Id logs")
-def connect_to_cloudwatch_get_request_id():
-        request_id_query_response = client.start_query(
+            else:
+                print(*value[0], sep="\n")
+
+
+@step(
+    "connect to cloudwatch log and assert the response for file with invalid date of download"
+)
+def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
+    start_query_response = client.start_query(
         logGroupName=log_group,
-        startTime=int((datetime.today() - timedelta(minutes=5)).timestamp()),
-        endTime=int(datetime.now().timestamp()),
-        queryString=query_requestid,
-        )
-        print(request_id_query_response)
-        
-        query_id = request_id_query_response['queryId']
-        response = None
-        while response == None or response['status'] == 'Running':
-            print('Waiting for query to complete ...')
-            time.sleep(10)
-            response = client.get_query_results(
-                queryId=query_id
-                )
-            for key, value in response.items():
-                if (key == "results"):
-                    if not value:
-                        response = client.get_query_results(
-                            queryId=query_id)
-                    print (key, value)
+        startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
+        endTime=int(test_datetime.now().timestamp()),
+        queryString=QUERY_LR02_INVALID_DOD,
+    )
+    query_id = start_query_response["queryId"]
+    response = None
+    while response == None or response["status"] == "Running":
+        print("Waiting for query to complete ...")
+        time.sleep(10)
+        response = client.get_query_results(queryId=query_id)
+        get_respresult = response.get("results")
+        for key in get_respresult[0]:
+            print(key)
+            for field in key:
+                print(field)
+
+
+@step("get the latest jobid from Jobs table")
+def get_latest_jobid():
+    dev1 = dev.resource("dynamodb", region_name="eu-west-2")
+    job_table = dev1.Table("Jobs")
+    job_data = job_table.scan()
+    job_items = []
+    for key, value in job_data.items():
+        if key == "Items":
+            job_items = [j for j in value]
+            job_items = sorted(job_items, reverse=True, key=lambda i: i["Timestamp"])
+            latest_job_id = job_items[0]
+            return latest_job_id["Id"]
+
+
+@step("connect to cloudwatch log and get the request id by JobId created")
+def connect_to_cloudwatch_get_request_id():
+    job_id = get_latest_jobid()
+    query_toget_requestid = f"fields @timestamp, @message,@requestId | sort @timestamp desc | filter @message like /Job {job_id} created/ | limit 20"
+    start_query_response = client.start_query(
+        logGroupName=log_group,
+        startTime=int((test_datetime.today() - timedelta(days=2)).timestamp()),
+        endTime=int(test_datetime.now().timestamp()),
+        queryString=query_toget_requestid,
+    )
+    query_id = start_query_response["queryId"]
+    response = None
+
+    while response == None or response["status"] == "Running":
+        print("Waiting for query to complete ...")
+        time.sleep(10)
+        response = client.get_query_results(queryId=query_id)
+        print(response)
