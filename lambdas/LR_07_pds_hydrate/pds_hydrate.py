@@ -102,6 +102,7 @@ def pds_hydrate(nhs_number: str, job_id: str, patient_id: str) -> Success:
             Demographics.PDS_Address.set(pds_record["address"]),
             Demographics.PDS_PostCode.set(pds_record["postcode"]),
             Demographics.GP_RegistrationStatus.set(status),
+            Demographics.PDS_Version.set(pds_record["version"]),
         ]
     )
 

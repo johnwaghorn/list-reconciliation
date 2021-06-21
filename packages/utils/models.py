@@ -94,6 +94,8 @@ class Demographics(Model):
     PDS_IsSensitive = BooleanAttribute(null=True)
     PDS_Address = ListAttribute(null=True)
     PDS_PostCode = UnicodeAttribute(null=True)
+    PDS_Version = UnicodeAttribute(null=True)
+
     JobIdIndex = DemographicsJobIdIndex()
 
 

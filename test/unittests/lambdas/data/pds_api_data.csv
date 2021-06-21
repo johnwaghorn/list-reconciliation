@@ -1,4 +1,4 @@
-nhs_number,surname,forename,prefix,birthdate,gender,address,postcode,gp,code,gp_registered_date
-9000000009,Smith,Jane,Mrs,2010-10-22,female,"1 Trevelyan Square,Boar Lane,City Centre,Leeds,West Yorkshire",LS1 6AE,Y123452,U,2012-05-22
-8000000008,Davies,"Paul,Philip",Mr,2009-10-22,male,"1 Trevelyan Square,Leeds,West Yorkshire",LS1 6UP,Y123451,R,2012-05-22
-7000000007,Pavey,Nikki-Stevens,Miss,1923-11-21,female,"19 Main Street,Logan,Durham,London",ZE3 9JY,,REDACTED,2012-05-22
+nhs_number,surname,forename,prefix,birthdate,gender,address,postcode,gp,code,gp_registered_date,version
+9000000009,Smith,Jane,Mrs,2010-10-22,female,"1 Trevelyan Square,Boar Lane,City Centre,Leeds,West Yorkshire",LS1 6AE,Y123452,U,2012-05-22,1
+8000000008,Davies,"Paul,Philip",Mr,2009-10-22,male,"1 Trevelyan Square,Leeds,West Yorkshire",LS1 6UP,Y123451,R,2012-05-22,2
+7000000007,Pavey,Nikki-Stevens,Miss,1923-11-21,female,"19 Main Street,Logan,Durham,London",ZE3 9JY,,REDACTED,2012-05-22,6

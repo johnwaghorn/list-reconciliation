@@ -50,6 +50,7 @@ def get_mock_pds_record(url: str, nhs_number: str, *args, **kwargs) -> Dict:
                 "gp_code": row["gp"] or None,
                 "gp_registered_date": row["gp_registered_date"] or None,
                 "is_sensitive": row["code"] in ("R", "V", "REDACTED"),
+                "version": row["version"],
             }
 
 
@@ -100,6 +101,7 @@ def get_pds_fhir_record(
         "gp_code": content["generalPractitioner"][0]["identifier"]["value"],
         "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"]["start"],
         "is_sensitive": content["meta"]["security"][0]["code"] in ("R", "V", "REDACTED"),
+        "version": content["meta"]["versionId"],
     }
 
 

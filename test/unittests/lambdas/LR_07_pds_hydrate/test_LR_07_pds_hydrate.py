@@ -24,6 +24,7 @@ PDS_COLUMNS = (
     "PDS_Address",
     "PDS_PostCode",
     "GP_RegistrationStatus",
+    "PDS_Version",
 )
 
 
@@ -60,6 +61,7 @@ def test_write_into_table(
         ],
         "PDS_PostCode": "LS1 6AE",
         "GP_RegistrationStatus": "Matched",
+        "PDS_Version": "1",
     }
 
     assert actual == expected
@@ -103,6 +105,7 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
         ],
         "PDS_PostCode": "LS1 6UP",
         "GP_RegistrationStatus": "Partnership Mismatch",
+        "PDS_Version": "2",
     }
 
     assert actual == expected
@@ -139,6 +142,7 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
         ],
         "PDS_PostCode": "ZE3 9JY",
         "GP_RegistrationStatus": "Deducted Patient Match",
+        "PDS_Version": "6",
     }
 
     assert actual == expected
