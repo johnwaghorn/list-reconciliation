@@ -1,0 +1,31 @@
+name: Destroy Feature Branch Env
+on:
+  delete:
+    branches-ignore:
+      - develop
+      - master
+jobs:
+  cleanup:
+    name: Destroy
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PUBLIC_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+      FEATURE_BRANCH: ${GITHUB_REF##*/}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Terraform Init
+        working-directory: ./terraform/environment/dev
+        run: |
+          echo "Deploying infrastructure for env: ${{ env.FEATURE_BRANCH }}"
+          terraform init
+          terraform workspace select "${{ env.FEATURE_BRANCH }}" || terraform workspace new "${{ env.FEATURE_BRANCH }}"
+          terraform workspace list
+      - name: Terraform Destroy
+        working-directory: ./terraform/
+        run: |
+          terraform destroy -auto-approve
+      - name: Terraform Delete workspace
+        working-directory: ./terraform/environment/dev
+        run: |
+          terraform  workspace delete "${{ env.FEATURE_BRANCH }}" 

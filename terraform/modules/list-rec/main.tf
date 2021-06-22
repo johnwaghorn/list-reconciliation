@@ -71,22 +71,22 @@ module "LR-08" {
 }
 
 module "LR-09" {
-  source                    = "../lambdas/LR-09"
-  lambda_name               = local.lambda_name.LR-09
-  runtime                   = var.runtime
-  lambda_timeout            = var.lambda_timeout
-  package_layer_arn         = aws_lambda_layer_version.package_layer.arn
-  lr_10_step_function_arn   = module.LR-10.LR-10-step_function_arn
-  demographics_table_arn    = module.Demographics_Table.dynamo_table_arn
-  demographics_table_name   = module.Demographics_Table.dynamo_table_name
-  jobs_table_arn            = module.Jobs_Table.dynamo_table_arn
-  jobs_table_name           = module.Jobs_Table.dynamo_table_name
-  job_stats_table_arn       = module.Jobs_Stats_Table.dynamo_table_arn
-  job_stats_table_name      = module.Jobs_Stats_Table.dynamo_table_name
-  inflight_table_arn        = module.In_Flight_Table.dynamo_table_arn
-  inflight_table_name       = module.In_Flight_Table.dynamo_table_name
-  errors_table_arn          = module.Errors_Table.dynamo_table_arn
-  errors_table_name         = module.Errors_Table.dynamo_table_name
+  source                  = "../lambdas/LR-09"
+  lambda_name             = local.lambda_name.LR-09
+  runtime                 = var.runtime
+  lambda_timeout          = var.lambda_timeout
+  package_layer_arn       = aws_lambda_layer_version.package_layer.arn
+  lr_10_step_function_arn = module.LR-10.LR-10-step_function_arn
+  demographics_table_arn  = module.Demographics_Table.dynamo_table_arn
+  demographics_table_name = module.Demographics_Table.dynamo_table_name
+  jobs_table_arn          = module.Jobs_Table.dynamo_table_arn
+  jobs_table_name         = module.Jobs_Table.dynamo_table_name
+  job_stats_table_arn     = module.Jobs_Stats_Table.dynamo_table_arn
+  job_stats_table_name    = module.Jobs_Stats_Table.dynamo_table_name
+  inflight_table_arn      = module.In_Flight_Table.dynamo_table_arn
+  inflight_table_name     = module.In_Flight_Table.dynamo_table_name
+  errors_table_arn        = module.Errors_Table.dynamo_table_arn
+  errors_table_name       = module.Errors_Table.dynamo_table_name
 }
 
 module "LR-11" {

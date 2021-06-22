@@ -1,0 +1,41 @@
+name: Deploy Feature branch and run system integration tests
+on:
+  push:
+    branches-ignore:
+      - develop
+      - master
+
+jobs:
+  create-infra:
+    name: Deploy infra and run System Integration tests
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_PUBLIC_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+      FEATURE_BRANCH: ${GITHUB_REF##*/}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Terraform Init
+      run: |
+        echo "Depolying ${{ env.FEATURE_BRANCH }} infrastructure  "
+        rm -rf .terraform || true
+        make init deployment_environment=dev
+        terraform -chdir=terraform/environment/dev workspace select "${{ env.FEATURE_BRANCH }}" || terraform -chdir=terraform/environment/dev workspace new "${{ env.FEATURE_BRANCH }}"
+        terraform -chdir=terraform/environment/dev workspace list
+    - name: Terraform Apply
+      run: |
+        terraform -chdir=terraform/environment/dev apply -auto-approve
+    - name: Terraform output
+      run: |
+        terraform -chdir=terraform/environment/dev output -json > output.json
+    - name: upload terraform output artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: terraform output
+        path: output.json
+        retention-days: 2
+    - name: Run System tests
+      run: |
+          cat output.json
+          echo "Running System tests"
+

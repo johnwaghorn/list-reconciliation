@@ -1,16 +1,16 @@
 locals {
   jobs_gsi = [
     {
-      name = "jobs-id-index",
-      hash_key = "Id"
+      name            = "jobs-id-index",
+      hash_key        = "Id"
       projection_type = "ALL"
     }
   ]
 
   demographics_gsi = [
     {
-      name = "demographics-job_id-index",
-      hash_key = "JobId"
+      name            = "demographics-job_id-index",
+      hash_key        = "JobId"
       projection_type = "ALL"
     }
   ]

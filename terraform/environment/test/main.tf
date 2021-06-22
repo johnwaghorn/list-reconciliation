@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-2"
+  region  = "eu-west-2"
   profile = "default"
 }
 
@@ -24,8 +24,8 @@ terraform {
 }
 
 module "List-Recon" {
-  source = "../../modules/list-rec"
-  pds_url = "s3://mock-pds-data/pds_api_data.csv"
+  source      = "../../modules/list-rec"
+  pds_url     = "s3://mock-pds-data/pds_api_data.csv"
   patient_sqs = "Patient_Records.fifo"
-  runtime = var.runtime
+  runtime     = var.runtime
 }

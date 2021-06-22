@@ -7,7 +7,7 @@ variable "lambda_name" {
 }
 
 variable "patient_sqs" {
-  type = string
+  type    = string
   default = "Patient_Records.fifo"
 }
 

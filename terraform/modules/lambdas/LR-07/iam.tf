@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_iam_role" "role" {
-  name = "iam-role-${var.lambda_name}-${terraform.workspace}"
+  name        = "iam-role-${var.lambda_name}-${terraform.workspace}"
   description = "Execution Role for ${var.lambda_name} Lambda."
 
   assume_role_policy = <<EOF
@@ -27,7 +27,7 @@ EOF
 }
 
 resource "aws_iam_policy" "policy" {
-  name = "iam-policy-${var.lambda_name}-${terraform.workspace}"
+  name        = "iam-policy-${var.lambda_name}-${terraform.workspace}"
   description = "Policy for LR-07 ${var.lambda_name} Lambda Role."
 
   policy = <<-EOF
@@ -88,7 +88,6 @@ resource "aws_iam_policy" "policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment" {
-  role = aws_iam_role.role.name
+  role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }
-

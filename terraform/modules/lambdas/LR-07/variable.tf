@@ -11,12 +11,12 @@ variable "package_layer_arn" {
 }
 
 variable "pds_url" {
-  type = string
+  type    = string
   default = "s3://mock-pds-data/pds_api_data.csv"
 }
 
 variable "patient_sqs" {
-  type = string
+  type    = string
   default = "Patient_Records.fifo"
 }
 
@@ -25,7 +25,7 @@ variable "patient_sqs_arn" {
 }
 
 variable "env_vars" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 

@@ -1,14 +1,14 @@
 variable "prefix" {
-  type = string
+  type    = string
   default = "NHS-list-rec"
 }
 
 variable "runtime" {
-  type = string
+  type    = string
   default = "python3.8"
 }
 
 variable "lambda_timeout" {
-  type = number
+  type    = number
   default = 300
 }

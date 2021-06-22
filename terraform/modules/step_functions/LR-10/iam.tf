@@ -1,7 +1,7 @@
 resource "aws_iam_role" "role" {
-  name                = "iam-role-${var.name}"
-  description         = "Execution Role for ${var.name} Step function."
-  assume_role_policy  = <<EOF
+  name               = "iam-role-${var.name}"
+  description        = "Execution Role for ${var.name} Step function."
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [

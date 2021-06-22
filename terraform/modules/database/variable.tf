@@ -3,19 +3,19 @@ variable "table_name" {
 }
 
 variable "billing_mode" {
-  type = string
+  type    = string
   default = "PAY_PER_REQUEST"
 }
 
 variable "default_read_capacity" {
-  type = string
+  type    = string
   default = "5"
 }
 
 variable "secondary_index" {
   type = list(object({
-    name = string,
-    hash_key = string
+    name            = string,
+    hash_key        = string
     projection_type = string
   }))
 }

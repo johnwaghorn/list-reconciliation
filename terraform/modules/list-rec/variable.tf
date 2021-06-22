@@ -3,7 +3,7 @@ variable "runtime" {
 }
 
 variable "lambda_timeout" {
-  type = number
+  type    = number
   default = 300
 }
 
@@ -37,7 +37,7 @@ variable "jobs_stats_attribute" {
     {
       name = "JobId"
       type = "S"
-    }]
+  }]
 }
 
 variable "in_flight_attribute" {
@@ -45,7 +45,7 @@ variable "in_flight_attribute" {
     {
       name = "JobId"
       type = "S"
-    }]
+  }]
 }
 
 variable "demographic_attribute" {
@@ -71,7 +71,7 @@ variable "demographic_difference_attribute" {
       name = "JobId"
       type = "S"
     }
-        ]
+  ]
 }
 
 variable "errors_attribute" {
@@ -83,7 +83,7 @@ variable "errors_attribute" {
     {
       name = "JobId"
       type = "S"
-    }]
+  }]
 }
 
 variable "status_attribute" {

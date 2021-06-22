@@ -1,25 +1,25 @@
 variable "s3_folders" {
   type        = list(string)
   description = "The list of S3 folders to create"
-  default     = ["inbound", "fail", "pass","ready"]
+  default     = ["inbound", "fail", "pass", "ready"]
 }
 
 resource "aws_s3_bucket" "LR-01" {
-  bucket= "lr-01-${terraform.workspace}"
-  acl = "private"
+  bucket        = lower("lr-01-${terraform.workspace}")
+  acl           = "private"
   force_destroy = true
 
-  tags={
-    Name = "S3 Input Bucket for LR-02 - ${terraform.workspace}"
+  tags = {
+    Name = "S3 Input Bucket for LR-01 - ${terraform.workspace}"
   }
 }
 
 resource "aws_s3_bucket" "LR-13" {
-  bucket = "lr-13-registration-differences-output-${terraform.workspace}"
-  acl = "private"
+  bucket        = lower("lr-13-registration-differences-output-${terraform.workspace}")
+  acl           = "private"
   force_destroy = true
 
-  tags={
+  tags = {
     Name = "Output file storage for LR-11 LR12 and LR14"
   }
 }
