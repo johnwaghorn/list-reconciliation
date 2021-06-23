@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "role" {
-  name               = "iam-role-${var.lambda_name}-${terraform.workspace}"
+  name               = "iam-role-${var.lambda_name}-${var.suffix}"
   description        = "Execution Role for ${var.lambda_name} Lambda."
   assume_role_policy = <<EOF
 {
@@ -21,13 +21,13 @@ resource "aws_iam_role" "role" {
  EOF
 
   tags = {
-    name = "Lambda role for LR-09-${terraform.workspace}"
+    name = "Lambda role for LR-09-${var.suffix}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "iam-policy-${var.lambda_name}-${terraform.workspace}"
-  description = "Policy for LR-09-${terraform.workspace} Lambda Role."
+  name        = "iam-policy-${var.lambda_name}-${var.suffix}"
+  description = "Policy for LR-09-${var.suffix} Lambda Role."
   policy      = <<-EOF
   {
     "Version": "2012-10-17",

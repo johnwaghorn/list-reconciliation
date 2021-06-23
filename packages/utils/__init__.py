@@ -1,9 +1,10 @@
-from datetime import datetime
 from enum import Enum
 from typing import List
 
 import csv
 import io
+
+from utils.datetimezone import get_datetime_now
 
 
 class RegistrationType(Enum):
@@ -40,4 +41,4 @@ def get_registration_filename(practice_code: str, reg_type: RegistrationType) ->
     Returns:
         str: Filename containing formatted practice, dataset name and datetime.
     """
-    return f'{practice_code}-{reg_type.value}-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv'
+    return f'{practice_code}-{reg_type.value}-{get_datetime_now().strftime("%Y%m%d%H%M%S")}.csv'

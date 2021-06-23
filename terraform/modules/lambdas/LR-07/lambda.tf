@@ -9,7 +9,7 @@ data "archive_file" "lambda_zip" {
 }
 
 resource "aws_lambda_function" "Lambda" {
-  function_name    = "${var.lambda_name}-${terraform.workspace}"
+  function_name    = "${var.lambda_name}-${var.suffix}"
   filename         = data.archive_file.lambda_zip.output_path
   handler          = "pds_hydrate.lambda_handler"
   role             = aws_iam_role.role.arn

@@ -11,8 +11,7 @@ variable "package_layer_arn" {
 }
 
 variable "pds_url" {
-  type    = string
-  default = "s3://mock-pds-data/pds_api_data.csv"
+  type = string
 }
 
 variable "patient_sqs" {
@@ -50,5 +49,13 @@ variable "demographics_table_name" {
 }
 
 variable "errors_table_name" {
+  type = string
+}
+
+variable "mock_pds_data_bucket_arn" {
+  type = string
+}
+
+variable "suffix" {
   type = string
 }

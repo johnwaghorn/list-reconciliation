@@ -18,6 +18,10 @@ variable "registrations_output_bucket" {
   type = string
 }
 
+variable "registrations_output_bucket_arn" {
+  type = string
+}
+
 variable "demographics_table_arn" {
   type = string
 }
@@ -47,5 +51,9 @@ variable "job_stats_table_name" {
 }
 
 variable "errors_table_name" {
+  type = string
+}
+
+variable "suffix" {
   type = string
 }

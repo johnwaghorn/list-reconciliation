@@ -1,6 +1,4 @@
-from datetime import datetime
 from io import StringIO
-from pytz import timezone
 
 import csv
 import os
@@ -31,7 +29,7 @@ def test_get_gp_exclusive_registrations_ok(demographics, jobs, s3_bucket, jobsta
 
     assert (
         response["filename"]
-        == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/Y12345/Y12345-OnlyOnGP-20200201134000.csv"
+        == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/1/Y12345-OnlyOnGP-20200201134000.csv"
     )
 
     actual = csv.reader(StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode()))
@@ -60,7 +58,7 @@ def test_get_gp_exclusive_registrations_no_diffs_ok(demographics, jobs, s3_bucke
 
     assert (
         response["filename"]
-        == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/Y23456/Y23456-OnlyOnGP-20200201135000.csv"
+        == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/2/Y23456-OnlyOnGP-20200201135000.csv"
     )
 
     actual = csv.reader(StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode()))

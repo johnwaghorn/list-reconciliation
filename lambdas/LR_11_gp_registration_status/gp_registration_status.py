@@ -3,9 +3,10 @@ import os
 
 import boto3
 
+from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
-from utils.models import Demographics, Jobs, JobStats
+from utils.models import Demographics, JobStats
 from utils.registration_status import GPRegistrationStatus
 
 
@@ -13,17 +14,13 @@ LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET
 
 
 def lambda_handler(event, context):
-    try:
-        job_id = json.loads(event["job_id"])
-
-    except json.JSONDecodeError:
-        job_id = event["job_id"]
+    job_id = event["job_id"]
 
     try:
         return json.dumps(get_gp_exclusive_registrations(job_id))
 
     except Exception as err:
-        msg = f"Unhandled error getting gp registrations. JobId: {job_id}"
+        msg = f"Unhandled error getting gp registrations. JobId: {job_id or '99999999-0909-0909-0909-999999999999'}"
         error_response = log_dynamodb_error(job_id, UNHANDLED_ERROR, msg)
 
         raise type(err)(error_response) from err
@@ -36,7 +33,7 @@ def get_gp_exclusive_registrations(job_id: str) -> Success:
         job_id (str): Job ID.
 
     """
-    practice_code = Jobs.query(job_id).next().PracticeCode
+    practice_code = get_job(job_id).PracticeCode
 
     results = Demographics.JobIdIndex.query(
         job_id,
@@ -92,7 +89,7 @@ def get_gp_exclusive_registrations(job_id: str) -> Success:
     ]
     stream = write_to_mem_csv(rows, header)
 
-    key = f"{practice_code}/{filename}"
+    key = f"{job_id}/{filename}"
     boto3.client("s3").put_object(
         Body=stream.getvalue(),
         Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,

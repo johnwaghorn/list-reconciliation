@@ -5,3 +5,7 @@ variable "name" {
 variable "lr_11_lambda" {
   type = string
 }
+
+variable "lr_12_lambda" {
+  type = string
+}

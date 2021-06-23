@@ -57,3 +57,7 @@ variable "errors_table_arn" {
 variable "errors_table_name" {
   type = string
 }
+
+variable "suffix" {
+  type = string
+}

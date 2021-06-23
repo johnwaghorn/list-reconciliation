@@ -24,8 +24,33 @@ terraform {
 }
 
 module "List-Recon" {
-  source      = "../../modules/list-rec"
-  pds_url     = "s3://mock-pds-data/pds_api_data.csv"
+  source = "../../modules/list-rec"
+  pds_url = "pds_api_data.csv"
   patient_sqs = "Patient_Records.fifo"
-  runtime     = var.runtime
+  runtime = var.runtime
+  suffix = "${element(split("-", terraform.workspace), 1)}"
+}
+
+resource "aws_s3_bucket_object" "upload-mock-pds-data" {
+  bucket = module.List-Recon.mock_pds_data
+  key    = "pds_api_data.csv"
+  acl    = "private"
+  source = "../../../test/unittests/lambdas/data/pds_api_data.csv"
+  etag   = filemd5("../../../test/unittests/lambdas/data/pds_api_data.csv")
+}
+
+resource "aws_s3_bucket_object" "upload-test-pds-registration-data-1" {
+  bucket = module.List-Recon.LR_22_bucket
+  key    = "Y123451.csv"
+  acl    = "private"
+  source = "../../../test/unittests/lambdas/data/Y123451.csv"
+  etag   = filemd5("../../../test/unittests/lambdas/data/Y123451.csv")
+}
+
+resource "aws_s3_bucket_object" "upload-test-pds-registration-data-2" {
+  bucket = module.List-Recon.LR_22_bucket
+  key    = "Y123452.csv"
+  acl    = "private"
+  source = "../../../test/unittests/lambdas/data/Y123452.csv"
+  etag   = filemd5("../../../test/unittests/lambdas/data/Y123452.csv")
 }

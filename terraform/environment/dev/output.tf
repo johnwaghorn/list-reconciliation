@@ -21,3 +21,19 @@ output "lr_01_bucket_retry" {
 output "patients_queue" {
   value = module.List-Recon.sqs_queue_name
 }
+
+output "LR-12-lambda" {
+  value = module.List-Recon.LR-12-lambda
+}
+
+output "mock_pds_data" {
+  value = module.List-Recon.mock_pds_data
+}
+
+output "LR_22_bucket" {
+  value = module.List-Recon.LR_22_bucket
+}
+
+# output "suffix" {
+#   value = module.List-Recon.suffix
+# }

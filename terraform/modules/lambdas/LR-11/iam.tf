@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "role" {
-  name               = "iam-role-${var.lambda_name}-${terraform.workspace}"
+  name               = "iam-role-${var.lambda_name}-${var.suffix}"
   description        = "Execution Role for ${var.lambda_name} Lambda."
   assume_role_policy = <<EOF
 {
@@ -21,13 +21,13 @@ resource "aws_iam_role" "role" {
 EOF
 
   tags = {
-    name = "Lambda role for LR-11-${terraform.workspace}"
+    name = "Lambda role for LR-11-${var.suffix}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "iam-policy-${var.lambda_name}-${terraform.workspace}"
-  description = "Policy for LR-11-${terraform.workspace} Lambda Role."
+  name        = "iam-policy-${var.lambda_name}-${var.suffix}"
+  description = "Policy for LR-11-${var.suffix} Lambda Role."
   policy      = <<EOF
 {
     "Version": "2012-10-17",
@@ -47,7 +47,9 @@ resource "aws_iam_policy" "policy" {
                 "s3:PutObject",
                 "s3:DeleteObject"
             ],
-            "Resource": "${var.registrations_output_bucket}/*"
+            "Resource": [
+                "${var.registrations_output_bucket_arn}/*"
+            ]
         },
         {
             "Effect": "Allow",
@@ -55,6 +57,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_table_arn}",
                 "${var.jobs_table_arn}",
+                "${var.job_stats_table_arn}",
                 "${var.errors_table_arn}"
             ]
         },
@@ -72,6 +75,13 @@ resource "aws_iam_policy" "policy" {
         {
             "Effect": "Allow",
             "Action": "dynamodb:UpdateItem",
+            "Resource": [
+                "${var.job_stats_table_arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:GetItem",
             "Resource": [
                 "${var.job_stats_table_arn}"
             ]

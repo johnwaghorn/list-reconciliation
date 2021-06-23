@@ -15,6 +15,11 @@ variable "pds_url" {
   type = string
 }
 
+variable "pds_api_retries" {
+  type = number
+  default = 5
+}
+
 variable "jobs_attribute" {
   default = [
     {
@@ -93,4 +98,8 @@ variable "status_attribute" {
       type = "S"
     },
   ]
+}
+
+variable "suffix" {
+  type = string
 }

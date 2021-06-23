@@ -12,6 +12,8 @@
 
 ## Development installation
 
+A tool, [getgauge](https://docs.gauge.org/getting_started/installing-gauge.html?os=windows&language=python&ide=null), needs to be installed to run additional tests.
+
 ```bash
 virtualenv env
 source env/bin/activate
@@ -28,6 +30,8 @@ pip install -r test_requirements.txt
 
 # Run tests
 pytest
+cd test/integrationtests
+gauge run
 
 # Run the program with two input files from the same extract group
 gpextract /tmp/output GPR4LNA1.C7A GPR4LNA1.C7B -t 0 -r

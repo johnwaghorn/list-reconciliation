@@ -1,5 +1,5 @@
 resource "aws_sqs_queue" "Patient_Records_Queue" {
-  name                        = "patient_records-${terraform.workspace}.fifo"
+  name                        = "patient_records-${var.suffix}.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
   delay_seconds               = 0

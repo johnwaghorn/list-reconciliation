@@ -2,32 +2,27 @@ variable "runtime" {
   type = string
 }
 
-variable "lambda_name" {
-  type = string
-}
-
-variable "patient_sqs" {
-  type    = string
-  default = "Patient_Records.fifo"
-}
-
 variable "package_layer_arn" {
   type = string
 }
 
-variable "lr_01_inbound_folder" {
+variable "lambda_name" {
   type = string
 }
 
-variable "patient_sqs_arn" {
+variable "registrations_output_bucket" {
   type = string
 }
 
-variable "patient_sqs_name" {
+variable "registrations_output_bucket_arn" {
   type = string
 }
 
-variable "source_bucket" {
+variable "pds_practice_registrations_bucket" {
+  type = string
+}
+
+variable "pds_practice_registrations_bucket_arn" {
   type = string
 }
 
@@ -39,7 +34,7 @@ variable "jobs_table_arn" {
   type = string
 }
 
-variable "inflight_table_arn" {
+variable "job_stats_table_arn" {
   type = string
 }
 
@@ -55,12 +50,29 @@ variable "jobs_table_name" {
   type = string
 }
 
-variable "inflight_table_name" {
+variable "job_stats_table_name" {
   type = string
 }
 
 variable "errors_table_name" {
   type = string
+}
+
+variable "mock_pds_data_bucket_arn" {
+  type = string
+}
+
+variable "pds_url" {
+  type = string
+}
+
+variable "pds_api_retries" {
+  type = number
+  default = 5
+}
+
+variable "lambda_timeout" {
+  type = number
 }
 
 variable "suffix" {

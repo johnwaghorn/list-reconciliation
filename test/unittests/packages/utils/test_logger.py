@@ -23,7 +23,7 @@ def job_record(create_dynamodb_tables):
         PracticeCode="ABC",
         FileName="test.csv",
         StatusId="1",
-        Timestamp=localize_date(datetime.datetime(2021, 5, 27))
+        Timestamp=localize_date(datetime.datetime(2021, 5, 27)),
     )
     obj.save()
     yield
@@ -35,6 +35,16 @@ def test_log_dynamodb_error_logs_error(create_dynamodb_tables):
     error = [e for e in Errors.scan()][0]
 
     assert error.JobId == "123"
+    assert error.Name == "TEST"
+    assert error.Description == "TEST MESSAGE"
+
+
+def test_log_dynamodb_error_logs_error_with_no_job_id(create_dynamodb_tables):
+    log_dynamodb_error("", "TEST", "TEST MESSAGE")
+
+    error = [e for e in Errors.scan()][0]
+
+    assert error.JobId == "99999999-0909-0909-0909-999999999999"
     assert error.Name == "TEST"
     assert error.Description == "TEST MESSAGE"
 

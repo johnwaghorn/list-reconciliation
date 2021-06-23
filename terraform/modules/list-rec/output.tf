@@ -24,4 +24,17 @@ output "LR_01_Bucket_inbound" {
 
 output "LR_01_Bucket_retry" {
   value = aws_s3_bucket_object.retry.key
+
+}
+
+output "LR-12-lambda" {
+  value = module.LR-12.LR-12-lambda
+}
+
+output "mock_pds_data" {
+  value = aws_s3_bucket.mock-pds-data.bucket
+}
+
+output "LR_22_bucket" {
+  value = aws_s3_bucket.LR-22.bucket
 }

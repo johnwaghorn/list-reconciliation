@@ -35,7 +35,9 @@ resource "aws_iam_policy" "policy" {
             ],
             "Resource": [
                 "${var.lr_11_lambda}",
-                "${var.lr_11_lambda}:*"
+                "${var.lr_11_lambda}:*",
+                "${var.lr_12_lambda}",
+                "${var.lr_12_lambda}:*"
             ]
         }
     ]

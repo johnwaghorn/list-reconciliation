@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_iam_role" "role" {
-  name        = "iam-role-${var.lambda_name}-${terraform.workspace}"
+  name        = "iam-role-${var.lambda_name}-${var.suffix}"
   description = "Execution Role for ${var.lambda_name} Lambda."
 
   assume_role_policy = <<EOF
@@ -22,12 +22,12 @@ resource "aws_iam_role" "role" {
 EOF
 
   tags = {
-    name = "Lambda role for ${var.lambda_name} - ${terraform.workspace}"
+    name = "Lambda role for ${var.lambda_name} - ${var.suffix}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "iam-policy-${var.lambda_name}-${terraform.workspace}"
+  name        = "iam-policy-${var.lambda_name}-${var.suffix}"
   description = "Policy for LR-07 ${var.lambda_name} Lambda Role."
 
   policy = <<-EOF
@@ -52,6 +52,13 @@ resource "aws_iam_policy" "policy" {
                  "sqs:ReceiveMessage"
             ],
             "Resource":"${var.patient_sqs_arn}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:GetObject",
+            "Resource": [
+                "${var.mock_pds_data_bucket_arn}/*"
+            ]
         },
         {
             "Effect": "Allow",

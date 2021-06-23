@@ -5,22 +5,12 @@ variable "s3_folders" {
 }
 
 resource "aws_s3_bucket" "LR-01" {
-  bucket        = lower("lr-01-${terraform.workspace}")
+  bucket        = lower("lr-01-${var.suffix}")
   acl           = "private"
   force_destroy = true
 
   tags = {
-    Name = "S3 Input Bucket for LR-01 - ${terraform.workspace}"
-  }
-}
-
-resource "aws_s3_bucket" "LR-13" {
-  bucket        = lower("lr-13-registration-differences-output-${terraform.workspace}")
-  acl           = "private"
-  force_destroy = true
-
-  tags = {
-    Name = "Output file storage for LR-11 LR12 and LR14"
+    Name = "S3 Input Bucket for LR-01 - ${var.suffix}"
   }
 }
 
@@ -54,4 +44,34 @@ resource "aws_s3_bucket_object" "retry" {
   acl           = "private"
   force_destroy = true
   content_type  = "application/x-directory"
+}
+
+resource "aws_s3_bucket" "LR-13" {
+  bucket = "lr-13-reg-diffs-output-${var.suffix}"
+  acl = "private"
+  force_destroy = true
+
+  tags={
+    Name = "Output file storage for LR-11 LR-12 and LR-14"
+  }
+}
+
+resource "aws_s3_bucket" "LR-22" {
+  bucket = "lr-22-pds-practice-registrations-${var.suffix}"
+  acl = "private"
+  force_destroy = true
+
+  tags={
+    Name = "File storage for PDS practice extract files"
+  }
+}
+
+resource "aws_s3_bucket" "mock-pds-data" {
+  bucket = "mock-pds-data-${var.suffix}"
+  acl = "private"
+  force_destroy = true
+
+  tags={
+    Name = "File storage for PDS mock api data"
+  }
 }

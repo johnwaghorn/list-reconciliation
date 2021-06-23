@@ -5,7 +5,7 @@ data "archive_file" "lambda_zip" {
 }
 
 resource "aws_lambda_function" "LR-11-Lambda" {
-  function_name = "${var.lambda_name}-${terraform.workspace}"
+  function_name = "${var.lambda_name}-${var.suffix}"
   filename = data.archive_file.lambda_zip.output_path
   handler = "gp_registration_status.lambda_handler"
   role = aws_iam_role.role.arn
@@ -20,7 +20,7 @@ resource "aws_lambda_function" "LR-11-Lambda" {
       JOBS_TABLE = var.jobs_table_name
       JOB_STATS_TABLE = var.job_stats_table_name
       ERRORS_TABLE = var.errors_table_name
-      AWS_S3_REGISTRATION_EXTRACT_BUCKET = var.registrations_output_bucket
+      LR_13_REGISTRATIONS_OUTPUT_BUCKET = var.registrations_output_bucket
     }
   }
 }

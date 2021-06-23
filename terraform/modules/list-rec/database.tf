@@ -18,7 +18,7 @@ locals {
 
 module "Jobs_Table" {
   source          = "../database"
-  table_name      = "Jobs-${terraform.workspace}"
+  table_name      = "Jobs-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = "PracticeCode"
   secondary_index = local.jobs_gsi
@@ -28,7 +28,7 @@ module "Jobs_Table" {
 module "Jobs_Stats_Table" {
   source          = "../database"
   table_range_key = ""
-  table_name      = "JobStats-${terraform.workspace}"
+  table_name      = "JobStats-${var.suffix}"
   table_hash_key  = "JobId"
   secondary_index = []
   attributes      = var.jobs_stats_attribute
@@ -36,7 +36,7 @@ module "Jobs_Stats_Table" {
 
 module "In_Flight_Table" {
   source          = "../database"
-  table_name      = "InFlight-${terraform.workspace}"
+  table_name      = "InFlight-${var.suffix}"
   table_hash_key  = "JobId"
   table_range_key = ""
   secondary_index = []
@@ -45,7 +45,7 @@ module "In_Flight_Table" {
 
 module "Demographics_Table" {
   source          = "../database"
-  table_name      = "Demographics-${terraform.workspace}"
+  table_name      = "Demographics-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
   secondary_index = local.demographics_gsi
@@ -54,7 +54,7 @@ module "Demographics_Table" {
 
 module "Demographics_Differences_Table" {
   source          = "../database"
-  table_name      = "DemographicsDifferences-${terraform.workspace}"
+  table_name      = "DemographicsDifferences-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
   secondary_index = []
@@ -63,7 +63,7 @@ module "Demographics_Differences_Table" {
 
 module "Errors_Table" {
   source          = "../database"
-  table_name      = "Errors-${terraform.workspace}"
+  table_name      = "Errors-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
   secondary_index = []
@@ -72,7 +72,7 @@ module "Errors_Table" {
 
 module "Statuses_Table" {
   source          = "../database"
-  table_name      = "Statuses-${terraform.workspace}"
+  table_name      = "Statuses-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = ""
   secondary_index = []

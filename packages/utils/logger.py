@@ -41,7 +41,7 @@ def log_dynamodb_error(job_id: str, name: str, msg: str, time: datetime = get_da
     try:
         item = Errors(
             error_id,
-            JobId=job_id,
+            JobId=job_id or "99999999-0909-0909-0909-999999999999",
             Type=type_,
             Name=name,
             Description=msg,

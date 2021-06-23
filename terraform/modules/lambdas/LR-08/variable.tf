@@ -37,3 +37,7 @@ variable "errors_table_name" {
 variable "demographics_differences_table_name" {
   type = string
 }
+
+variable "suffix" {
+  type = string
+}

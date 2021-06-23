@@ -20,6 +20,17 @@ resource "aws_sfn_state_machine" "LR-10" {
               "End": true
             }
           }
+        },
+        {
+          "StartAt": "Invoke LR12 PDS reg lambda",
+          "States": {
+            "Invoke LR12 PDS reg lambda": {
+              "Type": "Task",
+              "Resource": "${var.lr_12_lambda}",
+              "InputPath": "$",
+              "End": true
+            }
+          }
         }
       ]
     }
