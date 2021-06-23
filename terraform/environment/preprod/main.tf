@@ -28,4 +28,5 @@ module "List-Recon" {
   pds_url     = "s3://mock-pds-data/pds_api_data.csv"
   patient_sqs = "Patient_Records.fifo"
   runtime     = var.runtime
+  suffix      = ""
 }

@@ -31,6 +31,7 @@ module "List-Recon" {
   suffix = "${element(split("-", terraform.workspace), 1)}"
 }
 
+# Files uploaded for mock data
 resource "aws_s3_bucket_object" "upload-mock-pds-data" {
   bucket = module.List-Recon.mock_pds_data
   key    = "pds_api_data.csv"
