@@ -24,7 +24,6 @@ jobs:
         sudo apt-get install docker
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
-        pip install -r requirements.txt
         pip install -r test_requirements.txt
         pip install .
 
@@ -39,13 +38,4 @@ jobs:
         AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
         AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
       run: |
-        pytest
-    - name: Test with gauge
-      env:
-        AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
-        AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-      run: |
-        curl -SsL https://downloads.gauge.org/stable | sh
-        gauge install python
-        cd test/integrationtests
-        gauge run --tags "!wip" specs
+        pytest --ignore=test/integrationtests

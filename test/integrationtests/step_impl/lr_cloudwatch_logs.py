@@ -1,6 +1,8 @@
 from getgauge.python import step
 from datetime import timedelta
 from utils.datetimezone import get_datetime_now
+from .tf_aws_resources import get_aws_resources
+
 import os
 
 import boto3
@@ -14,12 +16,16 @@ access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
+aws_resource = get_aws_resources()
+LR02_LAMBDA = aws_resource["lr_02_lambda"]['value']
+
 # Region & Timezone
 region_name = "eu-west-2"
 test_datetime = get_datetime_now()
 
-# log groups
-log_group = "/aws/lambda/LR-02-validate-and-parse"
+# aws resources
+JOBS_TABLE = aws_resource['jobs_table']['value']
+LR02_LAMBDA_LOG_GROUP = f"/aws/lambda/{LR02_LAMBDA}"
 
 client = dev.client("logs", region_name)
 request_id = "46753b65-cdb2-4ced-b783-71f7ecd29b7d"
@@ -36,7 +42,7 @@ QUERY_LR02_INVALID_DOD = f"fields @timestamp, @message | filter @requestId = '11
 )
 def cloudwatch_file_processed_successfully():
     start_query_response = client.start_query(
-        logGroupName=log_group,
+        logGroupName=LR02_LAMBDA_LOG_GROUP,
         startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
         endTime=int(test_datetime.now().timestamp()),
         queryString=QUERY,
@@ -61,7 +67,7 @@ def cloudwatch_file_processed_successfully():
 )
 def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
     start_query_response = client.start_query(
-        logGroupName=log_group,
+        logGroupName=LR02_LAMBDA_LOG_GROUP,
         startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
         endTime=int(test_datetime.now().timestamp()),
         queryString=QUERY_LR02_INVALID_PAYLOAD,
@@ -85,7 +91,7 @@ def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
 )
 def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
     start_query_response = client.start_query(
-        logGroupName=log_group,
+        logGroupName=LR02_LAMBDA_LOG_GROUP,
         startTime=int((test_datetime.today() - timedelta(days=365)).timestamp()),
         endTime=int(test_datetime.now().timestamp()),
         queryString=QUERY_LR02_INVALID_DOD,
@@ -122,7 +128,7 @@ def connect_to_cloudwatch_get_request_id():
     job_id = get_latest_jobid()
     query_toget_requestid = f"fields @timestamp, @message,@requestId | sort @timestamp desc | filter @message like /Job {job_id} created/ | limit 20"
     start_query_response = client.start_query(
-        logGroupName=log_group,
+        logGroupName=LR02_LAMBDA_LOG_GROUP,
         startTime=int((test_datetime.today() - timedelta(days=2)).timestamp()),
         endTime=int(test_datetime.now().timestamp()),
         queryString=query_toget_requestid,

@@ -5,4 +5,3 @@
 ------------------------------------------------------------------------------------------------
 * connect to s3 and upload file "GPR4LNA1.EIA" into inbound folder for LR-02 to pick and validate the file
 * connect to cloudwatch log and get the request id by JobId created
-* connect to cloudwatch log and assert the response the file is processed successfully

@@ -4,15 +4,17 @@ from utils.datetimezone import get_datetime_now
 
 import boto3
 import json
-import os
 from tempfile import gettempdir
 import os
 from datetime import timedelta
 import time
+from .tf_aws_resources import get_aws_resources
 
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
+
+aws_resource = get_aws_resources()
 
 # Region & Timezone
 region_name = "eu-west-2"
@@ -20,7 +22,9 @@ test_datetime = get_datetime_now()
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-bucket = "test-extract-input-bucket"
+LR_01_BUCKET = aws_resource['lr_01_bucket']['value']
+LR_02_LAMBDA_ARN = aws_resource["lr_02_lambda_arn"]['value']
+
 temp_dir = gettempdir()
 now = test_datetime - timedelta(hours=1)
 day = "123456789ABCDEFGHIJKLMNOPQRSTUV"[now.day - 1]
@@ -42,7 +46,7 @@ def connect_to_lambda_lr02_with_valid_payload():
         payload_dict = json.load(jsonfile)
 
     lr_02_response = client.invoke(
-        FunctionName="arn:aws:lambda:eu-west-2:247275863148:function:LR-02-validate-and-parse",
+        FunctionName=LR_02_LAMBDA_ARN,
         InvocationType="Event",
         Payload=json.dumps(payload_dict),
     )
@@ -60,7 +64,7 @@ def connect_to_lambda_lr02_with_invalid_payload():
         payload_dict = json.load(jsonfile)
 
     lr_02_response = client.invoke(
-        FunctionName="arn:aws:lambda:eu-west-2:247275863148:function:LR-02-validate-and-parse",
+        FunctionName=LR_02_LAMBDA_ARN,
         InvocationType="Event",
         Payload=json.dumps(payload_dict),
     )
@@ -131,7 +135,7 @@ def upload_gpextract_file_into_s3(testfile):
     destination_filename = os.path.basename(temp_destdir)
     s3 = dev.client("s3", region_name)
     try:
-        s3.upload_file(temp_destdir, bucket, "inbound/" + destination_filename)
+        s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -150,7 +154,7 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
 
     s3 = dev.client("s3", region_name)
     try:
-        s3.upload_file(temp_destdir, bucket, "inbound/" + destination_filename)
+        s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -162,11 +166,13 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
 def readfile_in_s3_failed_invalid_item(search_word):
     time.sleep(20)
     s3 = dev.client("s3", region_name)
-    result = s3.list_objects(Bucket=bucket, Prefix="failed/" + destination_filename + "_LOG.txt")
+    result = s3.list_objects(
+        Bucket=LR_01_BUCKET, Prefix="fail/" + destination_filename + "_LOG.txt"
+    )
 
     if result:
         for o in result.get("Contents"):
-            data = s3.get_object(Bucket=bucket, Key=o.get("Key"))
+            data = s3.get_object(Bucket=LR_01_BUCKET, Key=o.get("Key"))
             contents = data["Body"].read().decode("utf-8").splitlines()
             len_content = len(contents)
             actual_line = []

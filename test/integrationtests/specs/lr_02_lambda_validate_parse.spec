@@ -5,6 +5,9 @@
  |-------------------------------------------------|
  |'DRUGS_DISPENSED_MARKER': "must be 'Y' or blank."|           
 
+
+* setup steps: clear all files in lr01 folders
+
 ## test to ensure when lambda LR-02 is triggered and response status code 202 is recieved
 ------------------------------------------------------------------------------------------
 * trigger lambda LR-02 and assert response status code is "202"
@@ -15,7 +18,6 @@
 Tags: wip
 
 * connect and trigger lambda LR-02 with invalid payload
-* connect to cloudwatch log and assert the response for the key error for the key S3 on lambda lr-02
 
 ## test to validate invalid record type
 ---------------------------------------
@@ -148,7 +150,7 @@ Tags: wip
 Tags: wip
 
 * connect to s3 and upload gp file with invalid item "E1DD1AA" in row "DOW~2" at position "5"
-* connect to s3 failed folder and assert failure message "'POSTCODE': 'must be in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, AANN NAA, ANA  NAA, AANA NAA'"
+* connect to s3 failed folder and assert failure message "'POSTCODE': 'must be 8 characters and in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, AANN NAA, ANA  NAA, AANA NAA'"
 
 ## test to validate invalid _DrugDispenser
 ------------------------------------------
@@ -156,4 +158,3 @@ Tags: wip
 
 * connect to s3 and upload gp file with invalid item "E1DD1AA" in row "DOW~2" at position "6"
 * connect to s3 failed folder and assert failure message <DrugDespenserErrorMessage>
-

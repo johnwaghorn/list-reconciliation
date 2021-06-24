@@ -143,6 +143,6 @@ module "LR-12" {
 module "LR-10" {
   source       = "../step_functions/LR-10"
   name         = "LR_10_registration-differences-${var.suffix}"
-  lr_11_lambda = module.LR-11.LR-11-lambda
-  lr_12_lambda = module.LR-12.LR-12-lambda
+  lr_11_lambda = module.LR-11.LR_11_lambda_arn
+  lr_12_lambda = module.LR-12.LR-12-lambda_arn
 }

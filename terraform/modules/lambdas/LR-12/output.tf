@@ -1,5 +1,9 @@
-output "LR-12-lambda" {
+output "LR-12-lambda_arn" {
   value = aws_lambda_function.LR-12-Lambda.arn
+}
+
+output "LR-12-lambda" {
+  value = aws_lambda_function.LR-12-Lambda.id
 }
 
 output "region" {

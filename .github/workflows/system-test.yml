@@ -34,8 +34,29 @@ jobs:
         name: terraform output
         path: output.json
         retention-days: 2
-    - name: Run System tests
+    - name: Run System Integration tests
+      env:
+        AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
+        AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
       run: |
-          cat output.json
-          echo "Running System tests"
-
+        cat output.json
+        echo "Running System tests"
+        pip install -r test_requirements.txt
+        pip install -e .
+        curl -SsL https://downloads.gauge.org/stable | sh
+        cd test/integrationtests
+        gauge run specs
+    - name: upload Test Results artifact
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: Test report
+        path: test/integrationtests/reports/html-report/*
+        retention-days: 2
+    - name: upload Test Logs artifact
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: Test logs
+        path: test/integrationtests/logs/*
+        retention-days: 2  
