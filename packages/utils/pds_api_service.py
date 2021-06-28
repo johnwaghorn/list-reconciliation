@@ -49,7 +49,7 @@ def get_mock_pds_record(url: str, nhs_number: str, *args, **kwargs) -> Dict:
                 "postcode": row["postcode"] or None,
                 "gp_code": row["gp"] or None,
                 "gp_registered_date": row["gp_registered_date"] or None,
-                "is_sensitive": row["code"] in ("R", "V", "REDACTED"),
+                "sensitive": row["code"],
                 "version": row["version"],
             }
 
@@ -74,7 +74,10 @@ def get_pds_fhir_record(
     retries = Retry(total=max_retries, backoff_factor=backoff_factor)
     session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    response = session.get(f"{url}/Patient/{nhs_number}")
+    response = session.get(
+        f"{url}/{nhs_number}",
+        headers={"X-Request-ID": "60E0B220-8136-4CA5-AE46-1D97EF59D068"},
+    )
 
     try:
         response.raise_for_status()
@@ -100,7 +103,7 @@ def get_pds_fhir_record(
         "postcode": content["address"][0]["postalCode"],
         "gp_code": content["generalPractitioner"][0]["identifier"]["value"],
         "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"]["start"],
-        "is_sensitive": content["meta"]["security"][0]["code"] in ("R", "V", "REDACTED"),
+        "sensitive": content["meta"]["security"][0]["code"],
         "version": content["meta"]["versionId"],
     }
 

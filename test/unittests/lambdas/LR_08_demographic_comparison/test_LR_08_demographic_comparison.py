@@ -50,7 +50,7 @@ def demographics_record(create_dynamodb_tables):
         "PDS_Titles": ["Mrs"],
         "PDS_Gender": "female",
         "PDS_DateOfBirth": "2010-10-22",
-        "PDS_IsSensitive": False,
+        "PDS_Sensitive": "U",
         "PDS_Address": [
             "1 Trevelyan Square",
             "Boar Lane",

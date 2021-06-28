@@ -98,7 +98,7 @@ def pds_hydrate(nhs_number: str, job_id: str, patient_id: str) -> Success:
             Demographics.PDS_Titles.set(pds_record["title"]),
             Demographics.PDS_Gender.set(pds_record["gender"]),
             Demographics.PDS_DateOfBirth.set(pds_record["date_of_birth"]),
-            Demographics.PDS_IsSensitive.set(pds_record["is_sensitive"]),
+            Demographics.PDS_Sensitive.set(pds_record["sensitive"]),
             Demographics.PDS_Address.set(pds_record["address"]),
             Demographics.PDS_PostCode.set(pds_record["postcode"]),
             Demographics.GP_RegistrationStatus.set(status),

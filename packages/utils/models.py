@@ -91,7 +91,7 @@ class Demographics(Model):
     PDS_Titles = ListAttribute(null=True)
     PDS_Gender = UnicodeAttribute(null=True)
     PDS_DateOfBirth = UnicodeAttribute(null=True)
-    PDS_IsSensitive = BooleanAttribute(null=True)
+    PDS_Sensitive = UnicodeAttribute(null=True)
     PDS_Address = ListAttribute(null=True)
     PDS_PostCode = UnicodeAttribute(null=True)
     PDS_Version = UnicodeAttribute(null=True)

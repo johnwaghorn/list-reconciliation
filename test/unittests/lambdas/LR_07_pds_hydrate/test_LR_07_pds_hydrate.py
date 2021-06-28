@@ -20,7 +20,7 @@ PDS_COLUMNS = (
     "PDS_Titles",
     "PDS_Gender",
     "PDS_DateOfBirth",
-    "PDS_IsSensitive",
+    "PDS_Sensitive",
     "PDS_Address",
     "PDS_PostCode",
     "GP_RegistrationStatus",
@@ -51,7 +51,7 @@ def test_write_into_table(
         "PDS_Titles": ["Mrs"],
         "PDS_Gender": "female",
         "PDS_DateOfBirth": "2010-10-22",
-        "PDS_IsSensitive": False,
+        "PDS_Sensitive": "U",
         "PDS_Address": [
             "1 Trevelyan Square",
             "Boar Lane",
@@ -97,7 +97,7 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
         "PDS_Titles": ["Mr"],
         "PDS_Gender": "male",
         "PDS_DateOfBirth": "2009-10-22",
-        "PDS_IsSensitive": True,
+        "PDS_Sensitive": "R",
         "PDS_Address": [
             "1 Trevelyan Square",
             "Leeds",
@@ -133,7 +133,7 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
         "PDS_Titles": ["Miss"],
         "PDS_Gender": "female",
         "PDS_DateOfBirth": "1923-11-21",
-        "PDS_IsSensitive": True,
+        "PDS_Sensitive": "REDACTED",
         "PDS_Address": [
             "19 Main Street",
             "Logan",
