@@ -19,7 +19,7 @@ jobs:
       - name: Terraform Init
         run: |
           make init deployment_environment=preprod
-          make workspace terraform_workspace=preprod
+          make workspace deployment_environment=preprod terraform_workspace=preprod
       - name: Terraform Apply
         run: |
           make apply

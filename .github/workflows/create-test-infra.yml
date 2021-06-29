@@ -19,7 +19,7 @@ jobs:
       - name: Terraform Init
         run: |
           make init deployment_environment=test
-          make workspace terraform_workspace=test
+          make workspace deployment_environment=test terraform_workspace=test
       - name: Terraform Apply
         run: |
           make apply
