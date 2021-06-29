@@ -22,7 +22,7 @@ jobs:
           make workspace deployment_environment=test terraform_workspace=test
       - name: Terraform Apply
         run: |
-          make apply
+          make apply deployment_environment=test
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:

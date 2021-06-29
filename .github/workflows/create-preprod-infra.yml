@@ -22,7 +22,7 @@ jobs:
           make workspace deployment_environment=preprod terraform_workspace=preprod
       - name: Terraform Apply
         run: |
-          make apply
+          make apply deployment_environment=preprod
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:
