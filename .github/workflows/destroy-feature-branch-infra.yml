@@ -1,0 +1,33 @@
+name: Destroy feature branch infrastructure on AWS
+on:
+  pull_request:
+    types:
+      - closed
+    branches-ignore:
+      - develop
+      - master
+
+jobs:
+  destroy-feature-branch-infra:
+    name: Destroy feature branch infrastructure on AWS
+    runs-on: self-hosted
+    if: github.event.pull_request.merged == true
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+      FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python Package
+        run: |
+          make python-package
+      - name: Terraform Init
+        run: |
+          make init
+          make workspace terraform_workspace=$(echo ${{ env.FEATURE_BRANCH }} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(echo ${{ env.FEATURE_BRANCH }} | sha1sum | head -c 8)
+      - name: Terraform Destroy
+        run: |
+          make destroy
+      - name: Terraform Delete workspace
+        run: |
+          make workspace-delete terraform_workspace=$(echo ${{ env.FEATURE_BRANCH }} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(echo ${{ env.FEATURE_BRANCH }} | sha1sum | head -c 8)

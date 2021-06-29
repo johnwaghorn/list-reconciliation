@@ -61,42 +61,58 @@ Install _terraform_ from [here](https://www.terraform.io/downloads.html) as per 
 
 ### Deploying Infrastructure
 
+#### Select a Workspace
+
 Note: The `-chdir` command isn't required if you are in the `terraform` directory
 
 Create a new workspace (if it is not created already) by using following command
 
-    terraform -chdir=terraform/environment/dev workspace new <workspace-name>
+```bash
+terraform -chdir=terraform/environment/dev workspace new <workspace-name>
+```
 
 This will create a new and switch workspace locally in your machine. To check if it is created
 
-      terraform -chdir=terraform/environment/dev workspace list
+```bash
+terraform -chdir=terraform/environment/dev workspace list
+```
 
 To switch to new workspace
 
-    terraform -chdir=terraform/environment/dev workspace select <workspace-name> 
+```bash
+terraform -chdir=terraform/environment/dev workspace select <workspace-name>
+```
 
-### Initialise Terraform
+#### Initialise Terraform
 
-      make init 
+```bash
+make init
+```
 
-### Terraform Plan
+#### Terraform Plan
 
 This outputs the `json` format of what resources are going to be created
 
-      make plan
+```bash
+make plan
+```
 
 Note: if you are executing `make plan` first time , ensure to run `make init` first
 
-### Deploying environment on AWS
+#### Deploying environment on AWS
 
-      make deploy
+```bash
+make apply
+```
 
 _Note: You may have to confirm by typing 'Yes' before it creates resources on AWS, This updates the resources if there
 is any change_in terraform script
 
-### Deleting Resources on AWS :
+#### Deleting Resources on AWS
 
-      make destroy
+```bash
+make destroy
+```
 
 ## Comparison engine
 
@@ -150,6 +166,3 @@ from comparison_engine.core import comparison
 def date_of_birth_not_equal(left: LeftRecord, right: RightRecord):
     return left["DATE_OF_BIRTH"] != right["DATE_OF_BIRTH"]
 ```
-
-```
-

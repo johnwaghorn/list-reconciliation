@@ -1,0 +1,55 @@
+name: Create preprod infrastructure on AWS run system integration tests
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-feature-branch-infra:
+    name: Create preprod infrastructure on AWS run system integration tests
+    runs-on: self-hosted
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python Package
+        run: |
+          make python-package
+      - name: Terraform Init
+        run: |
+          make init deployment_environment=preprod
+          make workspace terraform_workspace=preprod
+      - name: Terraform Apply
+        run: |
+          make apply
+      - name: Upload terraform output artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform output
+          path: output.json
+          retention-days: 2
+      - name: Assume Role in PreProd Account for Integration Tests
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-2
+          role-to-assume: "arn:aws:iam::287634746327:role/LRTerraformDeploy"
+          role-duration-seconds: 1200
+      - name: Run Integration tests
+        run: |
+          # Ensure gpextract and mock_data install location is available to Gauge
+          export PATH=$PATH:/opt/github_runner/.local/bin
+          make integrationtest-deps
+          make integrationtests
+      - name: Upload Integration tests result artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test report
+          path: test/integrationtests/reports/html-report/*
+          retention-days: 2
+      - name: Upload Integration tests logs artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test logs
+          path: test/integrationtests/logs/*
+          retention-days: 2

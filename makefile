@@ -1,31 +1,44 @@
 deployment_environment ?= dev
-init:
+terraform_workspace ?= default
+
+all: python-package init deploy
+test: integrationtests unittest
+
+python-package:
 	rm -r ./lambda_layer || true
 	mkdir -p ./lambda_layer/python/lib/python3.8/site-packages
 	echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" public.ecr.aws/sam/build-python3.8 /bin/python3 -m pip install -r requirements.txt -t ./lambda_layer/python/lib/python3.8/site-packages
 	cp -r ./packages/* ./lambda_layer/python/lib/python3.8/site-packages
-	terraform -chdir=terraform/environment/${deployment_environment} init
+
+init:
+	terraform -chdir=./terraform/environment/${deployment_environment} init
+
+workspace:
+	terraform -chdir=./terraform/environment/${deployment_environment}  workspace select "${terraform_workspace}" || terraform -chdir=./terraform/environment/${deployment_environment}  workspace new "${terraform_workspace}"
+	terraform -chdir=./terraform/environment/${deployment_environment}  workspace show
+
+workspace-delete:
+	terraform workspace select default
+	terraform workspace delete "${terraform_workspace}"
 
 plan:
-	terraform -chdir=terraform/environment/${deployment_environment} plan
+	terraform -chdir=./terraform/environment/${deployment_environment} plan
 
-deploy:
+apply:
 	terraform -chdir=terraform/environment/${deployment_environment} apply -auto-approve
-	rm -f output.json || true
-	terraform -chdir=terraform/environment/${deployment_environment} output -json > output.json
+	rm -f ./output.json || true
+	terraform -chdir=terraform/environment/${deployment_environment} output -json > ./output.json
 
 destroy:
 	terraform -chdir=terraform/environment/${deployment_environment} destroy
 
-all: init deploy
+integrationtest-deps:
+	pip install -r test_requirements.txt
+	pip install -e .
 
-system_test: all
-	cd test/integrationtests && gauge run
-	cd ../..
+integrationtests:
+	cd ./test/integrationtests && gauge run --tags "!wip" ./specs
 
-unittest: all
-	pytest
-
-test: system_test unittest
-	cd test/integrationtests && gauge run
+unittests:
+	pytest --ignore=test/integrationtests

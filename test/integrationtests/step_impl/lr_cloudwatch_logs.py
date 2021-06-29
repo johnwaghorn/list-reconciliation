@@ -112,7 +112,7 @@ def cloudwatch_for_s3_key_error_on_lambda_lr02_payload():
 @step("get the latest jobid from Jobs table")
 def get_latest_jobid():
     dev1 = dev.resource("dynamodb", region_name="eu-west-2")
-    job_table = dev1.Table("Jobs")
+    job_table = dev1.Table(JOBS_TABLE)
     job_data = job_table.scan()
     job_items = []
     for key, value in job_data.items():
