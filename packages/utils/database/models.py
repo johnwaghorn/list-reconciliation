@@ -1,8 +1,8 @@
 import os
 
+from utils.database.attributes import GMTDateTimeAttribute
 from pynamodb.attributes import (
     UnicodeAttribute,
-    UTCDateTimeAttribute,
     NumberAttribute,
     ListAttribute,
     BooleanAttribute,
@@ -123,7 +123,7 @@ class Errors(Model):
     Type = UnicodeAttribute()
     Name = UnicodeAttribute()
     Description = UnicodeAttribute()
-    Timestamp = UTCDateTimeAttribute()
+    Timestamp = GMTDateTimeAttribute()
     Traceback = UnicodeAttribute()
 
 
@@ -148,7 +148,7 @@ class Jobs(Model):
     Id = UnicodeAttribute(hash_key=True)
     PracticeCode = UnicodeAttribute(range_key=True)
     FileName = UnicodeAttribute()
-    Timestamp = UTCDateTimeAttribute()
+    Timestamp = GMTDateTimeAttribute()
     StatusId = UnicodeAttribute()
     IdIndex = JobsIdIndex()
 

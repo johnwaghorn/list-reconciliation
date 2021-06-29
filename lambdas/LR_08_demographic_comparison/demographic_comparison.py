@@ -5,7 +5,7 @@ import json
 from comparison_engine.core import compare_records
 from utils.logger import LOG, success, Success, log_dynamodb_error, UNHANDLED_ERROR
 from listrec_comparison_engine import listrec_comparisons
-from utils.models import DemographicsDifferences, Demographics
+from utils.database.models import DemographicsDifferences, Demographics
 
 
 def lambda_handler(event, context):
@@ -53,8 +53,7 @@ def demographic_comparisons(job_id: str, patient_id: str) -> Success:
 
     if gp_record["GP_GpCode"] != pds_record["PDS_GpCode"]:
         msg = (
-            f"GP Codes for job_id: {job_id} patient_id: {patient_id} do not "
-            f"match (GP: {gp_record['GP_GpCode']}, PDS: {pds_record['PDS_GpCode']})"
+            f"GP Codes for job_id: {job_id} patient_id: {patient_id} do not match (GP: {gp_record['GP_GpCode']}, PDS: {pds_record['PDS_GpCode']})"
         )
         LOG.info(msg)
 

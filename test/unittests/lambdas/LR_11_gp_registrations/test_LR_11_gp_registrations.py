@@ -10,7 +10,7 @@ import boto3
 from lambdas.LR_11_gp_registration_status.gp_registration_status import (
     get_gp_exclusive_registrations,
 )
-from utils.models import JobStats
+from utils.database.models import JobStats
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

@@ -4,7 +4,7 @@ import datetime
 from moto import mock_dynamodb2
 
 from utils.logger import log_dynamodb_error, log_dynamodb_status, success
-from utils.models import Errors, Jobs
+from utils.database.models import Errors, Jobs
 from utils.datetimezone import localize_date
 
 

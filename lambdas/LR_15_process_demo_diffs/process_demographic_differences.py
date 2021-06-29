@@ -8,7 +8,7 @@ import boto3
 
 from utils.datetimezone import get_datetime_now
 from utils.logger import success, LOG, log_dynamodb_error, UNHANDLED_ERROR
-from utils.models import JobStats, Jobs, DemographicsDifferences, Demographics
+from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.statuses import JobStatus
 from services.jobs import get_job
 
@@ -40,9 +40,9 @@ def create_dsa_payload(
 
     Args:
         patient_record (Dict): The patient record, following the Demographics
-            data model in utils.models.
+            data model in util.database.models.
         demo_diffs (List[Dict]): The demographic differences following the
-            DemographicsDifferences data model in utils.models.
+            DemographicsDifferences data model in utils.database.models.
 
     Returns:
         Tuple[Dict, int, int, int, int, int]: (DSA work item, human_validations,

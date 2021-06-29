@@ -14,7 +14,7 @@ from lambdas.LR_12_pds_registration_status.pds_registration_status import (
     get_practice_patients,
     lambda_handler,
 )
-from utils.models import JobStats, Errors
+from utils.database.models import JobStats, Errors
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

@@ -10,7 +10,7 @@ from lambdas.LR_15_process_demo_diffs.process_demographic_differences import (
     process_demographic_differences,
 )
 from services.jobs import JobNotFound
-from utils.models import JobStats, Jobs
+from utils.database.models import JobStats, Jobs
 
 
 MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")

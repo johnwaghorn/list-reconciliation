@@ -4,7 +4,7 @@ import pytest
 
 from comparison_engine.schema import ConfigurationError
 from lambdas.LR_08_demographic_comparison.demographic_comparison import demographic_comparisons
-from utils.models import Demographics, Errors, DemographicsDifferences
+from utils.database.models import Demographics, Errors, DemographicsDifferences
 
 import lambdas.LR_08_demographic_comparison.demographic_comparison
 

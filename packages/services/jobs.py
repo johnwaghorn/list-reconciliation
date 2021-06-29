@@ -1,6 +1,6 @@
 import pynamodb
 
-from utils.models import Jobs
+from utils.database.models import Jobs
 
 
 class JobNotFound(Exception):

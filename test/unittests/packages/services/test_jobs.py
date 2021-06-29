@@ -6,7 +6,7 @@ from pytz import timezone
 import pytest
 
 from services.jobs import get_job, JobNotFound
-from utils.models import Jobs
+from utils.database.models import Jobs
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def jobs(dynamodb):
         PracticeCode="Y123451",
         FileName="Y123451.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()
@@ -33,7 +33,7 @@ def jobs(dynamodb):
         PracticeCode="Y123452",
         FileName="Y123452.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()

@@ -7,7 +7,7 @@ from pytz import timezone
 import boto3
 import pytest
 
-from utils.models import Demographics, Errors, Jobs, JobStats
+from utils.database.models import Demographics, Errors, Jobs, JobStats
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
@@ -163,7 +163,7 @@ def jobs(dynamodb):
         PracticeCode="Y12345",
         FileName="Y12345.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()
@@ -173,7 +173,7 @@ def jobs(dynamodb):
         PracticeCode="Y23456",
         FileName="Y23456.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()

@@ -2,7 +2,7 @@ import json
 import pytest
 
 from lambdas.LR_09_scheduled_check.scheduled_check import process_finished_jobs
-from utils.models import InFlight, Jobs, JobStats
+from utils.database.models import InFlight, Jobs, JobStats
 from utils.statuses import JobStatus
 
 JOB_ID = "b204b5f4-6762-414e-bb6b-a05c37f52956"

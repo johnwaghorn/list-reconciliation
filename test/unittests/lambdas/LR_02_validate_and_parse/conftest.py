@@ -4,7 +4,7 @@ import pytest
 
 from moto import mock_dynamodb2, mock_s3, mock_sqs
 
-from utils.models import Demographics, Errors, Jobs, InFlight
+from utils.database.models import Demographics, Errors, Jobs, InFlight
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")

@@ -7,7 +7,7 @@ from datetime import datetime
 
 from pytz import timezone
 
-from utils.models import Demographics, Jobs, InFlight
+from utils.database.models import Demographics, Jobs, InFlight
 from lambdas.LR_02_validate_and_parse.validate_and_parse import (
     lambda_handler,
     validate_and_process_extract,

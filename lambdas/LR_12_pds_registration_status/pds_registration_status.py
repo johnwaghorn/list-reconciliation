@@ -13,7 +13,7 @@ import botocore
 from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR, LOG
-from utils.models import Demographics, JobStats
+from utils.database.models import Demographics, JobStats
 from utils.pds_api_service import get_pds_record, PDSAPIError
 
 

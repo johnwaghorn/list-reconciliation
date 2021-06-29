@@ -5,7 +5,7 @@ import boto3
 from moto import mock_dynamodb2, mock_stepfunctions
 from moto.core import ACCOUNT_ID
 
-from utils.models import Demographics, InFlight, Jobs, JobStats, Errors
+from utils.database.models import Demographics, InFlight, Jobs, JobStats
 
 JOB_ID = "b204b5f4-6762-414e-bb6b-a05c37f52956"
 JOB_ID_2 = "3af674be-1e7f-470c-b6d1-ca5ce6d9c600"

@@ -6,7 +6,7 @@ import boto3
 from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
-from utils.models import Demographics, JobStats
+from utils.database.models import Demographics, JobStats
 from utils.registration_status import GPRegistrationStatus
 
 

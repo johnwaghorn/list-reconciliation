@@ -8,7 +8,7 @@ from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
 import boto3
 import pytest
 
-from utils.models import Demographics, Errors
+from utils.database.models import Demographics, Errors
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")

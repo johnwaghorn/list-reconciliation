@@ -3,7 +3,7 @@ import os
 import pytest
 
 from lambdas.LR_07_pds_hydrate.pds_hydrate import pds_hydrate
-from utils.models import Demographics
+from utils.database.models import Demographics
 from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

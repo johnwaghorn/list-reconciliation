@@ -46,6 +46,7 @@ resource "aws_iam_policy" "policy" {
         {
             "Effect": "Allow",
             "Action": [
+                 "sqs:GetQueueUrl",
                  "sqs:ChangeMessageVisibility",
                  "sqs:DeleteMessage",
                  "sqs:GetQueueAttributes",
@@ -92,8 +93,13 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
+            "Action": "s3:GetObject",
+            "Resource": "${var.mock_pds_data_bucket_arn}/*"
+        },
+        {
+            "Effect": "Allow",
             "Action": "lambda:InvokeFunction",
-            "Resource": "${var.lr_08_lambda}"
+            "Resource":"${var.lr_08_lambda}"
         }
     ]
   }

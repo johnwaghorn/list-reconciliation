@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_dynamodb2, mock_s3
 
-from utils.models import Errors
+from utils.database.models import Errors
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")

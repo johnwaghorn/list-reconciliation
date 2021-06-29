@@ -1,15 +1,22 @@
 import pytest
 from moto import mock_dynamodb2
 from pynamodb.exceptions import ScanError
-from utils.models import Errors
+from utils.database.models import Errors
 
 from lambdas.LR_09_scheduled_check.scheduled_check import lambda_handler
+
 
 def test_lambda_handler_runs_successfully_no_errors_thrown(
         create_dynamo_tables
 ):
-    empty_response = lambda_handler(None, None)
-    assert empty_response is None
+    response = lambda_handler(None, None)
+    assert response is not None
+
+    assert response["status"] == "success"
+    assert response["message"] == "Scheduled checked successfully completed."
+
+    assert len(response["processed_jobs"]) == 0
+    assert len(response["skipped_jobs"]) == 0
 
 
 def test_lambda_handler_throws_error_handles_correctly():

@@ -2,8 +2,6 @@ import boto3
 import json
 import os
 
-from datetime import datetime
-
 from botocore.client import BaseClient
 from pynamodb.exceptions import PynamoDBConnectionError, PutError
 from uuid import uuid4
@@ -13,9 +11,10 @@ from gp_file_parser.utils import empty_string
 from gp_file_parser.parser import InvalidGPExtract, parse_gp_extract_file_s3
 from gp_file_parser.file_name_parser import InvalidFilename
 
-from utils.models import Jobs, InFlight, Demographics
+from utils.database.models import Jobs, InFlight, Demographics
 from utils.logger import LOG, log_dynamodb_error, success, Success
 from utils.datetimezone import get_datetime_now
+from utils.statuses import JobStatus
 
 ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")
 SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -182,8 +181,8 @@ def write_to_dynamodb(
         job_id,
         PracticeCode="tbc",
         FileName=upload_filename,
-        Timestamp=datetime.now(),
-        StatusId="1",
+        Timestamp=get_datetime_now(),
+        StatusId=JobStatus.ADDED_TO_QUEUE.value,
     )
     job_item.save()
 

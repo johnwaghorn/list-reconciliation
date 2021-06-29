@@ -4,7 +4,7 @@ import os
 import boto3
 
 from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
-from utils.models import Demographics
+from utils.database.models import Demographics
 from utils.pds_api_service import get_pds_record, PDSAPIError
 from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
 

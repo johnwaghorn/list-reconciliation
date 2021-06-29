@@ -6,7 +6,7 @@ import logging
 import sys
 import traceback
 
-from utils.models import Errors, Jobs
+from utils.database.models import Errors, Jobs
 from utils.datetimezone import get_datetime_now
 
 VALIDATION_ERROR = "VALIDATION_ERROR"

@@ -5,7 +5,7 @@ import boto3
 from typing import Dict
 
 from utils.logger import success, LOG, log_dynamodb_error
-from utils.models import Jobs, InFlight, Demographics, JobStats
+from utils.database.models import Jobs, InFlight, Demographics, JobStats
 from utils.statuses import JobStatus
 
 LR_10_STEP_FUNCTION_ARN = os.getenv("LR_10_STEP_FUNCTION_ARN")
@@ -31,11 +31,11 @@ def update_job_stats(job_id: str, total_records: int) -> None:
 
 
 def update_job_status_id(job_id: str) -> None:
-    job = Jobs.IdIndex.query(job_id)
+    job = Jobs.IdIndex.query(job_id).next()
 
-    for j in job:
-        j.StatusId = JobStatus.PDS_FHIR_API_PROCESSED.value
-        j.save()
+    job.update(
+        actions=[Jobs.StatusId.set(JobStatus.PDS_FHIR_API_PROCESSED.value)]
+    )
 
 
 def trigger_step_function(job_id: str) -> None:
@@ -87,8 +87,9 @@ def process_finished_jobs() -> Dict:
 def lambda_handler(event, context):
     try:
         response = process_finished_jobs()
+        LOG.info(response)
 
-        LOG.info(response["message"])
+        return response
 
     except Exception as err:
         error_response = log_dynamodb_error(

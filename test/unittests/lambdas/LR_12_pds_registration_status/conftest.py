@@ -7,7 +7,7 @@ from pytz import timezone
 import boto3
 import pytest
 
-from utils.models import Demographics, Errors, Jobs, JobStats
+from utils.database.models import Demographics, Errors, Jobs, JobStats
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -83,7 +83,7 @@ def jobs(dynamodb):
         PracticeCode="Y123451",
         FileName="Y123451.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()
@@ -93,7 +93,7 @@ def jobs(dynamodb):
         PracticeCode="Y123452",
         FileName="Y123452.E1A",
         StatusId="1",
-        Timestamp=datetime(2021, 5, 27, 14, 48, 37, tzinfo=timezone("Europe/London")),
+        Timestamp=datetime(2021, 5, 27, 14, 48, 37),
     )
 
     job.save()
