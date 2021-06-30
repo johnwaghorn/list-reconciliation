@@ -59,14 +59,20 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:GetItem",
+            "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem"
+            ],
             "Resource": [
-                "${var.demographics_table_arn}"
+                "${var.demographics_differences_table_arn}"
             ]
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:UpdateItem",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem"
+            ],
             "Resource": [
                 "${var.demographics_table_arn}"
             ]

@@ -108,3 +108,7 @@ output "mock_pds_data" {
 output "LR_22_bucket" {
   value = module.List-Recon.LR_22_bucket
 }
+
+output "LR-15-lambda" {
+  value = module.List-Recon.LR-15-lambda
+}

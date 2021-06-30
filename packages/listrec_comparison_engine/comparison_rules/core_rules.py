@@ -2,36 +2,36 @@ from comparison_engine.core import comparison
 from comparison_engine.schema import LeftRecord, RightRecord
 
 
-@comparison("date_of_birth_not_equal")
+@comparison("MN-BR-DB-01")
 def date_of_birth_not_equal(left: LeftRecord, right: RightRecord):
     return left["DATE_OF_BIRTH"] != right["DATE_OF_BIRTH"]
 
 
-@comparison("surname_not_equal")
+@comparison("MN-BR-SN-01")
 def surname_not_equal(left: LeftRecord, right: RightRecord):
     return left["SURNAME"].lower() != right["SURNAME"].lower()
 
 
-@comparison("forenames_not_equal")
+@comparison("MN-BR-FN-01")
 def forenames_not_equal(left: LeftRecord, right: RightRecord):
     return left["FORENAMES"].lower() != right["FORENAMES"].lower()
 
 
-@comparison("title_not_equal")
+@comparison("MN-BR-TL-01")
 def title_not_equal(left: LeftRecord, right: RightRecord):
     return left["TITLE"].lower() != right["TITLE"].lower()
 
 
-@comparison("gender_not_equal")
+@comparison("MN-BR-SX-01")
 def gender_not_equal(left: LeftRecord, right: RightRecord):
     return left["GENDER"].lower() != right["GENDER"].lower()
 
 
-@comparison("address_not_equal")
+@comparison("MN-BR-AD-01")
 def address_not_equal(left: LeftRecord, right: RightRecord):
     return left["ADDRESS"].lower() != right["ADDRESS"].lower()
 
 
-@comparison("postcode_not_equal")
+@comparison("MN-BR-AD-02")
 def postcode_not_equal(left: LeftRecord, right: RightRecord):
     return left["POSTCODE"] != right["POSTCODE"]

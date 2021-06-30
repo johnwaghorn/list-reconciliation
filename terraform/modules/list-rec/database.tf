@@ -14,6 +14,14 @@ locals {
       projection_type = "ALL"
     }
   ]
+
+  demographicsdifferences_gsi = [
+    {
+      name            = "demographicsdifferences-job_id-index",
+      hash_key        = "JobId"
+      projection_type = "ALL"
+    }
+  ]
 }
 
 module "Jobs_Table" {
@@ -57,7 +65,7 @@ module "Demographics_Differences_Table" {
   table_name      = "DemographicsDifferences-${var.suffix}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
-  secondary_index = []
+  secondary_index = local.demographicsdifferences_gsi
   attributes      = var.demographic_difference_attribute
 }
 

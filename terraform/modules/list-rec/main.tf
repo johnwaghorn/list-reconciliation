@@ -6,6 +6,7 @@ locals {
     LR-09 = "LR_09_scheduled_check"
     LR-11 = "LR_11_gp_registration_status"
     LR-12 = "LR_12_pds_registration_status"
+    LR-15 = "LR_15_process_demo_diffs"
   }
 }
 
@@ -50,7 +51,7 @@ module "LR-07" {
   package_layer_arn       = aws_lambda_layer_version.package_layer.arn
   runtime                 = var.runtime
   lambda_timeout          = var.lambda_timeout
-  lr_08_lambda            = module.LR-08.LR-08-lambda
+  lr_08_lambda            = module.LR-08.LR-08-lambda_arn
   patient_sqs_arn         = aws_sqs_queue.Patient_Records_Queue.arn
   demographics_table_arn  = module.Demographics_Table.dynamo_table_arn
   demographics_table_name = module.Demographics_Table.dynamo_table_name
@@ -139,10 +140,32 @@ module "LR-12" {
   suffix = var.suffix
 }
 
+module "LR-15" {
+  source                                = "../lambdas/LR-15"
+  lambda_name                           = local.lambda_name.LR-15
+  runtime                               = var.runtime
+  lambda_timeout                        = var.lambda_timeout
+  package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
+  mesh_send_bucket_arn                  = aws_s3_bucket.LR-23.arn
+  mesh_send_bucket                      = aws_s3_bucket.LR-23.bucket
+  demographics_table_arn                = module.Demographics_Table.dynamo_table_arn
+  demographics_table_name               = module.Demographics_Table.dynamo_table_name
+  jobs_table_arn                        = module.Jobs_Table.dynamo_table_arn
+  jobs_table_name                       = module.Jobs_Table.dynamo_table_name
+  job_stats_table_arn                   = module.Jobs_Stats_Table.dynamo_table_arn
+  job_stats_table_name                  = module.Jobs_Stats_Table.dynamo_table_name
+  errors_table_arn                      = module.Errors_Table.dynamo_table_arn
+  errors_table_name                     = module.Errors_Table.dynamo_table_name
+  demographics_differences_table_name   = module.Demographics_Differences_Table.dynamo_table_name
+  demographics_differences_table_arn    = module.Demographics_Differences_Table.dynamo_table_arn
+  suffix                                = var.suffix
+}
+
 # -----------------------Step functions ----------------------
 module "LR-10" {
   source       = "../step_functions/LR-10"
   name         = "LR_10_registration-differences-${var.suffix}"
   lr_11_lambda = module.LR-11.LR_11_lambda_arn
   lr_12_lambda = module.LR-12.LR-12-lambda_arn
+  lr_15_lambda = module.LR-15.LR-15-lambda_arn
 }

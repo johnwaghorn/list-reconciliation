@@ -64,12 +64,12 @@ def test_compare_records_some_unequal():
     }
 
     expected = {
-        "date_of_birth_not_equal",
-        "forenames_not_equal",
-        "surname_not_equal",
-        "title_not_equal",
-        "gender_not_equal",
-        "address_not_equal",
+        "MN-BR-DB-01",
+        "MN-BR-FN-01",
+        "MN-BR-SN-01",
+        "MN-BR-TL-01",
+        "MN-BR-SX-01",
+        "MN-BR-AD-01",
     }
 
     actual = set(compare_records(listrec_comparisons, left, right))

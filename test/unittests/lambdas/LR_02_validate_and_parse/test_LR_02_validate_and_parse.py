@@ -25,17 +25,13 @@ INVALID_FILE = "GPR4LNA1.CSB"
 
 @freeze_time("2020-04-06 13:40:00")
 def test_validate_and_process_with_valid_upload_handles_correctly(
-        upload_pds_valid_mock_data_to_s3,
-        create_dynamodb_tables,
-        create_sqs
+    upload_pds_valid_mock_data_to_s3, create_dynamodb_tables, create_sqs
 ):
     upload_key = f"inbound/{VALID_FILE}"
 
     response = validate_and_process_extract(upload_key, JOB_ID)
 
-    expected = success(
-        f"{VALID_FILE} processed successfully for Job: {JOB_ID}"
-    )
+    expected = success(f"{VALID_FILE} processed successfully for Job: {JOB_ID}")
 
     assert response == expected
 
@@ -89,7 +85,7 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
         GP_AddressLine4="EAST",
         GP_AddressLine5="",
         GP_PostCode="E1   1AA",
-        GP_DrugsDispensedMarker="",
+        GP_DrugsDispensedMarker=False,
     )
     expected_demographics_attributes = expected_demographics.attribute_values
 
@@ -110,24 +106,21 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
     s3_client = boto3.client("s3")
 
-    actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f'pass/{VALID_FILE}')
-    actual_file_contents = actual_file["Body"].read().decode('utf-8')
+    actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f"pass/{VALID_FILE}")
+    actual_file_contents = actual_file["Body"].read().decode("utf-8")
 
     assert expected_file_contents == actual_file_contents
 
 
 @freeze_time("2020-04-06 13:40:00")
 def test_validate_and_process_with_invalid_upload_handles_correctly(
-        upload_pds_invalid_mock_data_to_s3,
-        create_dynamodb_tables
+    upload_pds_invalid_mock_data_to_s3, create_dynamodb_tables
 ):
     upload_key = f"inbound/{INVALID_FILE}"
 
     response = validate_and_process_extract(upload_key, JOB_ID)
 
-    expected = success(
-        f"Invalid file {INVALID_FILE} handled successfully for Job: {JOB_ID}"
-    )
+    expected = success(f"Invalid file {INVALID_FILE} handled successfully for Job: {JOB_ID}")
 
     assert response == expected
 
@@ -137,7 +130,7 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
 
     s3_client = boto3.client("s3")
 
-    actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f'fail/{INVALID_FILE}')
-    actual_file_contents = actual_file["Body"].read().decode('utf-8')
+    actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f"fail/{INVALID_FILE}")
+    actual_file_contents = actual_file["Body"].read().decode("utf-8")
 
     assert expected_file_contents == actual_file_contents

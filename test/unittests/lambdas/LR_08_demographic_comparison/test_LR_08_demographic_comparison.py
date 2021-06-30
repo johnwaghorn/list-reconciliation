@@ -70,7 +70,7 @@ def test_demographics_comparison_ok(demographics_record):
     demographic_comparisons("50", "50")
     result = DemographicsDifferences.scan()
     actual = {record.attribute_values["RuleId"] for record in result}
-    expected = {"date_of_birth_not_equal", "address_not_equal"}
+    expected = {"MN-BR-DB-01", "MN-BR-AD-01"}
 
     assert actual == expected
 

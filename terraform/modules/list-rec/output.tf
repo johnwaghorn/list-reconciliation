@@ -110,3 +110,7 @@ output "mock_pds_data" {
 output "LR_22_bucket" {
   value = aws_s3_bucket.LR-22.bucket
 }
+
+output "LR-15-lambda" {
+  value = module.LR-15.LR-15-lambda
+}

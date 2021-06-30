@@ -31,6 +31,16 @@ class DemographicsJobIdIndex(GlobalSecondaryIndex):
     JobId = UnicodeAttribute(hash_key=True)
 
 
+class DemographicsDifferencesJobIdIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "demographicsdifferences-job_id-index"
+        projection = AllProjection()
+        read_capacity_units = 100
+        write_capacity_units = 100
+
+    JobId = UnicodeAttribute(hash_key=True)
+
+
 class JobsIdIndex(GlobalSecondaryIndex):
     class Meta:
         index_name = "jobs-id-index"
@@ -52,6 +62,8 @@ class DemographicsDifferences(Model):
     JobId = UnicodeAttribute()
     PatientId = UnicodeAttribute()
     RuleId = UnicodeAttribute()
+
+    JobIdIndex = DemographicsDifferencesJobIdIndex()
 
 
 class Demographics(Model):
@@ -82,7 +94,7 @@ class Demographics(Model):
     GP_AddressLine4 = UnicodeAttribute(null=True)
     GP_AddressLine5 = UnicodeAttribute(null=True)
     GP_PostCode = UnicodeAttribute(null=True)
-    GP_DrugsDispensedMarker = UnicodeAttribute(null=True)
+    GP_DrugsDispensedMarker = BooleanAttribute(null=True)
     GP_RegistrationStatus = UnicodeAttribute(null=True)
     PDS_GpCode = UnicodeAttribute(null=True)
     PDS_GpRegisteredDate = UnicodeAttribute(null=True)

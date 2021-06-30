@@ -13,8 +13,6 @@ AWS_REGION = os.getenv("AWS_REGION")
 
 
 def lambda_handler(event, context):
-    from pds_hydrate import pds_hydrate
-
     record = event["Records"][0]
     body = json.loads(record["body"])
     job_id = str(body["job_id"])

@@ -4,35 +4,57 @@ resource "aws_sfn_state_machine" "LR-10" {
 
   definition = <<EOF
 {
-  "StartAt": "Parallel",
+  "StartAt": "Demographic and registration outputs",
   "States": {
-    "Parallel": {
+    "Demographic and registration outputs": {
       "Type": "Parallel",
-      "End": true,
       "Branches": [
         {
-          "StartAt": "Invoke LR11 GP reg lambda",
+          "StartAt": "Invoke LR15 Demo diffs lambda",
           "States": {
-            "Invoke LR11 GP reg lambda": {
+            "Invoke LR15 Demo diffs lambda": {
               "Type": "Task",
-              "Resource": "${var.lr_11_lambda}",
+              "Resource": "${var.lr_15_lambda}",
               "InputPath": "$",
               "End": true
             }
           }
         },
         {
-          "StartAt": "Invoke LR12 PDS reg lambda",
+          "StartAt": "Registration outputs",
           "States": {
-            "Invoke LR12 PDS reg lambda": {
-              "Type": "Task",
-              "Resource": "${var.lr_12_lambda}",
-              "InputPath": "$",
-              "End": true
+            "Registration outputs": {
+              "Type": "Parallel",
+              "End": true,
+              "Branches": [
+                {
+                  "StartAt": "Invoke LR11 GP reg lambda",
+                  "States": {
+                    "Invoke LR11 GP reg lambda": {
+                      "Type": "Task",
+                      "Resource": "${var.lr_11_lambda}",
+                      "InputPath": "$",
+                      "End": true
+                    }
+                  }
+                },
+                {
+                  "StartAt": "Invoke LR12 PDS reg lambda",
+                  "States": {
+                    "Invoke LR12 PDS reg lambda": {
+                      "Type": "Task",
+                      "Resource": "${var.lr_12_lambda}",
+                      "InputPath": "$",
+                      "End": true
+                    }
+                  }
+                }
+              ]
             }
           }
         }
-      ]
+      ],
+      "End": true
     }
   }
 }

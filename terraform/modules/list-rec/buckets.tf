@@ -5,7 +5,7 @@ variable "s3_folders" {
 }
 
 resource "aws_s3_bucket" "LR-01" {
-  bucket        = lower("lr-01-${var.suffix}")
+  bucket        = "lr-01-${var.suffix}"
   acl           = "private"
   force_destroy = true
 
@@ -73,5 +73,15 @@ resource "aws_s3_bucket" "mock-pds-data" {
 
   tags={
     Name = "File storage for PDS mock api data"
+  }
+}
+
+resource "aws_s3_bucket" "LR-23" {
+  bucket = "lr-23-output-bucket-${var.suffix}"
+  acl = "private"
+  force_destroy = true
+
+  tags={
+    Name = "File storage for data to be sent through MESH"
   }
 }

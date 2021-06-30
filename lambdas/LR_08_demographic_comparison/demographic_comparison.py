@@ -1,5 +1,4 @@
 from uuid import uuid4
-from typing import Dict
 
 import json
 
@@ -10,8 +9,6 @@ from utils.models import DemographicsDifferences, Demographics
 
 
 def lambda_handler(event, context):
-    from demographic_comparison import demographic_comparisons
-
     job_id = str(event["job_id"])
     patient_id = str(event["patient_id"])
 
