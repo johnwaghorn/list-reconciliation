@@ -31,7 +31,7 @@ apply:
 	terraform -chdir=terraform/environment/${deployment_environment} output -json > ./output.json
 
 destroy:
-	terraform -chdir=terraform/environment/${deployment_environment} destroy
+	terraform -chdir=terraform/environment/${deployment_environment} destroy -auto-approve
 
 integrationtest-deps:
 	pip install -r test_requirements.txt
