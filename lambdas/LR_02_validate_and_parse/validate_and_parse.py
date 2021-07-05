@@ -40,7 +40,7 @@ def create_client(service: str) -> BaseClient:
         region_name=REGION,
         aws_access_key_id=ACCESS_KEY,
         aws_secret_access_key=SECRET_KEY,
-        aws_session_token=SESSION_TOKEN
+        aws_session_token=SESSION_TOKEN,
     )
 
 
@@ -93,12 +93,7 @@ def validate_and_process_extract(upload_key: str, job_id: str) -> Success:
             upload_date,
         )
 
-        return handle_validated_records(
-            upload_key,
-            upload_filename,
-            job_id,
-            gp_ha_cipher,
-            records)
+        return handle_validated_records(upload_key, upload_filename, job_id, gp_ha_cipher, records)
 
     except (AssertionError, InvalidGPExtract, InvalidFilename) as exc:
         message = process_invalid_message(exc)
@@ -108,17 +103,15 @@ def validate_and_process_extract(upload_key: str, job_id: str) -> Success:
         msg = f"Handled error for invalid file upload: {upload_filename}"
         log_dynamodb_error(job_id, "HANDLED_ERROR", msg)
 
-        return success(
-            f"Invalid file {upload_filename} handled successfully for Job: {job_id}"
-        )
+        return success(f"Invalid file {upload_filename} handled successfully for Job: {job_id}")
 
 
 def handle_validated_records(
-        upload_key: str,
-        upload_filename: str,
-        job_id: str,
-        gp_ha_cipher: str,
-        records: list
+    upload_key: str,
+    upload_filename: str,
+    job_id: str,
+    gp_ha_cipher: str,
+    records: list
 ) -> Success:
     """Handler to process validated patient records
 
@@ -145,9 +138,7 @@ def handle_validated_records(
 
         log_dynamodb_error(job_id, "HANDLED_ERROR", str(exc))
 
-        return success(
-            f"Successfully handled failed Job: {job_id}"
-        )
+        return success(f"Successfully handled failed Job: {job_id}")
 
     else:
         try:
@@ -159,23 +150,19 @@ def handle_validated_records(
 
             log_dynamodb_error(job_id, "HANDLED_ERROR", str(exc))
 
-            return success(
-                f"Successfully handled failed Job: {job_id}"
-            )
+            return success(f"Successfully handled failed Job: {job_id}")
 
         handle_extract(upload_key, PASSED_PREFIX)
 
-        return success(
-            f"{upload_filename} processed successfully for Job: {job_id}"
-        )
+        return success(f"{upload_filename} processed successfully for Job: {job_id}")
 
 
 def write_to_dynamodb(
-        job_id: str,
-        gp_ha_cipher: str,
-        upload_filename: str,
-        records: list,
-        num_of_records: int
+    job_id: str,
+    gp_ha_cipher: str,
+    upload_filename: str,
+    records: list,
+    num_of_records: int,
 ) -> list:
     """Creates Job items and writes a batch of validated records to DynamoDb.
         Appends 'Id' field to each validated patient record in records dict
@@ -255,9 +242,7 @@ def process_sqs_messages(job_id: str, records: list):
 
     sqs_client = create_client("sqs")
 
-    sqs_queue = sqs_client.get_queue_url(
-        QueueName=os.environ.get("AWS_PATIENT_RECORD_SQS")
-    )
+    sqs_queue = sqs_client.get_queue_url(QueueName=os.environ.get("AWS_PATIENT_RECORD_SQS"))
 
     queue_url = sqs_queue["QueueUrl"]
 
@@ -265,7 +250,7 @@ def process_sqs_messages(job_id: str, records: list):
         msg = {
             "job_id": job_id,
             "patient_id": record["ID"],
-            "nhs_number": record["NHS_NUMBER"]
+            "nhs_number": record["NHS_NUMBER"],
         }
 
         response = send_message(sqs_client, queue_url, msg)
@@ -277,18 +262,18 @@ def process_sqs_messages(job_id: str, records: list):
 @retry(
     stop_max_attempt_number=5,
     wait_exponential_multiplier=1000,
-    wait_exponential_max=5000
+    wait_exponential_max=5000,
 )
 def send_message(sqs_client: BaseClient, url: str, msg: dict) -> dict:
     """Send a message to the SQS queue, with exponential retries
 
-        Args:
-            sqs_client (BaseClient): SQS client
-            url (str): URL of SQS queue
-            msg (dict): Message to send
+    Args:
+        sqs_client (BaseClient): SQS client
+        url (str): URL of SQS queue
+        msg (dict): Message to send
 
-        Returns:
-            dict: response from SQS client.
+    Returns:
+        dict: response from SQS client.
     """
 
     return sqs_client.send_message(
@@ -358,4 +343,3 @@ def process_invalid_message(exception: Exception) -> str:
         msg = "DOW file is invalid:\n" + str(exception)
 
     return msg
-

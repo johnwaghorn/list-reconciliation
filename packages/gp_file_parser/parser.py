@@ -465,12 +465,7 @@ def parse_gp_extract_file_s3(
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
     """
 
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-        aws_session_token=os.environ.get("AWS_SESSION_TOKEN")
-    )
+    s3_client = boto3.client("s3")
 
     extract_date, gp_ha_cipher = validate_filename(
         file_key.replace(INBOUND_PREFIX, ""), process_datetime

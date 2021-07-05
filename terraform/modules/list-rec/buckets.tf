@@ -1,11 +1,11 @@
 variable "s3_folders" {
   type        = list(string)
   description = "The list of S3 folders to create"
-  default     = ["inbound", "fail", "pass", "ready"]
+  default     = ["inbound", "fail", "pass", "retry"]
 }
 
 resource "aws_s3_bucket" "LR-01" {
-  bucket        = "lr-01-${var.suffix}"
+  bucket        = "lr-01-gp-extract-input-${var.suffix}"
   acl           = "private"
   force_destroy = true
 
@@ -56,13 +56,23 @@ resource "aws_s3_bucket" "LR-13" {
   }
 }
 
-resource "aws_s3_bucket" "LR-22" {
-  bucket        = "lr-22-pds-practice-registrations-${var.suffix}"
+resource "aws_s3_bucket" "LR-20" {
+  bucket        = "lr-20-pds-reg-input-${var.suffix}"
   acl           = "private"
   force_destroy = true
 
   tags = {
-    Name = "File storage for PDS practice extract files"
+    Name = "Input file storage for PDS practice supplementary data"
+  }
+}
+
+resource "aws_s3_bucket" "LR-22" {
+  bucket        = "lr-22-pds-reg-output-${var.suffix}"
+  acl           = "private"
+  force_destroy = true
+
+  tags = {
+    Name = "Output file storage for PDS practice extract files"
   }
 }
 

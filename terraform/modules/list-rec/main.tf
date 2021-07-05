@@ -7,6 +7,7 @@ locals {
     LR-11 = "LR_11_gp_registration_status"
     LR-12 = "LR_12_pds_registration_status"
     LR-15 = "LR_15_process_demo_diffs"
+    LR-21 = "LR_21_split_dps_extract"
   }
 }
 
@@ -159,6 +160,18 @@ module "LR-15" {
   demographics_differences_table_name = module.Demographics_Differences_Table.dynamo_table_name
   demographics_differences_table_arn  = module.Demographics_Differences_Table.dynamo_table_arn
   suffix                              = var.suffix
+}
+
+module "LR-21" {
+  source                      = "../lambdas/LR-21"
+  lambda_name                 = local.lambda_name.LR-21
+  runtime                     = var.runtime
+  package_layer_arn           = aws_lambda_layer_version.package_layer.arn
+  supplementary-input-bucket  = aws_s3_bucket.LR-20.bucket
+  supplementary-output-bucket = aws_s3_bucket.LR-22.bucket
+  errors_table_arn            = module.Errors_Table.dynamo_table_arn
+  errors_table_name           = module.Errors_Table.dynamo_table_name
+  suffix                      = var.suffix
 }
 
 # -----------------------Step functions ----------------------

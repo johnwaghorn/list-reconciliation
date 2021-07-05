@@ -1,8 +1,11 @@
 import datetime
 import pytest
 
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from freezegun import freeze_time
+from pytz import timezone
+
+from utils.datetimezone import get_datetime_now, localize_date
 
 
 @freeze_time("2020-02-01 03:21:34")
@@ -56,4 +59,46 @@ def test_get_datetime_now_with_different_timezone_returns_correct_time(
 def test_get_datetime_now_returns_correct_type():
     actual = get_datetime_now()
 
-    assert type(actual) == datetime.datetime
+    assert type(actual) == datetime
+
+
+@freeze_time("2021-05-07T14:30:00.000000+0000")
+def test_localize_date_without_tz_returns_correct_date():
+    expected_year = 2021
+    expected_month = 5
+    expected_day = 7
+    expected_hour = 14
+    expected_minute = 30
+    expected_second = 0
+    expected_tz = "Europe/London"
+
+    actual = localize_date(datetime.now())
+
+    assert actual.year == expected_year
+    assert actual.month == expected_month
+    assert actual.day == expected_day
+    assert actual.hour == expected_hour
+    assert actual.minute == expected_minute
+    assert actual.second == expected_second
+    assert actual.tzinfo.zone == expected_tz
+
+
+@freeze_time("2021-05-07T14:30:00.000000-0400")
+def test_localize_date_with_tz_returns_correct_date():
+    expected_year = 2021
+    expected_month = 5
+    expected_day = 7
+    expected_hour = 19
+    expected_minute = 30
+    expected_second = 0
+    expected_tz = "Europe/London"
+
+    actual = localize_date(datetime.now(timezone("US/Eastern")))
+
+    assert actual.year == expected_year
+    assert actual.month == expected_month
+    assert actual.day == expected_day
+    assert actual.hour == expected_hour
+    assert actual.minute == expected_minute
+    assert actual.second == expected_second
+    assert actual.tzinfo.zone == expected_tz

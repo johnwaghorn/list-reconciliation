@@ -1,5 +1,5 @@
 from datetime import datetime
-from pytz import timezone
+from pytz import timezone, utc
 
 
 def get_datetime_now(specified_timezone: str = "Europe/London") -> datetime:
@@ -26,4 +26,8 @@ def localize_date(unlocalized_date: datetime = get_datetime_now(), specified_tim
             datetime: Localized datetime
     """
 
-    return timezone(specified_timezone).localize(unlocalized_date)
+    if unlocalized_date.tzinfo is not None and unlocalized_date.tzinfo.utcoffset(unlocalized_date) is not None:
+        return unlocalized_date.astimezone(timezone(specified_timezone))
+
+    else:
+        return timezone(specified_timezone).localize(unlocalized_date)

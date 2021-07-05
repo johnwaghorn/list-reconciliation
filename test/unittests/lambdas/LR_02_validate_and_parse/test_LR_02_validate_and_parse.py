@@ -1,5 +1,6 @@
 import os
 import boto3
+import pytest
 
 from freezegun import freeze_time
 from datetime import datetime
@@ -7,7 +8,10 @@ from datetime import datetime
 from pytz import timezone
 
 from utils.models import Demographics, Jobs, InFlight
-from lambdas.LR_02_validate_and_parse.main import validate_and_process_extract
+from lambdas.LR_02_validate_and_parse.validate_and_parse import (
+    lambda_handler,
+    validate_and_process_extract,
+)
 from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -21,6 +25,13 @@ JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
 
 VALID_FILE = "GPR4LNA1.CSA"
 INVALID_FILE = "GPR4LNA1.CSB"
+
+
+def test_lr_02_handler_invalid_event_raises_key_error(upload_pds_valid_mock_data_to_s3):
+    event = {"error": "error"}
+
+    with pytest.raises(KeyError):
+        lambda_handler(event, None)
 
 
 @freeze_time("2020-04-06 13:40:00")
