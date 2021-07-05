@@ -1,12 +1,12 @@
-name: Create preprod infrastructure on AWS run system integration tests
+name: Create preprod infrastructure on AWS and run integration tests
 on:
   push:
     branches:
       - master
 
 jobs:
-  create-feature-branch-infra:
-    name: Create preprod infrastructure on AWS run system integration tests
+  create-preprod-infra:
+    name: Create preprod infrastructure on AWS
     runs-on: self-hosted
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -17,18 +17,34 @@ jobs:
         run: |
           make python-package
       - name: Terraform Init
+        working-directory: ./terraform/stacks/list-reconciliation
         run: |
-          make init deployment_environment=preprod
-          make workspace deployment_environment=preprod terraform_workspace=preprod
+          terraform init
+          terraform workspace select "preprod" || terraform workspace new "preprod"
+      - name: Terraform Validate
+        working-directory: ./terraform/stacks/list-reconciliation
+        run: |
+          terraform validate
       - name: Terraform Apply
+        working-directory: ./terraform/stacks/list-reconciliation
         run: |
-          make apply deployment_environment=preprod
+          terraform apply -auto-approve
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:
-          name: terraform output
+          name: terraform-output
           path: output.json
           retention-days: 2
+  run-integration-tests:
+    name: Run integration tests
+    runs-on: self-hosted
+    needs:
+      - create-preprod-infra
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: terraform-output
       - name: Assume Role in PreProd Account for Integration Tests
         uses: aws-actions/configure-aws-credentials@v1
         with:
