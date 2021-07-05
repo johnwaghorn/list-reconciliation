@@ -1,6 +1,6 @@
 locals {
-  name               = "list-reconciliation-${local.environment}"
-  environment        = "test"
+  name        = "list-reconciliation-${local.environment}"
+  environment = "test"
 
   tags = {
     TagVersion         = "1"

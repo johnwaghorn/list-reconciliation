@@ -7,8 +7,8 @@ resource "aws_lambda_permission" "allows_sqs_to_trigger_lambda" {
 }
 
 resource "aws_lambda_event_source_mapping" "event_source" {
-  batch_size        = 1
-  event_source_arn  = var.patient_sqs_arn
-  enabled           = true
-  function_name     = aws_lambda_function.LR-07-Lambda.arn
+  batch_size       = 1
+  event_source_arn = var.patient_sqs_arn
+  enabled          = true
+  function_name    = aws_lambda_function.LR-07-Lambda.arn
 }

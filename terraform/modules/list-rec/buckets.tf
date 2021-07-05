@@ -47,41 +47,41 @@ resource "aws_s3_bucket_object" "retry" {
 }
 
 resource "aws_s3_bucket" "LR-13" {
-  bucket = "lr-13-reg-diffs-output-${var.suffix}"
-  acl = "private"
+  bucket        = "lr-13-reg-diffs-output-${var.suffix}"
+  acl           = "private"
   force_destroy = true
 
-  tags={
+  tags = {
     Name = "Output file storage for LR-11 LR-12 and LR-14"
   }
 }
 
 resource "aws_s3_bucket" "LR-22" {
-  bucket = "lr-22-pds-practice-registrations-${var.suffix}"
-  acl = "private"
+  bucket        = "lr-22-pds-practice-registrations-${var.suffix}"
+  acl           = "private"
   force_destroy = true
 
-  tags={
+  tags = {
     Name = "File storage for PDS practice extract files"
   }
 }
 
 resource "aws_s3_bucket" "mock-pds-data" {
-  bucket = "mock-pds-data-${var.suffix}"
-  acl = "private"
+  bucket        = "mock-pds-data-${var.suffix}"
+  acl           = "private"
   force_destroy = true
 
-  tags={
+  tags = {
     Name = "File storage for PDS mock api data"
   }
 }
 
 resource "aws_s3_bucket" "LR-23" {
-  bucket = "lr-23-output-bucket-${var.suffix}"
-  acl = "private"
+  bucket        = "lr-23-output-bucket-${var.suffix}"
+  acl           = "private"
   force_destroy = true
 
-  tags={
+  tags = {
     Name = "File storage for data to be sent through MESH"
   }
 }

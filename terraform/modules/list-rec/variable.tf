@@ -16,7 +16,7 @@ variable "pds_url" {
 }
 
 variable "pds_api_retries" {
-  type = number
+  type    = number
   default = 5
 }
 

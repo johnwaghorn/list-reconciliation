@@ -96,7 +96,6 @@ output "Jobs_Status_Table" {
 
 output "Statuses_Table" {
   value = module.Statuses_Table.dynamo_table_name
-
 }
 
 output "LR-12-lambda" {

@@ -3,7 +3,7 @@ locals {
 }
 
 data "archive_file" "lambda_zip" {
-  type = "zip"
+  type        = "zip"
   source_dir  = "${path.module}/../../../../lambdas/${var.lambda_name}"
   output_path = "${path.module}/../../../../lambdas/${var.lambda_name}.zip"
 }

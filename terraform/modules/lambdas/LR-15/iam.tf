@@ -3,8 +3,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "role" {
-  name = "iam-role-${var.lambda_name}-${var.suffix}"
-  description = "Execution Role for ${var.lambda_name} Lambda."
+  name               = "iam-role-${var.lambda_name}-${var.suffix}"
+  description        = "Execution Role for ${var.lambda_name} Lambda."
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -26,9 +26,9 @@ EOF
 }
 
 resource "aws_iam_policy" "policy" {
-  name = "iam-policy-${var.lambda_name}-${var.suffix}"
+  name        = "iam-policy-${var.lambda_name}-${var.suffix}"
   description = "Policy for LR-15-${var.suffix} Lambda Role."
-  policy = <<EOF
+  policy      = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -99,6 +99,6 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment" {
-  role = aws_iam_role.role.name
+  role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }

@@ -1,0 +1,37 @@
+name: Validate Terraform List Reconciliation Stack
+on:
+  push:
+    branches-ignore:
+      - develop
+      - master
+
+jobs:
+  validate-stack:
+    name: Validate Stack
+    runs-on: self-hosted
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+      FEATURE_BRANCH: ${GITHUB_REF##*/}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python Package
+        run: |
+          make python-package
+      - name: Terraform Format Check
+        run: |
+          make fmt-check
+      - name: Terraform Init
+        working-directory: ./terraform/stacks/list-reconciliation
+        run: |
+          terraform init
+          BRANCH_ID=$(make -f ./../../../makefile get-branch-id)-stack
+          terraform workspace select ${BRANCH_ID} || terraform workspace new ${BRANCH_ID}
+      - name: Terraform Validate
+        working-directory: ./terraform/stacks/list-reconciliation
+        run: |
+          terraform validate
+      - name: Terraform Plan
+        working-directory: ./terraform/stacks/list-reconciliation
+        run: |
+          terraform plan

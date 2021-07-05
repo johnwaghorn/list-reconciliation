@@ -8,3 +8,4 @@ getgauge
 moto
 pytest-env
 docker
+black

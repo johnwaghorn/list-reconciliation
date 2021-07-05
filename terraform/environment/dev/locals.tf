@@ -1,6 +1,6 @@
 locals {
-  name               = "list-reconciliation-${local.environment}"
-  environment        = lower(terraform.workspace)
+  name        = "list-reconciliation-${local.environment}"
+  environment = lower(terraform.workspace)
 
   tags = {
     TagVersion         = "1"

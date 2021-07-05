@@ -42,24 +42,24 @@ module "LR-02" {
   inflight_table_name     = module.In_Flight_Table.dynamo_table_name
   jobs_table_arn          = module.Jobs_Table.dynamo_table_arn
   jobs_table_name         = module.Jobs_Table.dynamo_table_name
-  suffix = var.suffix
+  suffix                  = var.suffix
 }
 
 module "LR-07" {
-  source                  = "../lambdas/LR-07"
-  lambda_name             = local.lambda_name.LR-07
-  package_layer_arn       = aws_lambda_layer_version.package_layer.arn
-  runtime                 = var.runtime
-  lambda_timeout          = var.lambda_timeout
-  lr_08_lambda            = module.LR-08.LR-08-lambda_arn
-  patient_sqs_arn         = aws_sqs_queue.Patient_Records_Queue.arn
-  demographics_table_arn  = module.Demographics_Table.dynamo_table_arn
-  demographics_table_name = module.Demographics_Table.dynamo_table_name
-  errors_table_arn        = module.Errors_Table.dynamo_table_arn
-  errors_table_name       = module.Errors_Table.dynamo_table_name
+  source                   = "../lambdas/LR-07"
+  lambda_name              = local.lambda_name.LR-07
+  package_layer_arn        = aws_lambda_layer_version.package_layer.arn
+  runtime                  = var.runtime
+  lambda_timeout           = var.lambda_timeout
+  lr_08_lambda             = module.LR-08.LR-08-lambda_arn
+  patient_sqs_arn          = aws_sqs_queue.Patient_Records_Queue.arn
+  demographics_table_arn   = module.Demographics_Table.dynamo_table_arn
+  demographics_table_name  = module.Demographics_Table.dynamo_table_name
+  errors_table_arn         = module.Errors_Table.dynamo_table_arn
+  errors_table_name        = module.Errors_Table.dynamo_table_name
   mock_pds_data_bucket_arn = aws_s3_bucket.mock-pds-data.arn
   pds_url                  = "s3://${aws_s3_bucket.mock-pds-data.bucket}/${var.pds_url}"
-  suffix = var.suffix
+  suffix                   = var.suffix
 }
 
 module "LR-08" {
@@ -74,7 +74,7 @@ module "LR-08" {
   errors_table_name                   = module.Errors_Table.dynamo_table_name
   demographics_differences_table_name = module.Demographics_Differences_Table.dynamo_table_name
   demographics_differences_table_arn  = module.Demographics_Differences_Table.dynamo_table_arn
-  suffix = var.suffix
+  suffix                              = var.suffix
 }
 
 module "LR-09" {
@@ -94,7 +94,7 @@ module "LR-09" {
   inflight_table_name     = module.In_Flight_Table.dynamo_table_name
   errors_table_arn        = module.Errors_Table.dynamo_table_arn
   errors_table_name       = module.Errors_Table.dynamo_table_name
-  suffix = var.suffix
+  suffix                  = var.suffix
 }
 
 module "LR-11" {
@@ -113,7 +113,7 @@ module "LR-11" {
   job_stats_table_name            = module.Jobs_Stats_Table.dynamo_table_name
   errors_table_arn                = module.Errors_Table.dynamo_table_arn
   errors_table_name               = module.Errors_Table.dynamo_table_name
-  suffix = var.suffix
+  suffix                          = var.suffix
 }
 
 module "LR-12" {
@@ -137,28 +137,28 @@ module "LR-12" {
   mock_pds_data_bucket_arn              = aws_s3_bucket.mock-pds-data.arn
   pds_url                               = "s3://${aws_s3_bucket.mock-pds-data.bucket}/${var.pds_url}"
   pds_api_retries                       = var.pds_api_retries
-  suffix = var.suffix
+  suffix                                = var.suffix
 }
 
 module "LR-15" {
-  source                                = "../lambdas/LR-15"
-  lambda_name                           = local.lambda_name.LR-15
-  runtime                               = var.runtime
-  lambda_timeout                        = var.lambda_timeout
-  package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
-  mesh_send_bucket_arn                  = aws_s3_bucket.LR-23.arn
-  mesh_send_bucket                      = aws_s3_bucket.LR-23.bucket
-  demographics_table_arn                = module.Demographics_Table.dynamo_table_arn
-  demographics_table_name               = module.Demographics_Table.dynamo_table_name
-  jobs_table_arn                        = module.Jobs_Table.dynamo_table_arn
-  jobs_table_name                       = module.Jobs_Table.dynamo_table_name
-  job_stats_table_arn                   = module.Jobs_Stats_Table.dynamo_table_arn
-  job_stats_table_name                  = module.Jobs_Stats_Table.dynamo_table_name
-  errors_table_arn                      = module.Errors_Table.dynamo_table_arn
-  errors_table_name                     = module.Errors_Table.dynamo_table_name
-  demographics_differences_table_name   = module.Demographics_Differences_Table.dynamo_table_name
-  demographics_differences_table_arn    = module.Demographics_Differences_Table.dynamo_table_arn
-  suffix                                = var.suffix
+  source                              = "../lambdas/LR-15"
+  lambda_name                         = local.lambda_name.LR-15
+  runtime                             = var.runtime
+  lambda_timeout                      = var.lambda_timeout
+  package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
+  mesh_send_bucket_arn                = aws_s3_bucket.LR-23.arn
+  mesh_send_bucket                    = aws_s3_bucket.LR-23.bucket
+  demographics_table_arn              = module.Demographics_Table.dynamo_table_arn
+  demographics_table_name             = module.Demographics_Table.dynamo_table_name
+  jobs_table_arn                      = module.Jobs_Table.dynamo_table_arn
+  jobs_table_name                     = module.Jobs_Table.dynamo_table_name
+  job_stats_table_arn                 = module.Jobs_Stats_Table.dynamo_table_arn
+  job_stats_table_name                = module.Jobs_Stats_Table.dynamo_table_name
+  errors_table_arn                    = module.Errors_Table.dynamo_table_arn
+  errors_table_name                   = module.Errors_Table.dynamo_table_name
+  demographics_differences_table_name = module.Demographics_Differences_Table.dynamo_table_name
+  demographics_differences_table_arn  = module.Demographics_Differences_Table.dynamo_table_arn
+  suffix                              = var.suffix
 }
 
 # -----------------------Step functions ----------------------
