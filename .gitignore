@@ -10,6 +10,7 @@ local_main.py
 openapi.tpl
 *.pem
 output.json
+terraform_outputs_*.json
 plan.out
 plan.out.json
 .python-version

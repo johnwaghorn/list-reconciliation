@@ -2,7 +2,9 @@
 # Variables
 #
 
+branch := $(shell git branch --show-current)
 env ?= dev
+stack ?= list-reconciliation
 
 #
 # Shared rules
@@ -42,30 +44,31 @@ black-check:
 
 # Executing
 init:
-	terraform -chdir=./terraform/stacks/list-reconciliation init
+	terraform -chdir=./terraform/stacks/${stack} init
+	terraform -chdir=./terraform/stacks/${stack} get -update
 
 workspace:
-	terraform -chdir=./terraform/stacks/list-reconciliation workspace select ${env} || terraform -chdir=./terraform/stacks/list-reconciliation workspace new ${env}
-	terraform -chdir=./terraform/stacks/list-reconciliation workspace show
+	terraform -chdir=./terraform/stacks/${stack} workspace select ${env} || terraform -chdir=./terraform/stacks/${stack} workspace new ${env}
+	terraform -chdir=./terraform/stacks/${stack} workspace show
 
 workspace-delete:
-	terraform -chdir=./terraform/stacks/list-reconciliation workspace select default
-	terraform -chdir=./terraform/stacks/list-reconciliation workspace delete ${env}
+	terraform -chdir=./terraform/stacks/${stack} workspace select default
+	terraform -chdir=./terraform/stacks/${stack} workspace delete ${env}
 
 plan:
-	terraform -chdir=./terraform/stacks/list-reconciliation plan
+	terraform -chdir=./terraform/stacks/${stack} plan
 
 apply:
-	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve
-	rm -f ./output.json || true
-	terraform -chdir=./terraform/stacks/list-reconciliation output -json > ./output.json
+	terraform -chdir=./terraform/stacks/${stack} apply -auto-approve
+	rm -f ./terraform_outputs_${stack}.json|| true
+	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
 
 destroy:
-	terraform -chdir=./terraform/stacks/list-reconciliation destroy -auto-approve
+	terraform -chdir=./terraform/stacks/${stack} destroy -auto-approve
 
 # Testing
 validate:
-	terraform -chdir=./terraform/stacks/list-reconciliation validate
+	terraform -chdir=./terraform/stacks/${stack} validate
 
 # Formatting
 fmt:
@@ -91,9 +94,8 @@ integrationtests:
 # Utilities
 #
 
-branch_override := $(shell git branch --show-current)
 get-branch-id:
-	@echo $(shell if echo ${branch_override} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then echo ${branch_override} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"; else echo ${branch_override}; fi)-$(shell echo ${branch_override} | sha1sum | head -c 8)
+	@echo $(shell if echo ${branch} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then echo ${branch} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"; else echo ${branch}; fi)-$(shell echo ${branch} | sha1sum | head -c 8)
 
 hooks:
 	pre-commit install

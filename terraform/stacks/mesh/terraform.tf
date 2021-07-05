@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 0.15.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -17,11 +19,11 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = "terraform-list-reconciliation-state"
-    key            = "workspaces/terraform.tfstate"
+    bucket         = "terraform-list-reconciliation-state-mgmt"
+    key            = "mesh.tfstate"
     dynamodb_table = "terraform-list-reconciliation-locks"
-    profile        = "default"
     region         = "eu-west-2"
     encrypt        = true
+    role_arn       = "arn:aws:iam::486319732046:role/LRTerraformBase"
   }
 }

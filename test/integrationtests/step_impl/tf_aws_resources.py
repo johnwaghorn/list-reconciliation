@@ -2,7 +2,7 @@ import json
 import os
 
 cwd = os.path.dirname(__file__)
-OUTPUT_FILE = os.path.join(cwd, "..", "..", "..", "output.json")
+OUTPUT_FILE = os.path.join(cwd, "..", "..", "..", "terraform_outputs_list-reconciliation.json")
 
 
 def get_aws_resources():

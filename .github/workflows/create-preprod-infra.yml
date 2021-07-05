@@ -5,8 +5,8 @@ on:
       - master
 
 jobs:
-  create-preprod-infra:
-    name: Create preprod infrastructure on AWS
+  create-preprod-list-reconciliation-stack:
+    name: Create preprod List Reconciliation stack on AWS
     runs-on: self-hosted
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -32,6 +32,23 @@ jobs:
           name: terraform-output
           path: ./output.json
           retention-days: 2
+
+  create-preprod-mesh-stack:
+    name: Create preprod Mesh stack on AWS
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Terraform Init
+        run: |
+          make init stack="mesh"
+          make workspace env="preprod" stack="mesh"
+      - name: Terraform Validate
+        run: |
+          make validate stack="mesh"
+      - name: Terraform Apply
+        run: |
+          make apply stack="mesh"
+
   run-integration-tests:
     name: Run integration tests
     runs-on: self-hosted
