@@ -33,17 +33,11 @@ def test_get_datetime_now_returns_correct_time():
         ("Europe/Vatican", 2020, 2, 1, 13, 21, 34),
         ("Pacific/Pago_Pago", 2020, 2, 1, 1, 21, 34),
         ("America/Thunder_Bay", 2020, 2, 1, 7, 21, 34),
-        ("Asia/Hong_Kong", 2020, 2, 1, 20, 21, 34)
+        ("Asia/Hong_Kong", 2020, 2, 1, 20, 21, 34),
     ],
 )
 def test_get_datetime_now_with_different_timezone_returns_correct_time(
-    timezone: str,
-    year: int,
-    month: int,
-    day: int,
-    hour: int,
-    minute: int,
-    second: int
+    timezone: str, year: int, month: int, day: int, hour: int, minute: int, second: int
 ):
     actual = get_datetime_now(timezone)
 

@@ -10,7 +10,9 @@ class InvalidFilename(Exception):
     pass
 
 
-def validate_filename(filename: str, process_datetime: datetime = None) -> Tuple[datetime, str]:
+def validate_filename(
+    filename: str, process_datetime: datetime = None
+) -> Tuple[datetime, str]:
     """Validates a GP extract filename
 
     Checks the following rules:

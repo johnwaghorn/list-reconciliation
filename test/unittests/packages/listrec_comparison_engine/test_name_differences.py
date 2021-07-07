@@ -17,7 +17,9 @@ def test_compare_patient_name_no_match_require_validation():
 
     expected = ACTION_REQUIRES_VALIDATION, BOTH_NAMES
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -30,7 +32,9 @@ def test_compare_patient_name_forename_mismatch_require_validation():
 
     expected = ACTION_REQUIRES_VALIDATION, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -43,7 +47,9 @@ def test_compare_patient_name_surname_mismatch_require_validation():
 
     expected = ACTION_REQUIRES_VALIDATION, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -56,7 +62,9 @@ def test_compare_patient_name_gp_lower_case_update_gp():
 
     expected = ACTION_UPDATE_GP, BOTH_NAMES
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -69,7 +77,9 @@ def test_compare_patient_name_pds_lower_case_update_pds():
 
     expected = ACTION_UPDATE_PDS, BOTH_NAMES
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -82,7 +92,9 @@ def test_compare_patient_name_gp_forname_lower_case_additional_update_pds():
 
     expected = ACTION_UPDATE_GP, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -95,7 +107,9 @@ def test_compare_patient_name_pds_surname_lower_case_additional_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -108,7 +122,9 @@ def test_compare_patient_name_mixed_lower_case_require_validation():
 
     expected = ACTION_REQUIRES_VALIDATION, BOTH_NAMES
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -121,7 +137,9 @@ def test_compare_patient_name_missing_gp_surname_update_gp():
 
     expected = ACTION_UPDATE_GP, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -134,7 +152,9 @@ def test_compare_patient_name_missing_pds_surname_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -147,7 +167,9 @@ def test_compare_patient_name_missing_gp_forename_update_gp():
 
     expected = ACTION_UPDATE_GP, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -160,7 +182,9 @@ def test_compare_patient_name_missing_pds_forename_update_pds():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -173,7 +197,9 @@ def test_compare_patient_name_forename_positional_mismatch_require_validation():
 
     expected = ACTION_REQUIRES_VALIDATION, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -186,7 +212,9 @@ def test_compare_patient_name_gp_surname_positional_mismatch_update_PDS():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -199,7 +227,9 @@ def test_compare_patient_name_pds_surname_positional_mismatch_update_PDS():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -212,7 +242,9 @@ def test_compare_patient_name_pds_double_barelled_forename_update_gp():
 
     expected = ACTION_UPDATE_GP, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -225,7 +257,9 @@ def test_compare_patient_name_gp_double_barelled_forename_update_gp():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -238,7 +272,9 @@ def test_compare_patient_name_gp_double_barelled_forename_match_update_pds():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -251,7 +287,9 @@ def test_compare_patient_name_pds_double_barelled_forename_match_update_pds():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -264,7 +302,9 @@ def test_compare_patient_name_gp_double_barelled_surname_match_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -277,7 +317,9 @@ def test_compare_patient_name_pds_double_barelled_surname_match_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -290,7 +332,9 @@ def test_compare_patient_name_gp_surname_with_apostraphe_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -303,7 +347,9 @@ def test_compare_patient_name_pds_surname_with_apostraphe_update_gp():
 
     expected = ACTION_UPDATE_GP, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -316,7 +362,9 @@ def test_compare_patient_name_pds_additional_forename_update_pds():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -329,7 +377,9 @@ def test_compare_patient_name_gp_additional_forename_update_pds():
 
     expected = ACTION_UPDATE_PDS, FORENAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -342,7 +392,9 @@ def test_compare_patient_name_pds_additional_surname_update_gp():
 
     expected = ACTION_UPDATE_GP, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -355,7 +407,9 @@ def test_compare_patient_name_gp_additional_surname_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -368,7 +422,9 @@ def test_compare_patient_name_pds_additional_surname_hyphenated_update_gp():
 
     expected = ACTION_UPDATE_GP, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -381,7 +437,9 @@ def test_compare_patient_name_gp_additional_surname_hyphenated_update_pds():
 
     expected = ACTION_UPDATE_PDS, SURNAME
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual
 
@@ -394,6 +452,8 @@ def test_compare_patient_name_switched_names_update_pds():
 
     expected = ACTION_UPDATE_PDS, BOTH_NAMES
 
-    actual = compare_patient_name(gp_forename, gp_surname, pds_givenNames, pds_familyName)
+    actual = compare_patient_name(
+        gp_forename, gp_surname, pds_givenNames, pds_familyName
+    )
 
     assert expected == actual

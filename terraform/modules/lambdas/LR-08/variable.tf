@@ -41,3 +41,7 @@ variable "demographics_differences_table_name" {
 variable "suffix" {
   type = string
 }
+
+variable "lambda_handler" {
+  type = string
+}

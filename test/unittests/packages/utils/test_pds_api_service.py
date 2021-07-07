@@ -28,7 +28,8 @@ def mocked_requests_get(*args, **kwargs):
                 raise Exception(self.status_code)
 
     return MockResponse(
-        json.dumps(json.load(open(os.path.join(DATA, "pds_fhir_api_response.json")))), 200
+        json.dumps(json.load(open(os.path.join(DATA, "pds_fhir_api_response.json")))),
+        200,
     )
 
 
@@ -41,7 +42,9 @@ def s3():
             Bucket=bucket,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
-        s3.upload_file(os.path.join(DATA, "pds_api_data.csv"), bucket, "pds_api_data.csv")
+        s3.upload_file(
+            os.path.join(DATA, "pds_api_data.csv"), bucket, "pds_api_data.csv"
+        )
         yield
 
 
@@ -56,7 +59,13 @@ def test_get_pds_fhir_record(pds_url):
         "title": ["Mrs"],
         "gender": "female",
         "date_of_birth": "2010-10-22",
-        "address": ["1 Trevelyan Square", "Boar Lane", "City Centre", "Leeds", "West Yorkshire"],
+        "address": [
+            "1 Trevelyan Square",
+            "Boar Lane",
+            "City Centre",
+            "Leeds",
+            "West Yorkshire",
+        ],
         "postcode": "LS1 6AE",
         "gp_code": "Y12345",
         "gp_registered_date": "2020-01-01",
@@ -77,7 +86,13 @@ def test_get_pds_mock_record(s3):
         "title": ["Mrs"],
         "gender": "female",
         "date_of_birth": "2010-10-22",
-        "address": ["1 Trevelyan Square", "Boar Lane", "City Centre", "Leeds", "West Yorkshire"],
+        "address": [
+            "1 Trevelyan Square",
+            "Boar Lane",
+            "City Centre",
+            "Leeds",
+            "West Yorkshire",
+        ],
         "postcode": "LS1 6AE",
         "gp_code": "Y123452",
         "gp_registered_date": "2012-05-22",

@@ -66,3 +66,7 @@ variable "errors_table_name" {
 variable "suffix" {
   type = string
 }
+
+variable "lambda_handler" {
+  type = string
+}

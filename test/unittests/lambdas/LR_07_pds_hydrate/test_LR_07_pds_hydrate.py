@@ -2,15 +2,16 @@ import os
 
 import pytest
 
-from lambdas.LR_07_pds_hydrate.pds_hydrate import pds_hydrate
+
 from utils.database.models import Demographics
+
 from utils.logger import success
+from utils.database.models import Demographics
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 REGION_NAME = "eu-west-2"
-
 
 PDS_COLUMNS = (
     "PDS_GpCode",
@@ -29,10 +30,13 @@ PDS_COLUMNS = (
 
 
 def test_write_into_table(
-    upload_pds_mock_data_to_s3, demographics_records, create_LR08_demographic_comparison_lambda
+    upload_pds_mock_data_to_s3,
+    demographics_records,
+    create_LR08_demographic_comparison_lambda,
+    lambda_context,
+    lambda_handler,
 ):
-
-    response = pds_hydrate("9000000009", "50", "50")
+    response = lambda_handler.pds_hydrate("9000000009", "50", "50")
     expected_response = success(
         "Retrieved PDS data for NhsNumber: 9000000009, JobId: 50, PatientId: 50"
     )
@@ -68,22 +72,29 @@ def test_write_into_table(
 
 
 def test_record_doesnt_exist_raises_DemographicsDoesNotExist(
-    upload_pds_mock_data_to_s3, demographics_records, create_LR08_demographic_comparison_lambda
+    upload_pds_mock_data_to_s3,
+    demographics_records,
+    create_LR08_demographic_comparison_lambda,
+    lambda_handler,
 ):
     with pytest.raises(Demographics.DoesNotExist):
-        pds_hydrate("9000000009", "500", "500")
+        app = lambda_handler
+        app.pds_hydrate("9000000009", "500", "500")
 
 
 def test_gp_registration_Partnership_Mismatch_in_demographics_table(
-    upload_pds_mock_data_to_s3, demographics_records, create_LR08_demographic_comparison_lambda
+    upload_pds_mock_data_to_s3,
+    demographics_records,
+    create_LR08_demographic_comparison_lambda,
+    lambda_handler,
 ):
 
-    response = pds_hydrate("8000000008", "50", "51")
-    expected_response = success(
+    response = lambda_handler.pds_hydrate("8000000008", "50", "51")
+    expected_response = (
         "Retrieved PDS data for NhsNumber: 8000000008, JobId: 50, PatientId: 51"
     )
 
-    assert response == expected_response
+    assert response["message"] == expected_response
 
     record = Demographics.get("51", "50").attribute_values
 
@@ -112,15 +123,18 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
 
 
 def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
-    upload_pds_mock_data_to_s3, demographics_records, create_LR08_demographic_comparison_lambda
+    upload_pds_mock_data_to_s3,
+    demographics_records,
+    create_LR08_demographic_comparison_lambda,
+    lambda_handler,
 ):
 
-    response = pds_hydrate("7000000007", "50", "52")
-    expected_response = success(
+    response = lambda_handler.pds_hydrate("7000000007", "50", "52")
+    expected_response = (
         "Retrieved PDS data for NhsNumber: 7000000007, JobId: 50, PatientId: 52"
     )
 
-    assert response == expected_response
+    assert response["message"] == expected_response
 
     record = Demographics.get("52", "50").attribute_values
 
@@ -149,15 +163,17 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
 
 
 def test_gp_registration_Unmatched_in_demographics_table(
-    upload_pds_mock_data_to_s3, demographics_records, create_LR08_demographic_comparison_lambda
+    upload_pds_mock_data_to_s3,
+    demographics_records,
+    create_LR08_demographic_comparison_lambda,
+    lambda_handler,
 ):
-
-    response = pds_hydrate("6000000006", "50", "53")
-    expected_response = success(
+    response = lambda_handler.pds_hydrate("6000000006", "50", "53")
+    expected_response = (
         "PDS data not found for NhsNumber: 6000000006, JobId: 50, PatientId: 53"
     )
 
-    assert response == expected_response
+    assert response["message"] == expected_response
 
     record = Demographics.get("53", "50").attribute_values
     actual = record["GP_RegistrationStatus"]

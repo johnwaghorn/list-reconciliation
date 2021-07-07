@@ -1,9 +1,10 @@
 import os
+
 import boto3
 import pytest
-
 from moto import mock_dynamodb2, mock_s3, mock_sqs
 
+from lambda_code.LR_02_validate_and_parse.lr02_lambda_handler import LR02LambdaHandler
 from utils.database.models import Demographics, Errors, Jobs, InFlight
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +25,8 @@ def upload_pds_valid_mock_data_to_s3():
     with mock_s3():
         client = boto3.client("s3", region_name=REGION_NAME)
         client.create_bucket(
-            Bucket=MOCK_BUCKET, CreateBucketConfiguration={"LocationConstraint": REGION_NAME}
+            Bucket=MOCK_BUCKET,
+            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
         )
         client.upload_file(
             os.path.join(DATA, f"{VALID_FILE}"), MOCK_BUCKET, f"inbound/{VALID_FILE}"
@@ -37,10 +39,13 @@ def upload_pds_invalid_mock_data_to_s3():
     with mock_s3():
         client = boto3.client("s3", region_name=REGION_NAME)
         client.create_bucket(
-            Bucket=MOCK_BUCKET, CreateBucketConfiguration={"LocationConstraint": REGION_NAME}
+            Bucket=MOCK_BUCKET,
+            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
         )
         client.upload_file(
-            os.path.join(DATA, f"{INVALID_FILE}"), MOCK_BUCKET, f"inbound/{INVALID_FILE}"
+            os.path.join(DATA, f"{INVALID_FILE}"),
+            MOCK_BUCKET,
+            f"inbound/{INVALID_FILE}",
         )
         yield
 
@@ -70,3 +75,14 @@ def create_sqs():
 
         sqs_client.create_queue(QueueName=MOCK_QUEUE, Attributes=attributes)
         yield
+
+
+@pytest.fixture(scope="module")
+def lr_02_event():
+    return {"Records": [{"s3": {"object": {"key": f"inbound/{VALID_FILE}"}}}]}
+
+
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = LR02LambdaHandler()
+    return app

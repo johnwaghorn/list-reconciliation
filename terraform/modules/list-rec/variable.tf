@@ -103,3 +103,7 @@ variable "status_attribute" {
 variable "suffix" {
   type = string
 }
+
+variable "lambda_handler" {
+  type = string
+}

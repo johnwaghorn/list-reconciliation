@@ -52,7 +52,10 @@ def test_get_records_exactly_one_right_record_required_in_object():
     with pytest.raises(ConfigurationError) as err:
         get_records(mod)
 
-    assert str(err.value) == "Exactly one LeftRecord and RightRecord object must be defined."
+    assert (
+        str(err.value)
+        == "Exactly one LeftRecord and RightRecord object must be defined."
+    )
 
 
 def test_get_records_only_one_left_record_allowed_in_object():
@@ -87,7 +90,10 @@ def test_get_records_exactly_one_left_record_required_in_object():
     with pytest.raises(ConfigurationError) as err:
         get_records(mod)
 
-    assert str(err.value) == "Exactly one LeftRecord and RightRecord object must be defined."
+    assert (
+        str(err.value)
+        == "Exactly one LeftRecord and RightRecord object must be defined."
+    )
 
 
 def test_record_has_exactly_one_primary_key_required():
@@ -123,7 +129,9 @@ def test_record_data_types():
         ID = IntegerColumn("id", primary_key=True)
         AMOUNT = FloatColumn("amt")
         NAME = StringColumn("name")
-        NAME_WITH_DASH = StringColumn("name", format=lambda x: "-".join(x.lower().split()))
+        NAME_WITH_DASH = StringColumn(
+            "name", format=lambda x: "-".join(x.lower().split())
+        )
         DATE = DateTimeColumn("date")
         US_DATE = DateTimeColumn(
             "us_date", format=lambda x: datetime.datetime.strptime(str(x), "%Y-%d-%m")

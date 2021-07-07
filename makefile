@@ -10,7 +10,7 @@ terraform_workspace ?= default
 #
 
 all: python-package init apply
-test: integrationtests unittest
+test: integrationtests unittests
 format: fmt black
 
 #

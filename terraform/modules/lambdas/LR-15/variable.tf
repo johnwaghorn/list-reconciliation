@@ -65,3 +65,7 @@ variable "lambda_timeout" {
 variable "suffix" {
   type = string
 }
+
+variable "lambda_handler" {
+  type = string
+}

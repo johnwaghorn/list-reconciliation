@@ -10,12 +10,19 @@ DATA = os.path.join(ROOT, "data")
 PDSPATIENTFILE = "pds_api_response.json"
 
 
-@step("trigger fhir r4 patient api for patient_id <patient_id> and assert response as expected")
+@step(
+    "trigger fhir r4 patient api for patient_id <patient_id> and assert response as expected"
+)
 def run_prd_fhir_get_patient_details_api(patient_id):
     url = URL + "/" + patient_id
-    pds_url_headers = {'accept': 'application/fhir+json','NHSD-Session-URID': '555021935107','X-Request-ID': '60E0B220-8136-4CA5-AE46-1D97EF59D068','X-Correlation-ID': '11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA'}
-    
-    response = requests.get(url,headers = pds_url_headers)
+    pds_url_headers = {
+        "accept": "application/fhir+json",
+        "NHSD-Session-URID": "555021935107",
+        "X-Request-ID": "60E0B220-8136-4CA5-AE46-1D97EF59D068",
+        "X-Correlation-ID": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA",
+    }
+
+    response = requests.get(url, headers=pds_url_headers)
 
     response.raise_for_status()
     expected_response_file = os.path.join(DATA, PDSPATIENTFILE)
@@ -23,4 +30,6 @@ def run_prd_fhir_get_patient_details_api(patient_id):
     with open(expected_response_file) as jsonfile:
         expected_response_body = json.load(jsonfile)
         actual_response_body = response.json()
-        assert expected_response_body == actual_response_body, "Response payload doesnt match"
+        assert (
+            expected_response_body == actual_response_body
+        ), "Response payload doesnt match"

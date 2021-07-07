@@ -1,11 +1,13 @@
 import os
+
 import boto3
 import pytest
-
 from freezegun import freeze_time
 from moto import mock_dynamodb2, mock_s3
 
+from lambda_code.LR_21_split_dps_extract.lr21_lambda_handler import SplitDPSExtract
 from utils.database.models import Errors
+
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -17,6 +19,12 @@ REGION_NAME = os.environ.get("AWS_REGION")
 VALID_DATA_FILE = "dps_data.csv"
 INVALID_DATA_FILE = "invalid_dps_data.csv"
 EXISTING_GP_FILE = "C86543.csv"
+
+
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = SplitDPSExtract()
+    return app
 
 
 @pytest.fixture

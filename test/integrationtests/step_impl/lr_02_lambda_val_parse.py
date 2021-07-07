@@ -22,8 +22,8 @@ test_datetime = get_datetime_now()
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-LR_01_BUCKET = aws_resource['lr_01_bucket']['value']
-LR_02_LAMBDA_ARN = aws_resource["lr_02_lambda_arn"]['value']
+LR_01_BUCKET = aws_resource["lr_01_bucket"]["value"]
+LR_02_LAMBDA_ARN = aws_resource["lr_02_lambda_arn"]["value"]
 
 temp_dir = gettempdir()
 now = test_datetime - timedelta(hours=1)
@@ -82,13 +82,17 @@ def assert_lambda_lr_02_response_statuscode(expstatuscode):
             assert value == int(expstatuscode)
 
 
-@step("trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>")
+@step(
+    "trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>"
+)
 def assert_lambda_lr_02_response_metadata_httpstatuscode(expstatuscode):
     lr_02_response = connect_to_lambda_lr02_with_invalid_payload()
 
     for key in lr_02_response.items():
         if key == "ResponseMetadata":
-            assert lr_02_response["ResponseMetadata"]["HTTPStatusCode"] == int(expstatuscode)
+            assert lr_02_response["ResponseMetadata"]["HTTPStatusCode"] == int(
+                expstatuscode
+            )
 
 
 @step("create gpextract file")
@@ -191,7 +195,10 @@ def readfile_in_s3_failed_invalid_item(search_word):
                     val += 1
                     assert search_word in actual_key
 
-                if line_num != len_content or line == "DOW file contains invalid records:":
+                if (
+                    line_num != len_content
+                    or line == "DOW file contains invalid records:"
+                ):
                     line_num += 1
 
             if val == 0:

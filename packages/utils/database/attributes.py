@@ -13,6 +13,7 @@ class GMTDateTimeAttribute(Attribute[datetime]):
     An attribute for storing a GMT Datetime
     This func is heavily duplicated from pynamodb\attributes.py
     """
+
     attr_type = STRING
 
     def serialize(self, value):
@@ -23,7 +24,9 @@ class GMTDateTimeAttribute(Attribute[datetime]):
             value = localize_date(value)
 
         if value.tzname() != "BST":
-            raise ValueError(f"Datetime string '{value}' with timezone '{value.tzname()}' doesn't use the correct timezone 'BST'")
+            raise ValueError(
+                f"Datetime string '{value}' with timezone '{value.tzname()}' doesn't use the correct timezone 'BST'"
+            )
 
         fmt = value.strftime(DATETIME_FORMAT)
         return fmt
@@ -40,17 +43,36 @@ class GMTDateTimeAttribute(Attribute[datetime]):
         # This is ~5.8x faster than using strptime and 38x faster than dateutil.parser.parse.
         _int = int  # Hack to prevent global lookups of int, speeds up the function ~10%
         try:
-            if (len(date_string) != 31 or date_string[4] != '-' or date_string[7] != '-'
-                    or date_string[10] != 'T' or date_string[13] != ':' or date_string[16] != ':'
-                    or date_string[19] != '.' or date_string[26] != '+'):
-                raise ValueError("Datetime string '{}' does not match format '{}'".format(date_string, DATETIME_FORMAT))
+            if (
+                len(date_string) != 31
+                or date_string[4] != "-"
+                or date_string[7] != "-"
+                or date_string[10] != "T"
+                or date_string[13] != ":"
+                or date_string[16] != ":"
+                or date_string[19] != "."
+                or date_string[26] != "+"
+            ):
+                raise ValueError(
+                    "Datetime string '{}' does not match format '{}'".format(
+                        date_string, DATETIME_FORMAT
+                    )
+                )
             return localize_date(
                 datetime(
-                    _int(date_string[0:4]), _int(date_string[5:7]), _int(date_string[8:10]),
-                    _int(date_string[11:13]), _int(date_string[14:16]), _int(date_string[17:19]),
-                    _int(date_string[20:26])
+                    _int(date_string[0:4]),
+                    _int(date_string[5:7]),
+                    _int(date_string[8:10]),
+                    _int(date_string[11:13]),
+                    _int(date_string[14:16]),
+                    _int(date_string[17:19]),
+                    _int(date_string[20:26]),
                 ),
-                "Europe/London"
+                "Europe/London",
             )
         except (TypeError, ValueError):
-            raise ValueError("Datetime string '{}' does not match format '{}'".format(date_string, DATETIME_FORMAT))
+            raise ValueError(
+                "Datetime string '{}' does not match format '{}'".format(
+                    date_string, DATETIME_FORMAT
+                )
+            )

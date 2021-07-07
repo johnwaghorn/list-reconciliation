@@ -1,20 +1,38 @@
-from datetime import datetime
 import os
-
-from moto import mock_dynamodb2, mock_s3
-from pytz import timezone
+from datetime import datetime
 
 import boto3
 import pytest
+from moto import mock_dynamodb2, mock_s3
+from pytz import timezone
 
+
+from lambda_code.LR_12_pds_registration_status.LR12_lambda_handler import (
+    PDSRegistrationStatus,
+)
 from utils.database.models import Demographics, Errors, Jobs, JobStats
+
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
-LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv("LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET")
+LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv(
+    "LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"
+)
+
+
+@pytest.fixture(scope="module")
+def lr_12_event():
+    return {"job_id": "blah"}
+
+
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = PDSRegistrationStatus()
+    return app
+
 
 PATIENTS = [
     Demographics(
@@ -114,10 +132,15 @@ def s3():
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
         for file in ("Y123451.csv", "Y123452.csv"):
-            s3.upload_file(os.path.join(DATA, file), LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET, file)
+            s3.upload_file(
+                os.path.join(DATA, file), LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET, file
+            )
 
         s3.create_bucket(
-            Bucket="mock-pds-data", CreateBucketConfiguration={"LocationConstraint": AWS_REGION}
+            Bucket="mock-pds-data",
+            CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
-        s3.upload_file(os.path.join(DATA, "pds_api_data.csv"), "mock-pds-data", "pds_api_data.csv")
+        s3.upload_file(
+            os.path.join(DATA, "pds_api_data.csv"), "mock-pds-data", "pds_api_data.csv"
+        )
         yield

@@ -1,19 +1,36 @@
-from datetime import datetime
 import os
-
-from moto import mock_dynamodb2, mock_s3
-from pytz import timezone
+from datetime import datetime
 
 import boto3
 import pytest
+from moto import mock_dynamodb2, mock_s3
+from pytz import timezone
 
-from utils.database.models import Demographics, Errors, Jobs, JobStats, DemographicsDifferences
+
+from lambda_code.LR_15_process_demo_diffs.lr15_lambda_handler import (
+    DemographicDifferences,
+)
+from utils.database.models import (
+    Demographics,
+    Errors,
+    Jobs,
+    JobStats,
+    DemographicsDifferences,
+)
+
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 AWS_REGION = os.getenv("AWS_REGION")
 MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")
+
+
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = DemographicDifferences()
+    return app
+
 
 PATIENTS = [
     Demographics(

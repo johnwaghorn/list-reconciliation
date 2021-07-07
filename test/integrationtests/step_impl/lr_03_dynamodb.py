@@ -8,7 +8,7 @@ secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
 aws_resource = get_aws_resources()
-JOBS_TABLE = aws_resource['jobs_table']['value']
+JOBS_TABLE = aws_resource["jobs_table"]["value"]
 
 
 @step("connect to lr-03 dynamodb and get the latest JobId for a gppractice file")
@@ -24,4 +24,3 @@ def get_latest_jobid():
             if job_items:
                 latest_job_id = job_items[0]
                 return latest_job_id["Id"]
-

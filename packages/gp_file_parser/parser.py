@@ -103,7 +103,10 @@ def _validate_record(
             raise InvalidGPExtract(f"Unrecognised column {col}")
 
         coerced_record, invalid_reason = validator_func(
-            val, process_datetime=process_datetime, gp_ha_cipher=gp_ha_cipher, other_ids=other_ids
+            val,
+            process_datetime=process_datetime,
+            gp_ha_cipher=gp_ha_cipher,
+            other_ids=other_ids,
         )
         validated_record[col] = coerced_record
         if invalid_reason:
@@ -246,7 +249,9 @@ def parse_gp_extract_text(
             raw_text = raw_text[count:]
             break
     else:
-        raise InvalidGPExtract("GP extract does not contain any valid records for processing")
+        raise InvalidGPExtract(
+            "GP extract does not contain any valid records for processing"
+        )
 
     raw_text.reverse()
 
@@ -297,7 +302,9 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
         raise InvalidGPExtract(str(err).replace("[Errno 2]", "").strip())
 
     results = []
-    extract_date, gp_ha_cipher = validate_filename(os.path.basename(filepath), process_datetime)
+    extract_date, gp_ha_cipher = validate_filename(
+        os.path.basename(filepath), process_datetime
+    )
 
     LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
 
@@ -312,7 +319,9 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     return results
 
 
-def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
+def process_invalid_records(
+    records: Records, include_reason: bool = False
+) -> Tuple[Dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more inormative validation fail reason.

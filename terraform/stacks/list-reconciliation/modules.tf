@@ -1,10 +1,11 @@
 module "list-rec" {
   source = "../../modules/list-rec"
 
-  suffix      = local.environment
-  pds_url     = "s3://mock-pds-data/pds_api_data.csv"
-  patient_sqs = "Patient_Records.fifo"
-  runtime     = "python3.8"
+  suffix         = local.environment
+  pds_url        = "pds_api_data.csv"
+  patient_sqs    = "Patient_Records.fifo"
+  runtime        = "python3.8"
+  lambda_handler = "main.lambda_handler"
 }
 
 module "test-data" {

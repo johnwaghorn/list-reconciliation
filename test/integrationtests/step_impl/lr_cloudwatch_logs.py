@@ -17,14 +17,14 @@ secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
 aws_resource = get_aws_resources()
-LR02_LAMBDA = aws_resource["lr_02_lambda"]['value']
+LR02_LAMBDA = aws_resource["lr_02_lambda"]["value"]
 
 # Region & Timezone
 region_name = "eu-west-2"
 test_datetime = get_datetime_now()
 
 # aws resources
-JOBS_TABLE = aws_resource['jobs_table']['value']
+JOBS_TABLE = aws_resource["jobs_table"]["value"]
 LR02_LAMBDA_LOG_GROUP = f"/aws/lambda/{LR02_LAMBDA}"
 
 client = dev.client("logs", region_name)

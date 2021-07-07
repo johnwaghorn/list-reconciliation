@@ -44,6 +44,7 @@ module "LR-02" {
   jobs_table_arn          = module.Jobs_Table.dynamo_table_arn
   jobs_table_name         = module.Jobs_Table.dynamo_table_name
   suffix                  = var.suffix
+  lambda_handler          = var.lambda_handler
 }
 
 module "LR-07" {
@@ -61,6 +62,7 @@ module "LR-07" {
   mock_pds_data_bucket_arn = aws_s3_bucket.mock-pds-data.arn
   pds_url                  = "s3://${aws_s3_bucket.mock-pds-data.bucket}/${var.pds_url}"
   suffix                   = var.suffix
+  lambda_handler           = var.lambda_handler
 }
 
 module "LR-08" {
@@ -76,6 +78,7 @@ module "LR-08" {
   demographics_differences_table_name = module.Demographics_Differences_Table.dynamo_table_name
   demographics_differences_table_arn  = module.Demographics_Differences_Table.dynamo_table_arn
   suffix                              = var.suffix
+  lambda_handler                      = var.lambda_handler
 }
 
 module "LR-09" {
@@ -96,6 +99,7 @@ module "LR-09" {
   errors_table_arn        = module.Errors_Table.dynamo_table_arn
   errors_table_name       = module.Errors_Table.dynamo_table_name
   suffix                  = var.suffix
+  lambda_handler          = var.lambda_handler
 }
 
 module "LR-11" {
@@ -115,6 +119,7 @@ module "LR-11" {
   errors_table_arn                = module.Errors_Table.dynamo_table_arn
   errors_table_name               = module.Errors_Table.dynamo_table_name
   suffix                          = var.suffix
+  lambda_handler                  = var.lambda_handler
 }
 
 module "LR-12" {
@@ -139,6 +144,7 @@ module "LR-12" {
   pds_url                               = "s3://${aws_s3_bucket.mock-pds-data.bucket}/${var.pds_url}"
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
+  lambda_handler                        = var.lambda_handler
 }
 
 module "LR-15" {
@@ -160,6 +166,7 @@ module "LR-15" {
   demographics_differences_table_name = module.Demographics_Differences_Table.dynamo_table_name
   demographics_differences_table_arn  = module.Demographics_Differences_Table.dynamo_table_arn
   suffix                              = var.suffix
+  lambda_handler                      = var.lambda_handler
 }
 
 module "LR-21" {
@@ -172,6 +179,7 @@ module "LR-21" {
   errors_table_arn            = module.Errors_Table.dynamo_table_arn
   errors_table_name           = module.Errors_Table.dynamo_table_name
   suffix                      = var.suffix
+  lambda_handler              = var.lambda_handler
 }
 
 # -----------------------Step functions ----------------------

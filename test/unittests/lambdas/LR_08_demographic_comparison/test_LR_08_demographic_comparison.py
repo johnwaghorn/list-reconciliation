@@ -1,12 +1,19 @@
+import pytest
 from moto import mock_dynamodb2
 
-import pytest
-
+import lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler
 from comparison_engine.schema import ConfigurationError
-from lambdas.LR_08_demographic_comparison.demographic_comparison import demographic_comparisons
+
+from lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler import (
+    DemographicComparison,
+)
 from utils.database.models import Demographics, Errors, DemographicsDifferences
 
-import lambdas.LR_08_demographic_comparison.demographic_comparison
+
+@pytest.fixture(autouse=True)
+def lambda_handler():
+    app = DemographicComparison()
+    return app
 
 
 @pytest.fixture
@@ -66,8 +73,8 @@ def demographics_record(create_dynamodb_tables):
     yield item
 
 
-def test_demographics_comparison_ok(demographics_record):
-    demographic_comparisons("50", "50")
+def test_demographics_comparison_ok(demographics_record, lambda_handler):
+    lambda_handler.demographic_comparisons("50", "50")
     result = DemographicsDifferences.scan()
     actual = {record.attribute_values["RuleId"] for record in result}
     expected = {"MN-BR-DB-01", "MN-BR-AD-01"}
@@ -75,12 +82,18 @@ def test_demographics_comparison_ok(demographics_record):
     assert actual == expected
 
 
-def test_record_doesnt_exist_raises_DemographicsDoesNotExist(demographics_record):
+def test_record_doesnt_exist_raises_DemographicsDoesNotExist(
+    demographics_record, lambda_handler
+):
     with pytest.raises(Demographics.DoesNotExist):
-        demographic_comparisons("500", "500")
+
+        lambda_handler.demographic_comparisons("500", "500")
 
 
-def test_bad_config_raises_ConfigurationError(demographics_record):
-    lambdas.LR_08_demographic_comparison.demographic_comparison.listrec_comparisons = None
+def test_bad_config_raises_ConfigurationError(demographics_record, lambda_handler):
+
+    lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler.listrec_comparisons = (
+        None
+    )
     with pytest.raises(ConfigurationError):
-        demographic_comparisons("50", "50")
+        lambda_handler.demographic_comparisons("50", "50")

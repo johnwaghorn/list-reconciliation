@@ -88,7 +88,8 @@ resource "aws_iam_policy" "policy" {
             "Action": "dynamodb:PutItem",
             "Resource": [
                 "${var.errors_table_arn}",
-                "${var.job_stats_table_arn}"
+                "${var.job_stats_table_arn}",
+                "${var.jobs_table_arn}"
             ]
         },
         {

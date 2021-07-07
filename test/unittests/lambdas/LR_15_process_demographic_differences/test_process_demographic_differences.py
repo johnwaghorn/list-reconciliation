@@ -6,9 +6,7 @@ from freezegun import freeze_time
 import boto3
 import pytest
 
-from lambdas.LR_15_process_demo_diffs.process_demographic_differences import (
-    process_demographic_differences,
-)
+
 from services.jobs import JobNotFound
 from utils.database.models import JobStats, Jobs
 
@@ -18,10 +16,10 @@ MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")
 
 @freeze_time("2020-04-06 13:40:00+01:00")
 def test_process_demographic_differences(
-    demographics, demographics_differences, jobstats, jobs, s3
+    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler
 ):
     job_id = "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"
-    response = process_demographic_differences(job_id)
+    response = lambda_handler.process_demographic_differences(job_id)
 
     expected = {
         "system": {
@@ -115,7 +113,7 @@ def test_process_demographic_differences(
 
 
 def test_process_demographic_differences_no_diffs_for_job(
-    demographics, demographics_differences, jobstats, jobs, s3
+    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler
 ):
     with pytest.raises(JobNotFound):
-        process_demographic_differences("ABC123")
+        lambda_handler.process_demographic_differences("ABC123")

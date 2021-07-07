@@ -7,7 +7,7 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_function" "LR-08-Lambda" {
   function_name    = "${var.lambda_name}-${var.suffix}"
   filename         = data.archive_file.lambda_zip.output_path
-  handler          = "demographic_comparison.lambda_handler"
+  handler          = var.lambda_handler
   role             = aws_iam_role.role.arn
   runtime          = var.runtime
   timeout          = var.lambda_timeout

@@ -3,12 +3,14 @@ import os
 import textwrap
 import zipfile
 
-from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
-
 import boto3
 import pytest
+from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
 
+
+from lambda_code.LR_07_pds_hydrate.lr07_lambda_handler import PdsHydrate
 from utils.database.models import Demographics, Errors
+
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -16,12 +18,19 @@ DATA = os.path.join(ROOT, "..", "data")
 REGION_NAME = "eu-west-2"
 
 
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = PdsHydrate()
+    return app
+
+
 @pytest.fixture
 def upload_pds_mock_data_to_s3():
     with mock_s3():
         client = boto3.client("s3", region_name=REGION_NAME)
         client.create_bucket(
-            Bucket="mock-pds-data", CreateBucketConfiguration={"LocationConstraint": REGION_NAME}
+            Bucket="mock-pds-data",
+            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
         )
         client.upload_file(
             os.path.join(DATA, "pds_api_data.csv"), "mock-pds-data", "pds_api_data.csv"

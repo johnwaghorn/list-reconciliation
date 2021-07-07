@@ -1,11 +1,19 @@
-import pytest
 import datetime
 
+import pytest
 from moto import mock_dynamodb2
+from spine_aws_common.lambda_application import LambdaApplication
 
-from utils.logger import log_dynamodb_error, log_dynamodb_status, success
+
 from utils.database.models import Errors, Jobs
+from utils.logger import log_dynamodb_error, log_dynamodb_status, success
 from utils.datetimezone import localize_date
+
+
+@pytest.fixture
+def spine_logger():
+    app = LambdaApplication()
+    return app.log_object
 
 
 @pytest.fixture
@@ -29,8 +37,8 @@ def job_record(create_dynamodb_tables):
     yield
 
 
-def test_log_dynamodb_error_logs_error(create_dynamodb_tables):
-    log_dynamodb_error("123", "TEST", "TEST MESSAGE")
+def test_log_dynamodb_error_logs_error(create_dynamodb_tables, spine_logger):
+    log_dynamodb_error(spine_logger, "123", "TEST", "TEST MESSAGE")
 
     error = [e for e in Errors.scan()][0]
 
@@ -39,8 +47,10 @@ def test_log_dynamodb_error_logs_error(create_dynamodb_tables):
     assert error.Description == "TEST MESSAGE"
 
 
-def test_log_dynamodb_error_logs_error_with_no_job_id(create_dynamodb_tables):
-    log_dynamodb_error("", "TEST", "TEST MESSAGE")
+def test_log_dynamodb_error_logs_error_with_no_job_id(
+    create_dynamodb_tables, spine_logger
+):
+    log_dynamodb_error(spine_logger, "", "TEST", "TEST MESSAGE")
 
     error = [e for e in Errors.scan()][0]
 
@@ -49,13 +59,13 @@ def test_log_dynamodb_error_logs_error_with_no_job_id(create_dynamodb_tables):
     assert error.Description == "TEST MESSAGE"
 
 
-def test_log_dynamodb_error_unexpected_fail_logs_error():
+def test_log_dynamodb_error_unexpected_fail_logs_error(spine_logger):
     with pytest.raises(Exception):
-        log_dynamodb_error("123", "TEST", "TEST MESSAGE")
+        log_dynamodb_error(spine_logger, "123", "TEST", "TEST MESSAGE")
 
 
-def test_log_dynamodb_status_logs_status(job_record):
-    log_dynamodb_status("1", "ABC", "TEST STATUS")
+def test_log_dynamodb_status_logs_status(job_record, spine_logger):
+    log_dynamodb_status(spine_logger, "1", "ABC", "TEST STATUS")
 
     job = [j for j in Jobs.scan()][0]
 
@@ -63,10 +73,15 @@ def test_log_dynamodb_status_logs_status(job_record):
     assert job.StatusId == "TEST STATUS"
 
 
-def test_log_dynamodb_no_job_for_status_logs_error(create_dynamodb_tables):
+def test_log_dynamodb_no_job_for_status_logs_error(
+    create_dynamodb_tables, spine_logger
+):
     with pytest.raises(Exception):
-        log_dynamodb_status("1", "ABC", "TEST STATUS")
+        log_dynamodb_status(spine_logger, "1", "ABC", "TEST STATUS")
 
 
 def test_success_ok():
-    assert success("Custom message") == {"status": "success", "message": "Custom message"}
+    assert success("Custom message") == {
+        "status": "success",
+        "message": "Custom message",
+    }

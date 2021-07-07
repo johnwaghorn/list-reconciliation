@@ -4,3 +4,5 @@ pynamodb==5.0.3
 requests==2.25.1
 pytz==2020.1
 retrying==1.3.3
+botocore==1.20.105
+spine-aws-common @ https://github.com/NHSDigital/spine-core-aws-common/releases/download/v0.0.4/spine_aws_common-0.0.4-py3-none-any.whl

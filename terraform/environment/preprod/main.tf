@@ -33,9 +33,10 @@ terraform {
 }
 
 module "List-Recon" {
-  source      = "../../modules/list-rec"
-  pds_url     = "s3://mock-pds-data/pds_api_data.csv"
-  patient_sqs = "Patient_Records.fifo"
-  runtime     = var.runtime
-  suffix      = local.environment
+  source         = "../../modules/list-rec"
+  pds_url        = "s3://mock-pds-data/pds_api_data.csv"
+  patient_sqs    = "Patient_Records.fifo"
+  runtime        = var.runtime
+  suffix         = local.environment
+  lambda_handler = "main.lambda_handler"
 }

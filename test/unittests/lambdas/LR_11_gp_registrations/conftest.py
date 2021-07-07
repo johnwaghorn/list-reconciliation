@@ -1,16 +1,31 @@
-from datetime import datetime
 import os
-
-from moto import mock_dynamodb2, mock_s3
-from pytz import timezone
+from datetime import datetime
 
 import boto3
 import pytest
+from moto import mock_dynamodb2, mock_s3
+from pytz import timezone
 
+from lambda_code.LR_11_gp_registration_status.LR011_lambda_handler import (
+    GPRegistrations,
+)
 from utils.database.models import Demographics, Errors, Jobs, JobStats
+
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
+
+
+@pytest.fixture(scope="module")
+def lr_12_event():
+    return {"job_id": "blah"}
+
+
+@pytest.fixture(scope="module")
+def lambda_handler():
+    app = GPRegistrations()
+    return app
+
 
 PATIENTS = [
     Demographics(

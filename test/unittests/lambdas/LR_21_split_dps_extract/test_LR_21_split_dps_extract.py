@@ -1,14 +1,10 @@
 import os
+
 import boto3
 import pytest
-
 from freezegun import freeze_time
 
-from lambdas.LR_21_split_dps_extract.split_dps_extract import (
-    lambda_handler,
-    split_dps_extract,
-    InvalidDSAFile,
-)
+from lambda_code.LR_21_split_dps_extract.lr21_lambda_handler import InvalidDSAFile
 from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -23,10 +19,12 @@ INVALID_DATA_FILE = "invalid_dps_data.csv"
 EXISTING_GP_FILE = "C86543.csv"
 
 
-def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3):
+def test_lr_21_handler_expect_success(
+    upload_valid_dps_data_to_s3, lambda_handler, lambda_context
+):
     event = {"Records": [{"s3": {"object": {"key": f"{VALID_DATA_FILE}"}}}]}
 
-    response = lambda_handler(event, None)
+    response = lambda_handler.main(event, lambda_context)
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -35,17 +33,21 @@ def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3):
     assert response == expected
 
 
-def test_lr_21_handler_invalid_event_raises_key_error(
-    upload_valid_dps_data_to_s3, create_dynamodb_tables
+def test_lr_21_handler_invalid_event_fails(
+    upload_valid_dps_data_to_s3, create_dynamodb_tables, lambda_handler, lambda_context
 ):
     event = {"error": "error"}
+    expected_response = (
+        "Unhandled error when processing supplementary data file in LR-21"
+    )
+    result = lambda_handler.main(event, lambda_context)
+    assert expected_response in result["message"]
 
-    with pytest.raises(Exception):
-        lambda_handler(event, None)
 
-
-def test_split_dps_handler_expect_success(upload_valid_dps_data_to_s3):
-    response = split_dps_extract(VALID_DATA_FILE)
+def test_split_dps_handler_expect_success(
+    upload_valid_dps_data_to_s3, lambda_handler, lambda_context
+):
+    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -86,7 +88,12 @@ def test_split_dps_handler_expect_success(upload_valid_dps_data_to_s3):
 
 
 @freeze_time("2021-06-29 14:01")
-def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(upload_existing_gp_data, upload_valid_dps_data_with_existing_gp_data):
+def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(
+    upload_existing_gp_data,
+    upload_valid_dps_data_with_existing_gp_data,
+    lambda_handler,
+    lambda_context,
+):
     # Test existing S3 files
     client = boto3.client("s3")
     paginator = client.get_paginator("list_objects_v2")
@@ -102,7 +109,7 @@ def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(upload_exist
     assert EXISTING_GP_FILE in outdated_gp_files
 
     # Add new test data
-    response = split_dps_extract(VALID_DATA_FILE)
+    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -123,7 +130,12 @@ def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(upload_exist
 
 
 @freeze_time("2021-06-29 14:00")
-def test_cleanup_outdated_files_within_minimum_date_expect_success(upload_existing_gp_data, upload_valid_dps_data_with_existing_gp_data):
+def test_cleanup_outdated_files_within_minimum_date_expect_success(
+    upload_existing_gp_data,
+    upload_valid_dps_data_with_existing_gp_data,
+    lambda_handler,
+    lambda_context,
+):
     # Test existing S3 files
     client = boto3.client("s3")
     paginator = client.get_paginator("list_objects_v2")
@@ -139,7 +151,7 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(upload_existi
     assert EXISTING_GP_FILE in outdated_gp_files
 
     # Add new test data
-    response = split_dps_extract(VALID_DATA_FILE)
+    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -159,6 +171,11 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(upload_existi
     assert EXISTING_GP_FILE in updated_gp_files
 
 
-def test_invalid_file_raises_value_error(upload_invalid_dps_data_to_s3, create_dynamodb_tables):
+def test_invalid_file_raises_value_error(
+    upload_invalid_dps_data_to_s3,
+    create_dynamodb_tables,
+    lambda_handler,
+    lambda_context,
+):
     with pytest.raises(InvalidDSAFile):
-        split_dps_extract(INVALID_DATA_FILE)
+        lambda_handler.split_dps_extract(INVALID_DATA_FILE)

@@ -13,13 +13,14 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_function" "LR-21-Lambda" {
   function_name    = "${var.lambda_name}-${var.suffix}"
   filename         = data.archive_file.lambda_zip.output_path
-  handler          = "split_dps_extract.lambda_handler"
+  handler          = var.lambda_handler
   role             = aws_iam_role.role.arn
   runtime          = var.runtime
   timeout          = local.lambda_timeout
   memory_size      = local.memory_size
   layers           = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
 
   environment {
     variables = {

@@ -55,7 +55,12 @@ def get_mock_pds_record(url: str, nhs_number: str, *args, **kwargs) -> Dict:
 
 
 def get_pds_fhir_record(
-    url: str, nhs_number: str, max_retries: int = 5, backoff_factor: int = 1, *args, **kwargs
+    url: str,
+    nhs_number: str,
+    max_retries: int = 5,
+    backoff_factor: int = 1,
+    *args,
+    **kwargs,
 ) -> Dict:
     """Get a PDS record using the FHIR API.
 
@@ -102,7 +107,9 @@ def get_pds_fhir_record(
         "address": content["address"][0]["line"],
         "postcode": content["address"][0]["postalCode"],
         "gp_code": content["generalPractitioner"][0]["identifier"]["value"],
-        "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"]["start"],
+        "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"][
+            "start"
+        ],
         "sensitive": content["meta"]["security"][0]["code"],
         "version": content["meta"]["versionId"],
     }

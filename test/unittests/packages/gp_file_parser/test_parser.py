@@ -82,7 +82,9 @@ def test_parse_gp_extract_text_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
+        text,
+        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        gp_ha_cipher="LNA",
     )
 
     assert actual == expected
@@ -151,7 +153,9 @@ def test_parse_gp_extract_text_with_junk_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
+        text,
+        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        gp_ha_cipher="LNA",
     )
 
     assert actual == expected
@@ -161,7 +165,9 @@ def test_parse_gp_extract_text_no_valid_records_raises_InvalidGPExtract():
     text = "503\\*\n\n***\n**\n*\n\n***\n**\n*\n\n"
     with pytest.raises(InvalidGPExtract):
         parse_gp_extract_text(
-            text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
+            text,
+            process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+            gp_ha_cipher="LNA",
         )
 
 
@@ -233,7 +239,9 @@ def test_parse_gp_extract_text_with_columns_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
+        text,
+        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        gp_ha_cipher="LNA",
     )
 
     assert actual == expected
@@ -307,7 +315,9 @@ def test_parse_gp_extract_text_with_columns_and_junk_parses_correctly():
     ]
 
     actual = parse_gp_extract_text(
-        text, process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)), gp_ha_cipher="LNA"
+        text,
+        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        gp_ha_cipher="LNA",
     )
 
     assert actual == expected
@@ -556,7 +566,9 @@ def expected_count_dict():
     }
 
 
-def test_process_invalid_records_no_invalid_reason_correct(records, expected_count_dict):
+def test_process_invalid_records_no_invalid_reason_correct(
+    records, expected_count_dict
+):
     expected_invalid_records = [
         {
             "RECORD_TYPE": "DOW",
@@ -640,13 +652,17 @@ def test_process_invalid_records_no_invalid_reason_correct(records, expected_cou
         },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=False)
+    actual_count, actual_invalid_records = process_invalid_records(
+        records, include_reason=False
+    )
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
 
 
-def test_process_invalid_records_with_invalid_reason_correct(records, expected_count_dict):
+def test_process_invalid_records_with_invalid_reason_correct(
+    records, expected_count_dict
+):
     expected_invalid_records = [
         {
             "RECORD_TYPE": "DOW",
@@ -732,7 +748,9 @@ def test_process_invalid_records_with_invalid_reason_correct(records, expected_c
         },
     ]
 
-    actual_count, actual_invalid_records = process_invalid_records(records, include_reason=True)
+    actual_count, actual_invalid_records = process_invalid_records(
+        records, include_reason=True
+    )
 
     assert actual_count == expected_count_dict
     assert actual_invalid_records == expected_invalid_records
@@ -768,9 +786,13 @@ def expected_counts_csv():
     )
 
 
-def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, expected_counts_csv):
+def test_output_invalid_records_no_invalid_reason_correct(
+    tmp_path, records, expected_counts_csv
+):
     out_file_path = os.path.join(tmp_path, "records.csv")
-    output_records(records, summary_path=tmp_path, include_reason=False, invalid_threshold=0)
+    output_records(
+        records, summary_path=tmp_path, include_reason=False, invalid_threshold=0
+    )
 
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
@@ -795,7 +817,9 @@ def test_output_invalid_records_with_invalid_reason_low_threshold_correct(
     tmp_path, records, expected_counts_csv
 ):
     out_file_path = os.path.join(tmp_path, "records.csv")
-    output_records(records, summary_path=tmp_path, include_reason=True, invalid_threshold=3)
+    output_records(
+        records, summary_path=tmp_path, include_reason=True, invalid_threshold=3
+    )
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'
         '"SEX must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.",DOW,"1111111,1234",LNA,2020-04-06 13:40:00,1557491,8234567890,PHILIP,JOHN,SOMEONE,MR,10,2002-01-01,FLAT 1,MAIN STREET,,EAST,,E1   1AA,,3,,,\n'
@@ -819,7 +843,9 @@ def test_output_invalid_records_no_invalid_reason_high_threshold_correct(
     tmp_path, records, expected_counts_csv
 ):
     out_file_path = os.path.join(tmp_path, "records.csv")
-    output_records(records, summary_path=tmp_path, include_reason=False, invalid_threshold=4)
+    output_records(
+        records, summary_path=tmp_path, include_reason=False, invalid_threshold=4
+    )
 
     expected_out_file = (
         '_INVALID_,RECORD_TYPE,"REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",TRADING_PARTNER_NHAIS_CIPHER,DATE_OF_DOWNLOAD,TRANS_ID,NHS_NUMBER,SURNAME,FORENAMES,PREV_SURNAME,TITLE,SEX,DOB,ADDRESS_LINE1,ADDRESS_LINE2,ADDRESS_LINE3,ADDRESS_LINE4,ADDRESS_LINE5,POSTCODE,DRUGS_DISPENSED_MARKER,RPP_MILEAGE,BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,WALKING_UNITS,RESIDENTIAL_INSTITUTE_CODE\n'

@@ -32,11 +32,17 @@ def compare_patient_name(
 
     valid_gp_names = (_validate_name_case(gp_forename), _validate_name_case(gp_surname))
 
-    valid_pds_names = (_validate_name_case(pds_givenNames), _validate_name_case(pds_familyName))
+    valid_pds_names = (
+        _validate_name_case(pds_givenNames),
+        _validate_name_case(pds_familyName),
+    )
 
     if not surname_match and not forename_match:
         if all(
-            [_check_match(gp_forename, pds_familyName), _check_match(gp_surname, pds_givenNames)]
+            [
+                _check_match(gp_forename, pds_familyName),
+                _check_match(gp_surname, pds_givenNames),
+            ]
         ):
             if all(valid_gp_names) and all(valid_pds_names):
                 return ACTION_UPDATE_PDS, BOTH_NAMES
@@ -45,17 +51,25 @@ def compare_patient_name(
 
     if surname_match and forename_match:
         if all(valid_gp_names) and not all(valid_pds_names):
-            if not _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
+            if not _validate_name_case(pds_givenNames) and not _validate_name_case(
+                pds_familyName
+            ):
                 return ACTION_UPDATE_PDS, BOTH_NAMES
 
-            if _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
+            if _validate_name_case(pds_givenNames) and not _validate_name_case(
+                pds_familyName
+            ):
                 return ACTION_UPDATE_PDS, SURNAME
 
-            if not _validate_name_case(pds_givenNames) and _validate_name_case(pds_familyName):
+            if not _validate_name_case(pds_givenNames) and _validate_name_case(
+                pds_familyName
+            ):
                 return ACTION_UPDATE_PDS, FORENAME
 
         if not all(valid_gp_names) and all(valid_pds_names):
-            if not _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):
+            if not _validate_name_case(gp_forename) and not _validate_name_case(
+                gp_surname
+            ):
                 return ACTION_UPDATE_GP, BOTH_NAMES
 
             if _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):
@@ -67,7 +81,12 @@ def compare_patient_name(
         return ACTION_REQUIRES_VALIDATION, BOTH_NAMES
 
     if surname_match and not forename_match:
-        if any([not gp_forename, _check_additional_name_hyphenated(gp_forename, pds_givenNames)]):
+        if any(
+            [
+                not gp_forename,
+                _check_additional_name_hyphenated(gp_forename, pds_givenNames),
+            ]
+        ):
             return ACTION_UPDATE_GP, FORENAME
 
         if any(
