@@ -6,9 +6,9 @@ import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
+from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.datetimezone import get_datetime_now
 from utils.logger import success, log_dynamodb_error, UNHANDLED_ERROR
-from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.statuses import JobStatus
 
 MANUAL_VALIDATION = "Manual Validation"
@@ -30,6 +30,7 @@ class DemographicDifferences(LambdaApplication):
     def start(self):
 
         try:
+            self.job_id = self.event["job_id"]
             self.response = json.dumps(
                 self.process_demographic_differences(self.job_id)
             )
