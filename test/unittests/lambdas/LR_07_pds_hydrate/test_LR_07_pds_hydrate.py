@@ -59,7 +59,6 @@ def test_write_into_table(
         "PDS_Address": [
             "1 Trevelyan Square",
             "Boar Lane",
-            "City Centre",
             "Leeds",
             "West Yorkshire",
         ],

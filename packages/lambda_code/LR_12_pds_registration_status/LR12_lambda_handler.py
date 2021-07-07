@@ -104,6 +104,9 @@ class PDSRegistrationStatus(LambdaApplication):
                     pds_record = get_pds_record(
                         nhs_number, max_retries=self.system_config["PDS_API_RETRIES"]
                     )
+                    pds_record["address"] = (
+                        pds_record["address"] + [None, None, None, None, None]
+                    )[:5]
 
                 except PDSAPIError as err:
                     msg = f"Error fetching PDS record for NHS number {nhs_number}, {err.details}"

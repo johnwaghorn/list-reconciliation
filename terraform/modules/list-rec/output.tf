@@ -110,6 +110,10 @@ output "LR_22_bucket" {
   value = aws_s3_bucket.LR-22.bucket
 }
 
+output "LR_13_bucket" {
+  value = aws_s3_bucket.LR-13.bucket
+}
+
 output "LR-15-lambda" {
   value = module.LR-15.LR-15-lambda
 }

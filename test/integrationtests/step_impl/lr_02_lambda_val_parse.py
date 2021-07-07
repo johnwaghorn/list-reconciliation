@@ -10,13 +10,12 @@ from datetime import timedelta
 import time
 from .tf_aws_resources import get_aws_resources
 
+# On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
-
 aws_resource = get_aws_resources()
 
-# Region & Timezone
 region_name = "eu-west-2"
 test_datetime = get_datetime_now()
 
@@ -111,11 +110,15 @@ def create_gp_file(testfile, row, invalid_item=None, field_loc=None):
     for line in in_text:
         if line.startswith(row) and row == "DOW~1":
             split_line = line.split("~")
+
             if invalid_item and field_loc:
                 split_line[int(field_loc)] = invalid_item
                 if field_loc != "4":
                     split_line[4] = ldate
                     split_line[5] = ltime
+            elif (invalid_item and field_loc) == None:
+                split_line[4] = ldate
+                split_line[5] = ltime
             line = "~".join(split_line)
 
         elif line.startswith(row) and row == "DOW~2":
@@ -130,9 +133,7 @@ def create_gp_file(testfile, row, invalid_item=None, field_loc=None):
     return file_out_path
 
 
-@step(
-    "connect to s3 and upload file <testfile> into inbound folder for LR-02 to pick and validate the file"
-)
+@step("connect to s3 and upload gpfile file <testfile> for successful file validation")
 def upload_gpextract_file_into_s3(testfile):
     row = "DOW~1"
     temp_destdir = create_gp_file(testfile, row)

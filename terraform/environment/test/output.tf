@@ -66,6 +66,10 @@ output "lr_11_lambda_arn" {
   value = module.List-Recon.LR_11_Lambda_arn
 }
 
+output "region" {
+  value = var.region
+}
+
 output "jobs_table" {
   value = module.List-Recon.Jobs_Table
 }
@@ -92,4 +96,19 @@ output "jobs_Status_table" {
 
 output "statuses_table" {
   value = module.List-Recon.Statuses_Table
+}
+output "lr-12-lambda" {
+  value = module.List-Recon.LR-12-lambda
+}
+
+output "mock_pds_data" {
+  value = module.List-Recon.mock_pds_data
+}
+
+output "lr_22_bucket" {
+  value = module.List-Recon.LR_22_bucket
+}
+
+output "lr_13_bucket" {
+  value = module.List-Recon.LR_13_bucket
 }

@@ -97,7 +97,7 @@ output "jobs_Status_table" {
 output "statuses_table" {
   value = module.List-Recon.Statuses_Table
 }
-output "LR-12-lambda" {
+output "lr-12-lambda" {
   value = module.List-Recon.LR-12-lambda
 }
 
@@ -105,8 +105,12 @@ output "mock_pds_data" {
   value = module.List-Recon.mock_pds_data
 }
 
-output "LR_22_bucket" {
+output "lr_22_bucket" {
   value = module.List-Recon.LR_22_bucket
+}
+
+output "lr_13_bucket" {
+  value = module.List-Recon.LR_13_bucket
 }
 
 output "LR-15-lambda" {

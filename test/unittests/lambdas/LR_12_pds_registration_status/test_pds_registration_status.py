@@ -103,7 +103,7 @@ def test_get_pds_exclusive_registrations_ok(
     expected = csv.reader(
         StringIO(
             """SURNAME,FORENAMES,DOB,NHS NO.,ADD 1,ADD 2,ADD 3,ADD 4,ADD 5,POSTCODE,TITLE,SEX,DATE ACCEPT.
-Smith,Jane,2010-10-22,9000000009,1 Trevelyan Square,Boar Lane,City Centre,Leeds,West Yorkshire,LS1 6AE,Mrs,female,2012-05-22"""
+Smith,Jane,2010-10-22,9000000009,1 Trevelyan Square,Boar Lane,Leeds,West Yorkshire,,LS1 6AE,Mrs,female,2012-05-22"""
         )
     )
 
