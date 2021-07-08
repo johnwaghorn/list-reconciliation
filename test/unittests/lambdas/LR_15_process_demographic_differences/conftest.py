@@ -24,6 +24,7 @@ DATA = os.path.join(ROOT, "..", "data")
 
 AWS_REGION = os.getenv("AWS_REGION")
 MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")
+LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
 
 
 @pytest.fixture(scope="module")
@@ -132,7 +133,7 @@ def demographics_differences(dynamodb):
 
 @pytest.fixture
 def jobstats(dynamodb):
-    JobStats("7b207bdb-2937-4e17-a1a9-57a2bbf3e358").save()
+    JobStats("7b207bdb-2937-4e17-a1a9-57a2bbf3e358", TotalRecords=1).save()
     yield
 
 
@@ -156,5 +157,9 @@ def s3():
         s3 = boto3.client("s3", region_name=AWS_REGION)
         s3.create_bucket(
             Bucket=MESH_SEND_BUCKET,
+            CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
+        )
+        s3.create_bucket(
+            Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )

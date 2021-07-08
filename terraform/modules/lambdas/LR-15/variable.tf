@@ -18,6 +18,14 @@ variable "mesh_send_bucket" {
   type = string
 }
 
+variable "registrations_output_bucket" {
+  type = string
+}
+
+variable "registrations_output_bucket_arn" {
+  type = string
+}
+
 variable "demographics_table_arn" {
   type = string
 }

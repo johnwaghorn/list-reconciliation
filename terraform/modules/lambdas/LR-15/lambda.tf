@@ -20,12 +20,13 @@ resource "aws_lambda_function" "LR-15-Lambda" {
 
   environment {
     variables = {
-      DEMOGRAPHICS_TABLE             = var.demographics_table_name
-      JOBS_TABLE                     = var.jobs_table_name
-      JOB_STATS_TABLE                = var.job_stats_table_name
-      ERRORS_TABLE                   = var.errors_table_name
-      DEMOGRAPHICS_DIFFERENCES_TABLE = var.demographics_differences_table_name
-      MESH_SEND_BUCKET               = var.mesh_send_bucket
+      DEMOGRAPHICS_TABLE                = var.demographics_table_name
+      JOBS_TABLE                        = var.jobs_table_name
+      JOB_STATS_TABLE                   = var.job_stats_table_name
+      ERRORS_TABLE                      = var.errors_table_name
+      DEMOGRAPHICS_DIFFERENCES_TABLE    = var.demographics_differences_table_name
+      MESH_SEND_BUCKET                  = var.mesh_send_bucket
+      LR_13_REGISTRATIONS_OUTPUT_BUCKET = var.registrations_output_bucket
     }
   }
 }

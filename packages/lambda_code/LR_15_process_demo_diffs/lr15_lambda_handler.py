@@ -1,11 +1,14 @@
-import json
 from collections import defaultdict
 from typing import Dict, List, Tuple
+
+import json
+import os
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
+from utils import write_to_mem_csv
 from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.datetimezone import get_datetime_now
 from utils.logger import success, log_dynamodb_error, UNHANDLED_ERROR
@@ -13,10 +16,10 @@ from utils.statuses import JobStatus
 
 MANUAL_VALIDATION = "Manual Validation"
 
-import os
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
+S3 = boto3.client("s3")
 
 
 class DemographicDifferences(LambdaApplication):
@@ -31,15 +34,11 @@ class DemographicDifferences(LambdaApplication):
 
         try:
             self.job_id = self.event["job_id"]
-            self.response = json.dumps(
-                self.process_demographic_differences(self.job_id)
-            )
+            self.response = json.dumps(self.process_demographic_differences(self.job_id))
 
         except Exception as err:
             msg = f"Unhandled error getting PDS registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
-            error_response = log_dynamodb_error(
-                self.log_object, self.job_id, UNHANDLED_ERROR, msg
-            )
+            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
 
             raise Exception(error_response) from err
 
@@ -137,6 +136,46 @@ class DemographicDifferences(LambdaApplication):
             potential_gp_updates,
         )
 
+    @staticmethod
+    def summarise_dsa_work_item(dsa_work_item: Dict):
+        summary_records = []
+
+        patient = dsa_work_item["patient"]
+        demographic_diffs = dsa_work_item["differences"]
+
+        for demographic_diff in demographic_diffs:
+            summary_records.append(
+                {
+                    "nhsNumber": patient["nhsNumber"],
+                    "gp_birthDate": patient["gpData"]["birthDate"],
+                    "gp_gender": patient["gpData"]["gender"],
+                    "gp_name_given": patient["gpData"]["name"]["given"],
+                    "gp_name_family": patient["gpData"]["name"]["family"],
+                    "gp_name_previousFamily": patient["gpData"]["name"]["previousFamily"],
+                    "gp_name_prefix": patient["gpData"]["name"]["prefix"],
+                    "gp_address_line1": patient["gpData"]["address"]["line1"],
+                    "gp_address_line2": patient["gpData"]["address"]["line2"],
+                    "gp_address_line3": patient["gpData"]["address"]["line3"],
+                    "gp_address_line4": patient["gpData"]["address"]["line4"],
+                    "gp_address_line5": patient["gpData"]["address"]["line5"],
+                    "gp_postalCode": patient["gpData"]["postalCode"],
+                    "gp_generalPractitionerOds": patient["gpData"]["generalPractitionerOds"],
+                    "pds_scn": patient["pdsData"]["scn"],
+                    "pds_birthDate": patient["pdsData"]["birthDate"],
+                    "pds_gender": patient["pdsData"]["gender"],
+                    "pds_name_given": " ".join(patient["pdsData"]["name"][0]["given"]),
+                    "pds_name_family": patient["pdsData"]["name"][0]["family"],
+                    "pds_name_prefix": ",".join(patient["pdsData"]["name"][0]["prefix"]),
+                    "pds_address": ",".join(patient["pdsData"]["address"]),
+                    "pds_postalCode": patient["pdsData"]["postalCode"],
+                    "pds_generalPractitionerOds": patient["pdsData"]["generalPractitionerOds"],
+                    "ruleId": demographic_diff["ruleId"],
+                    "guidance": demographic_diff["guidance"],
+                }
+            )
+
+        return summary_records
+
     def process_demographic_differences(self, job_id: str) -> Dict:
         """Process and output demographic differences for a job, creating DSA work
         item json objects for each patient in a job which has one or more
@@ -149,12 +188,12 @@ class DemographicDifferences(LambdaApplication):
             Dict: Success message including filenames created.
         """
 
-        demo_diffs = DemographicsDifferences.JobIdIndex.query(job_id)
+        demographic_diffs = DemographicsDifferences.JobIdIndex.query(job_id)
 
         patients = defaultdict(list)
 
-        for diff in demo_diffs:
-            patients[diff.PatientId].append(diff)
+        for demographic_diff in demographic_diffs:
+            patients[demographic_diff.PatientId].append(demographic_diff)
 
         self.log_object.write_log(
             "UTI9995",
@@ -173,6 +212,7 @@ class DemographicDifferences(LambdaApplication):
         job_potential_gp_updates = 0
 
         out_files = []
+        summary_records = []
 
         job = get_job(job_id)
         practice_code = job.PracticeCode
@@ -189,6 +229,8 @@ class DemographicDifferences(LambdaApplication):
                 potential_gp_updates,
             ) = self.create_dsa_payload(patient_record, patients[patient_id])
 
+            summary_records.extend(self.summarise_dsa_work_item(dsa_item))
+
             job_pds_updated += pds_updated
             job_gp_updated += gp_updated
             job_human_validations += human_validations
@@ -197,8 +239,7 @@ class DemographicDifferences(LambdaApplication):
 
             key = f"{job_id}/{practice_code}-WIP-{job_id}-{patient_record.NhsNumber}-{now}.json"
 
-            s3 = boto3.client("s3")
-            s3.put_object(
+            S3.put_object(
                 Bucket=self.system_config["MESH_SEND_BUCKET"],
                 Key=key,
                 Body=json.dumps(dsa_item),
@@ -208,7 +249,47 @@ class DemographicDifferences(LambdaApplication):
         self.log_object.write_log(
             "UTI9995",
             None,
-            {"logger": "LR15.Lambda", "level": "INFO", "message": "Done"},
+            {
+                "logger": "LR15.Lambda",
+                "level": "INFO",
+                "message": f"Creating summary records for JobId {job_id}",
+            },
+        )
+
+        header = [
+            "nhsNumber",
+            "gp_birthDate",
+            "gp_gender",
+            "gp_name_given",
+            "gp_name_family",
+            "gp_name_previousFamily",
+            "gp_name_prefix",
+            "gp_address_line1",
+            "gp_address_line2",
+            "gp_address_line3",
+            "gp_address_line4",
+            "gp_address_line5",
+            "gp_postalCode",
+            "gp_generalPractitionerOds",
+            "pds_scn",
+            "pds_birthDate",
+            "pds_gender",
+            "pds_name_given",
+            "pds_name_family",
+            "pds_name_prefix",
+            "pds_address",
+            "pds_postalCode",
+            "pds_generalPractitionerOds",
+            "ruleId",
+            "guidance",
+        ]
+
+        stream = write_to_mem_csv(summary_records, header)
+        csv_key = f"{job_id}/{practice_code}-CDD-{now}.csv"
+        S3.put_object(
+            Body=stream.getvalue(),
+            Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
+            Key=csv_key,
         )
 
         try:
@@ -241,11 +322,7 @@ class DemographicDifferences(LambdaApplication):
         )
 
         job = get_job(job_id)
-        job.update(
-            actions=[
-                Jobs.StatusId.set(JobStatus.DEMOGRAPHICS_DIFFERENCES_PROCESSED.value)
-            ]
-        )
+        job.update(actions=[Jobs.StatusId.set(JobStatus.DEMOGRAPHICS_DIFFERENCES_PROCESSED.value)])
 
         self.log_object.write_log(
             "UTI9995",
@@ -254,6 +331,9 @@ class DemographicDifferences(LambdaApplication):
         )
 
         out: dict = success(f"Demographic differences processed for JobId {job_id}")
-        out.update(filenames=out_files)
+        out.update(
+            work_items=out_files,
+            summary=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{csv_key}",
+        )
 
         return out

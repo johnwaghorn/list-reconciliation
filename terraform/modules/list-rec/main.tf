@@ -155,6 +155,8 @@ module "LR-15" {
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
   mesh_send_bucket_arn                = aws_s3_bucket.LR-23.arn
   mesh_send_bucket                    = aws_s3_bucket.LR-23.bucket
+  registrations_output_bucket_arn     = aws_s3_bucket.LR-13.arn
+  registrations_output_bucket         = aws_s3_bucket.LR-13.bucket
   demographics_table_arn              = module.Demographics_Table.dynamo_table_arn
   demographics_table_name             = module.Demographics_Table.dynamo_table_name
   jobs_table_arn                      = module.Jobs_Table.dynamo_table_arn

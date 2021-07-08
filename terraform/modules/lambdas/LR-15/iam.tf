@@ -45,7 +45,8 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "s3:PutObject",
             "Resource": [
-                "${var.mesh_send_bucket_arn}/*"
+                "${var.mesh_send_bucket_arn}/*",
+                "${var.registrations_output_bucket_arn}/*"
             ]
         },
         {
