@@ -7,3 +7,7 @@ variable "lambda_timeout" {
   type    = number
   default = 300
 }
+
+variable "region" {
+  default = "eu-west-2"
+}
