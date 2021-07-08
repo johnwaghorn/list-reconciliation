@@ -1,5 +1,4 @@
 import os
-from packages import utils
 import pytest
 
 from datetime import datetime
@@ -367,7 +366,7 @@ def test_parse_gp_extract_text_garbled_record_type2_raises_assertionerror(record
 
 @freeze_time("2020-04-08")
 def test_parse_gp_extract_file_parses_correctly():
-    filename = "GPR4LNA1.CSA"
+    filename = "A82023_GPR4LNA1.CSA"
     file_path = os.path.join(DATA, filename)
     expected = [
         {

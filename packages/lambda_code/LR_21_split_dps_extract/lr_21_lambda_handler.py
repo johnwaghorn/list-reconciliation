@@ -9,14 +9,11 @@ from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.datetimezone import get_datetime_now, localize_date
+from utils.exceptions import InvalidDSAFile
 from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
-
-
-class InvalidDSAFile(Exception):
-    pass
 
 
 class SplitDPSExtract(LambdaApplication):

@@ -4,7 +4,7 @@
 
 ## test to ensure when lambda LR-02 is triggered and check cloud watch log for positive scenario
 ------------------------------------------------------------------------------------------------
-* connect to s3 and upload gpfile file "GPR4LNA1.EIA" for successful file validation
+* connect to s3 and upload gpfile file "A82023_GPR4LNA1.EIA" for successful file validation
 * connect to cloudwatch log and get the request id by JobId created
 
 ## test to ensure when lambda LR-02 is triggered and response status code 202 is recieved

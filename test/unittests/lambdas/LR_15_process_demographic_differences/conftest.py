@@ -7,7 +7,7 @@ from moto import mock_dynamodb2, mock_s3
 from pytz import timezone
 
 
-from lambda_code.LR_15_process_demo_diffs.lr15_lambda_handler import (
+from lambda_code.LR_15_process_demo_diffs.lr_15_lambda_handler import (
     DemographicDifferences,
 )
 from utils.database.models import (

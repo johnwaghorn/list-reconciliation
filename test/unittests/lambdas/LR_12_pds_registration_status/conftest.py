@@ -7,7 +7,7 @@ from moto import mock_dynamodb2, mock_s3
 from pytz import timezone
 
 
-from lambda_code.LR_12_pds_registration_status.LR12_lambda_handler import (
+from lambda_code.LR_12_pds_registration_status.lr_12_lambda_handler import (
     PDSRegistrationStatus,
 )
 from utils.database.models import Demographics, Errors, Jobs, JobStats

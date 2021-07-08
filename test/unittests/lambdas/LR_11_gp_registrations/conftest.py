@@ -6,7 +6,7 @@ import pytest
 from moto import mock_dynamodb2, mock_s3
 from pytz import timezone
 
-from lambda_code.LR_11_gp_registration_status.LR011_lambda_handler import (
+from lambda_code.LR_11_gp_registration_status.lr_11_lambda_handler import (
     GPRegistrations,
 )
 from utils.database.models import Demographics, Errors, Jobs, JobStats

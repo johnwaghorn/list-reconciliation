@@ -10,6 +10,8 @@ from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
 from utils.datetimezone import get_datetime_now
+from utils.exceptions import InvalidGPExtract
+
 from gp_file_parser.file_name_parser import validate_filename
 from gp_file_parser.utils import pairs
 from gp_file_parser.validators import (
@@ -67,10 +69,6 @@ RECORD_1 = "1"
 RECORD_2 = "2"
 
 INBOUND_PREFIX = "inbound/"
-
-
-class InvalidGPExtract(Exception):
-    pass
 
 
 def _validate_record(
@@ -132,7 +130,6 @@ def _parse_row_pair(row_pair: RowPair) -> Row:
         AssertionError: If any abortive errors are found.
     """
 
-    row_1, row_2 = row_pair
     row_1 = row_pair[0].split(SEP)
     row_2 = row_pair[1].split(SEP)
 
@@ -302,17 +299,18 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
         raise InvalidGPExtract(str(err).replace("[Errno 2]", "").strip())
 
     results = []
-    extract_date, gp_ha_cipher = validate_filename(
-        os.path.basename(filepath), process_datetime
-    )
 
-    LOG.info(f"Processing extract from {gp_ha_cipher} created on {extract_date.date()}")
+    valid_file = validate_filename(os.path.basename(filepath), process_datetime)
+
+    LOG.info(
+        f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
+    )
 
     results.extend(
         parse_gp_extract_text(
             open(filepath, "r").read(),
             process_datetime=process_datetime or get_datetime_now(),
-            gp_ha_cipher=gp_ha_cipher,
+            gp_ha_cipher=valid_file["ha_cipher"],
         )
     )
 
@@ -324,7 +322,7 @@ def process_invalid_records(
 ) -> Tuple[Dict, Records]:
     """Filter out valid records from a set of records.
 
-    Optionally include a more inormative validation fail reason.
+    Optionally include a more informative validation fail reason.
 
     Args:
         records (Records): Valid and invalid records to extract invalids from.
@@ -462,7 +460,7 @@ def parse_gp_extract_file_s3(
     bucket_name: str,
     file_key: str,
     process_datetime: datetime = None,
-) -> Tuple[Records, str]:
+) -> dict:
     """Convert a GP extract file into records with fieldnames.
 
     Args:
@@ -476,19 +474,22 @@ def parse_gp_extract_file_s3(
 
     s3_client = boto3.client("s3")
 
-    extract_date, gp_ha_cipher = validate_filename(
-        file_key.replace(INBOUND_PREFIX, ""), process_datetime
+    valid_file = validate_filename(file_key.replace(INBOUND_PREFIX, ""), process_datetime)
+
+    LOG.info(
+        f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
     )
 
     file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
     file_data = file_obj["Body"].read()
 
     results = []
+
     results.extend(
         parse_gp_extract_text(
             file_data.decode("utf-8"),
             process_datetime=process_datetime or get_datetime_now(),
-            gp_ha_cipher=gp_ha_cipher,
+            gp_ha_cipher=valid_file["ha_cipher"],
         )
     )
 
@@ -497,4 +498,6 @@ def parse_gp_extract_file_s3(
     if invalid_records:
         raise InvalidGPExtract(json.dumps(invalid_records))
 
-    return results, gp_ha_cipher
+    valid_file.update({"records": results})
+
+    return valid_file

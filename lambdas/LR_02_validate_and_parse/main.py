@@ -1,4 +1,4 @@
-from lambda_code.LR_02_validate_and_parse.lr02_lambda_handler import LR02LambdaHandler
+from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import LR02LambdaHandler
 
 app = LR02LambdaHandler()
 

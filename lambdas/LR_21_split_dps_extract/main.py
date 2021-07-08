@@ -1,4 +1,4 @@
-from lambda_code.LR_21_split_dps_extract.lr21_lambda_handler import SplitDPSExtract
+from lambda_code.LR_21_split_dps_extract.lr_21_lambda_handler import SplitDPSExtract
 
 app = SplitDPSExtract()
 

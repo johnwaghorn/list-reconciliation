@@ -4,7 +4,7 @@ from dateutil.parser import parse
 from moto import mock_dynamodb2, mock_stepfunctions
 from moto.core import ACCOUNT_ID
 
-from lambda_code.LR_09_scheduled_check.LR09_lambda_handler import ScheduledCheck
+from lambda_code.LR_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
 from utils.database.models import Demographics, InFlight, Jobs, JobStats
 
 JOB_ID = "b204b5f4-6762-414e-bb6b-a05c37f52956"

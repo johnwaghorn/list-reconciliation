@@ -8,7 +8,7 @@ import pytest
 from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
 
 
-from lambda_code.LR_07_pds_hydrate.lr07_lambda_handler import PdsHydrate
+from lambda_code.LR_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
 from utils.database.models import Demographics, Errors
 
 

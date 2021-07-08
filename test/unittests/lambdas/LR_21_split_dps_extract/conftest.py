@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_dynamodb2, mock_s3
 
-from lambda_code.LR_21_split_dps_extract.lr21_lambda_handler import SplitDPSExtract
+from lambda_code.LR_21_split_dps_extract.lr_21_lambda_handler import SplitDPSExtract
 from utils.database.models import Errors
 
 

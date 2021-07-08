@@ -1,4 +1,4 @@
-from lambda_code.LR_11_gp_registration_status.LR011_lambda_handler import (
+from lambda_code.LR_11_gp_registration_status.lr_11_lambda_handler import (
     GPRegistrations,
 )
 

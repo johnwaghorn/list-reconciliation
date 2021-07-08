@@ -53,7 +53,9 @@ INVALID_GP_CODE = (
     "alphanumeric Local GP code separated by a comma."
 )
 INVALID_HA_CIPHER = "must be a 3-digit alphanumeric code and match the GP HA cipher"
-INVALID_TRANS_DATETIME = "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
+INVALID_TRANS_DATETIME = (
+    "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
+)
 INVALID_NHS_NO = "must be a valid NHS number. Max length 10."
 INVALID_SURNAME = (
     "must contain only uppercase alphabetic characters and space, apostrophe "

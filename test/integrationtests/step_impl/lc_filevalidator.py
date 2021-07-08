@@ -20,7 +20,7 @@ def run_gpextract(description, file1, freezedatetime, expmessage):
     print(description)
 
     # Initial Filenames
-    initial_file_name1 = os.path.join(DATA, "GPR4LNA1.A1A")
+    initial_file_name1 = os.path.join(DATA, "A82023_GPR4LNA1.A1A")
 
     temp_dir = gettempdir()
 
@@ -90,7 +90,7 @@ def assert_record_file_keys(file):
     "run gpextract for scenario using not existing file and ensure expected message is <Expected Message>"
 )
 def run_gpextract_file_not_found(expmessage):
-    file1 = "GPR4LNA1.EDA"
+    file1 = "A82023_GPR4LNA1.EDA"
 
     # output path
     out_path = gettempdir()

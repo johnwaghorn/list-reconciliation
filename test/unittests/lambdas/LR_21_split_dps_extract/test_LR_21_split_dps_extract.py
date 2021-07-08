@@ -4,7 +4,7 @@ import boto3
 import pytest
 from freezegun import freeze_time
 
-from lambda_code.LR_21_split_dps_extract.lr21_lambda_handler import InvalidDSAFile
+from lambda_code.LR_21_split_dps_extract.lr_21_lambda_handler import InvalidDSAFile
 from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

@@ -151,7 +151,7 @@ def upload_gpextract_file_into_s3(testfile):
     "connect to s3 and upload gp file with invalid item <invalid_item> in row <row1> at position <fieldlc>"
 )
 def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
-    testfile = "GPR4LNA1.EIA"
+    testfile = "A82023_GPR4LNA1.EIA"
     temp_destdir = create_gp_file(testfile, row, invalid_item, fieldlc)
 
     global destination_filename

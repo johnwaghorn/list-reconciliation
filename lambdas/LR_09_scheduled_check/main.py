@@ -1,4 +1,4 @@
-from lambda_code.LR_09_scheduled_check.LR09_lambda_handler import ScheduledCheck
+from lambda_code.LR_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
 
 app = ScheduledCheck()
 
