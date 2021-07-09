@@ -89,9 +89,7 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
 ):
 
     response = lambda_handler.pds_hydrate("8000000008", "50", "51")
-    expected_response = (
-        "Retrieved PDS data for NhsNumber: 8000000008, JobId: 50, PatientId: 51"
-    )
+    expected_response = "Retrieved PDS data for NhsNumber: 8000000008, JobId: 50, PatientId: 51"
 
     assert response["message"] == expected_response
 
@@ -129,9 +127,7 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
 ):
 
     response = lambda_handler.pds_hydrate("7000000007", "50", "52")
-    expected_response = (
-        "Retrieved PDS data for NhsNumber: 7000000007, JobId: 50, PatientId: 52"
-    )
+    expected_response = "Retrieved PDS data for NhsNumber: 7000000007, JobId: 50, PatientId: 52"
 
     assert response["message"] == expected_response
 
@@ -168,9 +164,7 @@ def test_gp_registration_Unmatched_in_demographics_table(
     lambda_handler,
 ):
     response = lambda_handler.pds_hydrate("6000000006", "50", "53")
-    expected_response = (
-        "PDS data not found for NhsNumber: 6000000006, JobId: 50, PatientId: 53"
-    )
+    expected_response = "PDS data not found for NhsNumber: 6000000006, JobId: 50, PatientId: 53"
 
     assert response["message"] == expected_response
 

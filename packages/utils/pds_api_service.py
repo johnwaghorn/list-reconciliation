@@ -107,9 +107,7 @@ def get_pds_fhir_record(
         "address": content["address"][0]["line"],
         "postcode": content["address"][0]["postalCode"],
         "gp_code": content["generalPractitioner"][0]["identifier"]["value"],
-        "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"][
-            "start"
-        ],
+        "gp_registered_date": content["generalPractitioner"][0]["identifier"]["period"]["start"],
         "sensitive": content["meta"]["security"][0]["code"],
         "version": content["meta"]["versionId"],
     }

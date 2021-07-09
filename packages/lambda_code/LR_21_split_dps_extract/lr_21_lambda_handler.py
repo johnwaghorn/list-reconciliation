@@ -94,9 +94,7 @@ class SplitDPSExtract(LambdaApplication):
             },
         )
 
-        return success(
-            f"LR-21 processed Supplementary data successfully, from file: {upload_key}"
-        )
+        return success(f"LR-21 processed Supplementary data successfully, from file: {upload_key}")
 
     def read_file(self, upload_key: str) -> list:
         """Retrieve and read supplementary file data

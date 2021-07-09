@@ -8,6 +8,6 @@
 
 ## test to ensure when the inflight table is empty lr09 stopped sucessfully
 ---------------------------------------------------------------------------
-* setup steps: clear all files in bucket folders
+* setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
 * get InFlight table item count
 * trigger lr09 and ensure scheduled checked successfully completed

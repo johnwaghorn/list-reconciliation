@@ -6,9 +6,7 @@ from utils.datetimezone import get_datetime_now, localize_date
 from utils.exceptions import InvalidFilename
 
 
-def validate_filename(
-    filename: str, process_datetime: datetime = None
-) -> dict:
+def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
     """Validates a GP extract file name and file extension
         - GP ODS code and DOW filename is seperated by "_"
         - First filename group is the GP ODS code. Consisting on 1 alphabetical char, followed by 5 numerical chars
@@ -64,7 +62,7 @@ def validate_filename(
 
     valid_filename = re.match(
         r"^[A-Z][0-9][0-9][0-9][0-9][0-9]_GPR4[A-Z0-9]{3}1.[A-L][1-9A-V][A-Z]$",
-        filename
+        filename,
     )
 
     if not valid_filename:
@@ -76,12 +74,14 @@ def validate_filename(
     ha_cipher = valid_download_name.group(1)
     extract_date = process_date(process_datetime, valid_extension.group(1))
 
-    return {"extract_date": extract_date, "practice_code": practice_code, "ha_cipher": ha_cipher}
+    return {
+        "extract_date": extract_date,
+        "practice_code": practice_code,
+        "ha_cipher": ha_cipher,
+    }
 
 
-def process_date(
-    process_datetime: datetime, date_indicator: str
-) -> datetime:
+def process_date(process_datetime: datetime, date_indicator: str) -> datetime:
     """Processes a date from the file name.
         - Date must not exceed the current date
         - Date must not be older than 14 days
@@ -132,4 +132,3 @@ def process_date(
         raise InvalidFilename("File date must not be older than 14 days")
 
     return extract_date
-

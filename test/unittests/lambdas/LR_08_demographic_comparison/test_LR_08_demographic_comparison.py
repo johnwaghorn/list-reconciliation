@@ -82,9 +82,7 @@ def test_demographics_comparison_ok(demographics_record, lambda_handler):
     assert actual == expected
 
 
-def test_record_doesnt_exist_raises_DemographicsDoesNotExist(
-    demographics_record, lambda_handler
-):
+def test_record_doesnt_exist_raises_DemographicsDoesNotExist(demographics_record, lambda_handler):
     with pytest.raises(Demographics.DoesNotExist):
 
         lambda_handler.demographic_comparisons("500", "500")
@@ -92,8 +90,6 @@ def test_record_doesnt_exist_raises_DemographicsDoesNotExist(
 
 def test_bad_config_raises_ConfigurationError(demographics_record, lambda_handler):
 
-    lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler.listrec_comparisons = (
-        None
-    )
+    lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler.listrec_comparisons = None
     with pytest.raises(ConfigurationError):
         lambda_handler.demographic_comparisons("50", "50")

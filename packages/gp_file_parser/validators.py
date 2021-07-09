@@ -53,9 +53,7 @@ INVALID_GP_CODE = (
     "alphanumeric Local GP code separated by a comma."
 )
 INVALID_HA_CIPHER = "must be a 3-digit alphanumeric code and match the GP HA cipher"
-INVALID_TRANS_DATETIME = (
-    "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
-)
+INVALID_TRANS_DATETIME = "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
 INVALID_NHS_NO = "must be a valid NHS number. Max length 10."
 INVALID_SURNAME = (
     "must contain only uppercase alphabetic characters and space, apostrophe "
@@ -69,7 +67,9 @@ INVALID_TITLE = (
     "must contain only uppercase alphabetic characters and space, apostrophe "
     "or hyphen. Max length 35."
 )
-INVALID_SEX = "must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+INVALID_SEX = (
+    "must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+)
 INVALID_DATE_OF_BIRTH = "must be a date in past in the format YYYYMMDD."
 INVALID_ADDRESS_LINE = (
     "must contain only uppercase alphabetic characters and space, apostrophe, "
@@ -146,9 +146,7 @@ def gp_code(gp_code_val: str, **kwargs) -> ValidatedRecord:
 
 
 @not_null
-def ha_cipher(
-    ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs
-) -> ValidatedRecord:
+def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> ValidatedRecord:
     """Coerce and validate HA cipher.
 
     Validation rules: Must be a not-null 3-digit alphanumeric code.
@@ -162,9 +160,7 @@ def ha_cipher(
     """
 
     invalid_reason = None
-    if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (
-        ha_cipher_val != gp_ha_cipher
-    ):
+    if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (ha_cipher_val != gp_ha_cipher):
         invalid_reason = INVALID_HA_CIPHER
 
     return ha_cipher_val, invalid_reason
@@ -193,9 +189,7 @@ def transaction_datetime(
 
     else:
         try:
-            transaction_datetime_val = datetime.strptime(
-                transaction_datetime_val, "%Y%m%d%H%M"
-            )
+            transaction_datetime_val = datetime.strptime(transaction_datetime_val, "%Y%m%d%H%M")
 
         except (TypeError, ValueError):
             invalid_reason = INVALID_TRANS_DATETIME
@@ -395,9 +389,7 @@ def date_of_birth(date_of_birth_val: str, **kwargs) -> ValidatedRecord:
 
         else:
             try:
-                date_of_birth_val = datetime.strptime(
-                    date_of_birth_val, "%Y%m%d"
-                ).date()
+                date_of_birth_val = datetime.strptime(date_of_birth_val, "%Y%m%d").date()
                 if date_of_birth_val > datetime.now().date():
                     invalid_reason = INVALID_DATE_OF_BIRTH
 
@@ -487,9 +479,7 @@ def postcode(postcode_val: str, **kwargs) -> ValidatedRecord:
     return postcode_val, invalid_reason
 
 
-def drugs_dispensed_marker(
-    drugs_dispensed_marker_val: str, **kwargs
-) -> ValidatedRecord:
+def drugs_dispensed_marker(drugs_dispensed_marker_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate drugs dispensed marker.
 
     Validation rules: Must be 'Y' or blank.
@@ -542,9 +532,7 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
     return rpp_mileage_val, invalid_reason
 
 
-def blocked_route_special_district_marker(
-    blocked_route_special_district_marker_val: str, **kwargs
-):
+def blocked_route_special_district_marker(blocked_route_special_district_marker_val: str, **kwargs):
     """Coerce and validate blocked route special district marker.
 
     Validation rules: Must be 'B' or 'S'.
@@ -597,9 +585,7 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
     return walking_units_val, invalid_reason
 
 
-def residential_institute_code(
-    residential_institute_code_val: str, **kwargs
-) -> ValidatedRecord:
+def residential_institute_code(residential_institute_code_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate residential institute code.
 
     Validation rules: Must be a 2-character string and valid code for the
@@ -628,9 +614,7 @@ def residential_institute_code(
 
 
 @not_null
-def transaction_id(
-    transaction_id_val: str, other_ids: List[int], **kwargs
-) -> ValidatedRecord:
+def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> ValidatedRecord:
     """Coerce and validate transaction id.
 
     Validation rules: Must be a unique not-null 2-character integer greater than 0.

@@ -20,9 +20,7 @@ LR_09_LAMBDA_ARN = AWS_RESOURCE["lr_09_lambda"]["value"]
 @step("trigger lr09 and expected statuscode is <expstatuscode>")
 def trigger_lr09(expstatuscode):
     client = dev.client("lambda", REGION_NAME)
-    response = client.invoke(
-        FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({})
-    )
+    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
     for key, value in response.items():
         if key == "ResponseMetadata":
             assert response["ResponseMetadata"]["HTTPStatusCode"] == int(expstatuscode)
@@ -31,9 +29,7 @@ def trigger_lr09(expstatuscode):
 @step("trigger lr09 and ensure scheduled checked successfully completed")
 def trigger_lr09_get_requestid():
     client = dev.client("lambda", REGION_NAME)
-    response = client.invoke(
-        FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({})
-    )
+    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
 
     for key, value in response.items():
         if key == "ResponseMetadata":

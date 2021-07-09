@@ -27,15 +27,11 @@ class DemographicComparison(LambdaApplication):
     def start(self):
 
         try:
-            self.response = json.dumps(
-                self.demographic_comparisons(self.job_id, self.patient_id)
-            )
+            self.response = json.dumps(self.demographic_comparisons(self.job_id, self.patient_id))
 
         except Exception as err:
             msg = f"Unhandled error patient_id: {self.patient_id}"
-            error_response = log_dynamodb_error(
-                self.log_object, self.job_id, UNHANDLED_ERROR, msg
-            )
+            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
 
             raise type(err)(error_response) from err
 
@@ -96,6 +92,4 @@ class DemographicComparison(LambdaApplication):
 
         record.update(actions=[Demographics.IsComparisonCompleted.set(True)])
 
-        return success(
-            f"Comparison applied for job_id {self.job_id} patient_id {self.patient_id}"
-        )
+        return success(f"Comparison applied for job_id {self.job_id} patient_id {self.patient_id}")

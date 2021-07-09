@@ -47,3 +47,7 @@ Tags are written as comma separated values in the specification with a prefix Ta
 **Note :** we can start giving the respective tags once its deployed to different environments 
 in the format : `env-(envName)`. For E.g. 'env-Staging', 'env-Production'
 
+
+### Black
+
+Use `make black` after writing the step implementation for every test specs.

@@ -78,9 +78,7 @@ def log_dynamodb_error(
     return {"status": "error", "message": msg, "error_id": error_id, "traceback": tb}
 
 
-def log_dynamodb_status(
-    logger: object, job_id: str, practice_code: str, status: str
-) -> Success:
+def log_dynamodb_status(logger: object, job_id: str, practice_code: str, status: str) -> Success:
     """Update a status to DynamoDB for the List Reconciliation process.
 
     Args:

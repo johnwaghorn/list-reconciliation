@@ -3,7 +3,6 @@ from getgauge.python import Messages
 import boto3
 import os
 from .tf_aws_resources import get_aws_resources
-from utils.datetimezone import get_datetime_now
 
 # On github
 access_key = os.getenv("AWS_PUBLIC_KEY")

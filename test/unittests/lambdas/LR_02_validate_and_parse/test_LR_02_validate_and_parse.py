@@ -20,7 +20,9 @@ VALID_FILE = "A82023_GPR4LNA1.CSA"
 INVALID_FILE = "A82023_GPR4LNA1.CSB"
 
 
-def test_lr_02_handler_invalid_event_raises_key_error(upload_valid_mock_data_to_s3, lambda_handler, lambda_context):
+def test_lr_02_handler_invalid_event_raises_key_error(
+    upload_valid_mock_data_to_s3, lambda_handler, lambda_context
+):
     event = {"error": "error"}
 
     expected_response = "Lambda event has missing 'Records' key"
@@ -32,12 +34,12 @@ def test_lr_02_handler_invalid_event_raises_key_error(upload_valid_mock_data_to_
 
 @freeze_time("2020-04-06 13:40:00")
 def test_lr02_lambda_handler_valid_file(
-        upload_valid_mock_data_to_s3,
-        create_dynamodb_tables,
-        create_sqs,
-        lr_02_valid_file_event,
-        lambda_context,
-        lambda_handler
+    upload_valid_mock_data_to_s3,
+    create_dynamodb_tables,
+    create_sqs,
+    lr_02_valid_file_event,
+    lambda_context,
+    lambda_handler,
 ):
     app = lambda_handler
 
@@ -48,12 +50,12 @@ def test_lr02_lambda_handler_valid_file(
 
 @freeze_time("2020-04-06 13:40:00")
 def test_lr02_lambda_handler_invalid_file(
-        upload_invalid_mock_data_to_s3,
-        create_dynamodb_tables,
-        create_sqs,
-        lr_02_invalid_file_event,
-        lambda_context,
-        lambda_handler
+    upload_invalid_mock_data_to_s3,
+    create_dynamodb_tables,
+    create_sqs,
+    lr_02_invalid_file_event,
+    lambda_context,
+    lambda_handler,
 ):
     app = lambda_handler
 
@@ -64,12 +66,12 @@ def test_lr02_lambda_handler_invalid_file(
 
 @freeze_time("2020-04-06 13:40:00")
 def test_validate_and_process_with_valid_upload_handles_correctly(
-        upload_valid_mock_data_to_s3,
-        create_dynamodb_tables,
-        create_sqs,
-        lr_02_valid_file_event,
-        lambda_context,
-        lambda_handler
+    upload_valid_mock_data_to_s3,
+    create_dynamodb_tables,
+    create_sqs,
+    lr_02_valid_file_event,
+    lambda_context,
+    lambda_handler,
 ):
     app = lambda_handler
     app.job_id = JOB_ID
@@ -162,10 +164,10 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
 @freeze_time("2020-04-06 13:40:00")
 def test_validate_and_process_with_invalid_upload_handles_correctly(
-        upload_invalid_mock_data_to_s3,
-        create_dynamodb_tables,
-        lr_02_invalid_file_event,
-        lambda_handler
+    upload_invalid_mock_data_to_s3,
+    create_dynamodb_tables,
+    lr_02_invalid_file_event,
+    lambda_handler,
 ):
     app = lambda_handler
     app.job_id = JOB_ID

@@ -48,9 +48,7 @@ class PdsHydrate(LambdaApplication):
 
         except Exception as err:
             msg = f"Unhandled error patient_id: {patient_id} nhs_number: {nhs_number}"
-            error_response = log_dynamodb_error(
-                self.log_object, job_id, UNHANDLED_ERROR, msg
-            )
+            error_response = log_dynamodb_error(self.log_object, job_id, UNHANDLED_ERROR, msg)
 
             raise type(err)(error_response) from err
 
@@ -74,12 +72,8 @@ class PdsHydrate(LambdaApplication):
             pds_record = get_pds_record(nhs_number, max_retries=5, backoff_factor=1)
 
         except PDSAPIError as err:
-            msg = (
-                f"Error fetching PDS record for NHS number {nhs_number}, {err.details}"
-            )
-            error_response = log_dynamodb_error(
-                self.log_object, job_id, err.details["code"], msg
-            )
+            msg = f"Error fetching PDS record for NHS number {nhs_number}, {err.details}"
+            error_response = log_dynamodb_error(self.log_object, job_id, err.details["code"], msg)
 
             raise PDSAPIError(json.dumps(error_response)) from err
 

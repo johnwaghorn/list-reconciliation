@@ -150,22 +150,16 @@ def get_records(module: ModuleType) -> RecordPair:
     for _, member in getmembers(module, isclass):
         if issubclass(member, LeftRecord) and member != LeftRecord:
             if left:
-                raise ConfigurationError(
-                    "A LeftRecord object has already been defined."
-                )
+                raise ConfigurationError("A LeftRecord object has already been defined.")
             left = member
 
         elif issubclass(member, RightRecord) and member != RightRecord:
             if right:
-                raise ConfigurationError(
-                    "A RightRecord object has already been defined."
-                )
+                raise ConfigurationError("A RightRecord object has already been defined.")
             right = member
 
     if not all([left, right]):
-        raise ConfigurationError(
-            "Exactly one LeftRecord and RightRecord object must be defined."
-        )
+        raise ConfigurationError("Exactly one LeftRecord and RightRecord object must be defined.")
 
     return left, right
 
@@ -197,9 +191,7 @@ def get_decorated_funcs(module: ModuleType, decorator: callable) -> DecoratedFun
     return funcs
 
 
-def compare_records(
-    module: ModuleType, left: Dict[str, Any], right: Dict[str, Any]
-) -> List[str]:
+def compare_records(module: ModuleType, left: Dict[str, Any], right: Dict[str, Any]) -> List[str]:
     """Apply comparisons to objects defined in module to the left and right records.
 
     Args:

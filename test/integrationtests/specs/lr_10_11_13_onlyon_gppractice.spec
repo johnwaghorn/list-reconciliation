@@ -1,6 +1,6 @@
 # Tests for LR-10 state function registration differences and LR-11 to produce GP only data
 --------------------------------------------------------------------------------------------
-* setup steps: clear all files in bucket folders
+* setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
 * connect to s3 lr-22 bucket and upload pds data
 
 ## test to ensure the data on mismatch records on onlyongp csv file  in the output bucket is as expected

@@ -18,9 +18,7 @@ DATA = os.path.join(ROOT, "..", "data")
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
-LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv(
-    "LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"
-)
+LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv("LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET")
 
 
 @pytest.fixture(scope="module")
@@ -132,15 +130,11 @@ def s3():
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
         for file in ("Y123451.csv", "Y123452.csv"):
-            s3.upload_file(
-                os.path.join(DATA, file), LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET, file
-            )
+            s3.upload_file(os.path.join(DATA, file), LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET, file)
 
         s3.create_bucket(
             Bucket="mock-pds-data",
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
-        s3.upload_file(
-            os.path.join(DATA, "pds_api_data.csv"), "mock-pds-data", "pds_api_data.csv"
-        )
+        s3.upload_file(os.path.join(DATA, "pds_api_data.csv"), "mock-pds-data", "pds_api_data.csv")
         yield

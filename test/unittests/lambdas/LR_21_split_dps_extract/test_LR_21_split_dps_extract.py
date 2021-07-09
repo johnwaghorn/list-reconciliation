@@ -19,9 +19,7 @@ INVALID_DATA_FILE = "invalid_dps_data.csv"
 EXISTING_GP_FILE = "C86543.csv"
 
 
-def test_lr_21_handler_expect_success(
-    upload_valid_dps_data_to_s3, lambda_handler, lambda_context
-):
+def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3, lambda_handler, lambda_context):
     event = {"Records": [{"s3": {"object": {"key": f"{VALID_DATA_FILE}"}}}]}
 
     response = lambda_handler.main(event, lambda_context)
@@ -37,9 +35,7 @@ def test_lr_21_handler_invalid_event_fails(
     upload_valid_dps_data_to_s3, create_dynamodb_tables, lambda_handler, lambda_context
 ):
     event = {"error": "error"}
-    expected_response = (
-        "Unhandled error when processing supplementary data file in LR-21"
-    )
+    expected_response = "Unhandled error when processing supplementary data file in LR-21"
     result = lambda_handler.main(event, lambda_context)
     assert expected_response in result["message"]
 

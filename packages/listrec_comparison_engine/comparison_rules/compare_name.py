@@ -51,25 +51,17 @@ def compare_patient_name(
 
     if surname_match and forename_match:
         if all(valid_gp_names) and not all(valid_pds_names):
-            if not _validate_name_case(pds_givenNames) and not _validate_name_case(
-                pds_familyName
-            ):
+            if not _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
                 return ACTION_UPDATE_PDS, BOTH_NAMES
 
-            if _validate_name_case(pds_givenNames) and not _validate_name_case(
-                pds_familyName
-            ):
+            if _validate_name_case(pds_givenNames) and not _validate_name_case(pds_familyName):
                 return ACTION_UPDATE_PDS, SURNAME
 
-            if not _validate_name_case(pds_givenNames) and _validate_name_case(
-                pds_familyName
-            ):
+            if not _validate_name_case(pds_givenNames) and _validate_name_case(pds_familyName):
                 return ACTION_UPDATE_PDS, FORENAME
 
         if not all(valid_gp_names) and all(valid_pds_names):
-            if not _validate_name_case(gp_forename) and not _validate_name_case(
-                gp_surname
-            ):
+            if not _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):
                 return ACTION_UPDATE_GP, BOTH_NAMES
 
             if _validate_name_case(gp_forename) and not _validate_name_case(gp_surname):

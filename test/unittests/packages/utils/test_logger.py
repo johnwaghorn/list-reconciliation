@@ -47,9 +47,7 @@ def test_log_dynamodb_error_logs_error(create_dynamodb_tables, spine_logger):
     assert error.Description == "TEST MESSAGE"
 
 
-def test_log_dynamodb_error_logs_error_with_no_job_id(
-    create_dynamodb_tables, spine_logger
-):
+def test_log_dynamodb_error_logs_error_with_no_job_id(create_dynamodb_tables, spine_logger):
     log_dynamodb_error(spine_logger, "", "TEST", "TEST MESSAGE")
 
     error = [e for e in Errors.scan()][0]
@@ -73,9 +71,7 @@ def test_log_dynamodb_status_logs_status(job_record, spine_logger):
     assert job.StatusId == "TEST STATUS"
 
 
-def test_log_dynamodb_no_job_for_status_logs_error(
-    create_dynamodb_tables, spine_logger
-):
+def test_log_dynamodb_no_job_for_status_logs_error(create_dynamodb_tables, spine_logger):
     with pytest.raises(Exception):
         log_dynamodb_status(spine_logger, "1", "ABC", "TEST STATUS")
 

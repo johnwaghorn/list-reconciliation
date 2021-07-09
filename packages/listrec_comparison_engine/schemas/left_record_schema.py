@@ -14,9 +14,7 @@ class GPRecord(LeftRecord):
     TITLE = StringColumn("GP_Title", format=strip_ws)
     GENDER = StringColumn(
         "GP_Gender",
-        format=lambda x: {"1": "male", "2": "female", "9": "unknown", "0": "other"}[
-            str(x)
-        ],
+        format=lambda x: {"1": "male", "2": "female", "9": "unknown", "0": "other"}[str(x)],
     )
     ADDRESS = StringColumn(
         [

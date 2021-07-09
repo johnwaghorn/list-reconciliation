@@ -15,7 +15,7 @@ LR_13_BUCKET = aws_resource["lr_13_bucket"]["value"]
 INFLIGHT_TABLE = aws_resource["inflight_table"]["value"]
 
 
-@step("setup steps: clear all files in bucket folders")
+@step("setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table")
 def before_hooks():
     # Buckets
     response = s3.list_objects_v2(Bucket=LR_01_BUCKET, Prefix="fail/")

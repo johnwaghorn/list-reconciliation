@@ -68,9 +68,7 @@ class ScheduledCheck(LambdaApplication):
             j.save()
 
     def trigger_step_function(self, job_id: str) -> None:
-        client = boto3.client(
-            "stepfunctions", region_name=self.system_config["AWS_REGION"]
-        )
+        client = boto3.client("stepfunctions", region_name=self.system_config["AWS_REGION"])
 
         client.start_execution(
             stateMachineArn=self.system_config["LR_10_STEP_FUNCTION_ARN"],

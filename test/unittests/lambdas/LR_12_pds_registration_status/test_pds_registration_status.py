@@ -97,9 +97,7 @@ def test_get_pds_exclusive_registrations_ok(
         == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/ABC123/Y123452-OnlyOnPDS-20200201134000.csv"
     )
 
-    actual = csv.reader(
-        StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode())
-    )
+    actual = csv.reader(StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode()))
     expected = csv.reader(
         StringIO(
             """SURNAME,FORENAMES,DOB,NHS NO.,ADD 1,ADD 2,ADD 3,ADD 4,ADD 5,POSTCODE,TITLE,SEX,DATE ACCEPT.

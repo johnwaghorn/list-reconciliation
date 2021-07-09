@@ -129,7 +129,7 @@ class LR02LambdaHandler(LambdaApplication):
             success: A dict result containing a status and message
         """
 
-        num_of_records = len(validated_file['records'])
+        num_of_records = len(validated_file["records"])
         self.log_object.write_log(
             "UTI9995",
             None,
@@ -155,9 +155,7 @@ class LR02LambdaHandler(LambdaApplication):
         except (PynamoDBConnectionError, PutError) as exc:
             self.handle_extract(self.retry_prefix)
 
-            log_dynamodb_error(
-               self.log_object, self.job_id, "HANDLED_ERROR", str(exc)
-            )
+            log_dynamodb_error(self.log_object, self.job_id, "HANDLED_ERROR", str(exc))
 
             return success(f"Successfully handled failed Job: {self.job_id}")
 
@@ -177,19 +175,13 @@ class LR02LambdaHandler(LambdaApplication):
             except SQSError as exc:
                 self.handle_extract(self.retry_prefix)
 
-                log_dynamodb_error(
-                    self.log_object, self.job_id, "HANDLED_ERROR", str(exc)
-                )
+                log_dynamodb_error(self.log_object, self.job_id, "HANDLED_ERROR", str(exc))
 
-                return success(
-                    f"Successfully handled failed Job: {self.job_id}"
-                )
+                return success(f"Successfully handled failed Job: {self.job_id}")
 
             self.handle_extract(self.passed_prefix)
 
-            return success(
-                f"{self.upload_filename} processed successfully for Job: {self.job_id}"
-            )
+            return success(f"{self.upload_filename} processed successfully for Job: {self.job_id}")
 
     def write_to_dynamodb(self, validated_file: dict, num_of_records: int) -> list:
         """Creates Job items and writes a batch of validated records to DynamoDb.
@@ -278,9 +270,7 @@ class LR02LambdaHandler(LambdaApplication):
 
         sqs_client = boto3.client("sqs", region_name=self.system_config["AWS_REGION"])
 
-        sqs_queue = sqs_client.get_queue_url(
-            QueueName=self.system_config["AWS_PATIENT_RECORD_SQS"]
-        )
+        sqs_queue = sqs_client.get_queue_url(QueueName=self.system_config["AWS_PATIENT_RECORD_SQS"])
 
         queue_url = sqs_queue["QueueUrl"]
 

@@ -16,9 +16,7 @@ class _Record:
         for attr, obj in self._class_attrs:
             try:
                 if getattr(obj, "primary_key") and found_pk:
-                    raise ConfigurationError(
-                        "Only one primary_key is allowed per record."
-                    )
+                    raise ConfigurationError("Only one primary_key is allowed per record.")
 
             except AttributeError:
                 continue

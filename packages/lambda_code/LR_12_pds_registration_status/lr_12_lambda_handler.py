@@ -30,15 +30,11 @@ class PDSRegistrationStatus(LambdaApplication):
     def start(self):
 
         try:
-            self.response = json.dumps(
-                self.get_pds_exclusive_registrations(self.job_id)
-            )
+            self.response = json.dumps(self.get_pds_exclusive_registrations(self.job_id))
 
         except Exception as err:
             msg = f"Unhandled error getting PDS registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
-            error_response = log_dynamodb_error(
-                self.log_object, self.job_id, UNHANDLED_ERROR, msg
-            )
+            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
             self.response = error_response
 
             raise Exception(error_response) from err
@@ -55,9 +51,7 @@ class PDSRegistrationStatus(LambdaApplication):
 
         s3 = boto3.client("s3")
         key = f"{practice_code}.csv"
-        bucket_path = (
-            f"{self.system_config['LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET']}/{key}"
-        )
+        bucket_path = f"{self.system_config['LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET']}/{key}"
         self.log_object.write_log(
             "UTI9995",
             None,
@@ -172,8 +166,6 @@ class PDSRegistrationStatus(LambdaApplication):
         )
 
         out = success("Got PDS-only registrations")
-        out.update(
-            filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}"
-        )
+        out.update(filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}")
 
         return out

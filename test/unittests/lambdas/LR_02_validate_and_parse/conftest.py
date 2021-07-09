@@ -34,11 +34,7 @@ def create_bucket():
 @pytest.fixture
 def upload_valid_mock_data_to_s3(create_bucket):
     client = boto3.client("s3")
-    client.upload_file(
-        os.path.join(DATA, f"{VALID_FILE}"),
-        MOCK_BUCKET,
-        f"inbound/{VALID_FILE}"
-    )
+    client.upload_file(os.path.join(DATA, f"{VALID_FILE}"), MOCK_BUCKET, f"inbound/{VALID_FILE}")
 
 
 @pytest.fixture

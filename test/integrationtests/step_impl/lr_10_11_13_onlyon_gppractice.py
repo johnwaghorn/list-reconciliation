@@ -67,9 +67,7 @@ def connect_statefunc_lr10():
             status = desc_exec_resp["status"]
 
 
-@step(
-    "connect to s3 bucket and ensure the csv file produced contains the expected gponly record"
-)
+@step("connect to s3 bucket and ensure the csv file produced contains the expected gponly record")
 def assert_file_in_lr13():
     exp_gponly_datafile = "expected_onlyongp.txt"
     exp_gponly_path = os.path.join(EXPECED_GP_ONLY_DATA, "LR_13/" + exp_gponly_datafile)
@@ -83,12 +81,8 @@ def assert_file_in_lr13():
             for key_items in result.get("Contents"):
                 for filename in key_items.items():
                     if "tbc-OnlyOnGP" in str(filename):
-                        data = s3.get_object(
-                            Bucket=LR_13_BUCKET, Key=key_items.get("Key")
-                        )
-                        act_contents = sorted(
-                            data["Body"].read().decode("utf-8").splitlines()
-                        )
+                        data = s3.get_object(Bucket=LR_13_BUCKET, Key=key_items.get("Key"))
+                        act_contents = sorted(data["Body"].read().decode("utf-8").splitlines())
                         for line, row in zip(act_contents, exp_gponly_data):
 
                             if row.rstrip() == line:

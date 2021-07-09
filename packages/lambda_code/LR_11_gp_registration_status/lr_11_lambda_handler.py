@@ -29,9 +29,7 @@ class GPRegistrations(LambdaApplication):
 
         except Exception as err:
             msg = f"Unhandled error getting gp registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
-            error_response = log_dynamodb_error(
-                self.log_object, self.job_id, UNHANDLED_ERROR, msg
-            )
+            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
 
             raise type(err)(error_response) from err
 
@@ -107,8 +105,6 @@ class GPRegistrations(LambdaApplication):
         )
 
         out = success(f"Got {len(rows)} GP-only registrations")
-        out.update(
-            filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}"
-        )
+        out.update(filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}")
 
         return out

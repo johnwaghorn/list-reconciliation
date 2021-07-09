@@ -246,9 +246,7 @@ def parse_gp_extract_text(
             raw_text = raw_text[count:]
             break
     else:
-        raise InvalidGPExtract(
-            "GP extract does not contain any valid records for processing"
-        )
+        raise InvalidGPExtract("GP extract does not contain any valid records for processing")
 
     raw_text.reverse()
 
@@ -317,9 +315,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     return results
 
 
-def process_invalid_records(
-    records: Records, include_reason: bool = False
-) -> Tuple[Dict, Records]:
+def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more informative validation fail reason.

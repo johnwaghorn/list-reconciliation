@@ -42,9 +42,7 @@ def s3():
             Bucket=bucket,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
-        s3.upload_file(
-            os.path.join(DATA, "pds_api_data.csv"), bucket, "pds_api_data.csv"
-        )
+        s3.upload_file(os.path.join(DATA, "pds_api_data.csv"), bucket, "pds_api_data.csv")
         yield
 
 

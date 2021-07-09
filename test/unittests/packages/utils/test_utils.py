@@ -26,14 +26,24 @@ def test_get_registration_filename(practice, type_, expected):
     [
         (
             [
-                {"col a": "Content", "col b": "string,containing,commas", "1": "", "2": None},
+                {
+                    "col a": "Content",
+                    "col b": "string,containing,commas",
+                    "1": "",
+                    "2": None,
+                },
                 {"col a": "1", "col b": "2", "1": "3", "2": None},
             ],
             ["col a", "col b", "1", "2"],
             """col a,col b,1,2\nContent,"string,containing,commas",,\n1,2,3,\n""",
             "Header with records; one column contains commas.",
         ),
-        ([], ["col a", "col b", "1", "2"], "col a,col b,1,2\n", "Header with no records"),
+        (
+            [],
+            ["col a", "col b", "1", "2"],
+            "col a,col b,1,2\n",
+            "Header with no records",
+        ),
         ([], [], "\n", "No header with no records"),
     ],
 )
