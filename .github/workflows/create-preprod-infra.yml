@@ -29,11 +29,15 @@ jobs:
         working-directory: ./terraform/stacks/list-reconciliation
         run: |
           terraform apply -auto-approve
+      - name: Terraform Outputs
+        working-directory: ./terraform/stacks/list-reconciliation
+        run: |
+          terraform output -json > ./output.json
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:
           name: terraform-output
-          path: output.json
+          path: ./terraform/stacks/list-reconciliation/output.json
           retention-days: 2
   run-integration-tests:
     name: Run integration tests
