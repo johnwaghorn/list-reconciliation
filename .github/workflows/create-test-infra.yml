@@ -18,11 +18,14 @@ jobs:
           make python-package
       - name: Terraform Init
         run: |
-          make init deployment_environment=test
-          make workspace deployment_environment=test terraform_workspace=test
+          make init
+          make workspace env="test"
+      - name: Terraform Validate
+        run: |
+          make validate
       - name: Terraform Apply
         run: |
-          make apply deployment_environment=test
+          make apply
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:

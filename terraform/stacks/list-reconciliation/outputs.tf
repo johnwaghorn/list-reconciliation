@@ -1,3 +1,7 @@
+output "region" {
+  value = "eu-west-2"
+}
+
 output "lr_01_bucket" {
   value = module.list-rec.LR_01_Bucket
 }
@@ -94,7 +98,7 @@ output "statuses_table" {
   value = module.list-rec.Statuses_Table
 }
 
-output "LR-12-lambda" {
+output "lr_12_lambda" {
   value = module.list-rec.LR-12-lambda
 }
 
@@ -102,10 +106,14 @@ output "mock_pds_data" {
   value = module.list-rec.mock_pds_data
 }
 
-output "LR_22_bucket" {
+output "lr_22_bucket" {
   value = module.list-rec.LR_22_bucket
 }
 
-output "LR-15-lambda" {
+output "lr_13_bucket" {
+  value = module.list-rec.LR_13_bucket
+}
+
+output "lr_15_lambda" {
   value = module.list-rec.LR-15-lambda
 }

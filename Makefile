@@ -2,8 +2,7 @@
 # Variables
 #
 
-deployment_environment ?= dev
-terraform_workspace ?= default
+env ?= dev
 
 #
 # Shared rules
@@ -43,30 +42,30 @@ black-check:
 
 # Executing
 init:
-	terraform -chdir=./terraform/environment/${deployment_environment} init
+	terraform -chdir=./terraform/stacks/list-reconciliation init
 
 workspace:
-	terraform -chdir=./terraform/environment/${deployment_environment} workspace select ${terraform_workspace} || terraform -chdir=./terraform/environment/${deployment_environment} workspace new ${terraform_workspace}
-	terraform -chdir=./terraform/environment/${deployment_environment} workspace show
+	terraform -chdir=./terraform/stacks/list-reconciliation workspace select ${env} || terraform -chdir=./terraform/stacks/list-reconciliation workspace new ${env}
+	terraform -chdir=./terraform/stacks/list-reconciliation workspace show
 
 workspace-delete:
-	terraform -chdir=./terraform/environment/${deployment_environment} workspace select default
-	terraform -chdir=./terraform/environment/${deployment_environment} workspace delete ${terraform_workspace}
+	terraform -chdir=./terraform/stacks/list-reconciliation workspace select default
+	terraform -chdir=./terraform/stacks/list-reconciliation workspace delete ${env}
 
 plan:
-	terraform -chdir=./terraform/environment/${deployment_environment} plan
+	terraform -chdir=./terraform/stacks/list-reconciliation plan
 
 apply:
-	terraform -chdir=terraform/environment/${deployment_environment} apply -auto-approve
+	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve
 	rm -f ./output.json || true
-	terraform -chdir=terraform/environment/${deployment_environment} output -json > ./output.json
+	terraform -chdir=./terraform/stacks/list-reconciliation output -json > ./output.json
 
 destroy:
-	terraform -chdir=terraform/environment/${deployment_environment} destroy -auto-approve
+	terraform -chdir=./terraform/stacks/list-reconciliation destroy -auto-approve
 
 # Testing
 validate:
-	terraform -chdir=./terraform/environment/${deployment_environment} validate
+	terraform -chdir=./terraform/stacks/list-reconciliation validate
 
 # Formatting
 fmt:

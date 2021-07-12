@@ -1,6 +1,6 @@
 locals {
   name               = "list-reconciliation-${local.environment}"
-  environment        = terraform.workspace
+  environment        = lower(terraform.workspace)
   data_clasification = local.environment == "prod" ? "5" : "1"
 
   terraform_deploy_role_arn = {

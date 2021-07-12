@@ -23,10 +23,10 @@ jobs:
       - name: Terraform Init
         run: |
           make init
-          make workspace terraform_workspace=$(echo ${{ env.FEATURE_BRANCH }} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(echo ${{ env.FEATURE_BRANCH }} | sha1sum | head -c 8)
+          make workspace env=$(make get-branch-id)
       - name: Terraform Destroy
         run: |
           make destroy
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete terraform_workspace=$(echo ${{ env.FEATURE_BRANCH }} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(echo ${{ env.FEATURE_BRANCH }} | sha1sum | head -c 8)
+          make workspace-delete env=$(make get-branch-id)
