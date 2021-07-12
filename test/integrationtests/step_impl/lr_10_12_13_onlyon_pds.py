@@ -25,7 +25,7 @@ LR_10_JOB_ID = '{"job_id" : "41f678df-9210-45df-8f1e-330ee96acdc8"}'
 LR_22_BUCKET = AWS_RESOURCE["lr_22_bucket"]["value"]
 LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
 DYNAMODB_DEMOG = AWS_RESOURCE["demographic_table"]["value"]
-DYNAMODB_INFLIGHTS = AWS_RESOURCE["inflight_table"]["value"]
+DYNAMODB_INFLIGHTS = AWS_RESOURCE["in_flight_table"]["value"]
 DYNAMODB_JOBS = AWS_RESOURCE["jobs_table"]["value"]
 DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_stats_table"]["value"]
 

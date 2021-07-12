@@ -1,4 +1,4 @@
-resource "aws_sqs_queue" "Patient_Records_Queue" {
+resource "aws_sqs_queue" "patient_records_queue" {
   name                        = "patient_records-${var.suffix}.fifo"
   fifo_queue                  = true
   content_based_deduplication = true
@@ -9,8 +9,8 @@ resource "aws_sqs_queue" "Patient_Records_Queue" {
   receive_wait_time_seconds   = 0
 }
 
-resource "aws_sqs_queue_policy" "Patient_Records_Queue_Policy" {
-  queue_url = aws_sqs_queue.Patient_Records_Queue.id
+resource "aws_sqs_queue_policy" "patient_records_queue_policy" {
+  queue_url = aws_sqs_queue.patient_records_queue.id
   policy    = <<EOF
 {
       "Version": "2012-10-17",
@@ -20,10 +20,10 @@ resource "aws_sqs_queue_policy" "Patient_Records_Queue_Policy" {
           "Effect": "Allow",
           "Principal": "*",
           "Action": "SQS:*",
-          "Resource": "${aws_sqs_queue.Patient_Records_Queue.arn}",
+          "Resource": "${aws_sqs_queue.patient_records_queue.arn}",
           "Condition": {
             "ArnEquals": {
-              "aws:SourceArn": "${aws_sqs_queue.Patient_Records_Queue.name}"
+              "aws:SourceArn": "${aws_sqs_queue.patient_records_queue.name}"
             }
           }
         }
@@ -31,4 +31,3 @@ resource "aws_sqs_queue_policy" "Patient_Records_Queue_Policy" {
   }
   EOF
 }
-

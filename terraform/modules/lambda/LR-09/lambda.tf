@@ -20,7 +20,7 @@ resource "aws_lambda_function" "LR-09-Lambda" {
       JOBS_TABLE              = var.jobs_table_name
       JOB_STATS_TABLE         = var.job_stats_table_name
       ERRORS_TABLE            = var.errors_table_name
-      INFLIGHT_TABLE          = var.inflight_table_name
+      INFLIGHT_TABLE          = var.in_flight_table_name
       LR_10_STEP_FUNCTION_ARN = var.lr_10_step_function_arn
     }
   }

@@ -1,5 +1,5 @@
-variable "mock_pds_data" {
-  description = "mock_pds_data bucket name"
+variable "suffix" {
+  type = string
 }
 
 variable "LR_22_bucket" {

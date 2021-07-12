@@ -31,3 +31,19 @@ variable "lambda_handler" {
 variable "dynamodb_tables" {
   type = map(map(string))
 }
+
+variable "s3_buckets" {
+  type = map(map(string))
+}
+
+variable "step_functions" {
+  type = map(map(string))
+}
+
+variable "sqs" {
+  type = map(map(string))
+}
+
+variable "mock_pds_data_bucket" {
+  type = map(string)
+}

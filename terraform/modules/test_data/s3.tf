@@ -1,5 +1,15 @@
+resource "aws_s3_bucket" "mock_pds_data" {
+  bucket        = "mock-pds-data-${var.suffix}"
+  acl           = "private"
+  force_destroy = true
+
+  tags = {
+    Name = "File storage for PDS mock api data"
+  }
+}
+
 resource "aws_s3_bucket_object" "upload-mock-pds-data" {
-  bucket = var.mock_pds_data
+  bucket = aws_s3_bucket.mock_pds_data.id
   key    = "pds_api_data.csv"
   acl    = "private"
   source = "../../../test/unittests/lambdas/data/pds_api_data.csv"

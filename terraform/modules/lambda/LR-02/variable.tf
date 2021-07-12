@@ -39,7 +39,7 @@ variable "jobs_table_arn" {
   type = string
 }
 
-variable "inflight_table_arn" {
+variable "in_flight_table_arn" {
   type = string
 }
 
@@ -55,7 +55,7 @@ variable "jobs_table_name" {
   type = string
 }
 
-variable "inflight_table_name" {
+variable "in_flight_table_name" {
   type = string
 }
 

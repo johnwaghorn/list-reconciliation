@@ -15,7 +15,7 @@ LR_01_BUCKET = aws_resource["lr_01_bucket"]["value"]
 LR_13_BUCKET = aws_resource["lr_13_bucket"]["value"]
 LR_22_BUCKET = aws_resource["lr_22_bucket"]["value"]
 MOCK_PDS_DATA = aws_resource["mock_pds_data"]["value"]
-INFLIGHT_TABLE = aws_resource["inflight_table"]["value"]
+INFLIGHT_TABLE = aws_resource["in_flight_table"]["value"]
 
 
 @step("setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table")

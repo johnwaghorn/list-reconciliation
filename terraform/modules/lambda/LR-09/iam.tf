@@ -46,7 +46,7 @@ resource "aws_iam_policy" "policy" {
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.demographics_table_arn}",
-                "${var.inflight_table_arn}",
+                "${var.in_flight_table_arn}",
                 "${var.jobs_table_arn}",
                 "${var.job_stats_table_arn}",
                 "${var.errors_table_arn}"
@@ -56,7 +56,7 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:Scan",
             "Resource": [
-                "${var.inflight_table_arn}"
+                "${var.in_flight_table_arn}"
             ]
         },
         {
@@ -80,7 +80,7 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:DeleteItem",
             "Resource": [
-                "${var.inflight_table_arn}"
+                "${var.in_flight_table_arn}"
             ]
         },
         {

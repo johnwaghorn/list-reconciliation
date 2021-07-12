@@ -70,7 +70,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.inflight_table_arn}",
+                "${var.in_flight_table_arn}",
                 "${var.errors_table_arn}"
             ]
         },
@@ -80,7 +80,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.inflight_table_arn}"
+                "${var.in_flight_table_arn}"
             ]
         },
         {
@@ -89,7 +89,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.inflight_table_arn}",
+                "${var.in_flight_table_arn}",
                 "${var.errors_table_arn}"
             ]
         },
@@ -110,4 +110,3 @@ resource "aws_iam_role_policy_attachment" "policy_attachment" {
   role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }
-

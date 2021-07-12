@@ -28,7 +28,7 @@ resource "aws_lambda_function" "LR-02-Lambda" {
       AWS_S3_REGISTRATION_EXTRACT_BUCKET = var.source_bucket
       DEMOGRAPHICS_TABLE                 = var.demographics_table_name
       JOBS_TABLE                         = var.jobs_table_name
-      INFLIGHT_TABLE                     = var.inflight_table_name
+      INFLIGHT_TABLE                     = var.in_flight_table_name
       ERRORS_TABLE                       = var.errors_table_name
     }
   }

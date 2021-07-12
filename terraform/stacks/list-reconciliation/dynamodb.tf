@@ -1,4 +1,4 @@
-module "jobs_table" {
+module "jobs" {
   source          = "../../modules/dynamodb"
   table_name      = "Jobs-${local.environment}"
   table_hash_key  = "Id"
@@ -22,7 +22,7 @@ module "jobs_table" {
   ]
 }
 
-module "jobs_stats_table" {
+module "jobs_stats" {
   source          = "../../modules/dynamodb"
   table_range_key = ""
   table_name      = "JobStats-${local.environment}"
@@ -36,7 +36,7 @@ module "jobs_stats_table" {
   ]
 }
 
-module "in_flight_table" {
+module "in_flight" {
   source          = "../../modules/dynamodb"
   table_name      = "InFlight-${local.environment}"
   table_hash_key  = "JobId"
@@ -50,7 +50,7 @@ module "in_flight_table" {
   ]
 }
 
-module "demographics_table" {
+module "demographics" {
   source          = "../../modules/dynamodb"
   table_name      = "Demographics-${local.environment}"
   table_hash_key  = "Id"
@@ -74,7 +74,7 @@ module "demographics_table" {
   ]
 }
 
-module "demographics_differences_table" {
+module "demographics_differences" {
   source          = "../../modules/dynamodb"
   table_name      = "DemographicsDifferences-${local.environment}"
   table_hash_key  = "Id"
@@ -98,7 +98,7 @@ module "demographics_differences_table" {
   ]
 }
 
-module "errors_table" {
+module "errors" {
   source          = "../../modules/dynamodb"
   table_name      = "Errors-${local.environment}"
   table_hash_key  = "Id"
@@ -116,7 +116,7 @@ module "errors_table" {
   ]
 }
 
-module "statuses_table" {
+module "statuses" {
   source          = "../../modules/dynamodb"
   table_name      = "Statuses-${local.environment}"
   table_hash_key  = "Id"

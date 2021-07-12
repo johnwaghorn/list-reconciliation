@@ -28,7 +28,7 @@ LR_10_STATE_FUNCTION_ARN = AWS_RESOURCE["lr_10_sfn_arn"]["value"]
 LR_22_BUCKET = AWS_RESOURCE["lr_22_bucket"]["value"]
 LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
 DYNAMODB_DEMOG = AWS_RESOURCE["demographic_table"]["value"]
-DYNAMODB_INFLIGHTS = AWS_RESOURCE["inflight_table"]["value"]
+DYNAMODB_INFLIGHTS = AWS_RESOURCE["in_flight_table"]["value"]
 DYNAMODB_JOBS = AWS_RESOURCE["jobs_table"]["value"]
 DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_stats_table"]["value"]
 
@@ -39,7 +39,9 @@ def connect_to_s3_and_upload_mock_data_valid_scenario(lr_15_path):
 
     try:
         s3.upload_file(
-            os.path.join(DATA, lr_15_path + "pds_api_data.csv"), MOCK_PDS_DATA, "pds_api_data.csv"
+            os.path.join(DATA, lr_15_path + "pds_api_data.csv"),
+            MOCK_PDS_DATA,
+            "pds_api_data.csv",
         )
         s3.upload_file(os.path.join(DATA, "LR_15/A82023.csv"), LR_22_BUCKET, "LR_15/A82023.csv")
         s3.upload_file(os.path.join(DATA, "LR_15/Y123451.csv"), LR_22_BUCKET, "LR_15/Y123451.csv")
