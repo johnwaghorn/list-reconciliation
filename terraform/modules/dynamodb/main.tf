@@ -1,7 +1,9 @@
 resource "aws_dynamodb_table" "tables" {
-  hash_key  = var.table_hash_key
-  name      = var.table_name
-  range_key = var.table_range_key
+  hash_key       = var.table_hash_key
+  name           = var.table_name
+  range_key      = var.table_range_key
+  billing_mode   = var.billing_mode
+  stream_enabled = false
 
   dynamic "attribute" {
     for_each = var.attributes
@@ -10,9 +12,6 @@ resource "aws_dynamodb_table" "tables" {
       type = attribute.value.type
     }
   }
-
-  billing_mode   = var.billing_mode
-  stream_enabled = false
 
   dynamic "global_secondary_index" {
     for_each = var.secondary_index

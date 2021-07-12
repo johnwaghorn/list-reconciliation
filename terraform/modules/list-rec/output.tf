@@ -70,34 +70,6 @@ output "LR_10_SFN_arn" {
   value = module.LR-10.LR-11-sfn_arn
 }
 
-output "Jobs_Table" {
-  value = module.Jobs_Table.dynamo_table_name
-}
-
-output "Demographic_Table" {
-  value = module.Demographics_Table.dynamo_table_name
-}
-
-output "InFlight_Table" {
-  value = module.In_Flight_Table.dynamo_table_name
-}
-
-output "Errors_Table" {
-  value = module.Errors_Table.dynamo_table_name
-}
-
-output "Demographics_Difference_Table" {
-  value = module.Demographics_Differences_Table.dynamo_table_name
-}
-
-output "Jobs_Status_Table" {
-  value = module.Jobs_Stats_Table.dynamo_table_name
-}
-
-output "Statuses_Table" {
-  value = module.Statuses_Table.dynamo_table_name
-}
-
 output "LR-12-lambda" {
   value = module.LR-12.LR-12-lambda
 }

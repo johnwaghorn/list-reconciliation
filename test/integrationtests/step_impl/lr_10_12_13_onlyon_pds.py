@@ -27,7 +27,7 @@ LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
 DYNAMODB_DEMOG = AWS_RESOURCE["demographic_table"]["value"]
 DYNAMODB_INFLIGHTS = AWS_RESOURCE["inflight_table"]["value"]
 DYNAMODB_JOBS = AWS_RESOURCE["jobs_table"]["value"]
-DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_Status_table"]["value"]
+DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_stats_table"]["value"]
 
 LR_12_LAMBDA_PAYLOAD = "LR_12_Lambda_Payload.txt"
 EXECUTION_NAME = "automate-lr-10-stepfunction"
