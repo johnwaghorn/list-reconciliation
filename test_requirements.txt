@@ -8,4 +8,5 @@ getgauge
 moto
 pytest-env
 docker
-black
+black==21.6b0
+pre-commit>=v2.13.0

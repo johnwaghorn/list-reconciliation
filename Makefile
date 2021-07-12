@@ -94,3 +94,7 @@ integrationtests:
 
 get-branch-id:
 	@echo $(shell git branch --show-current | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(shell git branch --show-current | sha1sum | head -c 8)
+
+hooks:
+	pre-commit install
+	pre-commit install --hook-type prepare-commit-msg

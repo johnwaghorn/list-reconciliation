@@ -25,7 +25,7 @@ jobs:
         working-directory: ./terraform/stacks/list-reconciliation
         run: |
           terraform init
-          BRANCH_ID=$(make -f ./../../../makefile get-branch-id)-stack
+          BRANCH_ID=$(make -f ./../../../Makefile get-branch-id)-stack
           terraform workspace select ${BRANCH_ID} || terraform workspace new ${BRANCH_ID}
       - name: Terraform Validate
         working-directory: ./terraform/stacks/list-reconciliation

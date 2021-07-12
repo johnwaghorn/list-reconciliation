@@ -163,14 +163,14 @@ def check_lambda_lr12_has_processed_record():
         if key == "ResponseMetadata":
             assert lr_12_response["ResponseMetadata"]["HTTPStatusCode"] == (202)
 
-    Messages.write_message( "lr-12 executed successfully")
+    Messages.write_message("lr-12 executed successfully")
 
 
 @step("connect to lr-13 and check output csv file content and file format as expected")
 def check_output_file_in_lr13():
     s3_client = dev.client("s3", REGION_NAME)
     response = s3_client.list_objects_v2(Bucket=LR_13_BUCKET, Prefix=PREFIX_S3)
-    
+
     if response.get("Contents") != None:
         for obj in response.get("Contents"):
             print("Found CSV File", obj["Key"])
