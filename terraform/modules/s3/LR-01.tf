@@ -1,13 +1,7 @@
-variable "s3_folders" {
-  type        = list(string)
-  description = "The list of S3 folders to create"
-  default     = ["inbound", "fail", "pass", "retry"]
-}
-
 resource "aws_s3_bucket" "LR-01" {
   bucket        = "lr-01-gp-extract-input-${var.suffix}"
   acl           = "private"
-  force_destroy = true
+  force_destroy = var.force_destroy
 
   tags = {
     Name = "S3 Input Bucket for LR-01 - ${var.suffix}"
@@ -21,6 +15,15 @@ resource "aws_s3_bucket" "LR-01" {
     target_bucket = aws_s3_bucket.LR-26.id
     target_prefix = "lr-01-gp-extract-input-${var.suffix}/"
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "LR-01" {
+  bucket = aws_s3_bucket.LR-01.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_object" "inbound" {

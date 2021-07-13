@@ -61,7 +61,9 @@ module "lambda" {
 module "s3" {
   source = "../../modules/s3"
 
-  suffix = local.environment
+  # Allow S3 resources to be destroyed whilst containing data in non-prod envs
+  force_destroy = local.environment == "prod" ? false : true
+  suffix        = local.environment
 }
 
 module "patient_records_queue" {
