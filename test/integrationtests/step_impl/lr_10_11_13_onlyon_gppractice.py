@@ -13,7 +13,6 @@ access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
-
 REGION_NAME = "eu-west-2"
 TEST_DATETIME = get_datetime_now()
 AWS_RESOURCE = get_aws_resources()
@@ -67,7 +66,9 @@ def connect_statefunc_lr10():
             status = desc_exec_resp["status"]
 
 
-@step("connect to s3 bucket and ensure the csv file produced contains the expected gponly record")
+@step(
+    "connect to lr-13 s3 bucket and ensure the gponly csv file produced contains the expected gponly records"
+)
 def assert_file_in_lr13():
     exp_gponly_datafile = "expected_onlyongp.txt"
     exp_gponly_path = os.path.join(EXPECED_GP_ONLY_DATA, "LR_13/" + exp_gponly_datafile)

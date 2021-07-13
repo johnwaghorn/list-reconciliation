@@ -1,3 +1,4 @@
+from sys import prefix
 from getgauge.python import step
 from getgauge.python import Messages
 from utils.datetimezone import get_datetime_now
@@ -14,9 +15,9 @@ from .tf_aws_resources import get_aws_resources
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
-aws_resource = get_aws_resources()
 
-region_name = "eu-west-2"
+aws_resource = get_aws_resources()
+REGION_NAME = "eu-west-2"
 test_datetime = get_datetime_now()
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -37,7 +38,7 @@ def get_gppractice_out_path(filename_no_ext):
 
 @step("connect and trigger lambda LR-02")
 def connect_to_lambda_lr02_with_valid_payload():
-    client = dev.client("lambda", region_name)
+    client = dev.client("lambda", REGION_NAME)
     payload_file = "LR_02_Lambda_Payload.txt"
     payload_temp = os.path.join(DATA, payload_file)
 
@@ -55,7 +56,7 @@ def connect_to_lambda_lr02_with_valid_payload():
 
 @step("connect and trigger lambda LR-02 with invalid payload")
 def connect_to_lambda_lr02_with_invalid_payload():
-    client = dev.client("lambda", region_name)
+    client = dev.client("lambda", REGION_NAME)
     payload_file = "LR_02_Lambda_Invalid_Payload.txt"
     payload_temp = os.path.join(DATA, payload_file)
 
@@ -132,10 +133,14 @@ def create_gp_file(testfile, row, invalid_item=None, field_loc=None):
 def upload_gpextract_file_into_s3(testfile):
     row = "DOW~1"
     temp_destdir = create_gp_file(testfile, row)
+
+    global destination_filename
     destination_filename = os.path.basename(temp_destdir)
-    s3 = dev.client("s3", region_name)
+
+    s3 = dev.client("s3", REGION_NAME)
     try:
         s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
+        time.sleep(10)
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -152,9 +157,10 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
     global destination_filename
     destination_filename = os.path.basename(temp_destdir)
 
-    s3 = dev.client("s3", region_name)
+    s3 = dev.client("s3", REGION_NAME)
     try:
         s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
+        time.sleep(10)
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -165,7 +171,7 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
 @step("connect to s3 failed folder and assert failure message <search_word>")
 def readfile_in_s3_failed_invalid_item(search_word):
     time.sleep(20)
-    s3 = dev.client("s3", region_name)
+    s3 = dev.client("s3", REGION_NAME)
     result = s3.list_objects(
         Bucket=LR_01_BUCKET, Prefix="fail/" + destination_filename + "_LOG.txt"
     )
@@ -197,3 +203,12 @@ def readfile_in_s3_failed_invalid_item(search_word):
             if val == 0:
                 Messages.write_message("Actual value was :" + str(actual_key))
                 assert val, "No value found"
+
+
+@step("connect to pass folder and check if it has loaded the test file")
+def assert_fileloaded_in_s3_pass_folder():
+    s3 = dev.client("s3", REGION_NAME)
+    expected_filename = "pass/" + destination_filename
+    result = s3.list_objects(Bucket=LR_01_BUCKET, Prefix=expected_filename)
+    actual_filename = result.get("Contents", [])[0]["Key"]
+    assert expected_filename == actual_filename, "destination file not found"

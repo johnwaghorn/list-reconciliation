@@ -1,4 +1,5 @@
 from getgauge.python import step, Messages
+import time
 import boto3
 import json
 import os
@@ -28,6 +29,7 @@ def trigger_lr09(expstatuscode):
 
 @step("trigger lr09 and ensure scheduled checked successfully completed")
 def trigger_lr09_get_requestid():
+    time.sleep(10)
     client = dev.client("lambda", REGION_NAME)
     response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
 

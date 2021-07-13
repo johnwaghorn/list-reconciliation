@@ -2,10 +2,12 @@
 --------------------------------------------------------------
 
 
-## test to ensure when lambda LR-02 is triggered and check cloud watch log for positive scenario
-------------------------------------------------------------------------------------------------
+## test to ensure when lambda LR-02 is triggered and check file is validated and passed sucessfully
+---------------------------------------------------------------------------------------------------
+* setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
 * connect to s3 and upload gpfile file "A82023_GPR4LNA1.EIA" for successful file validation
-* connect to cloudwatch log and get the request id by JobId created
+* connect to pass folder and check if it has loaded the test file
+
 
 ## test to ensure when lambda LR-02 is triggered and response status code 202 is recieved
 ------------------------------------------------------------------------------------------
