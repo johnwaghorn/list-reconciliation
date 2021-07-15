@@ -10,6 +10,7 @@ locals {
     LR-15 = "LR_15_process_demo_diffs"
     LR-24 = "LR_24_save_records_to_s3"
     LR-21 = "LR_21_split_dps_extract"
+    lr_25 = "LR_25_mesh_post_office"
   }
 }
 
@@ -218,4 +219,18 @@ module "LR-24" {
   lambda_handler    = var.lambda_handler
   dynamodb_kms_key  = var.dynamodb_kms_key
   s3_kms_key        = var.s3_kms_key
+}
+
+module "lr_25" {
+  source = "./LR_25_mesh_post_office"
+
+  lambda_name               = local.lambda_name.lr_25
+  package_layer_arn         = aws_lambda_layer_version.package_layer.arn
+  runtime                   = var.runtime
+  suffix                    = var.suffix
+  mesh_kms_key_alias        = var.mesh_kms_key_alias
+  mesh_post_office_open     = var.mesh_post_office_open
+  mesh_post_office_mappings = var.mesh_post_office_mappings
+  dynamodb_kms_key          = var.dynamodb_kms_key
+  s3_kms_key                = var.s3_kms_key
 }

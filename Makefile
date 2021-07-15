@@ -28,7 +28,7 @@ python-package:
 
 # Testing
 unittests:
-	pytest --ignore=test/integrationtests
+	pytest
 
 # Formating
 black:

@@ -47,3 +47,18 @@ variable "dynamodb_kms_key" {
 variable "s3_kms_key" {
   type = map(string)
 }
+
+variable "mesh_post_office_open" {
+  description = "If set to True, messages will be moved from Mesh Inbound to LR-01 Inbound"
+  type        = string
+}
+
+variable "mesh_post_office_mappings" {
+  description = "Mappings of where the Post Office will check messages and deliver them to"
+  type        = list(any)
+}
+
+variable "mesh_kms_key_alias" {
+  description = "The alias of the Mesh KMS encryption key"
+  type        = string
+}

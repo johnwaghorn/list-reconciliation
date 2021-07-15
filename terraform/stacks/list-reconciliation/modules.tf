@@ -9,6 +9,10 @@ module "lambda" {
   dynamodb_kms_key = module.kms["dynamodb"].output
   s3_kms_key       = module.kms["s3"].output
 
+  mesh_kms_key_alias        = try(local.mesh_post_office_open[local.environment], local.mesh_kms_key_alias["default"])
+  mesh_post_office_open     = try(local.mesh_post_office_open[local.environment], local.mesh_post_office_open["default"])
+  mesh_post_office_mappings = try(local.mesh_post_office_mappings[local.environment], local.mesh_post_office_mappings["default"])
+
   mock_pds_data_bucket = {
     arn  = module.test_data[0].mock_pds_data_bucket_arn
     name = module.test_data[0].mock_pds_data_bucket_name
