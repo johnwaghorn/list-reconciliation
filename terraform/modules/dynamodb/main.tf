@@ -5,6 +5,10 @@ resource "aws_dynamodb_table" "tables" {
   billing_mode   = var.billing_mode
   stream_enabled = false
 
+  point_in_time_recovery {
+    enabled = var.point_in_time_recovery_enabled
+  }
+
   dynamic "attribute" {
     for_each = var.attributes
     content {

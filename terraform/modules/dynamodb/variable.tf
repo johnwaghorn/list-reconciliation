@@ -34,3 +34,8 @@ variable "attributes" {
 variable "table_range_key" {
   type = string
 }
+
+variable "point_in_time_recovery_enabled" {
+  type    = bool
+  default = false
+}

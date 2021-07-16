@@ -1,8 +1,9 @@
 module "jobs" {
-  source          = "../../modules/dynamodb"
-  table_name      = "Jobs-${local.environment}"
-  table_hash_key  = "Id"
-  table_range_key = "PracticeCode"
+  source                         = "../../modules/dynamodb"
+  table_name                     = "Jobs-${local.environment}"
+  table_hash_key                 = "Id"
+  table_range_key                = "PracticeCode"
+  point_in_time_recovery_enabled = true
   secondary_index = [
     {
       name            = "jobs-id-index",
@@ -23,11 +24,12 @@ module "jobs" {
 }
 
 module "jobs_stats" {
-  source          = "../../modules/dynamodb"
-  table_range_key = ""
-  table_name      = "JobStats-${local.environment}"
-  table_hash_key  = "JobId"
-  secondary_index = []
+  source                         = "../../modules/dynamodb"
+  table_range_key                = ""
+  table_name                     = "JobStats-${local.environment}"
+  table_hash_key                 = "JobId"
+  secondary_index                = []
+  point_in_time_recovery_enabled = true
   attributes = [
     {
       name = "JobId"
