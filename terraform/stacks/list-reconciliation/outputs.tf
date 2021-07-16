@@ -118,6 +118,10 @@ output "lr_15_lambda" {
   value = module.lambda.lr_15_lambda
 }
 
+output "lr_26_bucket" {
+  value = module.s3.buckets.LR-26.bucket
+}
+
 output "lr_23_bucket" {
   value = module.s3.buckets.LR-23.bucket
 }

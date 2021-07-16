@@ -12,6 +12,15 @@ resource "aws_s3_bucket" "LR-01" {
   tags = {
     Name = "S3 Input Bucket for LR-01 - ${var.suffix}"
   }
+
+  versioning {
+    enabled = true
+  }
+
+  logging {
+    target_bucket = aws_s3_bucket.LR-26.id
+    target_prefix = "lr-01-gp-extract-input-${var.suffix}/"
+  }
 }
 
 resource "aws_s3_bucket_object" "inbound" {
