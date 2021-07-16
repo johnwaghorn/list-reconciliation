@@ -14,6 +14,7 @@ s3 = dev.client("s3")
 LR_01_BUCKET = aws_resource["lr_01_bucket"]["value"]
 LR_13_BUCKET = aws_resource["lr_13_bucket"]["value"]
 LR_22_BUCKET = aws_resource["lr_22_bucket"]["value"]
+LR_23_BUCKET = aws_resource["lr_23_bucket"]["value"]
 MOCK_PDS_DATA = aws_resource["mock_pds_data"]["value"]
 INFLIGHT_TABLE = aws_resource["in_flight_table"]["value"]
 
@@ -67,3 +68,13 @@ def before_hooks_pds_data():
         for object in lr_22_response["Contents"]:
             print("Deleting", object["Key"])
             s3.delete_object(Bucket=LR_22_BUCKET, Key=object["Key"])
+
+
+@step("setup steps: clear all files lr_23 bucket")
+def before_hooks_lr23_bucket_data():
+    # Bucket lr22_bucket
+    lr_23_response = s3.list_objects_v2(Bucket=LR_23_BUCKET)
+    if "Contents" in lr_23_response:
+        for object in lr_23_response["Contents"]:
+            print("Deleting", object["Key"])
+            s3.delete_object(Bucket=LR_23_BUCKET, Key=object["Key"])
