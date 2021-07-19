@@ -4,6 +4,7 @@ module "jobs" {
   table_hash_key                 = "Id"
   table_range_key                = "PracticeCode"
   point_in_time_recovery_enabled = true
+  kms_key_arn                    = module.kms["dynamodb"].output.arn
   secondary_index = [
     {
       name            = "jobs-id-index",
@@ -25,11 +26,10 @@ module "jobs" {
 
 module "jobs_stats" {
   source                         = "../../modules/dynamodb"
-  table_range_key                = ""
   table_name                     = "JobStats-${local.environment}"
   table_hash_key                 = "JobId"
-  secondary_index                = []
   point_in_time_recovery_enabled = true
+  kms_key_arn                    = module.kms["dynamodb"].output.arn
   attributes = [
     {
       name = "JobId"
@@ -39,11 +39,10 @@ module "jobs_stats" {
 }
 
 module "in_flight" {
-  source          = "../../modules/dynamodb"
-  table_name      = "InFlight-${local.environment}"
-  table_hash_key  = "JobId"
-  table_range_key = ""
-  secondary_index = []
+  source         = "../../modules/dynamodb"
+  table_name     = "InFlight-${local.environment}"
+  table_hash_key = "JobId"
+  kms_key_arn    = module.kms["dynamodb"].output.arn
   attributes = [
     {
       name = "JobId"
@@ -57,6 +56,7 @@ module "demographics" {
   table_name      = "Demographics-${local.environment}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
+  kms_key_arn     = module.kms["dynamodb"].output.arn
   secondary_index = [
     {
       name            = "demographics-job_id-index",
@@ -81,6 +81,7 @@ module "demographics_differences" {
   table_name      = "DemographicsDifferences-${local.environment}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
+  kms_key_arn     = module.kms["dynamodb"].output.arn
   secondary_index = [
     {
       name            = "demographicsdifferences-job_id-index",
@@ -105,7 +106,7 @@ module "errors" {
   table_name      = "Errors-${local.environment}"
   table_hash_key  = "Id"
   table_range_key = "JobId"
-  secondary_index = []
+  kms_key_arn     = module.kms["dynamodb"].output.arn
   attributes = [
     {
       name = "Id"
@@ -119,11 +120,10 @@ module "errors" {
 }
 
 module "statuses" {
-  source          = "../../modules/dynamodb"
-  table_name      = "Statuses-${local.environment}"
-  table_hash_key  = "Id"
-  table_range_key = ""
-  secondary_index = []
+  source         = "../../modules/dynamodb"
+  table_name     = "Statuses-${local.environment}"
+  table_hash_key = "Id"
+  kms_key_arn    = module.kms["dynamodb"].output.arn
   attributes = [
     {
       name = "Id"

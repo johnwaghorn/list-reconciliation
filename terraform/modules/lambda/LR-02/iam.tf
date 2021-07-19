@@ -66,6 +66,18 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${var.dynamodb_kms_key.arn}"
+            ]
+        },
+        {
+            "Effect": "Allow",
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.demographics_table_arn}",
@@ -103,7 +115,6 @@ resource "aws_iam_policy" "policy" {
     ]
   }
   EOF
-
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment" {

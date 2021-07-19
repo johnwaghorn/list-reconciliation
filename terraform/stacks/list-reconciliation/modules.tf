@@ -1,12 +1,13 @@
 module "lambda" {
   source = "../../modules/lambda"
 
-  suffix         = local.environment
-  pds_url        = "pds_api_data.csv"
-  patient_sqs    = "Patient_Records.fifo"
-  runtime        = "python3.8"
-  lambda_handler = "main.lambda_handler"
-  s3_buckets     = module.s3.buckets
+  suffix           = local.environment
+  pds_url          = "pds_api_data.csv"
+  patient_sqs      = "Patient_Records.fifo"
+  runtime          = "python3.8"
+  lambda_handler   = "main.lambda_handler"
+  s3_buckets       = module.s3.buckets
+  dynamodb_kms_key = module.kms["dynamodb"].output
 
   mock_pds_data_bucket = {
     arn  = module.test_data[0].mock_pds_data_bucket_arn
@@ -79,6 +80,15 @@ module "lr_10_registration_orchestration" {
   lr_11_lambda = module.lambda.lr_11_lambda_arn
   lr_12_lambda = module.lambda.lr_12_lambda_arn
   lr_15_lambda = module.lambda.lr_15_lambda_arn
+}
+
+module "kms" {
+  for_each = {
+    dynamodb = { name = "dynamodb-${local.environment}" }
+  }
+  source = "../../modules/kms"
+
+  name = each.value.name
 }
 
 module "test_data" {

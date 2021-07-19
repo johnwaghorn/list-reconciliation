@@ -30,6 +30,7 @@ module "LR-02" {
   jobs_table_name         = var.dynamodb_tables.jobs.name
   suffix                  = var.suffix
   lambda_handler          = var.lambda_handler
+  dynamodb_kms_key        = var.dynamodb_kms_key
 }
 
 module "LR-07" {
@@ -48,6 +49,7 @@ module "LR-07" {
   pds_url                  = "s3://${var.mock_pds_data_bucket.name}/${var.pds_url}"
   suffix                   = var.suffix
   lambda_handler           = var.lambda_handler
+  dynamodb_kms_key         = var.dynamodb_kms_key
 }
 
 module "LR-08" {
@@ -64,6 +66,7 @@ module "LR-08" {
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
+  dynamodb_kms_key                    = var.dynamodb_kms_key
 }
 
 module "LR-09" {
@@ -85,6 +88,7 @@ module "LR-09" {
   errors_table_name       = var.dynamodb_tables.errors.name
   suffix                  = var.suffix
   lambda_handler          = var.lambda_handler
+  dynamodb_kms_key        = var.dynamodb_kms_key
 }
 
 module "LR-11" {
@@ -105,6 +109,7 @@ module "LR-11" {
   errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
+  dynamodb_kms_key                = var.dynamodb_kms_key
 }
 
 module "LR-12" {
@@ -130,6 +135,7 @@ module "LR-12" {
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
   lambda_handler                        = var.lambda_handler
+  dynamodb_kms_key                      = var.dynamodb_kms_key
 }
 
 module "LR-15" {
@@ -154,6 +160,7 @@ module "LR-15" {
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
+  dynamodb_kms_key                    = var.dynamodb_kms_key
 }
 
 module "LR-21" {
@@ -167,4 +174,5 @@ module "LR-21" {
   errors_table_name           = var.dynamodb_tables.errors.name
   suffix                      = var.suffix
   lambda_handler              = var.lambda_handler
+  dynamodb_kms_key            = var.dynamodb_kms_key
 }

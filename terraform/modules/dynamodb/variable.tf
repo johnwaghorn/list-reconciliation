@@ -18,6 +18,7 @@ variable "secondary_index" {
     hash_key        = string
     projection_type = string
   }))
+  default = []
 }
 
 variable "table_hash_key" {
@@ -32,10 +33,16 @@ variable "attributes" {
 }
 
 variable "table_range_key" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "point_in_time_recovery_enabled" {
   type    = bool
   default = false
+}
+
+variable "kms_key_arn" {
+  description = "ARN of the KMS Key to use to encrypt DynamoDB Tables"
+  type        = string
 }

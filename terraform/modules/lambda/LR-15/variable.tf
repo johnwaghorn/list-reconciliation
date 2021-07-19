@@ -77,3 +77,7 @@ variable "suffix" {
 variable "lambda_handler" {
   type = string
 }
+
+variable "dynamodb_kms_key" {
+  type = map(string)
+}

@@ -62,3 +62,7 @@ variable "mock_pds_data_bucket_arn" {
 variable "suffix" {
   type = string
 }
+
+variable "dynamodb_kms_key" {
+  type = map(string)
+}

@@ -9,6 +9,11 @@ resource "aws_dynamodb_table" "tables" {
     enabled = var.point_in_time_recovery_enabled
   }
 
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = var.kms_key_arn
+  }
+
   dynamic "attribute" {
     for_each = var.attributes
     content {
