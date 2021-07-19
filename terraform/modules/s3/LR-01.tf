@@ -7,6 +7,15 @@ resource "aws_s3_bucket" "LR-01" {
     Name = "S3 Input Bucket for LR-01 - ${var.suffix}"
   }
 
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = var.kms_key_arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
   versioning {
     enabled = true
   }

@@ -31,6 +31,7 @@ module "LR-02" {
   suffix                  = var.suffix
   lambda_handler          = var.lambda_handler
   dynamodb_kms_key        = var.dynamodb_kms_key
+  s3_kms_key              = var.s3_kms_key
 }
 
 module "LR-07" {
@@ -50,6 +51,7 @@ module "LR-07" {
   suffix                   = var.suffix
   lambda_handler           = var.lambda_handler
   dynamodb_kms_key         = var.dynamodb_kms_key
+  s3_kms_key               = var.s3_kms_key
 }
 
 module "LR-08" {
@@ -67,6 +69,7 @@ module "LR-08" {
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
   dynamodb_kms_key                    = var.dynamodb_kms_key
+  s3_kms_key                          = var.s3_kms_key
 }
 
 module "LR-09" {
@@ -89,6 +92,7 @@ module "LR-09" {
   suffix                  = var.suffix
   lambda_handler          = var.lambda_handler
   dynamodb_kms_key        = var.dynamodb_kms_key
+  s3_kms_key              = var.s3_kms_key
 }
 
 module "LR-11" {
@@ -110,6 +114,7 @@ module "LR-11" {
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
   dynamodb_kms_key                = var.dynamodb_kms_key
+  s3_kms_key                      = var.s3_kms_key
 }
 
 module "LR-12" {
@@ -136,6 +141,7 @@ module "LR-12" {
   suffix                                = var.suffix
   lambda_handler                        = var.lambda_handler
   dynamodb_kms_key                      = var.dynamodb_kms_key
+  s3_kms_key                            = var.s3_kms_key
 }
 
 module "LR-15" {
@@ -161,6 +167,7 @@ module "LR-15" {
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
   dynamodb_kms_key                    = var.dynamodb_kms_key
+  s3_kms_key                          = var.s3_kms_key
 }
 
 module "LR-21" {
@@ -175,4 +182,5 @@ module "LR-21" {
   suffix                      = var.suffix
   lambda_handler              = var.lambda_handler
   dynamodb_kms_key            = var.dynamodb_kms_key
+  s3_kms_key                  = var.s3_kms_key
 }

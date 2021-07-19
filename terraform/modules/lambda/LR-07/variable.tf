@@ -66,3 +66,7 @@ variable "suffix" {
 variable "dynamodb_kms_key" {
   type = map(string)
 }
+
+variable "s3_kms_key" {
+  type = map(string)
+}

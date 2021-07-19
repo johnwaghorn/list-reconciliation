@@ -8,6 +8,7 @@ module "lambda" {
   lambda_handler   = "main.lambda_handler"
   s3_buckets       = module.s3.buckets
   dynamodb_kms_key = module.kms["dynamodb"].output
+  s3_kms_key       = module.kms["s3"].output
 
   mock_pds_data_bucket = {
     arn  = module.test_data[0].mock_pds_data_bucket_arn
@@ -65,6 +66,7 @@ module "s3" {
   # Allow S3 resources to be destroyed whilst containing data in non-prod envs
   force_destroy = local.environment == "prod" ? false : true
   suffix        = local.environment
+  kms_key_arn   = module.kms["s3"].output.arn
 }
 
 module "patient_records_queue" {
@@ -85,6 +87,7 @@ module "lr_10_registration_orchestration" {
 module "kms" {
   for_each = {
     dynamodb = { name = "dynamodb-${local.environment}" }
+    s3       = { name = "s3-${local.environment}" }
   }
   source = "../../modules/kms"
 

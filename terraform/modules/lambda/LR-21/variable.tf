@@ -37,3 +37,7 @@ variable "lambda_handler" {
 variable "dynamodb_kms_key" {
   type = map(string)
 }
+
+variable "s3_kms_key" {
+  type = map(string)
+}
