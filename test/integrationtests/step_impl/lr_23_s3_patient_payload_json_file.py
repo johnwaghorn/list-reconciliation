@@ -1,7 +1,7 @@
 from getgauge.python import step
 from getgauge.python import Messages
 from tempfile import gettempdir
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 from utils.datetimezone import get_datetime_now
 
 import boto3
@@ -17,11 +17,10 @@ test_datetime = get_datetime_now()
 temp_dir = gettempdir()
 
 REGION_NAME = "eu-west-2"
-AWS_RESOURCE = get_aws_resources()
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 EXPECTED_DATA = os.path.join(ROOT, "data")
-LR_23_BUCKET = AWS_RESOURCE["lr_23_bucket"]["value"]
+LR_23_BUCKET = get_terraform_output("lr_23_bucket")
 
 
 def update_exp_patient_record_lr23(exp_path, patient_id, job_id):

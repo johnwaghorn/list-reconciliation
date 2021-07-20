@@ -6,7 +6,7 @@ import os
 import json
 import uuid
 from tempfile import gettempdir
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 from utils.datetimezone import get_datetime_now
 
 
@@ -16,18 +16,17 @@ secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 REGION_NAME = "eu-west-2"
 
-AWS_RESOURCE = get_aws_resources()
 test_datetime = get_datetime_now()
 
-LR_12_LAMBDA = AWS_RESOURCE["lr_12_lambda"]["value"]
-LR_10_STATE_FUNCTION_ARN = AWS_RESOURCE["lr_10_sfn_arn"]["value"]
+LR_12_LAMBDA = get_terraform_output("lr_12_lambda")
+LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
 LR_10_JOB_ID = '{"job_id" : "41f678df-9210-45df-8f1e-330ee96acdc8"}'
-LR_22_BUCKET = AWS_RESOURCE["lr_22_bucket"]["value"]
-LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
-DYNAMODB_DEMOG = AWS_RESOURCE["demographic_table"]["value"]
-DYNAMODB_INFLIGHTS = AWS_RESOURCE["in_flight_table"]["value"]
-DYNAMODB_JOBS = AWS_RESOURCE["jobs_table"]["value"]
-DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_stats_table"]["value"]
+LR_22_BUCKET = get_terraform_output("lr_22_bucket")
+LR_13_BUCKET = get_terraform_output("lr_13_bucket")
+DYNAMODB_DEMOG = get_terraform_output("demographic_table")
+DYNAMODB_INFLIGHTS = get_terraform_output("in_flight_table")
+DYNAMODB_JOBS = get_terraform_output("jobs_table")
+DYNAMODB_JOBSTATS = get_terraform_output("jobs_stats_table")
 
 LR_12_LAMBDA_PAYLOAD = "LR_12_Lambda_Payload.txt"
 EXECUTION_NAME = "automate-lr-10-stepfunction"
@@ -38,7 +37,7 @@ EXPECTED_CSV_OUTPUT_FILE = "OnlyOnPDS-Expected-Output.csv"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-MOCK_PDS_DATA = AWS_RESOURCE["mock_pds_data"]["value"]
+MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 
 temp_dir = gettempdir()
 

@@ -9,21 +9,20 @@ from tempfile import gettempdir
 import os
 from datetime import timedelta
 import time
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 
 # On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
-aws_resource = get_aws_resources()
 REGION_NAME = "eu-west-2"
 test_datetime = get_datetime_now()
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-LR_01_BUCKET = aws_resource["lr_01_bucket"]["value"]
-LR_02_LAMBDA_ARN = aws_resource["lr_02_lambda_arn"]["value"]
+LR_01_BUCKET = get_terraform_output("lr_01_bucket")
+LR_02_LAMBDA_ARN = get_terraform_output("lr_02_lambda_arn")
 
 temp_dir = gettempdir()
 now = test_datetime - timedelta(hours=1)

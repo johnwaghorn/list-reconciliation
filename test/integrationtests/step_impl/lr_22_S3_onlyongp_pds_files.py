@@ -2,7 +2,7 @@ from getgauge.python import step
 from getgauge.python import Messages
 import boto3
 import os
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 
 # On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
@@ -12,8 +12,7 @@ dev = boto3.session.Session(access_key, secret_key)
 REGION_NAME = "eu-west-2"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data/LR_22")
-AWS_RESOURCE = get_aws_resources()
-LR_22_BUCKET = AWS_RESOURCE["lr_22_bucket"]["value"]
+LR_22_BUCKET = get_terraform_output("lr_22_bucket")
 
 
 @step("connect to s3 lr-22 bucket and upload pds data")

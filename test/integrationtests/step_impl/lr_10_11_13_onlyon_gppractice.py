@@ -6,7 +6,7 @@ import os
 import time
 from utils.datetimezone import get_datetime_now
 from .lr_03_dynamodb import get_latest_jobid
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 
 # On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
@@ -15,9 +15,8 @@ dev = boto3.session.Session(access_key, secret_key)
 
 REGION_NAME = "eu-west-2"
 TEST_DATETIME = get_datetime_now()
-AWS_RESOURCE = get_aws_resources()
-LR_10_STATE_FUNCTION_ARN = AWS_RESOURCE["lr_10_sfn_arn"]["value"]
-LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
+LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
+LR_13_BUCKET = get_terraform_output("lr_13_bucket")
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EXPECED_GP_ONLY_DATA = os.path.join(ROOT, "data")

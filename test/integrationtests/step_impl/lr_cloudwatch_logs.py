@@ -1,7 +1,7 @@
 from getgauge.python import step
 from datetime import timedelta
 from utils.datetimezone import get_datetime_now
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 from .lr_03_dynamodb import get_latest_jobid
 
 import os
@@ -23,11 +23,10 @@ region_name = "eu-west-2"
 test_datetime = get_datetime_now()
 client = dev.client("logs", region_name)
 
-aws_resource = get_aws_resources()
-LR02_LAMBDA = aws_resource["lr_02_lambda"]["value"]
+LR02_LAMBDA = get_terraform_output("lr_02_lambda")
 
 # aws resources
-JOBS_TABLE = aws_resource["jobs_table"]["value"]
+JOBS_TABLE = get_terraform_output("jobs_table")
 LR02_LAMBDA_LOG_GROUP = f"/aws/lambda/{LR02_LAMBDA}"
 
 

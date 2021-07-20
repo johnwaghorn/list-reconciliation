@@ -6,7 +6,7 @@ import os
 import base64
 
 from utils.datetimezone import get_datetime_now
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 
 # On github
 access_key = os.getenv("AWS_PUBLIC_KEY")
@@ -14,8 +14,7 @@ secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
 REGION_NAME = "eu-west-2"
-AWS_RESOURCE = get_aws_resources()
-LR_09_LAMBDA_ARN = AWS_RESOURCE["lr_09_lambda"]["value"]
+LR_09_LAMBDA_ARN = get_terraform_output("lr_09_lambda")
 
 
 @step("trigger lr09 and expected statuscode is <expstatuscode>")

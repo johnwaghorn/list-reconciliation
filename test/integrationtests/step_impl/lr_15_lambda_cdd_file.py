@@ -1,7 +1,7 @@
 from getgauge.python import step
 from getgauge.python import Messages
 from tempfile import gettempdir
-from .tf_aws_resources import get_aws_resources
+from .tf_aws_resources import get_terraform_output
 from utils.datetimezone import get_datetime_now
 
 import boto3
@@ -17,21 +17,20 @@ test_datetime = get_datetime_now()
 temp_dir = gettempdir()
 
 REGION_NAME = "eu-west-2"
-AWS_RESOURCE = get_aws_resources()
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 EXPECED_DATA = os.path.join(ROOT, "data")
 
-MOCK_PDS_DATA = AWS_RESOURCE["mock_pds_data"]["value"]
-LR_12_LAMBDA = AWS_RESOURCE["lr_12_lambda"]["value"]
-LR_10_STATE_FUNCTION_ARN = AWS_RESOURCE["lr_10_sfn_arn"]["value"]
-LR_22_BUCKET = AWS_RESOURCE["lr_22_bucket"]["value"]
-LR_13_BUCKET = AWS_RESOURCE["lr_13_bucket"]["value"]
-LR_23_BUCKET = AWS_RESOURCE["lr_23_bucket"]["value"]
-DYNAMODB_DEMOG = AWS_RESOURCE["demographic_table"]["value"]
-DYNAMODB_INFLIGHTS = AWS_RESOURCE["in_flight_table"]["value"]
-DYNAMODB_JOBS = AWS_RESOURCE["jobs_table"]["value"]
-DYNAMODB_JOBSTATS = AWS_RESOURCE["jobs_stats_table"]["value"]
+MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
+LR_12_LAMBDA = get_terraform_output("lr_12_lambda")
+LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
+LR_22_BUCKET = get_terraform_output("lr_22_bucket")
+LR_13_BUCKET = get_terraform_output("lr_13_bucket")
+LR_23_BUCKET = get_terraform_output("lr_23_bucket")
+DYNAMODB_DEMOG = get_terraform_output("demographic_table")
+DYNAMODB_INFLIGHTS = get_terraform_output("in_flight_table")
+DYNAMODB_JOBS = get_terraform_output("jobs_table")
+DYNAMODB_JOBSTATS = get_terraform_output("jobs_stats_table")
 
 
 @step("prep step : connect to s3 buckets mock pds, lr-22 and upload data files for <lr-15> lambda")
