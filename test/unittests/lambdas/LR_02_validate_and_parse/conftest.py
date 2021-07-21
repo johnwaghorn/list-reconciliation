@@ -1,8 +1,12 @@
+import io
 import os
+import textwrap
+import zipfile
+
 import boto3
 import pytest
 
-from moto import mock_dynamodb2, mock_s3, mock_sqs
+from moto import mock_dynamodb2, mock_s3, mock_iam, mock_lambda
 
 from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import LR02LambdaHandler
 from utils.database.models import Demographics, Errors, Jobs, InFlight
@@ -57,20 +61,48 @@ def create_dynamodb_tables():
         yield
 
 
+def get_role_name():
+    with mock_iam():
+        iam = boto3.client("iam", region_name=REGION_NAME)
+        return iam.create_role(
+            RoleName="my-role",
+            AssumeRolePolicyDocument="some policy",
+            Path="/my-path/",
+        )["Role"]["Arn"]
+
+
+def _process_lambda(func_str):
+    zip_output = io.BytesIO()
+    zip_file = zipfile.ZipFile(zip_output, "w", zipfile.ZIP_DEFLATED)
+    zip_file.writestr("main.py", func_str)
+    zip_file.close()
+    zip_output.seek(0)
+    return zip_output.read()
+
+
 @pytest.fixture
-def create_sqs():
-    with mock_sqs():
-        sqs_client = boto3.client("sqs", region_name=REGION_NAME)
+def create_LR24_lambda():
+    func_str = textwrap.dedent(
+        """
+        def lambda_handler(event, context):
+            pass
+        """
+    )
 
-        attributes = {
-            "DelaySeconds": "900",
-            "MaximumMessageSize": "256000",
-            "MessageRetentionPeriod": "345600",
-            "ReceiveMessageWaitTimeSeconds": "20",
-            "VisibilityTimeout": "30",
-        }
-
-        sqs_client.create_queue(QueueName=MOCK_QUEUE, Attributes=attributes)
+    with mock_lambda():
+        client = boto3.client("lambda", region_name=REGION_NAME)
+        client.create_function(
+            FunctionName=os.getenv("LR_24_SAVE_RECORDS_TO_S3"),
+            Runtime="python3.8",
+            Role=get_role_name(),
+            Handler="main.lambda_handler",
+            Code={
+                "ZipFile": _process_lambda(func_str),
+            },
+            Publish=True,
+            Timeout=10,
+            MemorySize=128,
+        )
         yield
 
 

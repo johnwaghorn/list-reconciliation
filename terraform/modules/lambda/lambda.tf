@@ -7,31 +7,30 @@ locals {
     LR-11 = "LR_11_gp_registration_status"
     LR-12 = "LR_12_pds_registration_status"
     LR-15 = "LR_15_process_demo_diffs"
+    LR-24 = "LR_24_save_records_to_s3"
     LR-21 = "LR_21_split_dps_extract"
   }
 }
 
 module "LR-02" {
-  source                  = "./LR-02"
-  lambda_name             = local.lambda_name.LR-02
-  package_layer_arn       = aws_lambda_layer_version.package_layer.arn
-  runtime                 = var.runtime
-  source_bucket           = var.s3_buckets.LR-01.bucket
-  lr_01_inbound_folder    = var.s3_buckets.LR-01.inbound_key
-  patient_sqs_arn         = var.sqs.patient_records_queue.arn
-  patient_sqs_name        = var.sqs.patient_records_queue.name
-  demographics_table_arn  = var.dynamodb_tables.demographics.arn
-  demographics_table_name = var.dynamodb_tables.demographics.name
-  errors_table_arn        = var.dynamodb_tables.errors.arn
-  errors_table_name       = var.dynamodb_tables.errors.name
-  in_flight_table_arn     = var.dynamodb_tables.in_flight.arn
-  in_flight_table_name    = var.dynamodb_tables.in_flight.name
-  jobs_table_arn          = var.dynamodb_tables.jobs.arn
-  jobs_table_name         = var.dynamodb_tables.jobs.name
-  suffix                  = var.suffix
-  lambda_handler          = var.lambda_handler
-  dynamodb_kms_key        = var.dynamodb_kms_key
-  s3_kms_key              = var.s3_kms_key
+  source               = "./LR-02"
+  lambda_name          = local.lambda_name.LR-02
+  package_layer_arn    = aws_lambda_layer_version.package_layer.arn
+  runtime              = var.runtime
+  source_bucket        = var.s3_buckets.LR-01.bucket
+  lr_01_inbound_folder = var.s3_buckets.LR-01.inbound_key
+  errors_table_arn     = var.dynamodb_tables.errors.arn
+  errors_table_name    = var.dynamodb_tables.errors.name
+  in_flight_table_arn  = var.dynamodb_tables.in_flight.arn
+  in_flight_table_name = var.dynamodb_tables.in_flight.name
+  jobs_table_arn       = var.dynamodb_tables.jobs.arn
+  jobs_table_name      = var.dynamodb_tables.jobs.name
+  suffix               = var.suffix
+  lr_24_lambda         = module.LR-24.LR-24-lambda_arn
+  lambda_handler       = var.lambda_handler
+  lr_06_bucket         = var.s3_buckets.LR-06.bucket
+  dynamodb_kms_key     = var.dynamodb_kms_key
+  s3_kms_key           = var.s3_kms_key
 }
 
 module "LR-07" {
@@ -41,11 +40,12 @@ module "LR-07" {
   runtime                  = var.runtime
   lambda_timeout           = var.lambda_timeout
   lr_08_lambda             = module.LR-08.LR-08-lambda_arn
-  patient_sqs_arn          = var.sqs.patient_records_queue.arn
   demographics_table_arn   = var.dynamodb_tables.demographics.arn
   demographics_table_name  = var.dynamodb_tables.demographics.name
   errors_table_arn         = var.dynamodb_tables.errors.arn
   errors_table_name        = var.dynamodb_tables.errors.name
+  lr_06_bucket_arn         = var.s3_buckets.LR-06.arn
+  lr_06_bucket             = var.s3_buckets.LR-06.bucket
   mock_pds_data_bucket_arn = var.mock_pds_data_bucket.arn
   pds_url                  = "s3://${var.mock_pds_data_bucket.name}/${var.pds_url}"
   suffix                   = var.suffix
@@ -183,4 +183,18 @@ module "LR-21" {
   lambda_handler              = var.lambda_handler
   dynamodb_kms_key            = var.dynamodb_kms_key
   s3_kms_key                  = var.s3_kms_key
+}
+
+module "LR-24" {
+  source            = "./LR-24"
+  lambda_name       = local.lambda_name.LR-24
+  package_layer_arn = aws_lambda_layer_version.package_layer.arn
+  runtime           = var.runtime
+  lambda_timeout    = var.lambda_timeout
+  errors_table_arn  = var.dynamodb_tables.errors.arn
+  errors_table_name = var.dynamodb_tables.errors.name
+  suffix            = var.suffix
+  lr-06-bucket      = var.s3_buckets.LR-06.bucket
+  lr-06-bucket_arn  = var.s3_buckets.LR-06.arn
+  lambda_handler    = var.lambda_handler
 }

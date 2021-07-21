@@ -49,3 +49,11 @@ output "lr_15_lambda" {
 output "lr_15_lambda_arn" {
   value = module.LR-15.LR-15-lambda_arn
 }
+
+output "lr_24_lambda" {
+  value = module.LR-24.LR-24-lambda
+}
+
+output "lr_24_lambda_arn" {
+  value = module.LR-24.LR-24-lambda_arn
+}

@@ -25,8 +25,8 @@ class DemographicsJobIdIndex(GlobalSecondaryIndex):
     class Meta:
         index_name = "demographics-job_id-index"
         projection = AllProjection()
-        read_capacity_units = 100
-        write_capacity_units = 100
+        read_capacity_units = 1000
+        write_capacity_units = 1000
 
     JobId = UnicodeAttribute(hash_key=True)
 
@@ -35,8 +35,8 @@ class DemographicsDifferencesJobIdIndex(GlobalSecondaryIndex):
     class Meta:
         index_name = "demographicsdifferences-job_id-index"
         projection = AllProjection()
-        read_capacity_units = 100
-        write_capacity_units = 100
+        read_capacity_units = 1000
+        write_capacity_units = 1000
 
     JobId = UnicodeAttribute(hash_key=True)
 
@@ -45,8 +45,8 @@ class JobsIdIndex(GlobalSecondaryIndex):
     class Meta:
         index_name = "jobs-id-index"
         projection = AllProjection()
-        read_capacity_units = 100
-        write_capacity_units = 100
+        read_capacity_units = 1000
+        write_capacity_units = 1000
 
     Id = UnicodeAttribute(hash_key=True)
 
@@ -55,8 +55,8 @@ class DemographicsDifferences(Model):
     class Meta:
         table_name = DEMOGRAPHICS_DIFFERENCES_TABLE
         region = AWS_REGION
-        read_capacity_units = 1
-        write_capacity_units = 1
+        read_capacity_units = 1000
+        write_capacity_units = 1000
 
     Id = UnicodeAttribute(hash_key=True)
     JobId = UnicodeAttribute()
@@ -70,8 +70,8 @@ class Demographics(Model):
     class Meta:
         table_name = DEMOGRAPHICS_TABLE
         region = AWS_REGION
-        read_capacity_units = 1
-        write_capacity_units = 1
+        read_capacity_units = 1000
+        write_capacity_units = 1000
 
     Id = UnicodeAttribute(hash_key=True)
     JobId = UnicodeAttribute(range_key=True)

@@ -14,15 +14,6 @@ variable "pds_url" {
   type = string
 }
 
-variable "patient_sqs" {
-  type    = string
-  default = "Patient_Records.fifo"
-}
-
-variable "patient_sqs_arn" {
-  type = string
-}
-
 variable "env_vars" {
   type    = map(string)
   default = {}
@@ -60,6 +51,14 @@ variable "mock_pds_data_bucket_arn" {
 }
 
 variable "suffix" {
+  type = string
+}
+
+variable "lr_06_bucket_arn" {
+  type = string
+}
+
+variable "lr_06_bucket" {
   type = string
 }
 

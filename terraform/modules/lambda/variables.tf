@@ -7,10 +7,6 @@ variable "lambda_timeout" {
   default = 300
 }
 
-variable "patient_sqs" {
-  type = string
-}
-
 variable "pds_url" {
   type = string
 }
@@ -37,10 +33,6 @@ variable "s3_buckets" {
 }
 
 variable "step_functions" {
-  type = map(map(string))
-}
-
-variable "sqs" {
   type = map(map(string))
 }
 

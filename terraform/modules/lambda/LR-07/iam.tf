@@ -1,7 +1,3 @@
-locals {
-  patient_sqs_queue = "arn:aws:sqs:::${var.patient_sqs}"
-}
-
 resource "aws_iam_role" "role" {
   name        = "iam-role-${var.lambda_name}-${var.suffix}"
   description = "Execution Role for ${var.lambda_name} Lambda."
@@ -42,18 +38,6 @@ resource "aws_iam_policy" "policy" {
                 "logs:PutLogEvents"
             ],
             "Resource": "arn:aws:logs:*:*:*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                 "sqs:GetQueueUrl",
-                 "sqs:ChangeMessageVisibility",
-                 "sqs:DeleteMessage",
-                 "sqs:GetQueueAttributes",
-                 "sqs:ReceiveMessage",
-                 "sqs:GetQueueUrl"
-            ],
-            "Resource": "${var.patient_sqs_arn}"
         },
         {
             "Effect": "Allow",
@@ -101,7 +85,8 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
-                "${var.errors_table_arn}"
+                "${var.errors_table_arn}",
+                "${var.demographics_table_arn}"
             ]
         },
         {
@@ -112,7 +97,23 @@ resource "aws_iam_policy" "policy" {
         {
             "Effect": "Allow",
             "Action": "lambda:InvokeFunction",
-            "Resource":"${var.lr_08_lambda}"
+            "Resource": "${var.lr_08_lambda}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:GetObject",
+            "Resource": [
+                "${var.mock_pds_data_bucket_arn}/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource":"${var.lr_06_bucket_arn}/*"
         }
     ]
   }

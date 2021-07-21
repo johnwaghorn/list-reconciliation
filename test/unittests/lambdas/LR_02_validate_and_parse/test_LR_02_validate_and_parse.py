@@ -4,7 +4,7 @@ import boto3
 from freezegun import freeze_time
 
 from utils.datetimezone import get_datetime_now
-from utils.database.models import Demographics, Jobs, InFlight
+from utils.database.models import Jobs, InFlight
 from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +36,7 @@ def test_lr_02_handler_invalid_event_raises_key_error(
 def test_lr02_lambda_handler_valid_file(
     upload_valid_mock_data_to_s3,
     create_dynamodb_tables,
-    create_sqs,
+    create_LR24_lambda,
     lr_02_valid_file_event,
     lambda_context,
     lambda_handler,
@@ -52,7 +52,7 @@ def test_lr02_lambda_handler_valid_file(
 def test_lr02_lambda_handler_invalid_file(
     upload_invalid_mock_data_to_s3,
     create_dynamodb_tables,
-    create_sqs,
+    create_LR24_lambda,
     lr_02_invalid_file_event,
     lambda_context,
     lambda_handler,
@@ -68,7 +68,7 @@ def test_lr02_lambda_handler_invalid_file(
 def test_validate_and_process_with_valid_upload_handles_correctly(
     upload_valid_mock_data_to_s3,
     create_dynamodb_tables,
-    create_sqs,
+    create_LR24_lambda,
     lr_02_valid_file_event,
     lambda_context,
     lambda_handler,
@@ -108,53 +108,11 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
     assert expected_inflight_attributes == actual_inflight_attributes
 
-    # Test Demographics validity
-    actual_demographics = [d for d in Demographics.JobIdIndex.query(JOB_ID)]
-    actual_demographics_attributes = actual_demographics[0].attribute_values
-
-    expected_demographics = Demographics(
-        Id=actual_demographics_attributes["Id"],
-        JobId=JOB_ID,
-        NhsNumber="1234567890",
-        IsComparisonCompleted=False,
-        GP_GpCode="A82023",
-        GP_HaCipher=str("LNA"),
-        GP_TransactionDate=str("20200406"),
-        GP_TransactionTime=str("1340"),
-        GP_TransactionId=str("1557490"),
-        GP_Surname="SOMEBODY",
-        GP_Forenames="JOHN",
-        GP_PreviousSurname="SOMEONE",
-        GP_Title="MR",
-        GP_Gender="1",
-        GP_DateOfBirth="20020101",
-        GP_AddressLine1="FLAT A",
-        GP_AddressLine2="THE STREET",
-        GP_AddressLine3="",
-        GP_AddressLine4="EAST",
-        GP_AddressLine5="",
-        GP_PostCode="E1   1AA",
-        GP_DrugsDispensedMarker=False,
-    )
-    expected_demographics_attributes = expected_demographics.attribute_values
-
-    assert len(actual_demographics) == 1
-    assert expected_demographics_attributes == actual_demographics_attributes
-
-    # Test SQS validity
-    sqs_client = boto3.client("sqs", region_name=REGION_NAME)
-
-    queue = sqs_client.get_queue_url(QueueName=MOCK_QUEUE)
-    actual_queue = sqs_client.get_queue_attributes(QueueUrl=queue["QueueUrl"])
-
-    assert actual_queue["Attributes"]["ApproximateNumberOfMessagesDelayed"] == "1"
-
     # Test S3 validity
     with open(os.path.join(DATA, f"{VALID_FILE}")) as f:
         expected_file_contents = f.read()
 
     s3_client = boto3.client("s3")
-    print(s3_client.list_objects_v2(Bucket=MOCK_BUCKET))
 
     actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f"pass/{VALID_FILE}")
     actual_file_contents = actual_file["Body"].read().decode("utf-8")

@@ -31,7 +31,7 @@ class GPRegistrations(LambdaApplication):
             msg = f"Unhandled error getting gp registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
             error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
 
-            raise type(err)(error_response) from err
+            raise Exception(error_response) from err
 
     def get_gp_exclusive_registrations(self, job_id: str) -> Success:
         """Create a GP-only registration differences file

@@ -1,14 +1,16 @@
-resource "aws_lambda_permission" "allows_sqs_to_trigger_lambda" {
-  statement_id  = "AllowExecutionFromSQS"
+resource "aws_lambda_permission" "allow_LR07_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.LR-07-Lambda.arn
-  principal     = "sqs.amazonaws.com"
-  source_arn    = var.patient_sqs_arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = var.lr_06_bucket_arn
 }
 
-resource "aws_lambda_event_source_mapping" "event_source" {
-  batch_size       = 1
-  event_source_arn = var.patient_sqs_arn
-  enabled          = true
-  function_name    = aws_lambda_function.LR-07-Lambda.arn
+resource "aws_s3_bucket_notification" "bucket_notification_2" {
+  bucket = var.lr_06_bucket
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.LR-07-Lambda.arn
+    events              = ["s3:ObjectCreated:Put"]
+  }
 }

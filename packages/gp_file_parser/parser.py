@@ -296,20 +296,16 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     except FileNotFoundError as err:
         raise InvalidGPExtract(str(err).replace("[Errno 2]", "").strip())
 
-    results = []
-
     valid_file = validate_filename(os.path.basename(filepath), process_datetime)
 
     LOG.info(
         f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
     )
 
-    results.extend(
-        parse_gp_extract_text(
-            open(filepath, "r").read(),
-            process_datetime=process_datetime or get_datetime_now(),
-            gp_ha_cipher=valid_file["ha_cipher"],
-        )
+    results = parse_gp_extract_text(
+        open(filepath, "r").read(),
+        process_datetime=process_datetime or get_datetime_now(),
+        gp_ha_cipher=valid_file["ha_cipher"],
     )
 
     return results
@@ -479,14 +475,10 @@ def parse_gp_extract_file_s3(
     file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
     file_data = file_obj["Body"].read()
 
-    results = []
-
-    results.extend(
-        parse_gp_extract_text(
-            file_data.decode("utf-8"),
-            process_datetime=process_datetime or get_datetime_now(),
-            gp_ha_cipher=valid_file["ha_cipher"],
-        )
+    results = parse_gp_extract_text(
+        file_data.decode("utf-8"),
+        process_datetime=process_datetime or get_datetime_now(),
+        gp_ha_cipher=valid_file["ha_cipher"],
     )
 
     invalid_records = [r for r in results if "_INVALID_" in list(r.keys())]

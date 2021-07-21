@@ -1,7 +1,3 @@
-locals {
-  input_bucket_arn = "arn:aws:s3:::${var.source_bucket}"
-}
-
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
@@ -9,7 +5,7 @@ data "aws_region" "current" {}
 resource "aws_iam_role" "role" {
   name               = "iam-role-${var.lambda_name}-${var.suffix}"
   description        = "Execution Role for ${var.lambda_name} Lambda."
-  assume_role_policy = <<-EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -25,15 +21,14 @@ resource "aws_iam_role" "role" {
 EOF
 
   tags = {
-    name = "Lambda role for ${var.lambda_name} - ${var.suffix}"
+    name = "Lambda role for LR-24-${var.suffix}"
   }
 }
 
 resource "aws_iam_policy" "policy" {
   name        = "iam-policy-${var.lambda_name}-${var.suffix}"
-  description = "Policy for LR-02 ${var.lambda_name} Lambda Role."
-
-  policy = <<-EOF
+  description = "Policy for LR-24-${var.suffix} Lambda Role."
+  policy      = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -49,49 +44,26 @@ resource "aws_iam_policy" "policy" {
         {
             "Effect": "Allow",
             "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:DeleteObject"
+                "s3:PutObject"
             ],
-            "Resource":"${local.input_bucket_arn}/*"
+            "Resource": [
+                "${var.lr-06-bucket_arn}",
+                "${var.lr-06-bucket_arn}/*"
+            ]
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:DescribeTable",
-            "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "dynamodb:UpdateItem",
-            "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}"
-            ]
+            "Resource": "${var.errors_table_arn}"
         },
         {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
-            "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                 "lambda:InvokeFunction"
-            ],
-            "Resource":"${var.lr_24_lambda}"
+            "Resource": "${var.errors_table_arn}"
         }
     ]
-  }
-  EOF
-
+    }
+EOF
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment" {

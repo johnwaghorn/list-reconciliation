@@ -22,10 +22,6 @@ output "lr_01_bucket_retry" {
   value = module.s3.LR_01_Bucket_retry
 }
 
-output "patients_queue" {
-  value = module.patient_records_queue.name
-}
-
 output "lr_02_lambda" {
   value = module.lambda.lr_02_lambda
 }
@@ -116,6 +112,14 @@ output "lr_22_bucket" {
 
 output "lr_15_lambda" {
   value = module.lambda.lr_15_lambda
+}
+
+output "lr_06_bucket" {
+  value = module.s3.buckets.LR-06.bucket
+}
+
+output "LR-24-lambda" {
+  value = module.lambda.lr_24_lambda
 }
 
 output "lr_26_bucket" {

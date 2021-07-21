@@ -3,7 +3,6 @@ module "lambda" {
 
   suffix           = local.environment
   pds_url          = "pds_api_data.csv"
-  patient_sqs      = "Patient_Records.fifo"
   runtime          = "python3.8"
   lambda_handler   = "main.lambda_handler"
   s3_buckets       = module.s3.buckets
@@ -18,13 +17,6 @@ module "lambda" {
   step_functions = {
     lr_10_registration_orchestration = {
       arn = module.lr_10_registration_orchestration.arn
-    }
-  }
-
-  sqs = {
-    patient_records_queue = {
-      arn  = module.patient_records_queue.arn
-      name = module.patient_records_queue.name
     }
   }
 
@@ -67,12 +59,6 @@ module "s3" {
   force_destroy = local.environment == "prod" ? false : true
   suffix        = local.environment
   kms_key_arn   = module.kms["s3"].output.arn
-}
-
-module "patient_records_queue" {
-  source = "../../modules/sqs/LR-06"
-
-  suffix = local.environment
 }
 
 module "lr_10_registration_orchestration" {

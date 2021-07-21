@@ -28,6 +28,10 @@ output "buckets" {
       inbound_key = aws_s3_bucket_object.inbound.key
       retry_key   = aws_s3_bucket_object.retry.key
     }
+    LR-06 = {
+      bucket = aws_s3_bucket.LR-06.id
+      arn    = aws_s3_bucket.LR-06.arn
+    }
     LR-13 = {
       bucket = aws_s3_bucket.LR-13.id
       arn    = aws_s3_bucket.LR-13.arn

@@ -65,10 +65,7 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
-            "Action": [
-                "dynamodb:BatchWriteItem",
-                "dynamodb:PutItem"
-            ],
+            "Action": "dynamodb:BatchWriteItem",
             "Resource": [
                 "${var.demographics_differences_table_arn}"
             ]
@@ -87,7 +84,6 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
-                "${var.demographics_differences_table_arn}",
                 "${var.errors_table_arn}"
             ]
         }
