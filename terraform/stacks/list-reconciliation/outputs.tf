@@ -125,3 +125,7 @@ output "lr_26_bucket" {
 output "lr_23_bucket" {
   value = module.s3.buckets.LR-23.bucket
 }
+
+output "lr_20_bucket" {
+  value = module.s3.buckets.LR-20.bucket
+}

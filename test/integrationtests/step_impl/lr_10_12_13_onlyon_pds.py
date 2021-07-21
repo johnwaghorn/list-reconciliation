@@ -116,7 +116,9 @@ def connect_to_s3_and_upload_mock_data():
         raise
 
 
-@step("connect to step function LR-10 and pass in job id and return successful execution response")
+@step(
+    "connect to step function LR-10 and pass in job id and return successful execution response"
+)
 def connect_to_step_function_successfully():
     step_function_client = dev.client("stepfunctions", REGION_NAME)
     lr_10_response = step_function_client.start_execution(
@@ -137,7 +139,9 @@ def connect_to_step_function_successfully():
             Messages.write_message(execution_arn)
             assert False
         else:
-            desc_exec_resp = step_function_client.describe_execution(executionArn=execution_arn)
+            desc_exec_resp = step_function_client.describe_execution(
+                executionArn=execution_arn
+            )
             status = desc_exec_resp["status"]
 
     Messages.write_message("Executed LR-10 Successfully")
@@ -165,19 +169,20 @@ def check_lambda_lr12_has_processed_record():
     Messages.write_message("lr-12 executed successfully")
 
 
-@step("connect to lr-13 and check output csv file content and file format as expected")
-def check_output_file_in_lr13():
+@step(
+    "connect to lr-13 and check output csv file content and file format as expected for <Job Id> and <GP ODS Code>"
+)
+def check_output_file_in_lr13(job_id, gp_ods_code):
+    time.sleep(10)
     s3_client = dev.client("s3", REGION_NAME)
-    response = s3_client.list_objects_v2(Bucket=LR_13_BUCKET, Prefix=PREFIX_S3)
+    response = s3_client.list_objects_v2(Bucket=LR_13_BUCKET, Prefix=job_id)
 
-    if response.get("Contents") != None:
-        for obj in response.get("Contents"):
-            print("Found CSV File", obj["Key"])
-            s3_client.get_object(Bucket=LR_13_BUCKET, Key=obj.get("Key"))
+    for obj in response.get("Contents"):
+        print("Found CSV File", obj["Key"])
+        s3_client.get_object(Bucket=LR_13_BUCKET, Key=obj.get("Key"))
 
-        expected_string = obj.get("Key")
-        filename, ext = os.path.splitext(expected_string)
-        elements = "-".join(filename.split("-")[0:6])
-
-        assert elements == f"{PREFIX_S3}/Y123452-OnlyOnPDS"
-        assert ext == ".csv"
+    expected_string = obj.get("Key")
+    filename, ext = os.path.splitext(expected_string)
+    elements = "-".join(filename.split("-")[0:6])
+    assert elements == f"{job_id}/{gp_ods_code}-OnlyOnPDS"
+    assert ext == ".csv"
