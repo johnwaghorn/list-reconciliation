@@ -12,7 +12,6 @@ jobs:
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-      FEATURE_BRANCH: ${GITHUB_REF##*/}
     steps:
       - uses: actions/checkout@v2
       - name: Python Package
