@@ -6,6 +6,25 @@ resource "aws_s3_bucket" "mock_pds_data" {
   tags = {
     Name = "File storage for PDS mock api data"
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = var.kms_key_arn
+        sse_algorithm     = "aws:kms"
+      }
+      bucket_key_enabled = true
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "mock_pds_data" {
+  bucket = aws_s3_bucket.mock_pds_data.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_object" "upload-mock-pds-data" {

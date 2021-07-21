@@ -88,4 +88,5 @@ module "test_data" {
 
   suffix       = local.environment
   LR_22_bucket = module.s3.buckets.LR-22.bucket
+  kms_key_arn  = module.kms["s3"].output.arn
 }

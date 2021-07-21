@@ -197,4 +197,6 @@ module "LR-24" {
   lr-06-bucket      = var.s3_buckets.LR-06.bucket
   lr-06-bucket_arn  = var.s3_buckets.LR-06.arn
   lambda_handler    = var.lambda_handler
+  dynamodb_kms_key  = var.dynamodb_kms_key
+  s3_kms_key        = var.s3_kms_key
 }

@@ -13,6 +13,7 @@ resource "aws_s3_bucket" "LR-23" {
         kms_master_key_id = var.kms_key_arn
         sse_algorithm     = "aws:kms"
       }
+      bucket_key_enabled = true
     }
   }
 

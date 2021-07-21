@@ -60,6 +60,19 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": "${var.errors_table_arn}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${var.dynamodb_kms_key.arn}",
+                "${var.s3_kms_key.arn}"
+            ]
         }
     ]
     }
