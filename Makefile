@@ -91,8 +91,9 @@ integrationtests:
 # Utilities
 #
 
+branch_override := $(shell git branch --show-current)
 get-branch-id:
-	@echo $(shell git branch --show-current | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")-$(shell git branch --show-current | sha1sum | head -c 8)
+	@echo $(shell if echo ${branch_override} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then echo ${branch_override} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"; else echo ${branch_override}; fi)-$(shell echo ${branch_override} | sha1sum | head -c 8)
 
 hooks:
 	pre-commit install

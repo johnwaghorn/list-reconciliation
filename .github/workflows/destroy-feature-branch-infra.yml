@@ -23,10 +23,10 @@ jobs:
       - name: Terraform Init
         run: |
           make init
-          make workspace env=$(make get-branch-id)
+          make workspace env=$(make get-branch-id branch_override=${FEATURE_BRANCH})
       - name: Terraform Destroy
         run: |
           make destroy
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete env=$(make get-branch-id)
+          make workspace-delete env=$(make get-branch-id branch_override=${FEATURE_BRANCH})
