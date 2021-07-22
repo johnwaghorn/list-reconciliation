@@ -87,6 +87,19 @@ resource "aws_iam_policy" "policy" {
                  "lambda:InvokeFunction"
             ],
             "Resource":"${var.lr_24_lambda}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*"
+            ],
+            "Resource": [
+                "${var.dynamodb_kms_key.arn}",
+                "${var.s3_kms_key.arn}"
+            ]
         }
     ]
   }
