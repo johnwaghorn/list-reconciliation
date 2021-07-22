@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: terraform-output
-          path: ./output.json
+          path: ./terraform_outputs_list-reconciliation.json
           retention-days: 2
 
   create-preprod-mesh-stack:

@@ -29,8 +29,8 @@ jobs:
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:
-          name: terraform output
-          path: output.json
+          name: terraform-output
+          path: ./terraform_outputs_list-reconciliation.json
           retention-days: 2
       - name: Assume Role in test Account for Integration Tests
         uses: aws-actions/configure-aws-credentials@v1
