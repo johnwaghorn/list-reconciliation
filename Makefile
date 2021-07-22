@@ -5,6 +5,7 @@
 branch := $(shell git branch --show-current)
 env ?= dev
 stack ?= list-reconciliation
+mesh_post_office_lambda ?= LR_25_mesh_post_office-prod
 
 #
 # Shared rules
@@ -100,3 +101,18 @@ get-branch-id:
 hooks:
 	pre-commit install
 	pre-commit install --hook-type prepare-commit-msg
+
+#
+# Operations
+#
+
+# Mesh Post Office Lambda
+open-mesh-post-office:
+	@aws ssm put-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open --type "String" --value "True" --overwrite > /dev/null
+	@aws lambda delete-function-concurrency --function-name ${mesh_post_office_lambda} > /dev/null
+	@aws ssm get-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open
+
+close-mesh-post-office:
+	@aws ssm put-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open --type "String" --value "False" --overwrite > /dev/null
+	@aws lambda put-function-concurrency --function-name ${mesh_post_office_lambda} --reserved-concurrent-executions 0 > /dev/null
+	@aws ssm get-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open
