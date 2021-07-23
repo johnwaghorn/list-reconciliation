@@ -116,9 +116,7 @@ def connect_to_s3_and_upload_mock_data():
         raise
 
 
-@step(
-    "connect to step function LR-10 and pass in job id and return successful execution response"
-)
+@step("connect to step function LR-10 and pass in job id and return successful execution response")
 def connect_to_step_function_successfully():
     step_function_client = dev.client("stepfunctions", REGION_NAME)
     lr_10_response = step_function_client.start_execution(
@@ -139,9 +137,7 @@ def connect_to_step_function_successfully():
             Messages.write_message(execution_arn)
             assert False
         else:
-            desc_exec_resp = step_function_client.describe_execution(
-                executionArn=execution_arn
-            )
+            desc_exec_resp = step_function_client.describe_execution(executionArn=execution_arn)
             status = desc_exec_resp["status"]
 
     Messages.write_message("Executed LR-10 Successfully")

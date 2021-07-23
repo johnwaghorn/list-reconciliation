@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 
@@ -17,7 +18,7 @@ REGION_NAME = os.environ.get("AWS_REGION")
 JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
 
 VALID_FILE = "A82023_GPR4LNA1.CSA"
-INVALID_FILE = "A82023_GPR4LNA1.CSB"
+INVALID_FILE = "A12023_GPR4LNA1.CSB"
 
 
 def test_lr_02_handler_invalid_event_raises_key_error(
@@ -116,7 +117,7 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
     actual_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=f"pass/{VALID_FILE}")
     actual_file_contents = actual_file["Body"].read().decode("utf-8")
-    #
+
     assert expected_file_contents == actual_file_contents
 
 
@@ -148,3 +149,23 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
     actual_file_contents = actual_file["Body"].read().decode("utf-8")
 
     assert expected_file_contents == actual_file_contents
+
+    # Test log validity
+    expected_log = {
+        "file": INVALID_FILE,
+        "upload_date": "2020-04-06 14:40:00+01:00",
+        "error_type": "INVALID_STRUCTURE",
+        "message": [r"Header must contain 503\*"],
+    }
+
+    expected_log_key = "fail/logs/A12023_GPR4LNA1.CSB_LOG_06042020T1440.00.000000.json"
+    actual_log_key = (
+        f"fail/logs/{INVALID_FILE}_LOG_{get_datetime_now().strftime('%d%m%YT%H%M.%S.%f')}.json"
+    )
+
+    assert expected_log_key == actual_log_key
+
+    actual_log_file = s3_client.get_object(Bucket=MOCK_BUCKET, Key=actual_log_key)
+    actual_log_contents = actual_log_file["Body"].read().decode("utf-8")
+
+    assert expected_log == json.loads(actual_log_contents)

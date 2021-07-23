@@ -9,6 +9,13 @@ from retrying import retry
 from utils.datetimezone import get_datetime_now
 
 
+class InputFolderType(Enum):
+    IN = "inbound/"
+    PASS = "pass/"
+    FAIL = "fail/"
+    RETRY = "retry/"
+
+
 class RegistrationType(Enum):
     GP = "OnlyOnGP"
     PDS = "OnlyOnPDS"

@@ -10,14 +10,6 @@ variable "package_layer_arn" {
   type = string
 }
 
-variable "lr_01_inbound_folder" {
-  type = string
-}
-
-variable "lr_01_failed_folder" {
-  type = string
-}
-
 variable "source_bucket" {
   type = string
 }
@@ -26,23 +18,7 @@ variable "source_bucket_arn" {
   type = string
 }
 
-variable "jobs_table_arn" {
-  type = string
-}
-
-variable "in_flight_table_arn" {
-  type = string
-}
-
 variable "errors_table_arn" {
-  type = string
-}
-
-variable "jobs_table_name" {
-  type = string
-}
-
-variable "in_flight_table_name" {
   type = string
 }
 
@@ -54,15 +30,7 @@ variable "suffix" {
   type = string
 }
 
-variable "lr_24_lambda_arn" {
-  type = string
-}
-
 variable "lambda_handler" {
-  type = string
-}
-
-variable "lr_06_bucket" {
   type = string
 }
 
@@ -72,8 +40,4 @@ variable "dynamodb_kms_key" {
 
 variable "s3_kms_key" {
   type = map(string)
-}
-
-variable "lr_04_lambda_arn" {
-  type = string
 }

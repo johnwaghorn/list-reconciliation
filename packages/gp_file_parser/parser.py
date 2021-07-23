@@ -9,6 +9,7 @@ from datetime import date, datetime
 from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
+from utils import InputFolderType
 from utils.datetimezone import get_datetime_now
 from utils.exceptions import InvalidGPExtract
 
@@ -67,8 +68,6 @@ SEP = "~"
 RECORD_TYPE = "DOW"
 RECORD_1 = "1"
 RECORD_2 = "2"
-
-INBOUND_PREFIX = "inbound/"
 
 
 def _validate_record(
@@ -204,7 +203,7 @@ def parse_gp_extract_text(
 
     raw_text = [r.strip() for r in gp_extract_text.split("\n") if r]
 
-    assert raw_text[0] == "503\\*", "Header must contain 503\\*"
+    assert raw_text[0] == r"503\*", r"Header must contain 503\*"
     start_idx = 1
 
     # Skip column names record if it exists
@@ -253,6 +252,7 @@ def parse_gp_extract_text(
     ids = []
     validated_records = []
 
+    line_number = start_idx + 1
     for row in pairs(raw_text[start_idx:]):
         validated_record = _validate_record(
             _parse_row_columns(row, columns),
@@ -260,8 +260,14 @@ def parse_gp_extract_text(
             gp_ha_cipher=gp_ha_cipher,
             other_ids=ids,
         )
+
+        if "_INVALID_" in validated_record.keys():
+            validated_record["_INVALID_"].update({"ON_LINES": f"{line_number}-{line_number+1}"})
+
         validated_records.append(validated_record)
         ids.append(validated_record[TRANS_ID_COL])
+
+        line_number += 2
 
     return validated_records
 
@@ -466,7 +472,7 @@ def parse_gp_extract_file_s3(
 
     s3_client = boto3.client("s3")
 
-    valid_file = validate_filename(file_key.replace(INBOUND_PREFIX, ""), process_datetime)
+    valid_file = validate_filename(file_key.replace(InputFolderType.IN.value, ""), process_datetime)
 
     LOG.info(
         f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
@@ -484,7 +490,7 @@ def parse_gp_extract_file_s3(
     invalid_records = [r for r in results if "_INVALID_" in list(r.keys())]
 
     if invalid_records:
-        raise InvalidGPExtract(json.dumps(invalid_records))
+        raise InvalidGPExtract({"total_records": len(results), "invalid_records": invalid_records})
 
     valid_file.update({"records": results})
 

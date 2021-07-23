@@ -46,65 +46,53 @@ RESIDENTIAL_INSTITUTE_CODE = "RESIDENTIAL_INSTITUTE_CODE"
 
 INVALID = "_INVALID_"
 
-INVALID_NULL = "must not be null."
-INVALID_RECORD_TYPE = "must be 'DOW'."
+INVALID_RECORD_TYPE = "Transaction/Record Type - Must be 'DOW'."
 INVALID_GP_CODE = (
-    "must be a 7-digit numeric GMC National GP code and 1-6-digit "
+    "GP Code - Must be a valid 7-digit numeric GMC National GP code and 1-6-digit "
     "alphanumeric Local GP code separated by a comma."
 )
-INVALID_HA_CIPHER = "must be a 3-digit alphanumeric code and match the GP HA cipher"
-INVALID_TRANS_DATETIME = "must be a datetime in the format YYYYMMDDHHMM and be less than 14 days old and not in the future."
-INVALID_NHS_NO = "must be a valid NHS number. Max length 10."
+INVALID_HA_CIPHER = "Destination HA Cipher - Must be a valid 3-digit alphanumeric code that matches the GP HA cipher"
+INVALID_TRANS_DATETIME = (
+    "Transaction/Record Date and Time - Must be a valid transmission date and timestamp, in the format YYYMMDDHHMM, "
+    "which is less than 14 days old and not in the future."
+)
+INVALID_NHS_NO = "NHS Number - Must be a valid NHS number. Max length 10."
 INVALID_SURNAME = (
-    "must contain only uppercase alphabetic characters and space, apostrophe "
+    "Surname - must contain only uppercase alphabetic characters and space, apostrophe "
     "or hyphen. Max length 35."
 )
 INVALID_FORENAME = (
-    "must contain only uppercase alphabetic characters and space, apostrophe, "
+    "Forename - must contain only uppercase alphabetic characters and space, apostrophe, "
     "hyphen, comma or full-stop. Max length 35."
 )
 INVALID_TITLE = (
-    "must contain only uppercase alphabetic characters and space, apostrophe "
+    "Title - must contain only uppercase alphabetic characters and space, apostrophe "
     "or hyphen. Max length 35."
 )
 INVALID_SEX = (
-    "must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+    "Sex - Must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
 )
-INVALID_DATE_OF_BIRTH = "must be a date in past in the format YYYYMMDD."
+INVALID_DATE_OF_BIRTH = "Date of Birth - Must be a date in the past, and in the format YYYYMMDD."
 INVALID_ADDRESS_LINE = (
-    "must contain only uppercase alphabetic characters and space, apostrophe, "
+    "Address Lines - Must contain only uppercase alphabetic characters and space, apostrophe, "
     "hyphen, comma or full-stop. Max length 35."
 )
 INVALID_POSTCODE = (
-    "must be 8 characters and in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, "
-    "AANN NAA, ANA  NAA, AANA NAA"
+    "Postcode - Must be 8 characters and in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, "
+    "AANN NAA, ANA  NAA, AANA NAA."
 )
-INVALID_DRUGS_DISPENSED_MARKER = "must be 'Y' or blank."
-INVALID_RPP_MILEAGE = "must be between 3 and 50 inclusive."
-INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER = "must be 'B' or 'S'."
-INVALID_WALKING_UNITS = "must be between 3 and 99 inclusive and be divisible by 3."
-INVALID_RESIDENTIAL_INSTITUTE_CODE = (
-    "must be a 2-character string and valid code for the patients Health Authority."
+INVALID_DRUGS_DISPENSED_MARKER = "Drug Dispensed Marker - Must be 'Y' or blank."
+INVALID_RPP_MILEAGE = "RRP Mileage - Must be between 3 and 50 inclusive."
+INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER = (
+    "Blocked Route Special District Marker - Must be 'B' or 'S'."
 )
-INVALID_TRANS_ID = "must be a unique not-null integer greater than 0."
+INVALID_WALKING_UNITS = "Walking Units - Must be between 3 and 99 inclusive and be divisible by 3."
+INVALID_RESIDENTIAL_INSTITUTE_CODE = "Residential Institute Code - Must be a 2-character string and valid code for the patients Health Authority."
+INVALID_TRANS_ID = "Transaction/Record Number - Must be a unique, not-null integer greater than 0."
 
 ValidatedRecord = Tuple[str, Union[str, None]]
 
 
-def not_null(func):
-    """Decorator for identifying not-null inputs to validator functions"""
-
-    def wraps(val, *args, **kwargs):
-        if val in (None, ""):
-            return None, INVALID_NULL
-
-        else:
-            return func(val, *args, **kwargs)
-
-    return wraps
-
-
-@not_null
 def record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate record type.
 
@@ -118,13 +106,18 @@ def record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
     """
 
     invalid_reason = None
-    if record_type_val != "DOW":
+
+    if record_type_val in (None, ""):
+        record_type_val = None
         invalid_reason = INVALID_RECORD_TYPE
+
+    else:
+        if record_type_val != "DOW":
+            invalid_reason = INVALID_RECORD_TYPE
 
     return record_type_val, invalid_reason
 
 
-@not_null
 def gp_code(gp_code_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate GP code.
 
@@ -139,13 +132,18 @@ def gp_code(gp_code_val: str, **kwargs) -> ValidatedRecord:
     """
 
     invalid_reason = None
-    if not re.match(r"^([0-9]{7}),([A-Z0-9]{1,6})$", gp_code_val):
+
+    if gp_code_val in (None, ""):
+        gp_code_val = None
         invalid_reason = INVALID_GP_CODE
+
+    else:
+        if not re.match(r"^([0-9]{7}),([A-Z0-9]{1,6})$", gp_code_val):
+            invalid_reason = INVALID_GP_CODE
 
     return gp_code_val, invalid_reason
 
 
-@not_null
 def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> ValidatedRecord:
     """Coerce and validate HA cipher.
 
@@ -160,13 +158,18 @@ def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> Validat
     """
 
     invalid_reason = None
-    if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (ha_cipher_val != gp_ha_cipher):
+
+    if ha_cipher_val in (None, ""):
+        ha_cipher_val = None
         invalid_reason = INVALID_HA_CIPHER
+
+    else:
+        if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (ha_cipher_val != gp_ha_cipher):
+            invalid_reason = INVALID_HA_CIPHER
 
     return ha_cipher_val, invalid_reason
 
 
-@not_null
 def transaction_datetime(
     transaction_datetime_val: str, process_datetime: datetime = None, **kwargs
 ):
@@ -184,7 +187,12 @@ def transaction_datetime(
     """
 
     invalid_reason = None
-    if len(transaction_datetime_val) != 12:
+
+    if transaction_datetime_val in (None, ""):
+        transaction_datetime_val = None
+        invalid_reason = INVALID_TRANS_DATETIME
+
+    elif len(transaction_datetime_val) != 12:
         invalid_reason = INVALID_TRANS_DATETIME
 
     else:
@@ -515,6 +523,7 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
     """
 
     invalid_reason = None
+
     if rpp_mileage_val in (None, ""):
         rpp_mileage_val = None
 
@@ -523,11 +532,11 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
             rpp_mileage_val = int(rpp_mileage_val)
 
         except (TypeError, ValueError):
-            invalid_reason = INVALID_RPP_MILEAGE
+            rpp_mileage_val = None
 
         else:
             if not 3 <= rpp_mileage_val <= 50:
-                invalid_reason = INVALID_RPP_MILEAGE
+                rpp_mileage_val = None
 
     return rpp_mileage_val, invalid_reason
 
@@ -545,12 +554,13 @@ def blocked_route_special_district_marker(blocked_route_special_district_marker_
     """
 
     invalid_reason = None
+
     if blocked_route_special_district_marker_val in (None, ""):
         blocked_route_special_district_marker_val = None
 
     else:
         if blocked_route_special_district_marker_val not in ("B", "S"):
-            invalid_reason = INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER
+            blocked_route_special_district_marker_val = None
 
     return blocked_route_special_district_marker_val, invalid_reason
 
@@ -568,6 +578,7 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
     """
 
     invalid_reason = None
+
     if walking_units_val in (None, ""):
         walking_units_val = None
 
@@ -576,11 +587,11 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
             walking_units_val = int(walking_units_val)
 
         except (TypeError, ValueError):
-            invalid_reason = INVALID_WALKING_UNITS
+            walking_units_val = None
 
         else:
             if not 3 <= walking_units_val <= 99 or (walking_units_val % 3):
-                invalid_reason = INVALID_WALKING_UNITS
+                walking_units_val = None
 
     return walking_units_val, invalid_reason
 
@@ -592,7 +603,7 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     patients Health Authority.
 
     Args:
-        walking_units_val (str): Residential institute code to validate.
+        residential_institute_code_val (str): Residential institute code to validate.
 
     Returns:
         ValidatedRecord: Tuple of coerced value and invalid reason if any.
@@ -613,13 +624,13 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     return residential_institute_code_val, invalid_reason
 
 
-@not_null
 def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> ValidatedRecord:
     """Coerce and validate transaction id.
 
     Validation rules: Must be a unique not-null 2-character integer greater than 0.
 
     Args:
+        transaction_id_val (str): Transaction number to validate.
         other_ids (List[str]): All other record id's seen so far for checking uniqueness.
 
     Returns:
@@ -627,18 +638,24 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
     """
 
     invalid_reason = None
-    if not re.match(r"^([1-9]{1}[0-9]*)$", str(transaction_id_val)):
+
+    if transaction_id_val in (None, ""):
+        transaction_id_val = None
         invalid_reason = INVALID_TRANS_ID
 
     else:
-        try:
-            transaction_id_val = int(transaction_id_val)
-
-        except (TypeError, ValueError):
+        if not re.match(r"^([1-9]{1}[0-9]*)$", str(transaction_id_val)):
             invalid_reason = INVALID_TRANS_ID
 
-    if transaction_id_val in other_ids:
-        invalid_reason = INVALID_TRANS_ID
+        else:
+            try:
+                transaction_id_val = int(transaction_id_val)
+
+            except (TypeError, ValueError):
+                invalid_reason = INVALID_TRANS_ID
+
+        if transaction_id_val in other_ids:
+            invalid_reason = INVALID_TRANS_ID
 
     return transaction_id_val, invalid_reason
 

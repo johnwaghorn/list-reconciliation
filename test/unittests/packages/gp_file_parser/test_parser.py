@@ -24,7 +24,7 @@ def test_parse_gp_extract_text_parses_correctly():
         "1234567890~SOMEBODY~JOHN~SOMEONE~MR~1~20020101~FLAT A~THE STREET"
         "\n\nDOW~2~~EAST~~E1   1AA~~3~~~  \n\nDOW~1~1111112,1235~LNA~20200406"
         "~1340~1557491~1234567891~SOMEBODY~JANE~FOE~MISS~1~20120211~FLAT B~"
-        "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~   "
+        "THE STREET\n\nDOW~2~~EAST~~E1   1AA~~3~~~"
     )
 
     expected = [

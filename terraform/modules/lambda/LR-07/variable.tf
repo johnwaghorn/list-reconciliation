@@ -26,6 +26,7 @@ variable "lambda_name" {
 variable "lambda_handler" {
   type = string
 }
+
 variable "lr_08_lambda" {
   type = string
 }

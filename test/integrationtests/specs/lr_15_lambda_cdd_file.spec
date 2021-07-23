@@ -5,7 +5,7 @@
 
 ## test to ensure consolidated demographic differences file is generated succesfully
 ------------------------------------------------------------------------------------
-
+Tags: wip
 * prep step : connect to s3 buckets mock pds, lr-22 and upload data files for "LR_15/" lambda
 * connect to s3 and upload gpfile file "A82023_GPR4LNA1.EIA" for successful file validation
 * connect and trigger lr-10 state function for registration differences and assert status succeeded

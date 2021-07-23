@@ -10,12 +10,15 @@ from pynamodb.exceptions import PynamoDBConnectionError, PutError
 
 from spine_aws_common.lambda_application import LambdaApplication
 
-from gp_file_parser.file_name_parser import InvalidFilename
-from gp_file_parser.parser import InvalidGPExtract, parse_gp_extract_file_s3
+from services.split_records_to_s3 import split_records_to_s3
+
+from gp_file_parser.parser import parse_gp_extract_file_s3
+
+from utils import InputFolderType
 from utils.datetimezone import get_datetime_now
 from utils.logger import log_dynamodb_error, success
 from utils.database.models import Jobs, InFlight
-from services.split_records_to_s3 import split_records_to_s3
+from utils.exceptions import InvalidGPExtract, InvalidFilename
 
 INBOUND_PREFIX = "inbound/"
 FAILED_PREFIX = "fail/"
@@ -25,17 +28,19 @@ RETRY_PREFIX = "retry/"
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
+INVALID_RECORDS = "INVALID_RECORDS"
+INVALID_STRUCTURE = "INVALID_STRUCTURE"
+INVALID_FILENAME = "INVALID_FILENAME"
 
-class LR02LambdaHandler(LambdaApplication):
+
+class ValidateAndParse(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.job_id = None
+        self.practice_code = None
         self.upload_key = None
         self.upload_filename = None
-        self.inbound_prefix = "inbound/"
-        self.failed_prefix = "fail/"
-        self.passed_prefix = "pass/"
-        self.retry_prefix = "retry/"
+        self.upload_date = None
 
     def initialise(self):
         self.job_id = str(uuid4())
@@ -43,7 +48,9 @@ class LR02LambdaHandler(LambdaApplication):
     def start(self):
         try:
             self.upload_key = self.event["Records"][0]["s3"]["object"]["key"]
-            self.upload_filename = self.upload_key.replace(self.inbound_prefix, "")
+
+            self.upload_filename = self.upload_key.replace(InputFolderType.IN.value, "")
+
             self.response = self.validate_and_process_extract()
             self.log_object.write_log(
                 "UTI9995",
@@ -68,6 +75,8 @@ class LR02LambdaHandler(LambdaApplication):
             )
             self.response = {"message": error_message}
 
+            raise
+
         except Exception as err:
             self.log_object.write_log(
                 "UTI9998",
@@ -80,6 +89,8 @@ class LR02LambdaHandler(LambdaApplication):
             )
             self.response = {"message": str(err)}
 
+            raise type(err)(str(err)) from err
+
     def create_client(self, service: str) -> BaseClient:
         return boto3.client(service, region_name=self.system_config["AWS_REGION"])
 
@@ -90,7 +101,8 @@ class LR02LambdaHandler(LambdaApplication):
         Returns:
             success: A dict result containing a status and message
         """
-        upload_date = get_datetime_now()
+
+        self.upload_date = get_datetime_now()
 
         self.log_object.write_log(
             "UTI9995",
@@ -98,7 +110,7 @@ class LR02LambdaHandler(LambdaApplication):
             {
                 "logger": "LR02.Lambda",
                 "level": "INFO",
-                "message": f"{self.upload_key} validation process begun at {upload_date}",
+                "message": f"{self.upload_key} validation process begun at {self.upload_date}",
             },
         )
 
@@ -106,15 +118,15 @@ class LR02LambdaHandler(LambdaApplication):
             validated_file = parse_gp_extract_file_s3(
                 self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"],
                 self.upload_key,
-                upload_date,
+                self.upload_date,
             )
 
             return self.handle_validated_records(validated_file)
 
         except (AssertionError, InvalidGPExtract, InvalidFilename) as exc:
-            message = self.process_invalid_message(exc)
+            message = json.dumps(self.process_invalid_message(exc))
 
-            self.handle_extract(self.failed_prefix, message)
+            self.handle_extract(InputFolderType.FAIL, message)
 
             msg = f"Handled error for invalid file upload: {self.upload_filename}"
             log_dynamodb_error(self.log_object, self.job_id, "HANDLED_ERROR", msg)
@@ -158,7 +170,7 @@ class LR02LambdaHandler(LambdaApplication):
             )
 
         except (PynamoDBConnectionError, PutError) as exc:
-            self.handle_extract(self.retry_prefix)
+            self.handle_extract(InputFolderType.RETRY)
 
             log_dynamodb_error(self.log_object, self.job_id, "HANDLED_ERROR", str(exc))
 
@@ -192,24 +204,22 @@ class LR02LambdaHandler(LambdaApplication):
                 )
 
             except Exception as exc:
-                self.handle_extract(self.retry_prefix)
+                self.handle_extract(InputFolderType.RETRY)
+
                 log_dynamodb_error(self.log_object, self.job_id, "HANDLED_ERROR", str(exc))
 
                 return success(f"Successfully handled failed Job: {self.job_id}")
 
-            self.handle_extract(self.passed_prefix)
+            self.handle_extract(InputFolderType.PASS)
 
             return success(f"{self.upload_filename} processed successfully for Job: {self.job_id}")
 
-    def write_to_dynamodb(self, practice_code: str, num_of_records: int) -> list:
+    def write_to_dynamodb(self, practice_code: str, num_of_records: int):
         """Creates Job items in DynamoDb.
 
         Args:
             practice_code (str): GP practice code of GP extract.
             num_of_records (int): Number of validated records.
-
-        Returns:
-            Records (list): List of Records with added ID field.
         """
 
         job_item = Jobs(
@@ -234,7 +244,7 @@ class LR02LambdaHandler(LambdaApplication):
             },
         )
 
-    def handle_extract(self, prefix: str, error_message: str = None):
+    def handle_extract(self, prefix: InputFolderType, error_message: str = None):
         """Handles an GP extract file. Depending on validation status, will move file from:
             - inbound -> failed
             - inbound -> passed
@@ -248,7 +258,7 @@ class LR02LambdaHandler(LambdaApplication):
         s3_client = boto3.client("s3")
 
         bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
-        key = prefix + self.upload_filename
+        key = f"{prefix.value}{self.upload_filename}"
 
         s3_client.copy_object(
             Bucket=bucket,
@@ -259,13 +269,14 @@ class LR02LambdaHandler(LambdaApplication):
         s3_client.delete_object(Bucket=bucket, Key=self.upload_key)
 
         if error_message:
-            log_filename = self.upload_filename + "_LOG.txt"
-            log_key = self.failed_prefix + log_filename
+            timestamp = self.upload_date.strftime("%d%m%YT%H%M.%S.%f")
+
+            log_filename = f"{self.upload_filename}_LOG_{timestamp}.json"
+            log_key = f"{InputFolderType.FAIL.value}logs/{log_filename}"
 
             s3_client.put_object(Body=error_message, Bucket=bucket, Key=log_key)
 
-    @staticmethod
-    def process_invalid_message(exception: Exception) -> str:
+    def process_invalid_message(self, exception: Exception) -> str:
         """Create a formatted error message string based on raised
             exception
 
@@ -273,21 +284,32 @@ class LR02LambdaHandler(LambdaApplication):
             exception (Exception): exception raised
 
         Returns:
-            str: Error message as formatted string.
+            dict: dictionary of failed file information
         """
 
+        fail_log = {
+            "file": self.upload_filename,
+            "upload_date": str(self.upload_date),
+        }
+
         if isinstance(exception, AssertionError):
-            msg = "DOW file content structure is invalid:\n" + str(exception)
+            error = {"error_type": INVALID_STRUCTURE, "message": [exception.args[0]]}
 
         elif isinstance(exception, InvalidGPExtract):
-            msg = "DOW file contains invalid records:\n"
+            msg = exception.args[0]
 
-            invalids = json.loads(str(exception))
+            error = {
+                "error_type": INVALID_RECORDS,
+                "total_records": msg["total_records"],
+                "total_invalid_records": len(msg["invalid_records"]),
+                "message": msg["invalid_records"],
+            }
 
-            for i in invalids:
-                msg += str(i) + "\n"
+        elif isinstance(exception, InvalidFilename):
+            msg = exception.args[0]["message"]
 
-        else:
-            msg = "DOW file is invalid:\n" + str(exception)
+            error = {"error_type": INVALID_FILENAME, "message": msg}
 
-        return msg
+        fail_log.update(error)
+
+        return fail_log

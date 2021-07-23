@@ -1,6 +1,7 @@
 locals {
   lambda_name = {
     LR-02 = "LR_02_validate_and_parse"
+    LR-04 = "LR_04_feedback_failure"
     LR-07 = "LR_07_pds_hydrate"
     LR-08 = "LR_08_demographic_comparison"
     LR-09 = "LR_09_scheduled_check"
@@ -18,7 +19,12 @@ module "LR-02" {
   package_layer_arn    = aws_lambda_layer_version.package_layer.arn
   runtime              = var.runtime
   source_bucket        = var.s3_buckets.LR-01.bucket
+  source_bucket_arn    = var.s3_buckets.LR-01.arn
   lr_01_inbound_folder = var.s3_buckets.LR-01.inbound_key
+  lr_01_failed_folder  = var.s3_buckets.LR-01.fail_key
+  lr_06_bucket         = var.s3_buckets.LR-06.bucket
+  lr_04_lambda_arn     = module.LR-04.LR-04-lambda_arn
+  lr_24_lambda_arn     = module.LR-24.LR-24-lambda_arn
   errors_table_arn     = var.dynamodb_tables.errors.arn
   errors_table_name    = var.dynamodb_tables.errors.name
   in_flight_table_arn  = var.dynamodb_tables.in_flight.arn
@@ -26,11 +32,24 @@ module "LR-02" {
   jobs_table_arn       = var.dynamodb_tables.jobs.arn
   jobs_table_name      = var.dynamodb_tables.jobs.name
   suffix               = var.suffix
-  lr_24_lambda         = module.LR-24.LR-24-lambda_arn
   lambda_handler       = var.lambda_handler
-  lr_06_bucket         = var.s3_buckets.LR-06.bucket
   dynamodb_kms_key     = var.dynamodb_kms_key
   s3_kms_key           = var.s3_kms_key
+}
+
+module "LR-04" {
+  source            = "./LR-04"
+  lambda_name       = local.lambda_name.LR-04
+  package_layer_arn = aws_lambda_layer_version.package_layer.arn
+  runtime           = var.runtime
+  source_bucket     = var.s3_buckets.LR-01.bucket
+  source_bucket_arn = var.s3_buckets.LR-01.arn
+  errors_table_arn  = var.dynamodb_tables.errors.arn
+  errors_table_name = var.dynamodb_tables.errors.name
+  suffix            = var.suffix
+  lambda_handler    = var.lambda_handler
+  dynamodb_kms_key  = var.dynamodb_kms_key
+  s3_kms_key        = var.s3_kms_key
 }
 
 module "LR-07" {

@@ -1,6 +1,6 @@
-from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import LR02LambdaHandler
+from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
 
-app = LR02LambdaHandler()
+app = ValidateAndParse()
 
 
 def lambda_handler(event, context):

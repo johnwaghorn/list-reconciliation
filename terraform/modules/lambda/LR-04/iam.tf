@@ -31,7 +31,7 @@ EOF
 
 resource "aws_iam_policy" "policy" {
   name        = "iam-policy-${var.lambda_name}-${var.suffix}"
-  description = "Policy for LR-02 ${var.lambda_name} Lambda Role."
+  description = "Policy for LR-04 ${var.lambda_name} Lambda Role."
 
   policy = <<-EOF
 {
@@ -57,36 +57,26 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:DescribeTable",
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*"
+            ],
             "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "dynamodb:UpdateItem",
-            "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "dynamodb:PutItem",
-            "Resource": [
-                "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.dynamodb_kms_key.arn}",
+                "${var.s3_kms_key.arn}"
             ]
         },
         {
             "Effect": "Allow",
             "Action": [
-                 "lambda:InvokeFunction"
+                "dynamodb:DescribeTable",
+                "dynamodb:PutItem"
             ],
-            "Resource":"${var.lr_24_lambda_arn}"
+            "Resource": [
+                "${var.errors_table_arn}"
+            ]
         },
         {
             "Effect": "Allow",
@@ -111,3 +101,4 @@ resource "aws_iam_role_policy_attachment" "policy_attachment" {
   role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }
+

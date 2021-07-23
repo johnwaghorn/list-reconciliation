@@ -27,38 +27,34 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
     filename = filename.upper()
 
     if len(filename) > 19:
-        msg = "Filename exceeds character limit"
-
-        raise InvalidFilename(msg)
+        msg = ["Filename exceeds character limit"]
+        raise InvalidFilename({"message": msg})
 
     valid_characters = re.match(r"^[A-Z0-9_.]{1,19}$", filename)
 
     if not valid_characters:
-        msg = "Filename contains invalid characters"
+        msg = ["Filename contains invalid characters"]
+        raise InvalidFilename({"message": msg})
 
-        raise InvalidFilename(msg)
-
-    filename_errors = []
+    errors = []
 
     valid_practice_code = re.search(r"^([A-Z][0-9][0-9][0-9][0-9][0-9])", filename)
 
     if not valid_practice_code:
-        filename_errors.append("Filename contains invalid practice code")
+        errors.append("Filename contains invalid practice code")
 
     valid_download_name = re.search(r"GPR4([A-Z0-9]{3})1", filename)
 
     if not valid_download_name:
-        filename_errors.append("Filename contains invalid DOW name and/or HA cipher")
+        errors.append("Filename contains invalid DOW name and/or HA cipher")
 
     valid_extension = re.search(r".([A-L][1-9A-V])[A-Z]$", filename)
 
     if not valid_extension:
-        filename_errors.append("Filename contains invalid extension")
+        errors.append("Filename contains invalid extension")
 
-    if filename_errors:
-        msg = "\n".join(filename_errors)
-
-        raise InvalidFilename(msg)
+    if errors:
+        raise InvalidFilename({"message": errors})
 
     valid_filename = re.match(
         r"^[A-Z][0-9][0-9][0-9][0-9][0-9]_GPR4[A-Z0-9]{3}1.[A-L][1-9A-V][A-Z]$",
@@ -66,9 +62,8 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
     )
 
     if not valid_filename:
-        msg = "Filename does not have the correct format"
-
-        raise InvalidFilename(msg)
+        msg = ["Filename does not have the correct format"]
+        raise InvalidFilename({"message": msg})
 
     practice_code = valid_practice_code.group(1)
     ha_cipher = valid_download_name.group(1)
@@ -121,14 +116,17 @@ def process_date(process_datetime: datetime, date_indicator: str) -> datetime:
             extract_date = datetime(date_now.year, extract_month, extract_day)
 
         except ValueError:
-            raise InvalidFilename("Filename contains invalid date")
+            msg = ["Filename contains invalid date"]
+            raise InvalidFilename({"message": msg})
 
     days_difference = (date_now.date() - extract_date.date()).days
 
     if days_difference < 0:
-        raise InvalidFilename("File date must not be from the future")
+        msg = ["File date must not be from the future"]
+        raise InvalidFilename({"message": msg})
 
     elif days_difference > 14:
-        raise InvalidFilename("File date must not be older than 14 days")
+        msg = ["File date must not be older than 14 days"]
+        raise InvalidFilename({"message": msg})
 
     return extract_date

@@ -30,6 +30,14 @@ output "lr_02_lambda_arn" {
   value = module.lambda.lr_02_lambda_arn
 }
 
+output "lr_04_lambda" {
+  value = module.lambda.lr_04_lambda
+}
+
+output "lr_04_lambda_arn" {
+  value = module.lambda.lr_04_lambda_arn
+}
+
 output "lr_07_lambda" {
   value = module.lambda.lr_07_lambda
 }

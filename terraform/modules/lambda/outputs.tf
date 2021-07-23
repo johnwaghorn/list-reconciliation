@@ -6,6 +6,14 @@ output "lr_02_lambda_arn" {
   value = module.LR-02.LR-02-lambda_arn
 }
 
+output "lr_04_lambda" {
+  value = module.LR-04.LR_04_lambda
+}
+
+output "lr_04_lambda_arn" {
+  value = module.LR-04.LR-04-lambda_arn
+}
+
 output "lr_07_lambda" {
   value = module.LR-07.LR_07_lambda
 }

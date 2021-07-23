@@ -8,3 +8,7 @@ class InvalidFilename(Exception):
 
 class InvalidDSAFile(Exception):
     pass
+
+
+class FeedbackLogError(Exception):
+    pass

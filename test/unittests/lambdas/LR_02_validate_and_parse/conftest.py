@@ -8,7 +8,7 @@ import pytest
 
 from moto import mock_dynamodb2, mock_s3, mock_iam, mock_lambda
 
-from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import LR02LambdaHandler
+from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
 from utils.database.models import Demographics, Errors, Jobs, InFlight
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +21,7 @@ REGION_NAME = os.environ.get("AWS_REGION")
 JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
 
 VALID_FILE = "A82023_GPR4LNA1.CSA"
-INVALID_FILE = "A82023_GPR4LNA1.CSB"
+INVALID_FILE = "A12023_GPR4LNA1.CSB"
 
 
 @pytest.fixture
@@ -118,5 +118,5 @@ def lr_02_invalid_file_event():
 
 @pytest.fixture(scope="module")
 def lambda_handler():
-    app = LR02LambdaHandler()
+    app = ValidateAndParse()
     return app

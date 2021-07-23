@@ -14,8 +14,8 @@ from utils.datetimezone import get_datetime_now, localize_date
         ("DOWNLOAD", ("DOWNLOAD", v.INVALID_RECORD_TYPE)),
         ("Not", ("Not", v.INVALID_RECORD_TYPE)),
         (" ", (" ", v.INVALID_RECORD_TYPE)),
-        ("", (None, v.INVALID_NULL)),
-        (None, (None, v.INVALID_NULL)),
+        ("", (None, v.INVALID_RECORD_TYPE)),
+        (None, (None, v.INVALID_RECORD_TYPE)),
         ("Dow", ("Dow", v.INVALID_RECORD_TYPE)),
         (0, (0, v.INVALID_RECORD_TYPE)),
     ),
@@ -39,8 +39,8 @@ def test_record_type_validator_return_values(val, expected):
         ("123456,123456", ("123456,123456", v.INVALID_GP_CODE)),
         ("123456B,123456", ("123456B,123456", v.INVALID_GP_CODE)),
         (" ", (" ", v.INVALID_GP_CODE)),
-        ("", (None, v.INVALID_NULL)),
-        (None, (None, v.INVALID_NULL)),
+        ("", (None, v.INVALID_GP_CODE)),
+        (None, (None, v.INVALID_GP_CODE)),
     ),
 )
 def test_gp_code_validator_return_values(val, expected):
@@ -255,10 +255,10 @@ def test_drugs_dispensed_marker_validator_return_values(val, expected):
         (None, (None, None)),
         ("3", (3, None)),
         ("50", (50, None)),
-        ("2", (2, v.INVALID_RPP_MILEAGE)),
-        ("51", (51, v.INVALID_RPP_MILEAGE)),
-        (" ", (" ", v.INVALID_RPP_MILEAGE)),
-        ([], ([], v.INVALID_RPP_MILEAGE)),
+        ("2", (None, None)),
+        ("51", (None, None)),
+        (" ", (None, None)),
+        ([], (None, None)),
     ),
 )
 def test_rpp_mileage_validator_return_values(val, expected):
@@ -274,9 +274,9 @@ def test_rpp_mileage_validator_return_values(val, expected):
         (None, (None, None)),
         ("B", ("B", None)),
         ("S", ("S", None)),
-        ("A", ("A", v.INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER)),
-        (" ", (" ", v.INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER)),
-        (1, (1, v.INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER)),
+        ("A", (None, None)),
+        (" ", (None, None)),
+        (1, (None, None)),
     ),
 )
 def test_blocked_route_special_district_marker_validator_return_values(val, expected):
@@ -292,10 +292,10 @@ def test_blocked_route_special_district_marker_validator_return_values(val, expe
         (None, (None, None)),
         ("3", (3, None)),
         ("99", (99, None)),
-        ("3%", ("3%", v.INVALID_WALKING_UNITS)),
-        ("2", (2, v.INVALID_WALKING_UNITS)),
-        ("100", (100, v.INVALID_WALKING_UNITS)),
-        ([], ([], v.INVALID_WALKING_UNITS)),
+        ("3%", (None, None)),
+        ("2", (None, None)),
+        ("100", (None, None)),
+        ([], (None, None)),
     ),
 )
 def test_walking_units_validator_return_values(val, expected):
@@ -366,8 +366,8 @@ def test_transaction_datetime_validators_return_values(val, process_datetime, ex
         ("111", "111", ("111", None)),
         ("AAA", "AAA", ("AAA", None)),
         ("LA0", "LA0", ("LA0", None)),
-        ("", "", (None, v.INVALID_NULL)),
-        (None, "LA0", (None, v.INVALID_NULL)),
+        ("", "", (None, v.INVALID_HA_CIPHER)),
+        (None, "LA0", (None, v.INVALID_HA_CIPHER)),
         ("A", "A", ("A", v.INVALID_HA_CIPHER)),
         ("1", "1", ("1", v.INVALID_HA_CIPHER)),
         ("LA0A", "LA0A", ("LA0A", v.INVALID_HA_CIPHER)),
@@ -387,32 +387,13 @@ def test_validate_record_contains_invalid_dict():
 
 
 @pytest.mark.parametrize(
-    "val,expected",
-    (
-        ("", (None, v.INVALID_NULL)),
-        (None, (None, v.INVALID_NULL)),
-        ("A1", ("A1", None)),
-        (" ", (" ", None)),
-    ),
-)
-def test_not_null_decorator_return_values(val, expected):
-    @v.not_null
-    def dummy(val):
-        return val, None
-
-    actual = dummy(val)
-
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
     "val,ids,expected",
     (
         ("1", [], (1, None)),
         (1, [], (1, None)),
         ("123", [], (123, None)),
-        ("", [], (None, v.INVALID_NULL)),
-        (None, [], (None, v.INVALID_NULL)),
+        ("", [], (None, v.INVALID_TRANS_ID)),
+        (None, [], (None, v.INVALID_TRANS_ID)),
         (" ", [], (" ", v.INVALID_TRANS_ID)),
         ("0", [], ("0", v.INVALID_TRANS_ID)),
         ("-1", [], ("-1", v.INVALID_TRANS_ID)),
