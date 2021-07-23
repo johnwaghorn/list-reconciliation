@@ -18,15 +18,6 @@ resource "aws_s3_bucket" "mock_pds_data" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "mock_pds_data" {
-  bucket = aws_s3_bucket.mock_pds_data.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
 resource "aws_s3_bucket_object" "upload-mock-pds-data" {
   bucket = aws_s3_bucket.mock_pds_data.id
   key    = "pds_api_data.csv"

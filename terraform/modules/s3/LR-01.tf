@@ -27,43 +27,42 @@ resource "aws_s3_bucket" "LR-01" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "LR-01" {
-  bucket = aws_s3_bucket.LR-01.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
 resource "aws_s3_bucket_object" "inbound" {
-  bucket        = aws_s3_bucket.LR-01.id
-  key           = "inbound/"
-  acl           = "private"
-  force_destroy = true
-  content_type  = "application/x-directory"
+  bucket       = aws_s3_bucket.LR-01.id
+  key          = "inbound/"
+  content_type = "application/x-directory"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_s3_bucket_object" "pass" {
-  bucket        = aws_s3_bucket.LR-01.id
-  key           = "pass/"
-  acl           = "private"
-  force_destroy = true
-  content_type  = "application/x-directory"
+  bucket       = aws_s3_bucket.LR-01.id
+  key          = "pass/"
+  content_type = "application/x-directory"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_s3_bucket_object" "fail" {
-  bucket        = aws_s3_bucket.LR-01.id
-  key           = "fail/"
-  acl           = "private"
-  force_destroy = true
-  content_type  = "application/x-directory"
+  bucket       = aws_s3_bucket.LR-01.id
+  key          = "fail/"
+  content_type = "application/x-directory"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "aws_s3_bucket_object" "retry" {
-  bucket        = aws_s3_bucket.LR-01.id
-  key           = "retry/"
-  acl           = "private"
-  force_destroy = true
-  content_type  = "application/x-directory"
+  bucket       = aws_s3_bucket.LR-01.id
+  key          = "retry/"
+  content_type = "application/x-directory"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }

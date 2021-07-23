@@ -26,12 +26,3 @@ resource "aws_s3_bucket" "LR-13" {
     target_prefix = "lr-13-reg-diffs-output-${var.suffix}/"
   }
 }
-
-resource "aws_s3_bucket_public_access_block" "LR-13" {
-  bucket = aws_s3_bucket.LR-13.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}

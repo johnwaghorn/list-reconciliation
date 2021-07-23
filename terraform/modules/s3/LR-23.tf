@@ -26,12 +26,3 @@ resource "aws_s3_bucket" "LR-23" {
     target_prefix = "lr-23-output-bucket-${var.suffix}/"
   }
 }
-
-resource "aws_s3_bucket_public_access_block" "LR-23" {
-  bucket = aws_s3_bucket.LR-23.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
