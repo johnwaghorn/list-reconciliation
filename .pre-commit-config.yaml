@@ -25,3 +25,8 @@ repos:
       - id: add-msg-issue-prefix
         args:
           - --template={}
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.3.0
+    hooks:
+      - id: check-github-workflows
+      - id: check-github-actions
