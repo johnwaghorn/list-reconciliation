@@ -1,3 +1,4 @@
+from .lr_beforehooks import use_waiters_check_object_exists
 from getgauge.python import step
 from getgauge.python import Messages
 import boto3
@@ -22,6 +23,7 @@ def connect_to_s3_and_upload_pds_data():
     s3 = dev.client("s3", REGION_NAME)
     try:
         s3.upload_file(upload_pds_data, LR_22_BUCKET, pds_data)
+        use_waiters_check_object_exists(LR_22_BUCKET, pds_data)
         Messages.write_message("PDS data Upload on LR-22 is Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")

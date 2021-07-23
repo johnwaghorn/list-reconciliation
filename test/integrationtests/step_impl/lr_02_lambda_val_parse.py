@@ -1,14 +1,14 @@
-from sys import prefix
+from utils import InputFolderType
 from getgauge.python import step
 from getgauge.python import Messages
 from utils.datetimezone import get_datetime_now
+from .lr_beforehooks import use_waiters_check_object_exists
 
 import boto3
 import json
 from tempfile import gettempdir
 import os
 from datetime import timedelta
-import time
 from .tf_aws_resources import get_terraform_output
 
 # On github
@@ -17,17 +17,20 @@ secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
 
 REGION_NAME = "eu-west-2"
-test_datetime = get_datetime_now()
-
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_02_LAMBDA_ARN = get_terraform_output("lr_02_lambda_arn")
 
+test_datetime = get_datetime_now()
 temp_dir = gettempdir()
 now = test_datetime - timedelta(hours=1)
 day = "123456789ABCDEFGHIJKLMNOPQRSTUV"[now.day - 1]
 month = "ABCDEFGHIJKL"[now.month - 1]
+
+IN = "inbound/"
+PASS = "pass/"
+FAIL = "fail/"
 
 
 def get_gppractice_out_path(filename_no_ext):
@@ -138,8 +141,7 @@ def upload_gpextract_file_into_s3(testfile):
 
     s3 = dev.client("s3", REGION_NAME)
     try:
-        s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
-        time.sleep(10)
+        s3.upload_file(temp_destdir, LR_01_BUCKET, InputFolderType.IN.value + destination_filename)
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -158,22 +160,26 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
 
     s3 = dev.client("s3", REGION_NAME)
     try:
-        s3.upload_file(temp_destdir, LR_01_BUCKET, "inbound/" + destination_filename)
-        time.sleep(10)
+        s3.upload_file(temp_destdir, LR_01_BUCKET, InputFolderType.IN.value + destination_filename)
         Messages.write_message("Upload Successful")
+    
     except FileNotFoundError:
         Messages.write_message("File not found")
         raise
+    
     return temp_destdir, destination_filename
 
 
 @step("connect to s3 failed folder and assert failure message <search_word>")
 def readfile_in_s3_failed_invalid_item(search_word):
-    time.sleep(20)
     s3 = dev.client("s3", REGION_NAME)
+    fail_prefix = InputFolderType.FAIL.value + destination_filename + "_LOG.txt"
+    use_waiters_check_object_exists(LR_01_BUCKET, fail_prefix)
+    
     result = s3.list_objects(
-        Bucket=LR_01_BUCKET, Prefix="fail/" + destination_filename + "_LOG.txt"
+        Bucket=LR_01_BUCKET, Prefix=fail_prefix
     )
+    
 
     if result:
         for o in result.get("Contents"):
@@ -207,7 +213,9 @@ def readfile_in_s3_failed_invalid_item(search_word):
 @step("connect to pass folder and check if it has loaded the test file")
 def assert_fileloaded_in_s3_pass_folder():
     s3 = dev.client("s3", REGION_NAME)
-    expected_filename = "pass/" + destination_filename
+    expected_filename = InputFolderType.PASS.value + destination_filename
+    use_waiters_check_object_exists(LR_01_BUCKET, expected_filename)
+
     result = s3.list_objects(Bucket=LR_01_BUCKET, Prefix=expected_filename)
     actual_filename = result.get("Contents", [])[0]["Key"]
     assert expected_filename == actual_filename, "destination file not found"

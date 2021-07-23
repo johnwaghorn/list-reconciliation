@@ -1,4 +1,4 @@
-from getgauge.python import step
+from getgauge.python import step,Messages
 from .tf_aws_resources import get_terraform_output
 
 import boto3
@@ -8,14 +8,29 @@ import os
 access_key = os.getenv("AWS_PUBLIC_KEY")
 secret_key = os.getenv("AWS_PRIVATE_KEY")
 dev = boto3.session.Session(access_key, secret_key)
-
 s3 = dev.client("s3")
+
+REGION_NAME = "eu-west-2"
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_13_BUCKET = get_terraform_output("lr_13_bucket")
 LR_22_BUCKET = get_terraform_output("lr_22_bucket")
 LR_23_BUCKET = get_terraform_output("lr_23_bucket")
 MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 INFLIGHT_TABLE = get_terraform_output("in_flight_table")
+
+
+def use_waiters_check_object_exists(bucket_name, key_name):
+   s3 = dev.client("s3", REGION_NAME)
+   try:
+      waiter = s3.get_waiter('object_exists')
+      waiter.wait(Bucket=bucket_name, Key = key_name,
+                  WaiterConfig={
+                     'Delay': 10, 'MaxAttempts': 5})
+      print('Object exists: ' + bucket_name +'/'+key_name)
+   
+   except FileNotFoundError:
+        Messages.write_message("File not found")
+        raise
 
 
 @step("setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table")

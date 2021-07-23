@@ -1,3 +1,4 @@
+from .lr_beforehooks import use_waiters_check_object_exists
 import time
 from getgauge.python import step
 from getgauge.python import Messages
@@ -46,6 +47,7 @@ temp_dir = gettempdir()
 def delete_all_s3_files_in_lr13():
     s3_client = dev.client("s3", REGION_NAME)
     lr_13_response = s3_client.list_objects_v2(Bucket=LR_13_BUCKET, Prefix=PREFIX_S3)
+    use_waiters_check_object_exists(LR_13_BUCKET, PREFIX_S3)
     if "Contents" in lr_13_response:
         for object in lr_13_response["Contents"]:
             print("Deleting", object["Key"])
@@ -107,8 +109,11 @@ def connect_to_s3_and_upload_mock_data():
 
     try:
         s3.upload_file(upload_pds_data, MOCK_PDS_DATA, pds_api_data_file)
+        use_waiters_check_object_exists(MOCK_PDS_DATA, pds_api_data_file)
         s3.upload_file(upload_pds_data_set1, LR_22_BUCKET, pds_data_set01)
+        use_waiters_check_object_exists(LR_22_BUCKET, pds_data_set01)
         s3.upload_file(upload_pds_data_set02, LR_22_BUCKET, pds_data_set02)
+        use_waiters_check_object_exists(LR_22_BUCKET, pds_data_set02)
         Messages.write_message("All PDS files Upload Successful")
 
     except FileNotFoundError:
@@ -169,8 +174,9 @@ def check_lambda_lr12_has_processed_record():
     "connect to lr-13 and check output csv file content and file format as expected for <Job Id> and <GP ODS Code>"
 )
 def check_output_file_in_lr13(job_id, gp_ods_code):
-    time.sleep(10)
     s3_client = dev.client("s3", REGION_NAME)
+    use_waiters_check_object_exists(LR_13_BUCKET, job_id)
+
     response = s3_client.list_objects_v2(Bucket=LR_13_BUCKET, Prefix=job_id)
 
     for obj in response.get("Contents"):
