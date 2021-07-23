@@ -53,7 +53,7 @@ jobs:
     name: Run integration tests
     runs-on: self-hosted
     needs:
-      - create-preprod-infra
+      - create-preprod-list-reconciliation-stack
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
