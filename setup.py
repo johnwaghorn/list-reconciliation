@@ -14,8 +14,7 @@ setup(
     install_requires=dependencies,
     entry_points={
         "console_scripts": [
-            "gpextract = gp_file_parser.main:main",
-            "mock_data = listrec.mock_data:main",
+            "gpextract = gp_file_parser.main:main"
         ]
     },
 )
