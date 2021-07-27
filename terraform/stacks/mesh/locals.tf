@@ -1,7 +1,7 @@
 locals {
-  name               = "list-rec-${local.environment}"
-  environment        = terraform.workspace
-  data_clasification = local.environment == "prod" ? "5" : "1"
+  name                = "list-rec-${local.environment}"
+  environment         = terraform.workspace
+  data_classification = local.environment == "prod" ? "5" : "1"
 
   terraform_deploy_role_arn = {
     dev     = "arn:aws:iam::092420156801:role/LRTerraformDeploy"
@@ -36,7 +36,7 @@ locals {
     TagVersion         = "1"
     Programme          = "SpinePod5"
     Project            = "ListReconciliationMesh"
-    DataClassification = local.data_clasification
+    DataClassification = local.data_classification
     Environment        = local.environment
     ServiceCategory    = local.environment == "prod" ? "Silver" : "N/A"
     Tool               = "terraform"
