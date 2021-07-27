@@ -1,23 +1,18 @@
 import json
-import os
 import sys
 import traceback
 
 import boto3
-
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils import retry_func
 
 S3 = boto3.client("s3")
 
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
-
 
 class SaveRecordsToS3(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
 
     def initialise(self):
         pass

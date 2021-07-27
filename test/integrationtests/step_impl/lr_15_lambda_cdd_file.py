@@ -46,21 +46,21 @@ def connect_to_s3_and_upload_mock_data_valid_scenario(lr_15_path):
             pds_api_prefix,
         )
         use_waiters_check_object_exists(MOCK_PDS_DATA, pds_api_prefix)
-        
-        #File 1:
+
+        # File 1:
         file1 = "A82023.csv"
         s3.upload_file(os.path.join(DATA, "LR_15/A82023.csv"), LR_22_BUCKET, file1)
         use_waiters_check_object_exists(LR_22_BUCKET, file1)
 
-        #File 2:
+        # File 2:
         file2 = "Y123451.csv"
         s3.upload_file(os.path.join(DATA, "LR_15/Y123451.csv"), LR_22_BUCKET, file2)
         use_waiters_check_object_exists(LR_22_BUCKET, file2)
 
-        #File 3:
+        # File 3:
         file3 = "Y123452.csv"
         s3.upload_file(os.path.join(DATA, "LR_15/Y123452.csv"), LR_22_BUCKET, file3)
-        
+
         Messages.write_message("All PDS data related files Uploaded Successful")
 
     except FileNotFoundError:

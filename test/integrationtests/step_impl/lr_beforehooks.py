@@ -1,4 +1,4 @@
-from getgauge.python import step,Messages
+from getgauge.python import step, Messages
 from .tf_aws_resources import get_terraform_output
 
 import boto3
@@ -20,15 +20,13 @@ INFLIGHT_TABLE = get_terraform_output("in_flight_table")
 
 
 def use_waiters_check_object_exists(bucket_name, key_name):
-   s3 = dev.client("s3", REGION_NAME)
-   try:
-      waiter = s3.get_waiter('object_exists')
-      waiter.wait(Bucket=bucket_name, Key = key_name,
-                  WaiterConfig={
-                     'Delay': 10, 'MaxAttempts': 5})
-      print('Object exists: ' + bucket_name +'/'+key_name)
-   
-   except FileNotFoundError:
+    s3 = dev.client("s3", REGION_NAME)
+    try:
+        waiter = s3.get_waiter("object_exists")
+        waiter.wait(Bucket=bucket_name, Key=key_name, WaiterConfig={"Delay": 10, "MaxAttempts": 5})
+        print("Object exists: " + bucket_name + "/" + key_name)
+
+    except FileNotFoundError:
         Messages.write_message("File not found")
         raise
 

@@ -10,18 +10,14 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
-from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
 from utils.database.models import Demographics, JobStats
+from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
 from utils.pds_api_service import get_pds_record, PDSAPIError
-import os
-
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class PDSRegistrationStatus(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.job_id = None
 
     def initialise(self):

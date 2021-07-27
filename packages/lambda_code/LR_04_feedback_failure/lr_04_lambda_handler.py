@@ -1,10 +1,8 @@
+import json
+import sys
 from datetime import datetime
 
 import boto3
-import json
-import os
-import sys
-
 from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
 
@@ -13,18 +11,14 @@ from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import (
     INVALID_RECORDS,
     INVALID_STRUCTURE,
 )
-
 from utils import InputFolderType
-from utils.logger import log_dynamodb_error, success
 from utils.exceptions import FeedbackLogError
-
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
+from utils.logger import log_dynamodb_error, success
 
 
 class FeedbackFailure(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
         self.log_key = None
         self.log_filename = None

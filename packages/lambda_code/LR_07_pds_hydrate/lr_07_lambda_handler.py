@@ -1,24 +1,19 @@
 import json
-import os
-
-from spine_aws_common.lambda_application import LambdaApplication
 
 import boto3
+from spine_aws_common.lambda_application import LambdaApplication
 
 from gp_file_parser.utils import empty_string
 from utils import retry_func
-from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
 from utils.database.models import Demographics
+from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
 from utils.pds_api_service import get_pds_record, PDSAPIError
 from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
-
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class PdsHydrate(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.s3 = boto3.client("s3")
         self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
 

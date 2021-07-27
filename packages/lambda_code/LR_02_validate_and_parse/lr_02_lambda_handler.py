@@ -1,32 +1,25 @@
+import json
+import sys
 from uuid import uuid4
 
 import boto3
-import json
-import os
-import sys
-
 from botocore.client import BaseClient
 from pynamodb.exceptions import PynamoDBConnectionError, PutError
-
 from spine_aws_common.lambda_application import LambdaApplication
 
-from services.split_records_to_s3 import split_records_to_s3
-
 from gp_file_parser.parser import parse_gp_extract_file_s3
-
+from services.split_records_to_s3 import split_records_to_s3
 from utils import InputFolderType
-from utils.datetimezone import get_datetime_now
-from utils.logger import log_dynamodb_error, success
 from utils.database.models import Jobs, InFlight
+from utils.datetimezone import get_datetime_now
 from utils.exceptions import InvalidGPExtract, InvalidFilename
+from utils.logger import log_dynamodb_error, success
 
 INBOUND_PREFIX = "inbound/"
 FAILED_PREFIX = "fail/"
 PASSED_PREFIX = "pass/"
 RETRY_PREFIX = "retry/"
 
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 INVALID_RECORDS = "INVALID_RECORDS"
 INVALID_STRUCTURE = "INVALID_STRUCTURE"
@@ -35,7 +28,7 @@ INVALID_FILENAME = "INVALID_FILENAME"
 
 class ValidateAndParse(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.job_id = None
         self.practice_code = None
         self.upload_key = None

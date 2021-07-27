@@ -1,6 +1,5 @@
 import csv
 import io
-import os
 from collections import defaultdict
 from datetime import timedelta
 
@@ -12,13 +11,10 @@ from utils.datetimezone import get_datetime_now, localize_date
 from utils.exceptions import InvalidDSAFile
 from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
 
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
-
 
 class SplitDPSExtract(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.input_bucket = self.system_config["LR_20_SUPPLEMENTARY_INPUT_BUCKET"]
         self.output_bucket = self.system_config["LR_22_SUPPLEMENTARY_OUTPUT_BUCKET"]
 

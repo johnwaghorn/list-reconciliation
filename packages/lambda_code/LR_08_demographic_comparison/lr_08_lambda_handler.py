@@ -6,17 +6,13 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 from comparison_engine.core import compare_records
 from listrec_comparison_engine import listrec_comparisons
-from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
 from utils.database.models import DemographicsDifferences, Demographics
-import os
-
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
+from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
 
 
 class DemographicComparison(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.job_id = None
         self.patient_id = None
 

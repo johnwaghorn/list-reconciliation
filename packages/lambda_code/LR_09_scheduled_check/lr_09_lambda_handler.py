@@ -4,18 +4,14 @@ from typing import Dict
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
-from utils.logger import success, log_dynamodb_error
 from utils.database.models import Jobs, InFlight, Demographics, JobStats
+from utils.logger import success, log_dynamodb_error
 from utils.statuses import JobStatus
-import os
-
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class ScheduledCheck(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
 
     def initialise(self):
         pass

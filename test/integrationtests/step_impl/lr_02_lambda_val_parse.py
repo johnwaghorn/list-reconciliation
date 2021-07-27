@@ -162,11 +162,11 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
     try:
         s3.upload_file(temp_destdir, LR_01_BUCKET, InputFolderType.IN.value + destination_filename)
         Messages.write_message("Upload Successful")
-    
+
     except FileNotFoundError:
         Messages.write_message("File not found")
         raise
-    
+
     return temp_destdir, destination_filename
 
 
@@ -175,11 +175,8 @@ def readfile_in_s3_failed_invalid_item(search_word):
     s3 = dev.client("s3", REGION_NAME)
     fail_prefix = InputFolderType.FAIL.value + destination_filename + "_LOG.txt"
     use_waiters_check_object_exists(LR_01_BUCKET, fail_prefix)
-    
-    result = s3.list_objects(
-        Bucket=LR_01_BUCKET, Prefix=fail_prefix
-    )
-    
+
+    result = s3.list_objects(Bucket=LR_01_BUCKET, Prefix=fail_prefix)
 
     if result:
         for o in result.get("Contents"):

@@ -1,8 +1,6 @@
+import json
 from collections import defaultdict
 from typing import Dict, List, Tuple
-
-import json
-import os
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
@@ -17,14 +15,12 @@ from utils.statuses import JobStatus
 MANUAL_VALIDATION = "Manual Validation"
 
 
-cwd = os.path.dirname(__file__)
-ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 S3 = boto3.client("s3")
 
 
 class DemographicDifferences(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        super().__init__()
         self.job_id = None
 
     def initialise(self):
