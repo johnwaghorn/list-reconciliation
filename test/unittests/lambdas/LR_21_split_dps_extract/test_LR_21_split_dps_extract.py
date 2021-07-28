@@ -43,7 +43,10 @@ def test_lr_21_handler_invalid_event_fails(
 def test_split_dps_handler_expect_success(
     upload_valid_dps_data_to_s3, lambda_handler, lambda_context
 ):
-    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
+    app = lambda_handler
+    app.upload_key = VALID_DATA_FILE
+
+    response = app.split_dps_extract()
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -90,6 +93,9 @@ def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(
     lambda_handler,
     lambda_context,
 ):
+    app = lambda_handler
+    app.upload_key = VALID_DATA_FILE
+
     # Test existing S3 files
     client = boto3.client("s3")
     paginator = client.get_paginator("list_objects_v2")
@@ -105,7 +111,7 @@ def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(
     assert EXISTING_GP_FILE in outdated_gp_files
 
     # Add new test data
-    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
+    response = app.split_dps_extract()
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -132,6 +138,9 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(
     lambda_handler,
     lambda_context,
 ):
+    app = lambda_handler
+    app.upload_key = VALID_DATA_FILE
+
     # Test existing S3 files
     client = boto3.client("s3")
     paginator = client.get_paginator("list_objects_v2")
@@ -147,7 +156,7 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(
     assert EXISTING_GP_FILE in outdated_gp_files
 
     # Add new test data
-    response = lambda_handler.split_dps_extract(VALID_DATA_FILE)
+    response = app.split_dps_extract()
 
     expected = success(
         f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
@@ -167,11 +176,29 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(
     assert EXISTING_GP_FILE in updated_gp_files
 
 
-def test_invalid_file_raises_value_error(
+def test_split_dps_extract_with_invalid_file_raises_invalid_error(
     upload_invalid_dps_data_to_s3,
     create_dynamodb_tables,
     lambda_handler,
     lambda_context,
 ):
+    app = lambda_handler
+    app.upload_key = INVALID_DATA_FILE
+
     with pytest.raises(InvalidDSAFile):
-        lambda_handler.split_dps_extract(INVALID_DATA_FILE)
+        app.split_dps_extract()
+
+
+def test_handler_with_invalid_file_raises_invalid_error(
+    upload_invalid_dps_data_to_s3,
+    create_dynamodb_tables,
+    lambda_handler,
+    lambda_context,
+):
+    event = {"Records": [{"s3": {"object": {"key": f"{INVALID_DATA_FILE}"}}}]}
+
+    result = lambda_handler.main(event, lambda_context)
+
+    expected_response = f"LR-21 processed an invalid DSA file: {INVALID_DATA_FILE}"
+
+    assert expected_response in result["message"]

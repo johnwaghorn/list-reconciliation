@@ -17,12 +17,26 @@ class SplitDPSExtract(LambdaApplication):
         super().__init__()
         self.input_bucket = self.system_config["LR_20_SUPPLEMENTARY_INPUT_BUCKET"]
         self.output_bucket = self.system_config["LR_22_SUPPLEMENTARY_OUTPUT_BUCKET"]
+        self.upload_key = None
 
     def start(self):
         try:
-            upload_key = self.event["Records"][0]["s3"]["object"]["key"]
+            self.upload_key = self.event["Records"][0]["s3"]["object"]["key"]
 
-            self.response = self.split_dps_extract(upload_key)
+            self.response = self.split_dps_extract()
+
+        except InvalidDSAFile:
+            error_message = f"LR-21 processed an invalid DSA file: {self.upload_key}"
+            self.log_object.write_log(
+                "UTI9998",
+                None,
+                {
+                    "logger": "LR21.Lambda",
+                    "level": "ERROR",
+                    "message": error_message,
+                },
+            )
+            self.response = {"message": error_message}
 
         except Exception as err:
             msg = f"Unhandled error when processing supplementary data file in LR-21"
@@ -36,17 +50,14 @@ class SplitDPSExtract(LambdaApplication):
 
             raise Exception(error_response) from err
 
-    def split_dps_extract(self, upload_key: str) -> success:
+    def split_dps_extract(self) -> success:
         """Splits a DPS supplementary file into multiple smaller files by practice
-
-        Args:
-            upload_key (str): A path to the s3 file key object
 
         Returns:
             success: A dict result containing a status and message
         """
 
-        records = self.read_file(upload_key)
+        records = self.read_file()
         self.log_object.write_log(
             "UTI9995",
             None,
@@ -57,7 +68,7 @@ class SplitDPSExtract(LambdaApplication):
             },
         )
 
-        per_registered_gp = self.split_file(upload_key, records)
+        per_registered_gp = self.split_file(records)
         self.log_object.write_log(
             "UTI9995",
             None,
@@ -79,7 +90,7 @@ class SplitDPSExtract(LambdaApplication):
             },
         )
 
-        self.cleanup_files(upload_key, per_registered_gp)
+        self.cleanup_files()
         self.log_object.write_log(
             "UTI9995",
             None,
@@ -90,13 +101,12 @@ class SplitDPSExtract(LambdaApplication):
             },
         )
 
-        return success(f"LR-21 processed Supplementary data successfully, from file: {upload_key}")
+        return success(
+            f"LR-21 processed Supplementary data successfully, from file: {self.upload_key}"
+        )
 
-    def read_file(self, upload_key: str) -> list:
+    def read_file(self) -> list:
         """Retrieve and read supplementary file data
-
-        Args:
-            upload_key (str): A path to the s3 file key object
 
         Returns:
             list: A list of strings containing file data
@@ -105,14 +115,17 @@ class SplitDPSExtract(LambdaApplication):
         try:
             client = boto3.client("s3")
 
-            file_obj = client.get_object(Bucket=self.input_bucket, Key=upload_key)
+            file_obj = client.get_object(Bucket=self.input_bucket, Key=self.upload_key)
 
             file_data = file_obj["Body"].read().decode("utf-8").splitlines()
 
-            return file_data
+            headers = ["NHS Number,Registered GP Practice,Dispensing Flag"]
+
+            if not file_data or file_data == headers:
+                raise InvalidDSAFile()
 
         except (ClientError, UnicodeDecodeError) as err:
-            msg = f"LR-21 failed to read supplementary data from: {upload_key}"
+            msg = f"LR-21 failed to read supplementary data from: {self.upload_key}"
             error_response = log_dynamodb_error(
                 self.log_object,
                 "99999999-2121-2121-2121-999999999999",
@@ -122,11 +135,13 @@ class SplitDPSExtract(LambdaApplication):
 
             raise InvalidDSAFile(error_response) from err
 
-    def split_file(self, upload_key: str, file_data: list) -> dict:
+        else:
+            return file_data
+
+    def split_file(self, file_data: list) -> dict:
         """Split file data into a dict for each registered GP
 
         Args:
-            upload_key (str): A path to the s3 file key object
             file_data (list): A list of strings containing file data
 
         Returns:
@@ -151,7 +166,7 @@ class SplitDPSExtract(LambdaApplication):
             return dict(per_registered_gp)
 
         except ValueError as err:
-            msg = f"LR-21 failed to process file contents for: {upload_key}"
+            msg = f"LR-21 failed to process file contents for: {self.upload_key}"
             error_response = log_dynamodb_error(
                 self.log_object,
                 "99999999-2121-2121-2121-999999999999",
@@ -191,7 +206,6 @@ class SplitDPSExtract(LambdaApplication):
 
                 error_response = log_dynamodb_error(
                     self.log_object,
-                    self.log_object,
                     "99999999-2121-2121-2121-999999999999",
                     "HANDLED_ERROR",
                     msg,
@@ -199,13 +213,9 @@ class SplitDPSExtract(LambdaApplication):
 
                 raise Exception(error_response) from err
 
-    def cleanup_files(self, upload_key: str, per_registered_gp: dict):
-        """Cleanup outdated GP files and clean input bucket
-
-        Args:
-            upload_key (str): A path to the s3 file key object
-            per_registered_gp (dict): A dict of registered GP's
-        """
+    def cleanup_files(self):
+        """Cleanup any file from the LR-22 output bucket, which hasn't been recently modified and remove the DSA
+        upload file from LR-20 input bucket"""
 
         client = boto3.client("s3")
 
@@ -216,7 +226,7 @@ class SplitDPSExtract(LambdaApplication):
             pages = paginator.paginate(Bucket=self.output_bucket)
 
             for page in pages:
-                for obj in page["Contents"]:
+                for obj in page.get("Contents", []):
                     mod_date = localize_date(obj["LastModified"])
 
                     if mod_date < minimum_last_update:
@@ -227,11 +237,11 @@ class SplitDPSExtract(LambdaApplication):
                             {
                                 "logger": "LR21.Lambda",
                                 "level": "INFO",
-                                "message": f"Outdated GP data deleted for GP:{str(obj['Key']).replace('.csv', '')}",
+                                "message": f"Outdated GP data file deleted for GP:{str(obj['Key']).replace('.csv', '')}",
                             },
                         )
 
-            client.delete_object(Bucket=self.input_bucket, Key=upload_key)
+            client.delete_object(Bucket=self.input_bucket, Key=self.upload_key)
 
         except ClientError as err:
             msg = f"Failed to cleanup files in output bucket in LR-21"

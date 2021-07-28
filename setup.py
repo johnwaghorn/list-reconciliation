@@ -12,9 +12,5 @@ setup(
     packages=find_packages(where="./packages"),
     package_dir={"": "packages"},
     install_requires=dependencies,
-    entry_points={
-        "console_scripts": [
-            "gpextract = gp_file_parser.main:main"
-        ]
-    },
+    entry_points={"console_scripts": ["gpextract = gp_file_parser.main:main"]},
 )

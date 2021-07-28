@@ -1,6 +1,6 @@
 locals {
-  supplementary-input-bucket  = "arn:aws:s3:::${var.supplementary-input-bucket}"
-  supplementary-output-bucket = "arn:aws:s3:::${var.supplementary-output-bucket}"
+  supplementary-input-bucket  = var.supplementary_input_bucket_arn
+  supplementary-output-bucket = var.supplementary_output_bucket_arn
 }
 
 data "aws_caller_identity" "current" {}

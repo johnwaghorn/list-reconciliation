@@ -1,5 +1,5 @@
 locals {
-  source_bucket  = "arn:aws:s3:::${var.supplementary-input-bucket}"
+  source_bucket  = var.supplementary_input_bucket_arn
   lambda_timeout = 900
   memory_size    = 10240
 }
@@ -24,8 +24,8 @@ resource "aws_lambda_function" "LR-21-Lambda" {
 
   environment {
     variables = {
-      LR_20_SUPPLEMENTARY_INPUT_BUCKET  = var.supplementary-input-bucket
-      LR_22_SUPPLEMENTARY_OUTPUT_BUCKET = var.supplementary-output-bucket
+      LR_20_SUPPLEMENTARY_INPUT_BUCKET  = var.supplementary_input_bucket
+      LR_22_SUPPLEMENTARY_OUTPUT_BUCKET = var.supplementary_output_bucket
       ERRORS_TABLE                      = var.errors_table_name
     }
   }

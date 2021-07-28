@@ -191,18 +191,20 @@ module "LR-15" {
 }
 
 module "LR-21" {
-  source                      = "./LR-21"
-  lambda_name                 = local.lambda_name.LR-21
-  runtime                     = var.runtime
-  package_layer_arn           = aws_lambda_layer_version.package_layer.arn
-  supplementary-input-bucket  = var.s3_buckets.LR-20.bucket
-  supplementary-output-bucket = var.s3_buckets.LR-22.bucket
-  errors_table_arn            = var.dynamodb_tables.errors.arn
-  errors_table_name           = var.dynamodb_tables.errors.name
-  suffix                      = var.suffix
-  lambda_handler              = var.lambda_handler
-  dynamodb_kms_key            = var.dynamodb_kms_key
-  s3_kms_key                  = var.s3_kms_key
+  source                          = "./LR-21"
+  lambda_name                     = local.lambda_name.LR-21
+  runtime                         = var.runtime
+  package_layer_arn               = aws_lambda_layer_version.package_layer.arn
+  supplementary_input_bucket      = var.s3_buckets.LR-20.bucket
+  supplementary_input_bucket_arn  = var.s3_buckets.LR-20.arn
+  supplementary_output_bucket     = var.s3_buckets.LR-22.bucket
+  supplementary_output_bucket_arn = var.s3_buckets.LR-22.arn
+  errors_table_arn                = var.dynamodb_tables.errors.arn
+  errors_table_name               = var.dynamodb_tables.errors.name
+  suffix                          = var.suffix
+  lambda_handler                  = var.lambda_handler
+  dynamodb_kms_key                = var.dynamodb_kms_key
+  s3_kms_key                      = var.s3_kms_key
 }
 
 module "LR-24" {

@@ -10,11 +10,19 @@ variable "package_layer_arn" {
   type = string
 }
 
-variable "supplementary-input-bucket" {
+variable "supplementary_input_bucket" {
   type = string
 }
 
-variable "supplementary-output-bucket" {
+variable "supplementary_input_bucket_arn" {
+  type = string
+}
+
+variable "supplementary_output_bucket" {
+  type = string
+}
+
+variable "supplementary_output_bucket_arn" {
   type = string
 }
 

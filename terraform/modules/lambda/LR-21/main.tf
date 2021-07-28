@@ -3,11 +3,11 @@ resource "aws_lambda_permission" "allow_LR20_bucket" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.LR-21-Lambda.arn
   principal     = "s3.amazonaws.com"
-  source_arn    = "arn:aws:s3:::${var.supplementary-input-bucket}"
+  source_arn    = var.supplementary_input_bucket_arn
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = var.supplementary-input-bucket
+  bucket = var.supplementary_input_bucket
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.LR-21-Lambda.arn
