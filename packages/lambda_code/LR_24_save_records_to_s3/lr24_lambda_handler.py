@@ -18,6 +18,8 @@ class SaveRecordsToS3(LambdaApplication):
         pass
 
     def start(self):
+        self.log_object.set_internal_id(self._create_new_internal_id())
+
         records = self.event["records"]
         destination_bucket = self.event["destination_bucket"]
         id_cols = self.event["id_cols"]

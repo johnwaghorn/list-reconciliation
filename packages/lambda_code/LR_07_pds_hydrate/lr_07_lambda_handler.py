@@ -16,6 +16,7 @@ class PdsHydrate(LambdaApplication):
         super().__init__()
         self.s3 = boto3.client("s3")
         self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
+        self.job_id = None
 
     def initialise(self):
         pass
@@ -36,9 +37,13 @@ class PdsHydrate(LambdaApplication):
             .decode("utf-8")
         )
 
+        self.job_id = str(body["job_id"])
+
+        self.log_object.set_internal_id(self.job_id)
+
         patient = Demographics(
             Id=body["id"],
-            JobId=body["job_id"],
+            JobId=self.job_id,
             NhsNumber=empty_string(body["NHS_NUMBER"]),
             IsComparisonCompleted=False,
             GP_GpCode=str(body["practice_code"]),
@@ -70,6 +75,19 @@ class PdsHydrate(LambdaApplication):
                 wait_exponential_multiplier=1000,
                 wait_exponential_max=10000,
                 stop_max_attempt_number=10,
+            )
+
+        except KeyError as err:
+            error_message = f"Lambda event has missing {str(err)} key"
+            self.response = {"message": error_message}
+            self.log_object.write_log(
+                "UTI9995",
+                None,
+                {
+                    "logger": "LR07.Lambda",
+                    "level": "INFO",
+                    "message": self.response["message"],
+                },
             )
 
         except Exception as err:

@@ -18,6 +18,8 @@ class ScheduledCheck(LambdaApplication):
 
     def start(self):
         try:
+            self.log_object.set_internal_id(self._create_new_internal_id())
+
             self.response = self.process_finished_jobs()
 
             self.log_object.write_log(

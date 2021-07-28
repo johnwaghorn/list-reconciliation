@@ -17,13 +17,29 @@ class DemographicComparison(LambdaApplication):
         self.patient_id = None
 
     def initialise(self):
-        self.job_id = str(self.event["job_id"])
-        self.patient_id = str(self.event["patient_id"])
+        pass
 
     def start(self):
-
         try:
+            self.job_id = str(self.event["job_id"])
+            self.patient_id = str(self.event["patient_id"])
+
+            self.log_object.set_internal_id(self.job_id)
+
             self.response = json.dumps(self.demographic_comparisons(self.job_id, self.patient_id))
+
+        except KeyError as err:
+            error_message = f"Lambda event has missing {str(err)} key"
+            self.response = {"message": error_message}
+            self.log_object.write_log(
+                "UTI9995",
+                None,
+                {
+                    "logger": "LR08.Lambda",
+                    "level": "INFO",
+                    "message": self.response["message"],
+                },
+            )
 
         except Exception as err:
             msg = f"Unhandled error patient_id: {self.patient_id}"

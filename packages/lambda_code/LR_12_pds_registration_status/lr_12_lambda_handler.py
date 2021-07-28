@@ -21,12 +21,28 @@ class PDSRegistrationStatus(LambdaApplication):
         self.job_id = None
 
     def initialise(self):
-        self.job_id = self.event["job_id"]
+        pass
 
     def start(self):
-
         try:
+            self.job_id = str(self.event["job_id"])
+
+            self.log_object.set_internal_id(self.job_id)
+
             self.response = json.dumps(self.get_pds_exclusive_registrations(self.job_id))
+
+        except KeyError as err:
+            error_message = f"Lambda event has missing {str(err)} key"
+            self.response = {"message": error_message}
+            self.log_object.write_log(
+                "UTI9995",
+                None,
+                {
+                    "logger": "LR12.Lambda",
+                    "level": "INFO",
+                    "message": self.response["message"],
+                },
+            )
 
         except Exception as err:
             msg = f"Unhandled error getting PDS registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"

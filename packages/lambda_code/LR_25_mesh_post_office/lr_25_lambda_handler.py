@@ -15,6 +15,8 @@ class MeshPostOffice(LambdaApplication):
         self.mesh_post_office_open: str = str(self.system_config["mesh_post_office_open"])
 
     def start(self):
+        self.log_object.set_internal_id(self._create_new_internal_id())
+
         if not self.check_if_open():
             # exit early if the Post Office is closed
             # we don't want to deliver any Mesh messages to LR-01 Inbound

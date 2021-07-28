@@ -15,12 +15,6 @@ from utils.datetimezone import get_datetime_now
 from utils.exceptions import InvalidGPExtract, InvalidFilename
 from utils.logger import log_dynamodb_error, success
 
-INBOUND_PREFIX = "inbound/"
-FAILED_PREFIX = "fail/"
-PASSED_PREFIX = "pass/"
-RETRY_PREFIX = "retry/"
-
-
 INVALID_RECORDS = "INVALID_RECORDS"
 INVALID_STRUCTURE = "INVALID_STRUCTURE"
 INVALID_FILENAME = "INVALID_FILENAME"

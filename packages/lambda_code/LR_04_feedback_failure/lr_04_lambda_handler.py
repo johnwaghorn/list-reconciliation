@@ -31,10 +31,10 @@ class FeedbackFailure(LambdaApplication):
 
     def start(self):
         try:
-            self.log_key = self.event["Records"][0]["s3"]["object"]["key"]
-
             prefix = f"{InputFolderType.FAIL.value}logs/"
 
+            self.log_object.set_internal_id(self._create_new_internal_id())
+            self.log_key = self.event["Records"][0]["s3"]["object"]["key"]
             self.log_filename = str(self.log_key).replace(prefix, "")
 
             self.response = self.process_failed_file()
