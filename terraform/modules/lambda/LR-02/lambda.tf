@@ -1,4 +1,5 @@
 locals {
+  name           = "${var.lambda_name}-${var.suffix}"
   source_bucket  = var.source_bucket_arn
   lambda_timeout = 900
   memory_size    = 1024
@@ -10,8 +11,13 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/../../../../lambdas/${var.lambda_name}.zip"
 }
 
+resource "aws_cloudwatch_log_group" "lambda" {
+  name              = "/aws/lambda/${local.name}"
+  retention_in_days = var.log_retention_in_days
+}
+
 resource "aws_lambda_function" "LR-02-Lambda" {
-  function_name    = "${var.lambda_name}-${var.suffix}"
+  function_name    = local.name
   filename         = data.archive_file.lambda_zip.output_path
   handler          = var.lambda_handler
   role             = aws_iam_role.role.arn
@@ -20,7 +26,6 @@ resource "aws_lambda_function" "LR-02-Lambda" {
   timeout          = local.lambda_timeout
   layers           = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-
 
   environment {
     variables = {
@@ -32,4 +37,6 @@ resource "aws_lambda_function" "LR-02-Lambda" {
       LR_06_BUCKET                       = var.lr_06_bucket
     }
   }
+
+  depends_on = [aws_cloudwatch_log_group.lambda]
 }

@@ -1,15 +1,16 @@
 module "lambda" {
   source = "../../modules/lambda"
 
-  suffix           = local.environment
-  pds_url          = "pds_api_data.csv"
-  runtime          = "python3.8"
-  lambda_handler   = "main.lambda_handler"
-  s3_buckets       = module.s3.buckets
-  dynamodb_kms_key = module.kms["dynamodb"].output
-  s3_kms_key       = module.kms["s3"].output
+  suffix                = local.environment
+  pds_url               = "pds_api_data.csv"
+  runtime               = "python3.8"
+  lambda_handler        = "main.lambda_handler"
+  s3_buckets            = module.s3.buckets
+  dynamodb_kms_key      = module.kms["dynamodb"].output
+  s3_kms_key            = module.kms["s3"].output
+  log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 
-  mesh_kms_key_alias        = try(local.mesh_post_office_open[local.environment], local.mesh_kms_key_alias["default"])
+  mesh_kms_key_alias        = try(local.mesh_kms_key_alias[local.environment], local.mesh_kms_key_alias["default"])
   mesh_post_office_open     = try(local.mesh_post_office_open[local.environment], local.mesh_post_office_open["default"])
   mesh_post_office_mappings = try(local.mesh_post_office_mappings[local.environment], local.mesh_post_office_mappings["default"])
 
@@ -60,9 +61,10 @@ module "s3" {
   source = "../../modules/s3"
 
   # Allow S3 resources to be destroyed whilst containing data in non-prod envs
-  force_destroy = local.environment == "prod" ? false : true
-  suffix        = local.environment
-  kms_key_arn   = module.kms["s3"].output.arn
+  force_destroy         = local.environment == "prod" ? false : true
+  suffix                = local.environment
+  kms_key_arn           = module.kms["s3"].output.arn
+  log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 }
 
 module "lr_10_registration_orchestration" {

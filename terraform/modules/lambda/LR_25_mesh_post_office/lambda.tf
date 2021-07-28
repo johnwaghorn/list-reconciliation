@@ -6,7 +6,7 @@ data "archive_file" "lambda_zip" {
 
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.name}"
-  retention_in_days = 365
+  retention_in_days = var.log_retention_in_days
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -18,4 +18,6 @@ resource "aws_lambda_function" "lambda" {
   timeout          = 15 * 60 # 15 minutes
   layers           = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  depends_on = [aws_cloudwatch_log_group.lambda]
 }

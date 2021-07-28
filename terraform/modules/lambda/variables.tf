@@ -62,3 +62,13 @@ variable "mesh_kms_key_alias" {
   description = "The alias of the Mesh KMS encryption key"
   type        = string
 }
+
+variable "log_retention_in_days" {
+  description = "How many days to retain logs for"
+  type        = number
+
+  validation {
+    condition     = var.log_retention_in_days >= 1
+    error_message = "The log_retention_in_days value must be greater than or equal to 1."
+  }
+}

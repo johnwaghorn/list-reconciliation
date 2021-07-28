@@ -1,4 +1,5 @@
 locals {
+  name           = "${var.lambda_name}-${var.suffix}"
   lambda_timeout = 300
 }
 
@@ -8,8 +9,13 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/../../../../lambdas/${var.lambda_name}.zip"
 }
 
+resource "aws_cloudwatch_log_group" "lambda" {
+  name              = "/aws/lambda/${local.name}"
+  retention_in_days = var.log_retention_in_days
+}
+
 resource "aws_lambda_function" "LR-12-Lambda" {
-  function_name    = "${var.lambda_name}-${var.suffix}"
+  function_name    = local.name
   filename         = data.archive_file.lambda_zip.output_path
   handler          = var.lambda_handler
   role             = aws_iam_role.role.arn
@@ -30,4 +36,6 @@ resource "aws_lambda_function" "LR-12-Lambda" {
       PDS_API_RETRIES                         = var.pds_api_retries
     }
   }
+
+  depends_on = [aws_cloudwatch_log_group.lambda]
 }

@@ -10,4 +10,13 @@ resource "aws_s3_bucket" "LR-26" {
       }
     }
   }
+
+  lifecycle_rule {
+    id      = "AccessLogs"
+    enabled = true
+
+    expiration {
+      days = var.log_retention_in_days
+    }
+  }
 }

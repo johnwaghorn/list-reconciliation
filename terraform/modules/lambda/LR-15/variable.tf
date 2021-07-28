@@ -85,3 +85,7 @@ variable "dynamodb_kms_key" {
 variable "s3_kms_key" {
   type = map(string)
 }
+
+variable "log_retention_in_days" {
+  type = number
+}

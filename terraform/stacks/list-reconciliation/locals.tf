@@ -3,6 +3,12 @@ locals {
   environment         = lower(terraform.workspace)
   data_classification = local.environment == "prod" ? "5" : "1"
 
+  log_retention_in_days = {
+    default = 3
+    preprod = 14
+    prod    = 365
+  }
+
   terraform_deploy_role_arn = {
     dev     = "arn:aws:iam::092420156801:role/LRTerraformDeploy"
     preprod = "arn:aws:iam::287634746327:role/LRTerraformDeploy"
