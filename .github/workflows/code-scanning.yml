@@ -10,17 +10,12 @@ on:
 
 jobs:
   codeql-analyze:
-    name: Analyze
+    name: CodeQL Analyze
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["python"]
 
     steps:
       - name: Checkout repository
@@ -29,10 +24,47 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
-          languages: ${{ matrix.language }}
+          languages: "python"
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
+
+  tfsec:
+    name: tfsec
+    runs-on: self-hosted
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+
+      - name: Python Package
+        run: |
+          make python-package
+
+      - name: Terraform Init
+        run: |
+          make init
+          make workspace env="default"
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@main
+        with:
+          working_directory: "./terraform/stacks/list-reconciliation"
+          github_token: ${{ github.token }}
+
+      - name: tfsec
+        uses: tfsec/tfsec-sarif-action@master
+        with:
+          working_directory: "./terraform/stacks/list-reconciliation"
+          sarif_file: tfsec_list-reconciliation.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: tfsec_list-reconciliation.sarif
