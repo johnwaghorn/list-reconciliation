@@ -11,6 +11,7 @@ locals {
     LR-24 = "LR_24_save_records_to_s3"
     LR-21 = "LR_21_split_dps_extract"
     lr_25 = "LR_25_mesh_post_office"
+    lr_27 = "LR_27_job_cleanup"
   }
 }
 
@@ -248,4 +249,22 @@ module "lr_25" {
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
   lr_25_event_schedule_expression = var.lr_25_event_schedule_expression
+}
+
+module "lr_27" {
+  source = "./LR_27_job_cleanup"
+
+  lambda_name                           = local.lambda_name.lr_27
+  package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
+  runtime                               = var.runtime
+  suffix                                = var.suffix
+  dynamodb_kms_key                      = var.dynamodb_kms_key
+  s3_kms_key                            = var.s3_kms_key
+  log_retention_in_days                 = var.log_retention_in_days
+  lr_13_registrations_output_bucket     = var.s3_buckets.LR-13.bucket
+  lr_13_registrations_output_bucket_arn = var.s3_buckets.LR-13.arn
+  jobs_table_arn                        = var.dynamodb_tables.jobs.arn
+  jobs_table_name                       = var.dynamodb_tables.jobs.name
+  in_flight_table_arn                   = var.dynamodb_tables.in_flight.arn
+  in_flight_table_name                  = var.dynamodb_tables.in_flight.name
 }

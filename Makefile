@@ -6,6 +6,8 @@ branch := $(shell git branch --show-current | sed -e 's/_/-/g' -e 's/\./-/g' | h
 env ?= dev
 stack ?= list-reconciliation
 mesh_post_office_lambda ?= LR_25_mesh_post_office-prod
+job_cleanup_lambda ?= LR_27_job_cleanup-prod
+job_id ?= 00000000-0000-0000-0000-000000000000
 
 #
 # Shared rules
@@ -24,7 +26,7 @@ python-package:
 	rm -r ./lambda_layer || true
 	mkdir -p ./lambda_layer/python/lib/python3.8/site-packages
 	echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || true
-	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" public.ecr.aws/sam/build-python3.8 /bin/python3 -m pip install -r requirements.txt -t ./lambda_layer/python/lib/python3.8/site-packages
+	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" public.ecr.aws/sam/build-python3.8 python3 -m pip install -r requirements.txt -t ./lambda_layer/python/lib/python3.8/site-packages
 	cp -r ./packages/* ./lambda_layer/python/lib/python3.8/site-packages
 
 # Testing
@@ -116,3 +118,10 @@ close-mesh-post-office:
 	@aws ssm put-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open --type "String" --value "False" --overwrite > /dev/null
 	@aws lambda put-function-concurrency --function-name ${mesh_post_office_lambda} --reserved-concurrent-executions 0 > /dev/null
 	@aws ssm get-parameter --name /${mesh_post_office_lambda}/mesh_post_office_open
+
+# Job Cleanup Lambda
+job-cleanup:
+	@aws lambda invoke --function-name ${job_cleanup_lambda} --cli-binary-format raw-in-base64-out --payload '{"job_id":"${job_id}"}' --log-type Tail ${job_cleanup_lambda}_${job_id}.log > /dev/null
+	@cat ${job_cleanup_lambda}_${job_id}.log
+# Echo a newline so we don't mess up the users terminal
+	@echo
