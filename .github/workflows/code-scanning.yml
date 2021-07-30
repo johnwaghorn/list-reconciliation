@@ -34,29 +34,11 @@ jobs:
 
   tfsec:
     name: tfsec
-    runs-on: self-hosted
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Clone repo
         uses: actions/checkout@v2
-
-      - name: Python Package
-        run: |
-          make python-package
-
-      - name: Terraform Init
-        run: |
-          make init
-          make workspace env="default"
-
-      - name: tfsec
-        uses: aquasecurity/tfsec-pr-commenter-action@main
-        with:
-          working_directory: "./terraform/stacks/list-reconciliation"
-          github_token: ${{ github.token }}
 
       - name: tfsec
         uses: tfsec/tfsec-sarif-action@master
