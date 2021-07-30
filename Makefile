@@ -2,7 +2,7 @@
 # Variables
 #
 
-branch := $(shell git branch --show-current)
+branch := $(shell git branch --show-current | sed -e 's/_/-/g' -e 's/\./-/g' | head -c 20)
 env ?= dev
 stack ?= list-reconciliation
 mesh_post_office_lambda ?= LR_25_mesh_post_office-prod
