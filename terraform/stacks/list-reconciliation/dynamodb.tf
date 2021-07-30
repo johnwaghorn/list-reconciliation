@@ -38,6 +38,7 @@ module "jobs_stats" {
   ]
 }
 
+#tfsec:ignore:aws-dynamodb-enable-recovery
 module "in_flight" {
   source         = "../../modules/dynamodb"
   table_name     = "InFlight-${local.environment}"
@@ -51,6 +52,7 @@ module "in_flight" {
   ]
 }
 
+#tfsec:ignore:aws-dynamodb-enable-recovery
 module "demographics" {
   source          = "../../modules/dynamodb"
   table_name      = "Demographics-${local.environment}"
@@ -76,6 +78,7 @@ module "demographics" {
   ]
 }
 
+#tfsec:ignore:aws-dynamodb-enable-recovery
 module "demographics_differences" {
   source          = "../../modules/dynamodb"
   table_name      = "DemographicsDifferences-${local.environment}"
@@ -101,6 +104,7 @@ module "demographics_differences" {
   ]
 }
 
+#tfsec:ignore:aws-dynamodb-enable-recovery
 module "errors" {
   source          = "../../modules/dynamodb"
   table_name      = "Errors-${local.environment}"
@@ -119,6 +123,7 @@ module "errors" {
   ]
 }
 
+#tfsec:ignore:aws-dynamodb-enable-recovery
 module "statuses" {
   source         = "../../modules/dynamodb"
   table_name     = "Statuses-${local.environment}"

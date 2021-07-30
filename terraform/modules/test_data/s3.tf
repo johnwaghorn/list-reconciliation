@@ -1,3 +1,4 @@
+#tfsec:ignore:custom-custom-lr-all-buckets-log tfsec:ignore:aws-s3-enable-bucket-logging tfsec:ignore:aws-s3-enable-versioning
 resource "aws_s3_bucket" "mock_pds_data" {
   bucket        = "mock-pds-data-${var.suffix}"
   acl           = "private"

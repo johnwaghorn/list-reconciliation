@@ -1,0 +1,3 @@
+---
+exclude:
+  - aws-s3-specify-public-access-block # handled at the account level

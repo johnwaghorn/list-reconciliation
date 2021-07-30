@@ -1,0 +1,17 @@
+---
+checks:
+  - code: lr-all-buckets-log
+    description: Check to ensure all S3 buckets have logging applied
+    impact: By not having logging we can't keep track of bucket interactions
+    resolution: Add the logging block
+    requiredTypes:
+      - resource
+    requiredLabels:
+      - aws_s3_bucket
+    severity: ERROR
+    matchSpec:
+      name: logging
+      action: isPresent
+    errorMessage: The required logging block was missing
+    relatedLinks:
+      - http://internal.acmecorp.com/standards/aws/tagging.html

@@ -1,3 +1,4 @@
+#tfsec:ignore:aws-s3-enable-versioning
 resource "aws_s3_bucket" "LR-06" {
   bucket        = "lr-06-${var.suffix}"
   acl           = "private"

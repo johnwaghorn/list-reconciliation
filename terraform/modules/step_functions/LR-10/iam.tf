@@ -21,6 +21,7 @@ EOF
   }
 }
 
+#tfsec:ignore:aws-iam-no-policy-wildcards
 resource "aws_iam_policy" "policy" {
   name        = "iam-policy-${var.name}"
   description = "Policy for LR-10 ${var.name} Step function Role."
@@ -51,4 +52,3 @@ resource "aws_iam_role_policy_attachment" "policy_attachment" {
   role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn
 }
-
