@@ -1,6 +1,7 @@
 # PDS FHIR API Tests
 ---------------------
-Tags : nightly_runs
+
+tags: nightly_runs
 
 ## Ensure able to access FHIR R4 PATIENT Record sucessfully
 -----------------------------------------------------------
