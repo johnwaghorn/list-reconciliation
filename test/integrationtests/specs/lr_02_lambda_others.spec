@@ -15,7 +15,7 @@ Tags: wip
 * trigger lambda LR-02 and assert response status code is "202"
 * trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is "202"
 
-## test to ensure when lambda LR-02 is triggered with invalid payload should throw key error 
+## test to ensure when lambda LR-02 is triggered with invalid payload should throw key error
 --------------------------------------------------------------------------------------------
 * connect and trigger lambda LR-02 with invalid payload
 

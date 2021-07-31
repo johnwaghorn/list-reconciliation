@@ -1,4 +1,4 @@
-# Test on LR-12 Lambda & LR-13 bucket for PDS not on practice file 
+# Test on LR-12 Lambda & LR-13 bucket for PDS not on practice file
 ------------------------------------------------------------------
 Tags : wip
 

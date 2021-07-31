@@ -1,94 +1,134 @@
-from .lr_beforehooks import use_waiters_check_object_exists
-from getgauge.python import step
-from getgauge.python import Messages
-from tempfile import gettempdir
-from .tf_aws_resources import get_terraform_output
-from utils.datetimezone import get_datetime_now
-
-import boto3
+import json
 import os
 import time
 
-# On github
-access_key = os.getenv("AWS_PUBLIC_KEY")
-secret_key = os.getenv("AWS_PRIVATE_KEY")
-dev = boto3.session.Session(access_key, secret_key)
+import boto3
+from getgauge.python import data_store, Messages, step
 
-test_datetime = get_datetime_now()
-temp_dir = gettempdir()
+from .test_helpers import (
+    create_timestamp,
+    get_latest_jobid,
+    await_s3_object_exists,
+    await_stepfunction_succeeded,
+)
+from .lr_02_lambda_val_parse import create_gp_file
+from .lr_beforehooks import use_waiters_check_object_exists
+from .tf_aws_resources import get_terraform_output
+from utils import InputFolderType
 
-REGION_NAME = "eu-west-2"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
-EXPECED_DATA = os.path.join(ROOT, "data")
+EXPECTED_DATA = os.path.join(ROOT, "data", "LR_13")
 
-MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
-LR_12_LAMBDA = get_terraform_output("lr_12_lambda")
+LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
-LR_22_BUCKET = get_terraform_output("lr_22_bucket")
 LR_13_BUCKET = get_terraform_output("lr_13_bucket")
-LR_23_BUCKET = get_terraform_output("lr_23_bucket")
-DYNAMODB_DEMOG = get_terraform_output("demographic_table")
-DYNAMODB_INFLIGHTS = get_terraform_output("in_flight_table")
-DYNAMODB_JOBS = get_terraform_output("jobs_table")
-DYNAMODB_JOBSTATS = get_terraform_output("jobs_stats_table")
+LR_22_BUCKET = get_terraform_output("lr_22_bucket")
+MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
+
+REGION_NAME = "eu-west-2"
+dynamodb = boto3.resource("dynamodb", REGION_NAME)
+s3 = boto3.client("s3", REGION_NAME)
+stepfunctions = boto3.client("stepfunctions", REGION_NAME)
 
 
-@step("prep step : connect to s3 buckets mock pds, lr-22 and upload data files for <lr-15> lambda")
-def connect_to_s3_and_upload_mock_data_valid_scenario(lr_15_path):
-    s3 = dev.client("s3", REGION_NAME)
-
+@step("upload mock pds data in <path> to S3")
+def upload_mock_pds_data(path):
     try:
         pds_api_prefix = "pds_api_data.csv"
         s3.upload_file(
-            os.path.join(DATA, lr_15_path + pds_api_prefix),
+            os.path.join(DATA, path, pds_api_prefix),
             MOCK_PDS_DATA,
             pds_api_prefix,
         )
         use_waiters_check_object_exists(MOCK_PDS_DATA, pds_api_prefix)
-
-        # File 1:
-        file1 = "A82023.csv"
-        s3.upload_file(os.path.join(DATA, "LR_15/A82023.csv"), LR_22_BUCKET, file1)
-        use_waiters_check_object_exists(LR_22_BUCKET, file1)
-
-        # File 2:
-        file2 = "Y123451.csv"
-        s3.upload_file(os.path.join(DATA, "LR_15/Y123451.csv"), LR_22_BUCKET, file2)
-        use_waiters_check_object_exists(LR_22_BUCKET, file2)
-
-        # File 3:
-        file3 = "Y123452.csv"
-        s3.upload_file(os.path.join(DATA, "LR_15/Y123452.csv"), LR_22_BUCKET, file3)
-
-        Messages.write_message("All PDS data related files Uploaded Successful")
-
+        Messages.write_message("PDS data uploaded")
     except FileNotFoundError:
         Messages.write_message("File not found")
         raise
 
 
+@step("upload test data files in <path> to lr-22")
+def upload_test_data_files_to_lr_22(path):
+    try:
+        for file in ["A82023.csv", "Y123451.csv", "Y123452.csv"]:
+            s3.upload_file(os.path.join(DATA, path, file), LR_22_BUCKET, file)
+            use_waiters_check_object_exists(LR_22_BUCKET, file)
+        Messages.write_message("Test data uploaded")
+    except FileNotFoundError:
+        Messages.write_message("File not found")
+        raise
+
+
+@step("upload gpfile file <testfile> to LR-01")
+def upload_gpextract_file_into_s3(testfile):
+    gp_file = create_gp_file(testfile, "DOW~1")
+    destination_filename = os.path.basename(gp_file)
+    try:
+        s3.upload_file(gp_file, LR_01_BUCKET, f"{InputFolderType.IN.value}{destination_filename}")
+        Messages.write_message("Upload Successful")
+    except FileNotFoundError:
+        Messages.write_message("File not found")
+        raise
+
+
+@step("execute step function lr-10 and assert status succeeded")
+def execute_step_function_lr_10_assert_succeeded():
+    # Get the latest Job ID and put it into a Gauge datastore so other steps can pick it up
+    job_id = get_latest_jobid()
+    Messages.write_message(f"JOB_ID {job_id}")
+    data_store.scenario["job_id"] = job_id
+
+    execution = stepfunctions.start_execution(
+        stateMachineArn=LR_10_STATE_FUNCTION_ARN,
+        name=f"integration_test_{create_timestamp()}",
+        input=json.dumps({"job_id": job_id}),
+    )
+
+    stepfunction = await_stepfunction_succeeded(execution["executionArn"])
+
+    if stepfunction["status"] == "SUCCEEDED":
+        # Get the LR-10 output filename and put it into a Gauge datastore so other steps can pick it up
+        filename = json.loads(json.loads(stepfunction["output"])[0])["summary"]
+        Messages.write_message(f"FILENAME {filename}")
+        bucket = filename.split("/")[2]
+        key = "/".join(filename.split("/")[3:])
+        data_store.scenario["lr_10"] = {"job_id": job_id, "bucket": bucket, "key": key}
+        assert True
+
+
 @step(
-    "connect to <lr_bucket> s3 bucket and ensure <filetype> produced contains the expected consolidated records as in <exp_datafile>"
+    "ensure produced CDD file contains the expected consolidated records as in <expected_data_file>"
 )
-def assert_expected_file_in_lr13(lr_bucket, filetype, exp_datafile):
-    exp_path = os.path.join(EXPECED_DATA, lr_bucket + exp_datafile)
+def assert_expected_file_in_lr13(expected_data_file):
+    job_id = data_store.scenario["job_id"]
+    if not job_id:
+        job_id = get_latest_jobid()
 
-    s3 = dev.client("s3", REGION_NAME)
-    result = s3.list_objects(Bucket=LR_13_BUCKET)
-    with open(exp_path, "r") as exp_datafile:
-        exp_data = sorted(exp_datafile)
+    lr_10 = data_store.scenario["lr_10"]
+    if not lr_10:
+        assert False
 
-        for filename in result.get("Contents"):
-            if filetype in filename:
-                data = s3.get_object(Bucket=LR_13_BUCKET, Key=filename.get("Key"))
-                act_contents = sorted(data["Body"].read().decode("utf-8").splitlines())
-                for line, row in zip(act_contents, exp_data):
+    bucket = lr_10["bucket"]
+    key = lr_10["key"]
 
-                    if row.rstrip() == line:
-                        Messages.write_message("Actual row is :" + str(line))
-                        Messages.write_message("success : Record as expected")
-                    else:
-                        assert (
-                            row.rstrip() == line
-                        ), f"Actual row is : {str(line)} Expected was : {row.rstrip()}\nUnsuccessful : expected record not found"
+    assert await_s3_object_exists(
+        bucket, key
+    ), f"Could not find file: {bucket}/{key} for job_id: {job_id}"
+    assert "CDD" in key, f"Output file: {bucket}/{key} was not type: CDD"
+
+    job_object = s3.get_object(Bucket=LR_13_BUCKET, Key=key)
+    sorted_job_data = sorted(job_object["Body"].read().decode("utf-8").splitlines())
+
+    expected_data_path = os.path.join(EXPECTED_DATA, expected_data_file)
+    with open(expected_data_path, "r") as expected_data:
+        sorted_expected_data = sorted(expected_data)
+        for job_row, expected_row in zip(sorted_job_data, sorted_expected_data):
+            assert (
+                job_row.rstrip() == expected_row.rstrip()
+            ), f"File: {bucket}/{key}\nJob row: {job_row}\nExpected row: {expected_row}\nError: expected record not found"
+
+
+@step("wait for <seconds> seconds to allow other jobs to process")
+def wait_for_seconds(seconds):
+    time.sleep(int(seconds))

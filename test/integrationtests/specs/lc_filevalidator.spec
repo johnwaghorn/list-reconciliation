@@ -29,5 +29,5 @@
 * run gpextract for scenario "positive scenario" using file "A82023_GPR4LNA1.C1A" and date "20210315" and ensure expected message is "Success"
 * assert "records.csv" file keys are as expected
 
-## validate  for non existing GP file 
+## validate  for non existing GP file
 * run gpextract for scenario using not existing file and ensure expected message is "No such file or directory: 'A82023_GPR4LNA1.EDA'Failed"

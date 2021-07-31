@@ -1,6 +1,8 @@
 import json
 import os
 
+from getgauge.python import Messages
+
 cwd = os.path.dirname(__file__)
 OUTPUT_FILE = os.path.join(cwd, "..", "..", "..", "terraform_outputs_list-reconciliation.json")
 
@@ -20,5 +22,7 @@ def get_terraform_output(resource):
         # it exits non-gracefully and gives no hint to the user as to which variable is missing, requiring
         # them to download the logs and find the error this way the tests should error as they won't be able
         # to lookup AWS resources on the name (with "MISSING_OUTPUT_" prefix)
-        print(f"Missing terraform output: {resource}")
+        msg = f"Missing terraform output: {resource}"
+        print(msg)
+        Messages.write_message(msg)
         return f"MISSING_OUTPUT_{resource}"

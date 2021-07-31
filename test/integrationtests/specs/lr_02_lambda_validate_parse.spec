@@ -4,7 +4,7 @@ Tags: wip
 
  |DrugDespenserErrorMessage                        |
  |-------------------------------------------------|
- |'DRUGS_DISPENSED_MARKER': "must be 'Y' or blank."|           
+ |'DRUGS_DISPENSED_MARKER': "must be 'Y' or blank."|
 
 
 * setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
