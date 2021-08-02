@@ -1,5 +1,5 @@
 boto3==1.18.11
-python-dateutil==2.8.1
+python-dateutil==2.8.2
 pynamodb==5.0.3
 requests==2.25.1
 pytz==2020.1
