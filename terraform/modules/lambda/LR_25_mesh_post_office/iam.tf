@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "policy" {
       ]
 
       resources = [
-        data.aws_kms_alias.mesh.target_key_arn
+        data.aws_kms_alias.mesh[0].target_key_arn
       ]
     }
   }
@@ -127,9 +127,7 @@ data "aws_iam_policy_document" "policy" {
       effect = "Allow"
 
       actions = [
-        "s3:GetObjectTagging",
-        "s3:GetObject",
-        "s3:DeleteObject"
+        "s3:PutObject*",
       ]
 
       resources = [
