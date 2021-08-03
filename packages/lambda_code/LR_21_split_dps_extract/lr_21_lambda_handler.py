@@ -155,8 +155,8 @@ class SplitDPSExtract(LambdaApplication):
 
             next(reader, None)
 
-            for nhs_number, gp_code, disp_flag in reader:
-                per_registered_gp[gp_code.strip()].append(
+            for nhs_number, gp_practicecode, disp_flag in reader:
+                per_registered_gp[gp_practicecode.strip()].append(
                     {
                         "nhs_number": nhs_number.strip(),
                         "dispensing_flag": int(disp_flag),

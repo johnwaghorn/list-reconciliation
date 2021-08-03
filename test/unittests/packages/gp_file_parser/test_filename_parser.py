@@ -91,7 +91,7 @@ def test_validate_filename_exceeds_length_raises_InvalidFilename():
 
 
 @freeze_time("2020-02-01")
-def test_validate_filename_invalid_gp_code_match_raises_InvalidFilename():
+def test_validate_filename_invalid_gp_practicecode_match_raises_InvalidFilename():
     filename = "AZ2023_GPR4BRF1.B1A"
 
     expected = {"message": ["Filename contains invalid practice code"]}
@@ -103,7 +103,7 @@ def test_validate_filename_invalid_gp_code_match_raises_InvalidFilename():
 
 
 @freeze_time("2020-02-01")
-def test_validate_filename_invalid_gp_code_and_invalid_filename_raises_InvalidFilename():
+def test_validate_filename_invalid_gp_practicecode_and_invalid_filename_raises_InvalidFilename():
     filename = "AZ2023_GAR4BRF1.CSA"
 
     expected = {

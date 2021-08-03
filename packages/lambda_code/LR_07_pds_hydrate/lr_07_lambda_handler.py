@@ -46,7 +46,7 @@ class PdsHydrate(LambdaApplication):
             JobId=self.job_id,
             NhsNumber=empty_string(body["NHS_NUMBER"]),
             IsComparisonCompleted=False,
-            GP_GpCode=str(body["practice_code"]),
+            GP_GpPracticeCode=str(body["practice_code"]),
             GP_HaCipher=str(body["TRADING_PARTNER_NHAIS_CIPHER"]),
             GP_TransactionDate=str(body["DATE_OF_DOWNLOAD"][:10].replace("-", "")),
             GP_TransactionTime=str(body["DATE_OF_DOWNLOAD"][11:16].replace(":", "")),
@@ -126,7 +126,7 @@ class PdsHydrate(LambdaApplication):
 
             raise PDSAPIError(json.dumps(error_response)) from err
 
-        status = get_gp_registration_status(record.GP_GpCode, pds_record)
+        status = get_gp_registration_status(record.GP_GpPracticeCode, pds_record)
 
         if status == GPRegistrationStatus.UNMATCHED.value:
             record.IsComparisonCompleted = True
@@ -151,7 +151,7 @@ class PdsHydrate(LambdaApplication):
         )
         record.update(
             actions=[
-                Demographics.PDS_GpCode.set(pds_record["gp_code"]),
+                Demographics.PDS_GpPracticeCode.set(pds_record["gp_practicecode"]),
                 Demographics.PDS_GpRegisteredDate.set(pds_record["gp_registered_date"]),
                 Demographics.PDS_Surname.set(pds_record["surname"]),
                 Demographics.PDS_Forenames.set(pds_record["forenames"]),

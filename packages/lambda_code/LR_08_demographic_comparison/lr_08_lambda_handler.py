@@ -76,10 +76,10 @@ class DemographicComparison(LambdaApplication):
             elif col.startswith("PDS_"):
                 pds_record[col] = val
 
-        if gp_record["GP_GpCode"] != pds_record["PDS_GpCode"]:
+        if gp_record["GP_GpPracticeCode"] != pds_record["PDS_GpPracticeCode"]:
             msg = (
                 f"GP Codes for job_id: {self.job_id} patient_id: {self.patient_id} do not "
-                f"match (GP: {gp_record['GP_GpCode']}, PDS: {pds_record['PDS_GpCode']})"
+                f"match (GP: {gp_record['GP_GpPracticeCode']}, PDS: {pds_record['PDS_GpPracticeCode']})"
             )
             self.log_object.write_log(
                 "UTI9995",

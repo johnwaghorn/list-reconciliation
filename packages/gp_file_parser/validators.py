@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 RECORD_TYPE_COL = "RECORD_TYPE"
-GP_CODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
+GP_PRACTICECODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
 HA_CIPHER_COL = "TRADING_PARTNER_NHAIS_CIPHER"
 TRANS_DATETIME_COL = "DATE_OF_DOWNLOAD"
 TRANS_TIME_COL = "TIME_OF_DOWNLOAD"
@@ -47,7 +47,7 @@ RESIDENTIAL_INSTITUTE_CODE = "RESIDENTIAL_INSTITUTE_CODE"
 INVALID = "_INVALID_"
 
 INVALID_RECORD_TYPE = "Transaction/Record Type - Must be 'DOW'."
-INVALID_GP_CODE = (
+INVALID_GP_PRACTICECODE = (
     "GP Code - Must be a valid 7-digit numeric GMC National GP code and 1-6-digit "
     "alphanumeric Local GP code separated by a comma."
 )
@@ -118,14 +118,14 @@ def record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
     return record_type_val, invalid_reason
 
 
-def gp_code(gp_code_val: str, **kwargs) -> ValidatedRecord:
+def gp_practicecode(gp_practicecode_val: str, **kwargs) -> ValidatedRecord:
     """Coerce and validate GP code.
 
     Validation rules: Must be a not-null 7-digit numeric GMC National GP code
     and 1-6-digit alphanumeric Local GP code separated by a comma.
 
     Args:
-        gp_code_val (str): GP Code to validate.
+        gp_practicecode_val (str): GP Code to validate.
 
     Returns:
         ValidatedRecord: Tuple of coerced value and invalid reason if any.
@@ -133,15 +133,15 @@ def gp_code(gp_code_val: str, **kwargs) -> ValidatedRecord:
 
     invalid_reason = None
 
-    if gp_code_val in (None, ""):
-        gp_code_val = None
-        invalid_reason = INVALID_GP_CODE
+    if gp_practicecode_val in (None, ""):
+        gp_practicecode_val = None
+        invalid_reason = INVALID_GP_PRACTICECODE
 
     else:
-        if not re.match(r"^([0-9]{7}),([A-Z0-9]{1,6})$", gp_code_val):
-            invalid_reason = INVALID_GP_CODE
+        if not re.match(r"^([0-9]{7}),([A-Z0-9]{1,6})$", gp_practicecode_val):
+            invalid_reason = INVALID_GP_PRACTICECODE
 
-    return gp_code_val, invalid_reason
+    return gp_practicecode_val, invalid_reason
 
 
 def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> ValidatedRecord:
@@ -663,7 +663,7 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
 # Callables for validating fields
 VALIDATORS = {
     RECORD_TYPE_COL: record_type,
-    GP_CODE_COL: gp_code,
+    GP_PRACTICECODE_COL: gp_practicecode,
     HA_CIPHER_COL: ha_cipher,
     TRANS_DATETIME_COL: transaction_datetime,
     TRANS_ID_COL: transaction_id,

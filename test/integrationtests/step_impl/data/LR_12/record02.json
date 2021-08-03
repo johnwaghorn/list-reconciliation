@@ -8,7 +8,7 @@
   "GP_DrugsDispensedMarker": true,
   "GP_Forenames": "PAUL PHILIP",
   "GP_Gender": "1",
-  "GP_GpCode": "Y123452",
+  "GP_GpPracticeCode": "Y123452",
   "GP_HaCipher": "LNA",
   "GP_PostCode": "LS1  6UP",
   "GP_PreviousSurname": "PREVNAMEA",
@@ -33,7 +33,7 @@
     "Philip"
   ],
   "PDS_Gender": "male",
-  "PDS_GpCode": "Y123451",
+  "PDS_GpPracticeCode": "Y123451",
   "PDS_GpRegisteredDate": "2012-05-22",
   "PDS_IsSensitive": true,
   "PDS_PostCode": "LS1 6UP",

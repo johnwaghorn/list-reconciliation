@@ -31,7 +31,7 @@ PATIENTS = [
     Demographics(
         "d2305c19-96b3-4e81-91af-d26f2281b67f",
         "1",
-        GP_GpCode="Y12345",
+        GP_GpPracticeCode="Y12345",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",
@@ -54,7 +54,7 @@ PATIENTS = [
     Demographics(
         "29263475-1c38-4d2e-a477-0004ba9f04b2",
         "1",
-        GP_GpCode="Y12345",
+        GP_GpPracticeCode="Y12345",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",
@@ -77,7 +77,7 @@ PATIENTS = [
     Demographics(
         "31c8aa5e-c545-11eb-ae00-5b6c199ee918",
         "1",
-        GP_GpCode="Y12345",
+        GP_GpPracticeCode="Y12345",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",
@@ -100,7 +100,7 @@ PATIENTS = [
     Demographics(
         "37c100aa-c545-11eb-a75b-1315385e9b21",
         "1",
-        GP_GpCode="Y12345",
+        GP_GpPracticeCode="Y12345",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",
@@ -123,7 +123,7 @@ PATIENTS = [
     Demographics(
         "6cea6924-1ed9-423e-a69f-6d868f58b278",
         "2",
-        GP_GpCode="ABC",
+        GP_GpPracticeCode="ABC",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",
@@ -134,7 +134,7 @@ PATIENTS = [
     Demographics(
         "50e1b957-2fc4-44b0-8e60-d8f9ca162022",
         "2",
-        GP_GpCode="ABC",
+        GP_GpPracticeCode="ABC",
         GP_HaCipher="123",
         GP_TransactionDate="123",
         GP_TransactionId="123",

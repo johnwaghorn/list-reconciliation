@@ -117,7 +117,7 @@ class DemographicDifferences(LambdaApplication):
                         "line5": patient_record.GP_AddressLine5,
                     },
                     "postalCode": patient_record.GP_PostCode,
-                    "generalPractitionerOds": patient_record.GP_GpCode,
+                    "generalPractitionerOds": patient_record.GP_GpPracticeCode,
                 },
                 "pdsData": {
                     "scn": patient_record.PDS_Version,
@@ -132,7 +132,7 @@ class DemographicDifferences(LambdaApplication):
                     ],
                     "address": patient_record.PDS_Address,
                     "postalCode": patient_record.PDS_PostCode,
-                    "generalPractitionerOds": patient_record.PDS_GpCode,
+                    "generalPractitionerOds": patient_record.PDS_GpPracticeCode,
                 },
             },
             "differences": diffs,

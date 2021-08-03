@@ -32,19 +32,19 @@ def test_record_type_validator_return_values(val, expected):
         ("1234567,123ABC", ("1234567,123ABC", None)),
         ("1234567,1", ("1234567,1", None)),
         ("1234567,A", ("1234567,A", None)),
-        ("1234567.123ABC", ("1234567.123ABC", v.INVALID_GP_CODE)),
-        ("123456723ABC", ("123456723ABC", v.INVALID_GP_CODE)),
-        ("1234567,1234567", ("1234567,1234567", v.INVALID_GP_CODE)),
-        ("1234567,", ("1234567,", v.INVALID_GP_CODE)),
-        ("123456,123456", ("123456,123456", v.INVALID_GP_CODE)),
-        ("123456B,123456", ("123456B,123456", v.INVALID_GP_CODE)),
-        (" ", (" ", v.INVALID_GP_CODE)),
-        ("", (None, v.INVALID_GP_CODE)),
-        (None, (None, v.INVALID_GP_CODE)),
+        ("1234567.123ABC", ("1234567.123ABC", v.INVALID_GP_PRACTICECODE)),
+        ("123456723ABC", ("123456723ABC", v.INVALID_GP_PRACTICECODE)),
+        ("1234567,1234567", ("1234567,1234567", v.INVALID_GP_PRACTICECODE)),
+        ("1234567,", ("1234567,", v.INVALID_GP_PRACTICECODE)),
+        ("123456,123456", ("123456,123456", v.INVALID_GP_PRACTICECODE)),
+        ("123456B,123456", ("123456B,123456", v.INVALID_GP_PRACTICECODE)),
+        (" ", (" ", v.INVALID_GP_PRACTICECODE)),
+        ("", (None, v.INVALID_GP_PRACTICECODE)),
+        (None, (None, v.INVALID_GP_PRACTICECODE)),
     ),
 )
-def test_gp_code_validator_return_values(val, expected):
-    actual = v.VALIDATORS[v.GP_CODE_COL](val)
+def test_gp_practicecode_validator_return_values(val, expected):
+    actual = v.VALIDATORS[v.GP_PRACTICECODE_COL](val)
 
     assert actual == expected
 

@@ -19,7 +19,7 @@ from gp_file_parser.validators import (
     VALIDATORS,
     INVALID,
     RECORD_TYPE_COL,
-    GP_CODE_COL,
+    GP_PRACTICECODE_COL,
     HA_CIPHER_COL,
     TRANS_DATETIME_COL,
     TRANS_ID_COL,
@@ -212,7 +212,7 @@ def parse_gp_extract_text(
 
     columns = [
         RECORD_TYPE_COL,
-        GP_CODE_COL,
+        GP_PRACTICECODE_COL,
         HA_CIPHER_COL,
         TRANS_DATETIME_COL,
         TRANS_ID_COL,
@@ -373,7 +373,7 @@ def output_records(
     header = [
         INVALID,
         RECORD_TYPE_COL,
-        GP_CODE_COL,
+        GP_PRACTICECODE_COL,
         HA_CIPHER_COL,
         TRANS_DATETIME_COL,
         TRANS_ID_COL,
