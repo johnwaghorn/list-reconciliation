@@ -97,27 +97,28 @@ module "LR-08" {
 }
 
 module "LR-09" {
-  source                  = "./LR-09"
-  lambda_name             = local.lambda_name.LR-09
-  runtime                 = var.runtime
-  lambda_timeout          = var.lambda_timeout
-  package_layer_arn       = aws_lambda_layer_version.package_layer.arn
-  lr_10_step_function_arn = var.step_functions.lr_10_registration_orchestration.arn
-  demographics_table_arn  = var.dynamodb_tables.demographics.arn
-  demographics_table_name = var.dynamodb_tables.demographics.name
-  jobs_table_arn          = var.dynamodb_tables.jobs.arn
-  jobs_table_name         = var.dynamodb_tables.jobs.name
-  job_stats_table_arn     = var.dynamodb_tables.jobs_stats.arn
-  job_stats_table_name    = var.dynamodb_tables.jobs_stats.name
-  in_flight_table_arn     = var.dynamodb_tables.in_flight.arn
-  in_flight_table_name    = var.dynamodb_tables.in_flight.name
-  errors_table_arn        = var.dynamodb_tables.errors.arn
-  errors_table_name       = var.dynamodb_tables.errors.name
-  suffix                  = var.suffix
-  lambda_handler          = var.lambda_handler
-  dynamodb_kms_key        = var.dynamodb_kms_key
-  s3_kms_key              = var.s3_kms_key
-  log_retention_in_days   = var.log_retention_in_days
+  source                          = "./LR-09"
+  lambda_name                     = local.lambda_name.LR-09
+  runtime                         = var.runtime
+  lambda_timeout                  = var.lambda_timeout
+  package_layer_arn               = aws_lambda_layer_version.package_layer.arn
+  lr_10_step_function_arn         = var.step_functions.lr_10_registration_orchestration.arn
+  demographics_table_arn          = var.dynamodb_tables.demographics.arn
+  demographics_table_name         = var.dynamodb_tables.demographics.name
+  jobs_table_arn                  = var.dynamodb_tables.jobs.arn
+  jobs_table_name                 = var.dynamodb_tables.jobs.name
+  job_stats_table_arn             = var.dynamodb_tables.jobs_stats.arn
+  job_stats_table_name            = var.dynamodb_tables.jobs_stats.name
+  in_flight_table_arn             = var.dynamodb_tables.in_flight.arn
+  in_flight_table_name            = var.dynamodb_tables.in_flight.name
+  errors_table_arn                = var.dynamodb_tables.errors.arn
+  errors_table_name               = var.dynamodb_tables.errors.name
+  suffix                          = var.suffix
+  lambda_handler                  = var.lambda_handler
+  dynamodb_kms_key                = var.dynamodb_kms_key
+  s3_kms_key                      = var.s3_kms_key
+  log_retention_in_days           = var.log_retention_in_days
+  lr_09_event_schedule_expression = var.lr_09_event_schedule_expression
 }
 
 module "LR-11" {
@@ -236,14 +237,15 @@ module "LR-24" {
 module "lr_25" {
   source = "./LR_25_mesh_post_office"
 
-  lambda_name               = local.lambda_name.lr_25
-  package_layer_arn         = aws_lambda_layer_version.package_layer.arn
-  runtime                   = var.runtime
-  suffix                    = var.suffix
-  mesh_kms_key_alias        = var.mesh_kms_key_alias
-  mesh_post_office_open     = var.mesh_post_office_open
-  mesh_post_office_mappings = var.mesh_post_office_mappings
-  dynamodb_kms_key          = var.dynamodb_kms_key
-  s3_kms_key                = var.s3_kms_key
-  log_retention_in_days     = var.log_retention_in_days
+  lambda_name                     = local.lambda_name.lr_25
+  package_layer_arn               = aws_lambda_layer_version.package_layer.arn
+  runtime                         = var.runtime
+  suffix                          = var.suffix
+  mesh_kms_key_alias              = var.mesh_kms_key_alias
+  mesh_post_office_open           = var.mesh_post_office_open
+  mesh_post_office_mappings       = var.mesh_post_office_mappings
+  dynamodb_kms_key                = var.dynamodb_kms_key
+  s3_kms_key                      = var.s3_kms_key
+  log_retention_in_days           = var.log_retention_in_days
+  lr_25_event_schedule_expression = var.lr_25_event_schedule_expression
 }

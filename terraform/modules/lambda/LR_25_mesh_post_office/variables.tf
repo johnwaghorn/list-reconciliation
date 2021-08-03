@@ -51,15 +51,13 @@ variable "mesh_post_office_mappings" {
   }
 }
 
-variable "event_schedule_expression" {
+variable "lr_25_event_schedule_expression" {
   description = "How often should the Post Office attempt to deliver Mesh messages"
-
-  type    = string
-  default = "rate(5 minutes)"
+  type        = string
 
   validation {
-    condition     = can(regex("^rate\\([0-9][0-9]?[0-9]? (minute|minutes|hour|hours|day|days)\\)$", var.event_schedule_expression))
-    error_message = "The event_schedule_expression value must be a valid Rate Expression."
+    condition     = var.lr_25_event_schedule_expression == null || can(regex("^rate\\([0-9][0-9]?[0-9]? (minute|minutes|hour|hours|day|days)\\)$", var.lr_25_event_schedule_expression))
+    error_message = "The lr_25_event_schedule_expression value must be a valid Rate Expression."
   }
 }
 

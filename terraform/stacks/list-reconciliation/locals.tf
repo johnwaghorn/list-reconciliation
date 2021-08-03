@@ -45,6 +45,18 @@ locals {
     prod = []
   }
 
+  lr_09_event_schedule_expression = {
+    default = null
+    preprod = "rate(5 minutes)"
+    prod    = "rate(5 minutes)"
+  }
+
+  lr_25_event_schedule_expression = {
+    default = null
+    preprod = "rate(5 minutes)"
+    prod    = "rate(5 minutes)"
+  }
+
   tags = {
     TagVersion         = "1"
     Programme          = "SpinePod5"

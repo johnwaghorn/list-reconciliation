@@ -13,7 +13,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
   retention_in_days = var.log_retention_in_days
 }
 
-resource "aws_lambda_function" "LR-09-Lambda" {
+resource "aws_lambda_function" "lambda" {
   function_name    = local.name
   filename         = data.archive_file.lambda_zip.output_path
   handler          = var.lambda_handler

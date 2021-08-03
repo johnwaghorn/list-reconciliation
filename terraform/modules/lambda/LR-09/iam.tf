@@ -1,7 +1,3 @@
-data "aws_caller_identity" "current" {}
-
-data "aws_region" "current" {}
-
 resource "aws_iam_role" "role" {
   name               = "iam-role-${var.lambda_name}-${var.suffix}"
   description        = "Execution Role for ${var.lambda_name} Lambda."
@@ -23,6 +19,11 @@ resource "aws_iam_role" "role" {
   tags = {
     name = "Lambda role for LR-09-${var.suffix}"
   }
+}
+
+resource "aws_iam_role_policy_attachment" "policy_attachment" {
+  role       = aws_iam_role.role.name
+  policy_arn = aws_iam_policy.policy.arn
 }
 
 resource "aws_iam_policy" "policy" {
@@ -113,9 +114,4 @@ resource "aws_iam_policy" "policy" {
     ]
   }
   EOF
-}
-
-resource "aws_iam_role_policy_attachment" "policy_attachment" {
-  role       = aws_iam_role.role.name
-  policy_arn = aws_iam_policy.policy.arn
 }

@@ -72,3 +72,13 @@ variable "log_retention_in_days" {
     error_message = "The log_retention_in_days value must be greater than or equal to 1."
   }
 }
+
+variable "lr_09_event_schedule_expression" {
+  description = "How often should LR-09 be called"
+  type        = string
+}
+
+variable "lr_25_event_schedule_expression" {
+  description = "How often should LR-25 be called"
+  type        = string
+}

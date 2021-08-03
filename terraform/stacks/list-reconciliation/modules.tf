@@ -10,6 +10,9 @@ module "lambda" {
   s3_kms_key            = module.kms["s3"].output
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 
+  lr_09_event_schedule_expression = try(local.lr_09_event_schedule_expression[local.environment], local.lr_09_event_schedule_expression["default"])
+  lr_25_event_schedule_expression = try(local.lr_25_event_schedule_expression[local.environment], local.lr_25_event_schedule_expression["default"])
+
   mesh_kms_key_alias        = try(local.mesh_kms_key_alias[local.environment], local.mesh_kms_key_alias["default"])
   mesh_post_office_open     = try(local.mesh_post_office_open[local.environment], local.mesh_post_office_open["default"])
   mesh_post_office_mappings = try(local.mesh_post_office_mappings[local.environment], local.mesh_post_office_mappings["default"])
