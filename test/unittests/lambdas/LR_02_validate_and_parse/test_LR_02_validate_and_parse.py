@@ -155,12 +155,12 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
         "file": INVALID_FILE,
         "upload_date": "2020-04-06 14:40:00+01:00",
         "error_type": "INVALID_STRUCTURE",
-        "message": [r"Header must contain 503\*"],
+        "message": [r"Header must be 503\*"],
     }
 
-    expected_log_key = "fail/logs/A12023_GPR4LNA1.CSB_LOG_06042020T1440.00.000000.json"
+    expected_log_key = "fail/logs/A12023_GPR4LNA1.CSB_FailedFile_20200406144000.json"
     actual_log_key = (
-        f"fail/logs/{INVALID_FILE}_LOG_{get_datetime_now().strftime('%d%m%YT%H%M.%S.%f')}.json"
+        f"fail/logs/{INVALID_FILE}_FailedFile_{get_datetime_now().strftime('%Y%m%d%H%M%S')}.json"
     )
 
     assert expected_log_key == actual_log_key

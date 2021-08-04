@@ -59,7 +59,7 @@ def assert_record_file_keys(file):
     actual_keys = list_of_column_names[0]
     expected_keys = [
         "_INVALID_",
-        "RECORD_TYPE",
+        "RECORD_TYPE_1",
         "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE",
         "TRADING_PARTNER_NHAIS_CIPHER",
         "DATE_OF_DOWNLOAD",
@@ -73,6 +73,7 @@ def assert_record_file_keys(file):
         "DOB",
         "ADDRESS_LINE1",
         "ADDRESS_LINE2",
+        "RECORD_TYPE_2",
         "ADDRESS_LINE3",
         "ADDRESS_LINE4",
         "ADDRESS_LINE5",

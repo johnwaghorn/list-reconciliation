@@ -2,6 +2,10 @@ class InvalidGPExtract(Exception):
     pass
 
 
+class InvalidStructure(Exception):
+    pass
+
+
 class InvalidFilename(Exception):
     pass
 

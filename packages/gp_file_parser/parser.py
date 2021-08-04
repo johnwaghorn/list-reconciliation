@@ -2,7 +2,6 @@ import csv
 import logging
 import os
 import boto3
-import json
 
 from pathlib import Path
 from datetime import date, datetime
@@ -11,14 +10,18 @@ from typing import Iterable, Dict, List, Union, Tuple
 
 from utils import InputFolderType
 from utils.datetimezone import get_datetime_now
-from utils.exceptions import InvalidGPExtract
+from utils.exceptions import InvalidGPExtract, InvalidStructure
 
 from gp_file_parser.file_name_parser import validate_filename
 from gp_file_parser.utils import pairs
 from gp_file_parser.validators import (
     VALIDATORS,
     INVALID,
-    RECORD_TYPE_COL,
+    INVALID_RECORD,
+    INVALID_RECORD_DATA,
+    INVALID_RECORD_LEN,
+    RECORD_TYPE_1_COL,
+    RECORD_TYPE_2_COL,
     GP_PRACTICECODE_COL,
     HA_CIPHER_COL,
     TRANS_DATETIME_COL,
@@ -88,8 +91,12 @@ def _validate_record(
         Record: Validated record, with an added field containing validation result.
     """
 
+    if INVALID in record.keys():
+        return record
+
     validation_errors = {}
     validated_record = {}
+
     # Apply validator functions mapped to each element, default to string
     # conversion if not defined
     for col, val in record.items():
@@ -97,7 +104,7 @@ def _validate_record(
         try:
             validator_func = VALIDATORS[col]
         except KeyError:
-            raise InvalidGPExtract(f"Unrecognised column {col}")
+            raise InvalidStructure(f"Unrecognised column {col}")
 
         coerced_record, invalid_reason = validator_func(
             val,
@@ -126,31 +133,25 @@ def _parse_row_pair(row_pair: RowPair) -> Row:
         Row: List of field contents
 
     Raises:
-        AssertionError: If any abortive errors are found.
+        InvalidStructure: If any abortive errors are found.
     """
 
     row_1 = row_pair[0].split(SEP)
     row_2 = row_pair[1].split(SEP)
 
-    assert (
-        row_1[0] == RECORD_TYPE and row_1[1] == RECORD_1
-    ), f"Row 1 for all records must start with '{RECORD_TYPE}~{RECORD_1}'"
-
-    assert (
-        row_2[0] == RECORD_TYPE and row_2[1] == RECORD_2
-    ), f"Row 2 for all records must start with '{RECORD_TYPE}~{RECORD_2}'"
-
     trans_datetime = row_1[4] + row_1.pop(5)
     row_1[4] = trans_datetime
 
-    return row_1[2:] + row_2[2:]
+    row_1.pop(1)
+    row_2.pop(1)
+
+    return row_1 + row_2
 
 
 def _validate_columns(row_columns: RowColumns):
     for i, (col, val) in enumerate(row_columns):
-        assert not (
-            not col and val
-        ), f"Missing column name must not contain any value; Column: {i}, Value: {val}"
+        if not col and val:
+            raise InvalidGPExtract({INVALID_RECORD: INVALID_RECORD_DATA})
 
 
 def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
@@ -165,17 +166,25 @@ def _parse_row_columns(row_pair: RowPair, columns: Columns) -> Record:
         Record: Dictionary of column names mapped to the row pair
     """
 
-    row = [RECORD_TYPE] + _parse_row_pair(row_pair)
-    assert len(columns) == len(row), "Columns and row must be the same length"
+    try:
+        row = _parse_row_pair(row_pair)
 
-    row_cols = list(zip(columns, row))
+        if len(columns) != len(row):
+            raise InvalidGPExtract({INVALID_RECORD: INVALID_RECORD_LEN})
 
-    _validate_columns(row_cols)
+        row_cols = list(zip(columns, row))
 
-    record = dict(row_cols)
-    record.pop("", None)
+        _validate_columns(row_cols)
 
-    return record
+        record = dict(row_cols)
+        record.pop("", None)
+
+        return record
+
+    except InvalidGPExtract as err:
+        record = {INVALID: err.args[0]}
+
+        return record
 
 
 def parse_gp_extract_text(
@@ -198,12 +207,14 @@ def parse_gp_extract_text(
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
 
     Raises:
-        AssertionError: If the file is not a valid extract.
+        InvalidStructure: If the file is not a valid extract.
     """
 
     raw_text = [r.strip() for r in gp_extract_text.split("\n") if r]
 
-    assert raw_text[0] == r"503\*", r"Header must contain 503\*"
+    if raw_text[0] != r"503\*":
+        raise InvalidStructure(r"Header must be 503\*")
+
     start_idx = 1
 
     # Skip column names record if it exists
@@ -211,7 +222,7 @@ def parse_gp_extract_text(
         start_idx += 2
 
     columns = [
-        RECORD_TYPE_COL,
+        RECORD_TYPE_1_COL,
         GP_PRACTICECODE_COL,
         HA_CIPHER_COL,
         TRANS_DATETIME_COL,
@@ -225,6 +236,7 @@ def parse_gp_extract_text(
         DOB_COL,
         ADDRESS_LINE1_COL,
         ADDRESS_LINE2_COL,
+        RECORD_TYPE_2_COL,
         ADDRESS_LINE3_COL,
         ADDRESS_LINE4_COL,
         ADDRESS_LINE5_COL,
@@ -241,11 +253,13 @@ def parse_gp_extract_text(
     raw_text.reverse()
 
     for count, line in enumerate(raw_text):
-        if line.startswith("DOW"):
+        if line.endswith("~"):
             raw_text = raw_text[count:]
             break
     else:
-        raise InvalidGPExtract("GP extract does not contain any valid records for processing")
+        raise InvalidStructure(
+            "GP extract does not contain any identifiable DOW records for processing"
+        )
 
     raw_text.reverse()
 
@@ -261,11 +275,13 @@ def parse_gp_extract_text(
             other_ids=ids,
         )
 
-        if "_INVALID_" in validated_record.keys():
-            validated_record["_INVALID_"].update({"ON_LINES": f"{line_number}-{line_number+1}"})
+        if INVALID in validated_record.keys():
+            validated_record[INVALID].update({"ON_LINES": f"{line_number}-{line_number + 1}"})
 
         validated_records.append(validated_record)
-        ids.append(validated_record[TRANS_ID_COL])
+
+        if TRANS_ID_COL in validated_record.keys():
+            ids.append(validated_record[TRANS_ID_COL])
 
         line_number += 2
 
@@ -290,7 +306,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
 
     Raises:
-        AssertionError: If any abortive errors are found.
+        InvalidStructure: If any abortive errors are found.
         InvalidGPExtract: If any files are not found.
     """
 
@@ -372,7 +388,7 @@ def output_records(
 
     header = [
         INVALID,
-        RECORD_TYPE_COL,
+        RECORD_TYPE_1_COL,
         GP_PRACTICECODE_COL,
         HA_CIPHER_COL,
         TRANS_DATETIME_COL,
@@ -386,6 +402,7 @@ def output_records(
         DOB_COL,
         ADDRESS_LINE1_COL,
         ADDRESS_LINE2_COL,
+        RECORD_TYPE_2_COL,
         ADDRESS_LINE3_COL,
         ADDRESS_LINE4_COL,
         ADDRESS_LINE5_COL,
@@ -487,7 +504,7 @@ def parse_gp_extract_file_s3(
         gp_ha_cipher=valid_file["ha_cipher"],
     )
 
-    invalid_records = [r for r in results if "_INVALID_" in list(r.keys())]
+    invalid_records = [r for r in results if INVALID in list(r.keys())]
 
     if invalid_records:
         raise InvalidGPExtract({"total_records": len(results), "invalid_records": invalid_records})

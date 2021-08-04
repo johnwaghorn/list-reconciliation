@@ -11,17 +11,36 @@ from utils.datetimezone import get_datetime_now, localize_date
     "val,expected",
     (
         ("DOW", ("DOW", None)),
-        ("DOWNLOAD", ("DOWNLOAD", v.INVALID_RECORD_TYPE)),
-        ("Not", ("Not", v.INVALID_RECORD_TYPE)),
-        (" ", (" ", v.INVALID_RECORD_TYPE)),
-        ("", (None, v.INVALID_RECORD_TYPE)),
-        (None, (None, v.INVALID_RECORD_TYPE)),
-        ("Dow", ("Dow", v.INVALID_RECORD_TYPE)),
-        (0, (0, v.INVALID_RECORD_TYPE)),
+        ("DOWNLOAD", (None, v.INVALID_RECORD_TYPE_1)),
+        ("Not", (None, v.INVALID_RECORD_TYPE_1)),
+        (" ", (None, v.INVALID_RECORD_TYPE_1)),
+        ("", (None, v.INVALID_RECORD_TYPE_1)),
+        (None, (None, v.INVALID_RECORD_TYPE_1)),
+        ("Dow", (None, v.INVALID_RECORD_TYPE_1)),
+        (0, (None, v.INVALID_RECORD_TYPE_1)),
     ),
 )
-def test_record_type_validator_return_values(val, expected):
-    actual = v.VALIDATORS[v.RECORD_TYPE_COL](val)
+def test_first_record_type_validator_return_values(val, expected):
+    actual = v.VALIDATORS[v.RECORD_TYPE_1_COL](val)
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "val,expected",
+    (
+        ("DOW", ("DOW", None)),
+        ("DOWNLOAD", (None, v.INVALID_RECORD_TYPE_2)),
+        ("Not", (None, v.INVALID_RECORD_TYPE_2)),
+        (" ", (None, v.INVALID_RECORD_TYPE_2)),
+        ("", (None, v.INVALID_RECORD_TYPE_2)),
+        (None, (None, v.INVALID_RECORD_TYPE_2)),
+        ("Dow", (None, v.INVALID_RECORD_TYPE_2)),
+        (0, (None, v.INVALID_RECORD_TYPE_2)),
+    ),
+)
+def test_second_record_type_validator_return_values(val, expected):
+    actual = v.VALIDATORS[v.RECORD_TYPE_2_COL](val)
 
     assert actual == expected
 
@@ -380,9 +399,9 @@ def test_ha_cipher_validators_return_values(val, gp_ha_cipher, expected):
 
 
 def test_validate_record_contains_invalid_dict():
-    assert _validate_record({"RECORD_TYPE": "Not"}, get_datetime_now()) == {
-        "RECORD_TYPE": "Not",
-        "_INVALID_": {"RECORD_TYPE": v.INVALID_RECORD_TYPE},
+    assert _validate_record({"RECORD_TYPE_1": "Not"}, get_datetime_now()) == {
+        "RECORD_TYPE_1": None,
+        "_INVALID_": {"RECORD_TYPE_1": v.INVALID_RECORD_TYPE_1},
     }
 
 

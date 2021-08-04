@@ -1,5 +1,6 @@
 # Tests for LR-15 to generate consolidated csv file with the respective gppractive comparision records 
 -------------------------------------------------------------------------------------------------------
+Tags: wip
 * setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
 * setup steps: clear all files in mock pds data and lr_22 buckets
 

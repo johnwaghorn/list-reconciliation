@@ -9,11 +9,12 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 from gp_file_parser.parser import parse_gp_extract_file_s3
 from services.split_records_to_s3 import split_records_to_s3
+
 from utils import InputFolderType
 from utils.database.models import Jobs, InFlight
 from utils.datetimezone import get_datetime_now
-from utils.exceptions import InvalidGPExtract, InvalidFilename
 from utils.logger import log_dynamodb_error, success
+from utils.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
 
 INVALID_RECORDS = "INVALID_RECORDS"
 INVALID_STRUCTURE = "INVALID_STRUCTURE"
@@ -110,7 +111,7 @@ class ValidateAndParse(LambdaApplication):
 
             return self.handle_validated_records(validated_file)
 
-        except (AssertionError, InvalidGPExtract, InvalidFilename) as exc:
+        except (InvalidStructure, InvalidGPExtract, InvalidFilename) as exc:
             message = json.dumps(self.process_invalid_message(exc))
 
             self.handle_extract(InputFolderType.FAIL, message)
@@ -256,9 +257,9 @@ class ValidateAndParse(LambdaApplication):
         s3_client.delete_object(Bucket=bucket, Key=self.upload_key)
 
         if error_message:
-            timestamp = self.upload_date.strftime("%d%m%YT%H%M.%S.%f")
+            timestamp = self.upload_date.strftime("%Y%m%d%H%M%S")
 
-            log_filename = f"{self.upload_filename}_LOG_{timestamp}.json"
+            log_filename = f"{self.upload_filename}_FailedFile_{timestamp}.json"
             log_key = f"{InputFolderType.FAIL.value}logs/{log_filename}"
 
             s3_client.put_object(Body=error_message, Bucket=bucket, Key=log_key)
@@ -279,7 +280,7 @@ class ValidateAndParse(LambdaApplication):
             "upload_date": str(self.upload_date),
         }
 
-        if isinstance(exception, AssertionError):
+        if isinstance(exception, InvalidStructure):
             error = {"error_type": INVALID_STRUCTURE, "message": [exception.args[0]]}
 
         elif isinstance(exception, InvalidGPExtract):

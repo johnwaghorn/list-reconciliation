@@ -19,7 +19,8 @@ __all__ = [
     "VALIDATORS",
 ]
 
-RECORD_TYPE_COL = "RECORD_TYPE"
+RECORD_TYPE_1_COL = "RECORD_TYPE_1"
+RECORD_TYPE_2_COL = "RECORD_TYPE_2"
 GP_PRACTICECODE_COL = "REGISTERED_GP_GMC_NUMBER,REGISTERED_GP_LOCAL_CODE"
 HA_CIPHER_COL = "TRADING_PARTNER_NHAIS_CIPHER"
 TRANS_DATETIME_COL = "DATE_OF_DOWNLOAD"
@@ -46,7 +47,11 @@ RESIDENTIAL_INSTITUTE_CODE = "RESIDENTIAL_INSTITUTE_CODE"
 
 INVALID = "_INVALID_"
 
-INVALID_RECORD_TYPE = "Transaction/Record Type - Must be 'DOW'."
+INVALID_RECORD = "INVALID_RECORD"
+INVALID_RECORD_DATA = "Record contains invalid data/structure, and could not be read"
+INVALID_RECORD_LEN = "Record - Must contain the correct number of data fields for parsing"
+INVALID_RECORD_TYPE_1 = "Transaction/Record Type - Row 1 of record must be 'DOW~1'."
+INVALID_RECORD_TYPE_2 = "Transaction/Record Type - Row 2 of record must be 'DOW~2'."
 INVALID_GP_PRACTICECODE = (
     "GP Code - Must be a valid 7-digit numeric GMC National GP code and 1-6-digit "
     "alphanumeric Local GP code separated by a comma."
@@ -59,6 +64,10 @@ INVALID_TRANS_DATETIME = (
 INVALID_NHS_NO = "NHS Number - Must be a valid NHS number. Max length 10."
 INVALID_SURNAME = (
     "Surname - must contain only uppercase alphabetic characters and space, apostrophe "
+    "or hyphen. Max length 35."
+)
+INVALID_PREV_SURNAME = (
+    "Previous Surname - must contain only uppercase alphabetic characters and space, apostrophe "
     "or hyphen. Max length 35."
 )
 INVALID_FORENAME = (
@@ -93,10 +102,10 @@ INVALID_TRANS_ID = "Transaction/Record Number - Must be a unique, not-null integ
 ValidatedRecord = Tuple[str, Union[str, None]]
 
 
-def record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
-    """Coerce and validate record type.
+def first_record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
+    """Coerce and validate first record type.
 
-    Record type must not null and be 'DOW'.
+    First record type must not null and be 'DOW'.
 
     Args:
         record_type_val (str): Record type to validate.
@@ -109,11 +118,32 @@ def record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
 
     if record_type_val in (None, ""):
         record_type_val = None
-        invalid_reason = INVALID_RECORD_TYPE
+        invalid_reason = INVALID_RECORD_TYPE_1
 
     else:
         if record_type_val != "DOW":
-            invalid_reason = INVALID_RECORD_TYPE
+            record_type_val = None
+            invalid_reason = INVALID_RECORD_TYPE_1
+
+    return record_type_val, invalid_reason
+
+
+def second_record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
+    """Coerce and validate second record type.
+
+    Second record type must not null and be 'DOW'.
+
+    Args:
+        record_type_val (str): Record type to validate.
+
+    Returns:
+        ValidatedRecord: Tuple of coerced value and invalid reason if any.
+    """
+
+    record_type_val, invalid_reason = first_record_type(record_type_val)
+
+    if invalid_reason:
+        invalid_reason = INVALID_RECORD_TYPE_2
 
     return record_type_val, invalid_reason
 
@@ -274,6 +304,27 @@ def surname(surname_val: str, **kwargs) -> ValidatedRecord:
             invalid_reason = INVALID_SURNAME
 
     return surname_val, invalid_reason
+
+
+def prev_surname(prev_surname_val: str, **kwargs) -> ValidatedRecord:
+    """Coerce and validate previous surname.
+
+    Validation rules: Must contain only uppercase alphabetic characters and
+    space, apostrophe or hyphen. Max length 35.
+
+    Args:
+        prev_surname_val (str): Previous surname to validate.
+
+    Returns:
+        ValidatedRecord: Tuple of coerced value and invalid reason if any.
+    """
+
+    prev_surname_val, invalid_reason = surname(prev_surname_val)
+
+    if invalid_reason:
+        invalid_reason = INVALID_PREV_SURNAME
+
+    return prev_surname_val, invalid_reason
 
 
 def forename(forename_val: str, **kwargs) -> ValidatedRecord:
@@ -662,7 +713,8 @@ def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> V
 
 # Callables for validating fields
 VALIDATORS = {
-    RECORD_TYPE_COL: record_type,
+    RECORD_TYPE_1_COL: first_record_type,
+    RECORD_TYPE_2_COL: second_record_type,
     GP_PRACTICECODE_COL: gp_practicecode,
     HA_CIPHER_COL: ha_cipher,
     TRANS_DATETIME_COL: transaction_datetime,
@@ -670,7 +722,7 @@ VALIDATORS = {
     NHS_NUMBER_COL: nhs_number,
     SURNAME_COL: surname,
     FORENAMES_COL: forename,
-    PREV_SURNAME_COL: surname,
+    PREV_SURNAME_COL: prev_surname,
     TITLE_COL: title,
     SEX_COL: sex,
     DOB_COL: date_of_birth,
