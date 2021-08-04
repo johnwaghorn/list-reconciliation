@@ -32,6 +32,7 @@ resource "aws_lambda_function" "lambda" {
       ERRORS_TABLE            = var.errors_table_name
       INFLIGHT_TABLE          = var.in_flight_table_name
       LR_10_STEP_FUNCTION_ARN = var.lr_10_step_function_arn
+      JOB_TIMEOUT_HOURS       = var.lr_09_job_timeout_hours
     }
   }
 

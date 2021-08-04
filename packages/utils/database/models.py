@@ -1,14 +1,17 @@
 import os
 
-from utils.database.attributes import GMTDateTimeAttribute
+from datetime import datetime
 from pynamodb.attributes import (
     UnicodeAttribute,
     NumberAttribute,
     ListAttribute,
     BooleanAttribute,
+    UTCDateTimeAttribute,
 )
 from pynamodb.models import Model
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
+
+from utils.database.attributes import GMTDateTimeAttribute
 
 AWS_REGION = os.getenv("AWS_REGION")
 
@@ -179,4 +182,5 @@ class InFlight(Model):
         write_capacity_units = 1
 
     JobId = UnicodeAttribute(hash_key=True)
+    Timestamp = UTCDateTimeAttribute(default=datetime.utcnow())
     TotalRecords = NumberAttribute()

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import boto3
 import pytest
 from dateutil.parser import parse
@@ -7,9 +8,12 @@ from moto.core import ACCOUNT_ID
 from lambda_code.LR_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
 from utils.database.models import Demographics, InFlight, Jobs, JobStats
 
-JOB_ID = "b204b5f4-6762-414e-bb6b-a05c37f52956"
-JOB_ID_2 = "3af674be-1e7f-470c-b6d1-ca5ce6d9c600"
-JOB_ID_3 = "87e36ab6-4f25-4c47-9e13-d029f1e4c925"
+JOB_ID = {
+    1: "b204b5f4-6762-414e-bb6b-a05c37f52956",
+    2: "3af674be-1e7f-470c-b6d1-ca5ce6d9c600",
+    3: "87e36ab6-4f25-4c47-9e13-d029f1e4c925",
+    4: "87b687e3-6ad4-1337-0420-edcab6912499",
+}
 REGION_NAME = "eu-west-2"
 
 
@@ -22,7 +26,7 @@ def lambda_handler():
 FAKE_PATIENTS = [
     Demographics(
         Id="d2305c19-96b3-4e81-91af-d26f2281b67f",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="111",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -34,7 +38,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="29263475-1c38-4d2e-a477-0004ba9f04b2",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="222",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -46,7 +50,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="6cea6924-1ed9-423e-a69f-6d868f58b278",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="333",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -58,7 +62,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="50e1b957-2fc4-44b0-8e60-d8f9ca162022",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="444",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -70,7 +74,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="78490ae9-4908-4414-bf83-6b5452f18644",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="555",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -82,7 +86,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="3af674be-1e7f-470c-b6d1-ca5ce6d9c600",
-        JobId=JOB_ID,
+        JobId=JOB_ID[1],
         NhsNumber="666",
         IsComparisonCompleted=True,
         GP_GpPracticeCode="JSABCDEF",
@@ -94,7 +98,7 @@ FAKE_PATIENTS = [
     ),
     Demographics(
         Id="3af674be-1e7f-470c-b6d1-ca5ce6d9c601",
-        JobId=JOB_ID_3,
+        JobId=JOB_ID[3],
         NhsNumber="777",
         IsComparisonCompleted=False,
         GP_GpPracticeCode="JSABCDEG",
@@ -131,9 +135,10 @@ def populate_demographics_table(create_dynamo_tables):
 @pytest.fixture
 def populate_inflight_table(create_dynamo_tables):
     items = [
-        InFlight(JOB_ID, TotalRecords=6),
-        InFlight(JOB_ID_2, TotalRecords=1),
-        InFlight(JOB_ID_3, TotalRecords=1),
+        InFlight(JOB_ID[1], TotalRecords=6, Timestamp=datetime.utcnow() - timedelta(hours=1)),
+        InFlight(JOB_ID[2], TotalRecords=1, Timestamp=datetime.utcnow() - timedelta(hours=1)),
+        InFlight(JOB_ID[3], TotalRecords=1, Timestamp=datetime.utcnow() - timedelta(hours=1)),
+        InFlight(JOB_ID[4], TotalRecords=7, Timestamp=datetime.utcnow() - timedelta(hours=9)),
     ]
 
     with InFlight.batch_write() as batch:
@@ -146,7 +151,7 @@ def populate_inflight_table(create_dynamo_tables):
 @pytest.fixture
 def populate_jobs_table(create_dynamo_tables):
     job = Jobs(
-        JOB_ID,
+        JOB_ID[1],
         PracticeCode="JSABCDEF",
         FileName="JSHTST.EAA",
         StatusId="1",

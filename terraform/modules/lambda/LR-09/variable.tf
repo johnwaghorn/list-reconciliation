@@ -91,3 +91,9 @@ variable "lr_09_event_schedule_expression" {
     error_message = "The lr_09_event_schedule_expression value must be a valid Rate Expression."
   }
 }
+
+variable "lr_09_job_timeout_hours" {
+  description = "Number of hours old that a job is allowed to reach before it's cleaned up"
+  type        = number
+  default     = 6
+}

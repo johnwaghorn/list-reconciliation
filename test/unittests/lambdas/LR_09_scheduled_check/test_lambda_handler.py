@@ -8,7 +8,6 @@ from utils.database.models import Errors
 def test_lambda_handler_runs_successfully_no_errors_thrown(
     create_dynamo_tables, lambda_handler, lambda_context
 ):
-
     expected_message = {"message": "Lambda application stopped"}
     response = lambda_handler.main({}, lambda_context)
     assert response is not None
@@ -17,6 +16,7 @@ def test_lambda_handler_runs_successfully_no_errors_thrown(
 
     assert len(response["processed_jobs"]) == 0
     assert len(response["skipped_jobs"]) == 0
+    assert len(response["timed_out_jobs"]) == 0
 
 
 @pytest.mark.xfail(reason="Error table not being written")

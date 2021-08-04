@@ -97,17 +97,13 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
     actual_job = Jobs.get(JOB_ID, "A82023")
     actual_job_attributes = actual_job.attribute_values
-
     assert expected_job_attributes == actual_job_attributes
 
     # Test InFlight validity
     expected_inflight = InFlight(JOB_ID, TotalRecords=1)
-    expected_inflight_attributes = expected_inflight.attribute_values
-
     actual_inflight = InFlight.get(JOB_ID)
-    actual_inflight_attributes = actual_inflight.attribute_values
-
-    assert expected_inflight_attributes == actual_inflight_attributes
+    assert expected_inflight.JobId == actual_inflight.JobId
+    assert expected_inflight.TotalRecords == actual_inflight.TotalRecords
 
     # Test S3 validity
     with open(os.path.join(DATA, f"{VALID_FILE}")) as f:
