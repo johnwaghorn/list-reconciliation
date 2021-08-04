@@ -2,7 +2,7 @@
 # Variables
 #
 
-branch := $(shell git branch --show-current | sed -e 's/_/-/g' -e 's/\./-/g' | head -c 10)
+branch := $(shell git branch --show-current)
 env ?= dev
 stack ?= list-reconciliation
 mesh_post_office_lambda ?= LR_25_mesh_post_office-prod
@@ -98,7 +98,7 @@ integrationtests:
 #
 
 get-branch-id:
-	@echo $(shell if echo ${branch} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then echo ${branch} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"; else echo ${branch}; fi)-$(shell echo ${branch} | sha1sum | head -c 8)
+	@echo $(shell if echo ${branch} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then echo ${branch} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"; else echo ${branch} | sed -e 's/_/-/g' -e 's/\./-/g' | head -c 10; fi)-$(shell echo ${branch} | sha1sum | head -c 8)
 
 hooks:
 	pre-commit install
