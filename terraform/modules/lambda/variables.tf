@@ -40,6 +40,10 @@ variable "mock_pds_data_bucket" {
   type = map(string)
 }
 
+variable "cloudwatch_kms_key" {
+  type = map(string)
+}
+
 variable "dynamodb_kms_key" {
   type = map(string)
 }

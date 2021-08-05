@@ -35,6 +35,7 @@ module "LR-02" {
   jobs_table_name       = var.dynamodb_tables.jobs.name
   suffix                = var.suffix
   lambda_handler        = var.lambda_handler
+  cloudwatch_kms_key    = var.cloudwatch_kms_key
   dynamodb_kms_key      = var.dynamodb_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
@@ -51,6 +52,7 @@ module "LR-04" {
   errors_table_name     = var.dynamodb_tables.errors.name
   suffix                = var.suffix
   lambda_handler        = var.lambda_handler
+  cloudwatch_kms_key    = var.cloudwatch_kms_key
   dynamodb_kms_key      = var.dynamodb_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
@@ -73,6 +75,7 @@ module "LR-07" {
   pds_url                  = "s3://${var.mock_pds_data_bucket.name}/${var.pds_url}"
   suffix                   = var.suffix
   lambda_handler           = var.lambda_handler
+  cloudwatch_kms_key       = var.cloudwatch_kms_key
   dynamodb_kms_key         = var.dynamodb_kms_key
   s3_kms_key               = var.s3_kms_key
   log_retention_in_days    = var.log_retention_in_days
@@ -92,6 +95,7 @@ module "LR-08" {
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
+  cloudwatch_kms_key                  = var.cloudwatch_kms_key
   dynamodb_kms_key                    = var.dynamodb_kms_key
   s3_kms_key                          = var.s3_kms_key
   log_retention_in_days               = var.log_retention_in_days
@@ -116,6 +120,7 @@ module "LR-09" {
   errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
+  cloudwatch_kms_key              = var.cloudwatch_kms_key
   dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
@@ -140,6 +145,7 @@ module "LR-11" {
   errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
+  cloudwatch_kms_key              = var.cloudwatch_kms_key
   dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
@@ -168,6 +174,7 @@ module "LR-12" {
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
   lambda_handler                        = var.lambda_handler
+  cloudwatch_kms_key                    = var.cloudwatch_kms_key
   dynamodb_kms_key                      = var.dynamodb_kms_key
   s3_kms_key                            = var.s3_kms_key
   log_retention_in_days                 = var.log_retention_in_days
@@ -195,6 +202,7 @@ module "LR-15" {
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
+  cloudwatch_kms_key                  = var.cloudwatch_kms_key
   dynamodb_kms_key                    = var.dynamodb_kms_key
   s3_kms_key                          = var.s3_kms_key
   log_retention_in_days               = var.log_retention_in_days
@@ -213,6 +221,7 @@ module "LR-21" {
   errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
+  cloudwatch_kms_key              = var.cloudwatch_kms_key
   dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
@@ -230,6 +239,7 @@ module "LR-24" {
   lr-06-bucket          = var.s3_buckets.LR-06.bucket
   lr-06-bucket_arn      = var.s3_buckets.LR-06.arn
   lambda_handler        = var.lambda_handler
+  cloudwatch_kms_key    = var.cloudwatch_kms_key
   dynamodb_kms_key      = var.dynamodb_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
@@ -245,6 +255,7 @@ module "lr_25" {
   mesh_kms_key_alias              = var.mesh_kms_key_alias
   mesh_post_office_open           = var.mesh_post_office_open
   mesh_post_office_mappings       = var.mesh_post_office_mappings
+  cloudwatch_kms_key              = var.cloudwatch_kms_key
   dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
@@ -258,6 +269,7 @@ module "lr_27" {
   package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
   runtime                               = var.runtime
   suffix                                = var.suffix
+  cloudwatch_kms_key                    = var.cloudwatch_kms_key
   dynamodb_kms_key                      = var.dynamodb_kms_key
   s3_kms_key                            = var.s3_kms_key
   log_retention_in_days                 = var.log_retention_in_days

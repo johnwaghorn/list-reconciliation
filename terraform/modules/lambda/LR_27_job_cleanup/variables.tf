@@ -14,6 +14,10 @@ variable "suffix" {
   type = string
 }
 
+variable "cloudwatch_kms_key" {
+  type = map(string)
+}
+
 variable "dynamodb_kms_key" {
   type = map(string)
 }

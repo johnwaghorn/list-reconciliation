@@ -66,6 +66,10 @@ variable "mesh_kms_key_alias" {
   type        = string
 }
 
+variable "cloudwatch_kms_key" {
+  type = map(string)
+}
+
 variable "dynamodb_kms_key" {
   type = map(string)
 }

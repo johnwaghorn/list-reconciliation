@@ -70,6 +70,7 @@ resource "aws_iam_policy" "policy" {
               "kms:GenerateDataKey*"
             ],
             "Resource": [
+                "${var.cloudwatch_kms_key.arn}",
                 "${var.dynamodb_kms_key.arn}",
                 "${var.s3_kms_key.arn}"
             ]

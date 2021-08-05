@@ -14,6 +14,7 @@ data "archive_file" "lambda_zip" {
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.name}"
   retention_in_days = var.log_retention_in_days
+  kms_key_id        = var.cloudwatch_kms_key.arn
 }
 
 resource "aws_lambda_function" "LR-21-Lambda" {

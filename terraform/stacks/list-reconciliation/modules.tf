@@ -6,6 +6,7 @@ module "lambda" {
   runtime               = "python3.8"
   lambda_handler        = "main.lambda_handler"
   s3_buckets            = module.s3.buckets
+  cloudwatch_kms_key    = module.kms["cloudwatch"].output
   dynamodb_kms_key      = module.kms["dynamodb"].output
   s3_kms_key            = module.kms["s3"].output
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
@@ -81,8 +82,9 @@ module "lr_10_registration_orchestration" {
 
 module "kms" {
   for_each = {
-    dynamodb = { name = "dynamodb-${local.environment}" }
-    s3       = { name = "s3-${local.environment}" }
+    cloudwatch = { name = "cloudwatch-${local.environment}" }
+    dynamodb   = { name = "dynamodb-${local.environment}" }
+    s3         = { name = "s3-${local.environment}" }
   }
   source = "../../modules/kms"
 

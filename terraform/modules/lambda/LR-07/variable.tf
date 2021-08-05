@@ -63,6 +63,10 @@ variable "lr_06_bucket" {
   type = string
 }
 
+variable "cloudwatch_kms_key" {
+  type = map(string)
+}
+
 variable "dynamodb_kms_key" {
   type = map(string)
 }
