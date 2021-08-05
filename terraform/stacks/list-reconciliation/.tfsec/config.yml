@@ -1,3 +1,4 @@
 ---
 exclude:
   - aws-s3-specify-public-access-block # handled at the account level
+  - aws-lambda-enable-tracing # Splunk is used for logging/metrics/tracing
