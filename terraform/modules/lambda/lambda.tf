@@ -72,13 +72,16 @@ module "LR-07" {
   lr_06_bucket_arn         = var.s3_buckets.LR-06.arn
   lr_06_bucket             = var.s3_buckets.LR-06.bucket
   mock_pds_data_bucket_arn = var.mock_pds_data_bucket.arn
-  pds_url                  = "s3://${var.mock_pds_data_bucket.name}/${var.pds_url}"
   suffix                   = var.suffix
   lambda_handler           = var.lambda_handler
   cloudwatch_kms_key       = var.cloudwatch_kms_key
   dynamodb_kms_key         = var.dynamodb_kms_key
   s3_kms_key               = var.s3_kms_key
   log_retention_in_days    = var.log_retention_in_days
+  ssm_kms_key              = var.ssm_kms_key
+  pds_ssm_prefix           = var.pds_ssm_prefix
+  pds_ssm_access_token     = var.pds_ssm_access_token
+  pds_base_url             = var.pds_base_url
 }
 
 module "LR-08" {
@@ -170,7 +173,6 @@ module "LR-12" {
   errors_table_arn                      = var.dynamodb_tables.errors.arn
   errors_table_name                     = var.dynamodb_tables.errors.name
   mock_pds_data_bucket_arn              = var.mock_pds_data_bucket.arn
-  pds_url                               = "s3://${var.mock_pds_data_bucket.name}/${var.pds_url}"
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
   lambda_handler                        = var.lambda_handler
@@ -178,6 +180,10 @@ module "LR-12" {
   dynamodb_kms_key                      = var.dynamodb_kms_key
   s3_kms_key                            = var.s3_kms_key
   log_retention_in_days                 = var.log_retention_in_days
+  ssm_kms_key                           = var.ssm_kms_key
+  pds_ssm_prefix                        = var.pds_ssm_prefix
+  pds_base_url                          = var.pds_base_url
+  pds_ssm_access_token                  = var.pds_ssm_access_token
 }
 
 module "LR-15" {

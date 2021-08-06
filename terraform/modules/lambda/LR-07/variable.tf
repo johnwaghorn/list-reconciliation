@@ -10,7 +10,7 @@ variable "package_layer_arn" {
   type = string
 }
 
-variable "pds_url" {
+variable "pds_base_url" {
   type = string
 }
 
@@ -77,4 +77,17 @@ variable "s3_kms_key" {
 
 variable "log_retention_in_days" {
   type = number
+}
+
+
+variable "ssm_kms_key" {
+  type = map(string)
+}
+
+variable "pds_ssm_prefix" {
+  type = string
+}
+
+variable "pds_ssm_access_token" {
+  type = string
 }

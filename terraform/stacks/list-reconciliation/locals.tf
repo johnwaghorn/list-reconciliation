@@ -15,6 +15,12 @@ locals {
     # prod = "arn:aws:iam::000000000000:role/LRTerraformDeploy"
   }
 
+  pds_fhir_api_url = {
+    default = "https://sandbox.api.service.nhs.uk",
+    preprod = "https://int.api.service.nhs.uk"
+    # prod    = ""
+  }
+
   mesh_kms_key_alias = {
     default = ""
     preprod = "alias/list-rec-preprod-mesh"

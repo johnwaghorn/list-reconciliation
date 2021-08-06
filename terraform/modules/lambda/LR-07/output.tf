@@ -1,5 +1,5 @@
-output "pds_url_link" {
-  value = var.pds_url
+output "pds_base_url_link" {
+  value = var.pds_base_url
 }
 
 output "LR_07_lambda_arn" {

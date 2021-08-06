@@ -2,13 +2,16 @@ module "lambda" {
   source = "../../modules/lambda"
 
   suffix                = local.environment
-  pds_url               = "pds_api_data.csv"
+  pds_base_url          = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
   runtime               = "python3.8"
   lambda_handler        = "main.lambda_handler"
   s3_buckets            = module.s3.buckets
   cloudwatch_kms_key    = module.kms["cloudwatch"].output
   dynamodb_kms_key      = module.kms["dynamodb"].output
   s3_kms_key            = module.kms["s3"].output
+  ssm_kms_key           = module.kms["ssm"].output
+  pds_ssm_prefix        = module.ssm.pds_ssm_parameters_path
+  pds_ssm_access_token  = module.ssm.pds_ssm_access_token
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 
   lr_09_event_schedule_expression = try(local.lr_09_event_schedule_expression[local.environment], local.lr_09_event_schedule_expression["default"])
@@ -84,6 +87,7 @@ module "kms" {
   for_each = {
     cloudwatch = { name = "cloudwatch-${local.environment}" }
     dynamodb   = { name = "dynamodb-${local.environment}" }
+    ssm        = { name = "ssm-${local.environment}" }
     s3         = { name = "s3-${local.environment}" }
   }
   source = "../../modules/kms"
@@ -100,4 +104,10 @@ module "test_data" {
   suffix       = local.environment
   LR_22_bucket = module.s3.buckets.LR-22.bucket
   kms_key_arn  = module.kms["s3"].output.arn
+}
+
+module "ssm" {
+  source      = "../../modules/ssm"
+  prefix      = local.environment
+  ssm_kms_arn = module.kms["ssm"].output.arn
 }

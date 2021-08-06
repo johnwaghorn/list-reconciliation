@@ -1,14 +1,6 @@
-from unittest import mock
-
-import json
 import os
 
-from moto import mock_s3
-
-import boto3
 import pytest
-
-from utils.pds_api_service import get_mock_pds_record, get_pds_fhir_record
 
 PDS_API_URL = os.getenv("PDS_API_URL")
 AWS_REGION = os.getenv("AWS_REGION")
@@ -17,79 +9,83 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "lambdas", "data")
 
 
-def mocked_requests_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.content = json_data
-            self.status_code = status_code
-
-        def raise_for_status(self):
-            if self.status_code >= 300:
-                raise Exception(self.status_code)
-
-    return MockResponse(
-        json.dumps(json.load(open(os.path.join(DATA, "pds_fhir_api_response.json")))),
-        200,
-    )
+def test_expired_token(create_mock_ssm_valid_access_token, pds_api):
+    response = pds_api._is_token_expired()
+    assert not response
 
 
-@pytest.fixture
-def s3():
-    with mock_s3():
-        s3 = boto3.client("s3", region_name=AWS_REGION)
-        bucket = PDS_API_URL.replace("s3://", "").split("/")[0]
-        s3.create_bucket(
-            Bucket=bucket,
-            CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
-        )
-        s3.upload_file(os.path.join(DATA, "pds_api_data.csv"), bucket, "pds_api_data.csv")
-        yield
+def test_valid_token(create_mock_ssm_expired_access_token, pds_api):
+    response = pds_api._is_token_expired()
+    assert response
 
 
-@mock.patch("requests.Session.get", side_effect=mocked_requests_get)
-def test_get_pds_fhir_record(pds_url):
+def test_get_access_token(
+    mock_pds_app_key,
+    mock_pds_private_key,
+    mock_pds_access_token,
+    mock_jwt_encode,
+    mock_auth_post,
+    pds_api,
+    create_mock_ssm_valid_access_token,
+):
+    response = pds_api.get_access_token()
+    expected_keys = ["access_token", "expires_in", "token_type", "issued_at"]
+    assert all(keys in expected_keys for keys in response.keys())
 
-    actual = get_pds_fhir_record(pds_url, "9000000009")
 
-    expected = {
+def test_get_new_access_token(
+    mock_pds_app_key,
+    mock_pds_private_key,
+    mock_pds_access_token,
+    create_mock_ssm_expired_access_token,
+    mock_jwt_encode,
+    mock_auth_post,
+    pds_api,
+):
+    response = pds_api.get_access_token()
+    expected_keys = ["access_token", "expires_in", "token_type", "issued_at"]
+    assert all(keys in expected_keys for keys in response.keys())
+
+
+def test_pds_record(
+    mock_pds_app_key,
+    mock_pds_private_key,
+    mock_pds_access_token,
+    mock_jwt_encode,
+    mock_auth_post,
+    pds_api,
+    mock_response,
+):
+    response = pds_api.get_pds_record("9000000009", "test-job-id")
+    expected_response = {
         "surname": "Smith",
         "forenames": ["Jane"],
         "title": ["Mrs"],
-        "gender": "female",
         "date_of_birth": "2010-10-22",
-        "address": [
-            "1 Trevelyan Square",
-            "Boar Lane",
-            "City Centre",
-            "Leeds",
-            "West Yorkshire",
-        ],
-        "postcode": "LS1 6AE",
-        "gp_practicecode": "Y12345",
-        "gp_registered_date": "2020-01-01",
-        "sensitive": "U",
-        "version": "2",
-    }
-
-    assert actual == expected
-
-
-def test_get_pds_mock_record(s3):
-
-    actual = get_mock_pds_record(PDS_API_URL, "9000000009")
-
-    expected = {
-        "surname": "Smith",
-        "forenames": ["Jane"],
-        "title": ["Mrs"],
         "gender": "female",
-        "date_of_birth": "2010-10-22",
-        "address": ["1 Trevelyan Square", "Boar Lane", "Leeds", "West Yorkshire"],
+        "address": ["1 Trevelyan Square", "Boar Lane", "Leeds", "City Centre", "West Yorkshire"],
         "postcode": "LS1 6AE",
         "gp_practicecode": "Y123452",
         "gp_registered_date": "2012-05-22",
         "sensitive": "U",
         "version": "1",
     }
+    assert response == expected_response
 
-    assert actual == expected
+
+@pytest.mark.parametrize(
+    "id,url,expected",
+    [
+        ("prod", "https://api.service.nhs.uk/personal-demographics/FHIR/R4/", "prod-1"),
+        ("ref", "https://ref.api.service.nhs.uk/personal-demographics/FHIR/R4/", "ref-1"),
+        ("int", "https://int.api.service.nhs.uk/personal-demographics/FHIR/R4/", "int-1"),
+        ("sandbox", "https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4/", None),
+    ],
+)
+def test_key_identifier(
+    id, url, expected, mock_pds_app_key, mock_pds_private_key, mock_pds_access_token, pds_api
+):
+    pds_api.pds_url = url
+    kid = pds_api.get_key_identifier()
+
+    assert kid == expected

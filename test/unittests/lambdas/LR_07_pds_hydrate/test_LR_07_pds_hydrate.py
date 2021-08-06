@@ -15,8 +15,8 @@ def test_write_into_table(
     create_dynamodb_tables,
     lambda_context,
     lambda_handler,
+    mock_response,
 ):
-
     record = Demographics(
         "50",
         "50",
@@ -85,6 +85,7 @@ def test_write_into_table(
             "1 Trevelyan Square",
             "Boar Lane",
             "Leeds",
+            "City Centre",
             "West Yorkshire",
         ],
         "PDS_PostCode": "LS1 6AE",
@@ -100,8 +101,8 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
     create_dynamodb_tables,
     create_LR08_demographic_comparison_lambda,
     lambda_handler,
+    mock_response,
 ):
-
     record = Demographics(
         Id="51",
         JobId="50",
@@ -164,9 +165,11 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
         "PDS_Titles": ["Mr"],
         "PDS_Gender": "male",
         "PDS_DateOfBirth": "2009-10-22",
-        "PDS_Sensitive": "R",
+        "PDS_Sensitive": "U",
         "PDS_Address": [
             "1 Trevelyan Square",
+            "",
+            "",
             "Leeds",
             "West Yorkshire",
         ],
@@ -183,12 +186,12 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
     create_dynamodb_tables,
     create_LR08_demographic_comparison_lambda,
     lambda_handler,
+    mock_response,
 ):
-
     record = Demographics(
         Id="52",
         JobId="50",
-        NhsNumber="7000000007",
+        NhsNumber="9449306060",
         GP_DateOfBirth="19231121",
         GP_Gender="1",
         GP_GpPracticeCode="Y123452",
@@ -211,53 +214,48 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
     )
 
     response = lambda_handler.pds_hydrate("50", record)
-    expected_response = "Retrieved PDS data for JobId: 50, PatientId: 52, NhsNumber: 7000000007"
+    expected_response = "Retrieved PDS data for JobId: 50, PatientId: 52, NhsNumber: 9449306060"
 
     assert response["message"] == expected_response
 
     actual = Demographics.get("52", "50").attribute_values
 
     expected = {
-        "Id": "52",
-        "JobId": "50",
-        "NhsNumber": "7000000007",
-        "GP_DateOfBirth": "19231121",
-        "GP_Gender": "1",
-        "GP_GpPracticeCode": "Y123452",
-        "GP_Title": "Miss",
-        "GP_Forenames": "Nikki-Stevens",
-        "GP_Surname": "Pavey",
+        "IsComparisonCompleted": False,
         "GP_AddressLine1": "19 Main Street",
         "GP_AddressLine2": "",
         "GP_AddressLine3": "Logan",
         "GP_AddressLine4": "Durham",
         "GP_AddressLine5": "London",
-        "GP_PostCode": "ZE3 9JY",
-        "IsComparisonCompleted": False,
-        "GP_HaCipher": "TEST",
-        "GP_TransactionDate": "2021-01-01",
-        "GP_TransactionTime": "01:00:00",
-        "GP_TransactionId": "1236",
-        "GP_PreviousSurname": "",
+        "GP_DateOfBirth": "19231121",
         "GP_DrugsDispensedMarker": False,
-        "PDS_GpRegisteredDate": "2012-05-22",
-        "PDS_Surname": "Pavey",
-        "PDS_Forenames": ["Nikki-Stevens"],
-        "PDS_Titles": ["Miss"],
-        "PDS_Gender": "female",
-        "PDS_DateOfBirth": "1923-11-21",
-        "PDS_Sensitive": "REDACTED",
-        "PDS_Address": [
-            "19 Main Street",
-            "Logan",
-            "Durham",
-            "London",
-        ],
-        "PDS_PostCode": "ZE3 9JY",
+        "GP_Forenames": "Nikki-Stevens",
+        "GP_Gender": "1",
+        "GP_GpPracticeCode": "Y123452",
+        "GP_HaCipher": "TEST",
+        "GP_PostCode": "ZE3 9JY",
+        "GP_PreviousSurname": "",
         "GP_RegistrationStatus": "Deducted Patient Match",
-        "PDS_Version": "6",
+        "GP_Surname": "Pavey",
+        "GP_Title": "Miss",
+        "GP_TransactionDate": "2021-01-01",
+        "GP_TransactionId": "1236",
+        "GP_TransactionTime": "01:00:00",
+        "Id": "52",
+        "JobId": "50",
+        "NhsNumber": "9449306060",
+        "PDS_Address": [],
+        "PDS_DateOfBirth": "",
+        "PDS_Forenames": [],
+        "PDS_Gender": "",
+        "PDS_GpPracticeCode": "",
+        "PDS_GpRegisteredDate": "",
+        "PDS_PostCode": "",
+        "PDS_Sensitive": "REDACTED",
+        "PDS_Surname": "",
+        "PDS_Titles": [],
+        "PDS_Version": "",
     }
-
     assert actual == expected
 
 
@@ -266,8 +264,10 @@ def test_gp_registration_Unmatched_in_demographics_table(
     create_dynamodb_tables,
     create_LR08_demographic_comparison_lambda,
     lambda_handler,
+    mock_jwt_encode,
+    mock_auth_post,
+    mock_response,
 ):
-
     record = Demographics(
         Id="53",
         JobId="50",

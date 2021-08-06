@@ -51,7 +51,7 @@ def upload_mock_pds_data(path):
 @step("upload test data files in <path> to lr-22")
 def upload_test_data_files_to_lr_22(path):
     try:
-        for file in ["A82023.csv", "Y123451.csv", "Y123452.csv"]:
+        for file in ["Y12345.csv", "Y123451.csv", "Y123452.csv"]:
             s3.upload_file(os.path.join(DATA, path, file), LR_22_BUCKET, file)
             use_waiters_check_object_exists(LR_22_BUCKET, file)
         Messages.write_message("Test data uploaded")

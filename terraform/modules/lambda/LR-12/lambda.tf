@@ -25,6 +25,7 @@ resource "aws_lambda_function" "LR-12-Lambda" {
   layers           = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
+
   environment {
     variables = {
       DEMOGRAPHICS_TABLE                      = var.demographics_table_name
@@ -33,8 +34,9 @@ resource "aws_lambda_function" "LR-12-Lambda" {
       ERRORS_TABLE                            = var.errors_table_name
       LR_13_REGISTRATIONS_OUTPUT_BUCKET       = var.registrations_output_bucket
       LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = var.pds_practice_registrations_bucket
-      PDS_API_URL                             = var.pds_url
+      PDS_BASE_URL                            = var.pds_base_url
       PDS_API_RETRIES                         = var.pds_api_retries
+      SSM_STORE_PREFIX                        = "/${var.pds_ssm_prefix}/"
     }
   }
 

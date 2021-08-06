@@ -18,8 +18,8 @@ DATA = os.path.join(ROOT, "..", "data")
 REGION_NAME = "eu-west-2"
 
 
-@pytest.fixture(scope="module")
-def lambda_handler():
+@pytest.fixture(scope="function")
+def lambda_handler(mock_pds_app_key, mock_pds_access_token, mock_pds_private_key):
     app = PdsHydrate()
     return app
 

@@ -12,12 +12,13 @@ from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.database.models import Demographics, JobStats
 from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
-from utils.pds_api_service import get_pds_record, PDSAPIError
+from utils.pds_api_service import PDSAPIHelper, PDSAPIError
 
 
 class PDSRegistrationStatus(LambdaApplication):
     def __init__(self):
         super().__init__()
+        self.api = PDSAPIHelper(self.system_config)
         self.job_id = None
 
     def initialise(self):
@@ -107,12 +108,7 @@ class PDSRegistrationStatus(LambdaApplication):
 
             if nhs_number not in job_nhs_numbers:
                 try:
-                    pds_record = get_pds_record(
-                        nhs_number, max_retries=self.system_config["PDS_API_RETRIES"]
-                    )
-                    pds_record["address"] = (
-                        pds_record["address"] + [None, None, None, None, None]
-                    )[:5]
+                    pds_record = self.api.get_pds_record(nhs_number, job_id)
 
                 except PDSAPIError as err:
                     msg = f"Error fetching PDS record for NHS number {nhs_number}, {err.details}"

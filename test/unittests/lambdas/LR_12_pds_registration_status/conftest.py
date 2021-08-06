@@ -26,8 +26,8 @@ def lr_12_event():
     return {"job_id": "blah"}
 
 
-@pytest.fixture(scope="module")
-def lambda_handler():
+@pytest.fixture(scope="function")
+def lambda_handler(mock_pds_app_key, mock_pds_access_token, mock_pds_private_key):
     app = PDSRegistrationStatus()
     return app
 

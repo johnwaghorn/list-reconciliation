@@ -62,8 +62,9 @@ variable "mock_pds_data_bucket_arn" {
   type = string
 }
 
-variable "pds_url" {
-  type = string
+variable "pds_base_url" {
+  description = "PDS FHIR API base url"
+  type        = string
 }
 
 variable "pds_api_retries" {
@@ -97,4 +98,16 @@ variable "s3_kms_key" {
 
 variable "log_retention_in_days" {
   type = number
+}
+
+variable "ssm_kms_key" {
+  type = map(string)
+}
+
+variable "pds_ssm_prefix" {
+  type = string
+}
+
+variable "pds_ssm_access_token" {
+  type = string
 }

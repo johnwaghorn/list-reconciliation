@@ -65,3 +65,7 @@ output "lr_24_lambda" {
 output "lr_24_lambda_arn" {
   value = module.LR-24.LR-24-lambda_arn
 }
+
+output "pds_url" {
+  value = module.LR-07.pds_base_url_link
+}

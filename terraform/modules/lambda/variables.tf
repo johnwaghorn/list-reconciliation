@@ -7,8 +7,9 @@ variable "lambda_timeout" {
   default = 300
 }
 
-variable "pds_url" {
-  type = string
+variable "pds_base_url" {
+  description = "PDS FHIR API base url"
+  type        = string
 }
 
 variable "pds_api_retries" {
@@ -85,4 +86,17 @@ variable "lr_09_event_schedule_expression" {
 variable "lr_25_event_schedule_expression" {
   description = "How often should LR-25 be called"
   type        = string
+}
+
+variable "ssm_kms_key" {
+  type = map(string)
+}
+
+variable "pds_ssm_prefix" {
+  description = "PDS SSM parameter path"
+  type        = string
+}
+
+variable "pds_ssm_access_token" {
+  type = string
 }

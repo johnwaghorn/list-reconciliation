@@ -141,3 +141,7 @@ output "lr_23_bucket" {
 output "lr_20_bucket" {
   value = module.s3.buckets.LR-20.bucket
 }
+
+output "pds_url" {
+  value = module.lambda.pds_url
+}

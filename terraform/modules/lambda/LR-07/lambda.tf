@@ -30,8 +30,9 @@ resource "aws_lambda_function" "LR-07-Lambda" {
       DEMOGRAPHICS_TABLE            = var.demographics_table_name
       ERRORS_TABLE                  = var.errors_table_name
       DEMOGRAPHIC_COMPARISON_LAMBDA = var.lr_08_lambda
-      PDS_API_URL                   = var.pds_url
+      PDS_BASE_URL                  = var.pds_base_url
       LR_06_BUCKET                  = var.lr_06_bucket
+      SSM_STORE_PREFIX              = "/${var.pds_ssm_prefix}/"
     }
   }
 

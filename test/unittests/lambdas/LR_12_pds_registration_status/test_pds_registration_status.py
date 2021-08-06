@@ -30,7 +30,7 @@ def test_get_practice_patients(s3, lambda_handler):
 
 
 def test_get_pds_exclusive_registrations_with_no_existing_job_stats_ok(
-    demographics, jobs, s3, lambda_handler
+    demographics, jobs, s3, lambda_handler, mock_jwt_encode, mock_auth_post, mock_response
 ):
 
     lambda_handler.get_pds_exclusive_registrations("ABC123")
@@ -78,7 +78,7 @@ def test_lambda_handler_for(
 
 @freeze_time("2020-02-01 13:40:00")
 def test_get_pds_exclusive_registrations_ok(
-    demographics, jobstats, jobs, s3, lambda_handler, lambda_context
+    demographics, jobstats, jobs, s3, mock_response, lambda_handler, lambda_context
 ):
     response = json.loads(lambda_handler.main({"job_id": "ABC123"}, lambda_context))
 
@@ -101,7 +101,7 @@ def test_get_pds_exclusive_registrations_ok(
     expected = csv.reader(
         StringIO(
             """SURNAME,FORENAMES,DOB,NHS NO.,ADD 1,ADD 2,ADD 3,ADD 4,ADD 5,POSTCODE,TITLE,SEX,DATE ACCEPT.
-Smith,Jane,2010-10-22,9000000009,1 Trevelyan Square,Boar Lane,Leeds,West Yorkshire,,LS1 6AE,Mrs,female,2012-05-22"""
+Smith,Jane,2010-10-22,9000000009,1 Trevelyan Square,Boar Lane,Leeds,City Centre,West Yorkshire,LS1 6AE,Mrs,female,2012-05-22"""
         )
     )
 

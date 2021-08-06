@@ -70,7 +70,8 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.cloudwatch_kms_key.arn}",
                 "${var.dynamodb_kms_key.arn}",
-                "${var.s3_kms_key.arn}"
+                "${var.s3_kms_key.arn}",
+                "${var.ssm_kms_key.arn}"
             ]
         },
         {
@@ -115,6 +116,26 @@ resource "aws_iam_policy" "policy" {
                 "${var.job_stats_table_arn}",
                 "${var.errors_table_arn}"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource":[
+                  "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${var.pds_ssm_prefix}/*"
+           ]
+        },
+          {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:PutParameter"
+            ],
+            "Resource":[
+                  "${var.pds_ssm_access_token}"
+           ]
         }
     ]
     }

@@ -7,7 +7,7 @@ from gp_file_parser.utils import empty_string
 from utils import retry_func
 from utils.database.models import Demographics
 from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
-from utils.pds_api_service import get_pds_record, PDSAPIError
+from utils.pds_api_service import PDSAPIError, PDSAPIHelper
 from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
 
 
@@ -15,6 +15,7 @@ class PdsHydrate(LambdaApplication):
     def __init__(self):
         super().__init__()
         self.s3 = boto3.client("s3")
+        self.api = PDSAPIHelper(self.system_config)
         self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
         self.job_id = None
 
@@ -118,11 +119,11 @@ class PdsHydrate(LambdaApplication):
         """
 
         try:
-            pds_record = get_pds_record(record.NhsNumber, max_retries=5, backoff_factor=1)
+            pds_record = self.api.get_pds_record(record.NhsNumber, job_id)
 
         except PDSAPIError as err:
-            msg = f"Error fetching PDS record for NHS number {record.NhsNumber}, {err.details}"
-            error_response = log_dynamodb_error(self.log_object, job_id, err.details["code"], msg)
+            msg = f"Error fetching PDS record for NHS number {record.NhsNumber}, {str(err)}"
+            error_response = log_dynamodb_error(self.log_object, job_id, str(err), msg)
 
             raise PDSAPIError(json.dumps(error_response)) from err
 
