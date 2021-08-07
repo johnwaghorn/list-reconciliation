@@ -7,23 +7,7 @@ output "region" {
 }
 
 output "lr_01_bucket" {
-  value = module.s3.LR_01_Bucket
-}
-
-output "lr_01_bucket_inbound" {
-  value = module.s3.LR_01_Bucket_inbound
-}
-
-output "lr_01_bucket_pass" {
-  value = module.s3.LR_01_Bucket_pass
-}
-
-output "lr_01_bucket_fail" {
-  value = module.s3.LR_01_Bucket_fail
-}
-
-output "lr_01_bucket_retry" {
-  value = module.s3.LR_01_Bucket_retry
+  value = module.s3.buckets.LR-01.bucket
 }
 
 output "lr_02_lambda" {

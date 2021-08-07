@@ -23,8 +23,8 @@ module "lr_02_validate_and_parse" {
   lambda_layers         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
-  lr_01_inbound_folder  = var.s3_buckets.LR-01.inbound_key
-  lr_01_failed_folder   = var.s3_buckets.LR-01.fail_key
+  lr_01_inbound_folder  = "inbound"
+  lr_01_failed_folder   = "failed"
   lr_06_bucket          = var.s3_buckets.LR-06.bucket
   lr_04_lambda_arn      = module.lr_04_feedback_failure.LR-04-lambda_arn
   lr_24_lambda_arn      = module.lr_24_save_records_to_s3.LR-24-lambda_arn

@@ -1,4 +1,4 @@
-NHS Number,Registered GP Practice,Dispensing Flag
+nhs_number,gp_practice,dispensing_flag
 9449304424,H81109,1
 9449305552,H81109,0
 9449306621,H81109,1

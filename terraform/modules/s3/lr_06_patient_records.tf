@@ -1,6 +1,6 @@
 #tfsec:ignore:aws-s3-enable-versioning
 resource "aws_s3_bucket" "LR-06" {
-  bucket        = "lr-06-${var.suffix}"
+  bucket        = "lr-06-patient-records-${var.suffix}"
   acl           = "private"
   force_destroy = var.force_destroy
 
@@ -20,6 +20,6 @@ resource "aws_s3_bucket" "LR-06" {
 
   logging {
     target_bucket = aws_s3_bucket.LR-26.id
-    target_prefix = "lr-06-${var.suffix}/"
+    target_prefix = "lr-06-patient-records-${var.suffix}/"
   }
 }

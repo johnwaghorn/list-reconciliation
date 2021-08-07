@@ -5,7 +5,7 @@
 
 ## Ensure that gponly, pdsonly, cdd files and MESH DSA payload are produced as expected
 
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * connect to s3 and upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" for successful file validation
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
@@ -20,7 +20,7 @@
 
 ## Ensure the data on mismatch records on onlyongp csv file  in the output bucket is as expected
 
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * connect to s3 and upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" for successful file validation
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
@@ -31,7 +31,7 @@
 
 ## Ensure the data on mismatch records on onlyonPDS csv file in the output bucket is as expected
 
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
@@ -42,7 +42,7 @@
 
 ## Consolidated Demographic Differences file is generated succesfully when comparison is complete
 
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
@@ -54,7 +54,7 @@
 ## Ensure expected comparision is done for the non sensitive patient matching the PDS record
 
 * upload gpfile file "lr_07/Y12345_GPR4LNA1.EIA" to LR-01
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check demographic difference "MN-BR-DB-01" on demographics difference table for nhsnumber "9000000017"
 * check demographic difference "MN-BR-AD-02" on demographics difference table for nhsnumber "9000000017"
@@ -65,7 +65,7 @@
 
 ## Ensure individual payload json file is produced sucessfully
 
-* setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"

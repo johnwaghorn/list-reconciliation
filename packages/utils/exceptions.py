@@ -10,7 +10,7 @@ class InvalidFilename(Exception):
     pass
 
 
-class InvalidDSAFile(Exception):
+class InvalidPDSData(Exception):
     pass
 
 

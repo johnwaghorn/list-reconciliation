@@ -66,6 +66,14 @@ output "lr_15_lambda_arn" {
   value = module.lr_15_process_demo_diffs.LR-15-lambda_arn
 }
 
+output "lr_21_lambda" {
+  value = module.lr_21_split_dps_extract.lambda.arn
+}
+
+output "lr_21_lambda_arn" {
+  value = module.lr_21_split_dps_extract.lambda.function_name
+}
+
 output "lr_24_lambda" {
   value = module.lr_24_save_records_to_s3.LR-24-lambda
 }

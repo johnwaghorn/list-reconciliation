@@ -23,7 +23,6 @@ python-package: packages-layer dependencies-layer
 #
 
 # Packaging
-
 packages-layer:
 	rm -r ./packages_layer || true
 	mkdir -p ./packages_layer/python/
@@ -37,7 +36,7 @@ dependencies-layer:
 
 # Testing
 unittests:
-	pytest
+	pytest -v --doctest-modules --cov=packages
 
 # Formatting
 black:

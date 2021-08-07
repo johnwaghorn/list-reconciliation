@@ -1,3 +1,3 @@
-NHS Number,Registered GP Practice,Dispensing Flag
+nhs_number,gp_practice,dispensing_flag
 9000000009,Y12345,1
 9000000017,Y12345,1

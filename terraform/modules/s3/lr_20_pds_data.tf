@@ -1,3 +1,4 @@
+#tfsec:ignore:aws-s3-enable-versioning
 resource "aws_s3_bucket" "LR-20" {
   bucket        = "lr-20-pds-reg-input-${var.suffix}"
   acl           = "private"
@@ -15,10 +16,6 @@ resource "aws_s3_bucket" "LR-20" {
       }
       bucket_key_enabled = true
     }
-  }
-
-  versioning {
-    enabled = true
   }
 
   logging {

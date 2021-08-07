@@ -1,10 +1,3 @@
-locals {
-  name           = "${var.lambda_name}-${var.suffix}"
-  source_bucket  = var.supplementary_input_bucket_arn
-  lambda_timeout = 900
-  memory_size    = 10240
-}
-
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/../../../../lambdas/${var.lambda_name}"
@@ -17,14 +10,14 @@ resource "aws_cloudwatch_log_group" "lambda" {
   kms_key_id        = var.cloudwatch_kms_key.arn
 }
 
-resource "aws_lambda_function" "LR-21-Lambda" {
+resource "aws_lambda_function" "lambda" {
   function_name    = local.name
   filename         = data.archive_file.lambda_zip.output_path
   handler          = var.lambda_handler
   role             = aws_iam_role.role.arn
   runtime          = var.runtime
-  timeout          = local.lambda_timeout
-  memory_size      = local.memory_size
+  timeout          = 60 * 15   # 15 minutes
+  memory_size      = 1024 * 10 # 10GB
   layers           = var.lambda_layers
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
@@ -36,4 +29,21 @@ resource "aws_lambda_function" "LR-21-Lambda" {
   }
 
   depends_on = [aws_cloudwatch_log_group.lambda]
+}
+
+resource "aws_lambda_permission" "allow_LR20_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = var.supplementary_input_bucket_arn
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = var.supplementary_input_bucket
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.lambda.arn
+    events              = ["s3:ObjectCreated:*"]
+  }
 }

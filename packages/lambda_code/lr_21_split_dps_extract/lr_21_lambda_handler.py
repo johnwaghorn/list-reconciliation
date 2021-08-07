@@ -1,7 +1,5 @@
-import csv
-import io
 import os
-from collections import defaultdict
+import json
 from datetime import timedelta
 
 import boto3
@@ -9,11 +7,14 @@ from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.datetimezone import get_datetime_now, localize_date
-from utils.exceptions import InvalidDSAFile
+from utils.exceptions import InvalidPDSData
 from utils.logger import success, error, Message
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
+
+s3 = boto3.client("s3")
+lambda_ = boto3.client("lambda")
 
 
 class SplitDPSExtract(LambdaApplication):
@@ -22,195 +23,195 @@ class SplitDPSExtract(LambdaApplication):
         self.s3 = boto3.client("s3")
         self.input_bucket = self.system_config["LR_20_SUPPLEMENTARY_INPUT_BUCKET"]
         self.output_bucket = self.system_config["LR_22_SUPPLEMENTARY_OUTPUT_BUCKET"]
-        self.upload_key = None
 
     def start(self):
-        try:
-            self.upload_key = self.event["Records"][0]["s3"]["object"]["key"]
-
-            self.response = self.split_dps_extract()
-
-        except InvalidDSAFile:
-            self.response = error(
-                f'LR21 Lambda processed an invalid DSA file in uploadPath="{self.upload_key}"',
-                self.log_object.internal_id,
-            )
-
-        except KeyError as err:
-            self.response = error(
-                f"LR21 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
-            )
-
-        except Exception:
-            self.response = error(
-                f"Unhandled exception caught in LR21 Lambda", self.log_object.internal_id
-            )
-
-    def split_dps_extract(self) -> Message:
-        """Splits a DPS supplementary file into multiple smaller files by practice
-
-        Returns:
-            Message: A dict result containing a status and message
-        """
-
-        records = self.read_file()
-
-        per_registered_gp = self.split_file(records)
-
-        self.write_files(per_registered_gp)
-
-        self.cleanup_files()
-
-        return success("LR21 Lambda application stopped", self.log_object.internal_id)
-
-    def read_file(self) -> list:
-        """Retrieve and read supplementary file data
-
-        Returns:
-            list: A list of strings containing file data
-        """
-
-        try:
-            file_obj = self.s3.get_object(Bucket=self.input_bucket, Key=self.upload_key)
-
-            file_data = file_obj["Body"].read().decode("utf-8").splitlines()
-
-            headers = ["NHS Number,Registered GP Practice,Dispensing Flag"]
-
-            if not file_data or file_data == headers:
-                raise InvalidDSAFile("File is empty")
-
-        except (ClientError, UnicodeDecodeError) as err:
+        # handle calling from S3 Event or JSON in invoke
+        if self.event.get("Records") is not None:
+            # pyright: reportOptionalSubscript=false
+            dps_data_key = self.event["Records"][0]["s3"]["object"]["key"]
+            is_compressed = True if dps_data_key.endswith("gz") else False
+            self.s3_event(dps_data_key, is_compressed)
             self.log_object.write_log(
-                "LR21C01",
+                "LR21I01",
                 log_row_dict={
-                    "file_name": self.upload_key,
+                    "file_name": dps_data_key,
                     "bucket": self.input_bucket,
                 },
             )
-
-            raise InvalidDSAFile(f"Failed to read supplementary data from file") from err
-
+            self.cleanup_files(
+                input_bucket=self.input_bucket,
+                input_key=dps_data_key,
+                output_bucket=self.output_bucket,
+            )
+        elif self.event.get("gp_practice") is not None:
+            # pyright: reportOptionalSubscript=false
+            self.invoked(
+                gp_practice=self.event["gp_practice"],
+                bucket=self.event["bucket"],
+                key=self.event["key"],
+                is_compressed=self.event["is_compressed"],
+            )
+            self.log_object.write_log(
+                "LR21I02",
+                log_row_dict={
+                    "file_name": self.event["key"],
+                    "bucket": self.event["bucket"],
+                    "gp_practice": self.event["gp_practice"],
+                },
+            )
         else:
-            return file_data
-
-    def split_file(self, file_data: list) -> dict:
-        """Split file data into a dict for each registered GP
-
-        Args:
-            file_data (list): A list of strings containing file data
-
-        Returns:
-            dict: A dict of registered GP's
-        """
-
-        try:
-            per_registered_gp = defaultdict(list)
-
-            reader = csv.reader(file_data)
-
-            next(reader, None)
-
-            for nhs_number, gp_practicecode, disp_flag in reader:
-                per_registered_gp[gp_practicecode.strip()].append(
-                    {
-                        "nhs_number": nhs_number.strip(),
-                        "dispensing_flag": int(disp_flag),
-                    }
-                )
-
-            return dict(per_registered_gp)
-
-        except ValueError as err:
             self.log_object.write_log(
-                "LR21C02",
+                "LR21W01",
                 log_row_dict={
-                    "file_name": self.upload_key,
-                    "bucket": self.input_bucket,
+                    "event": self.event,
                 },
             )
+            raise InvalidPDSData
 
-            raise InvalidDSAFile(f"Failed to process supplementary data from file") from err
+        self.response = json.dumps({"msg": "LR-21 Completed"})
+        return
 
-    def write_files(self, per_registered_gp: dict):
-        """Create and write each GP dict it's own GP file
+    def s3_event(self, key: str, is_compressed: bool = True):
+        # S3 Select all the gp_practice codes, sadly there's no DISTINCT or UNIQUE available
+        s3_select = s3.select_object_content(
+            Bucket=self.input_bucket,
+            Key=key,
+            Expression='SELECT "gp_practice" FROM s3object',
+            ExpressionType="SQL",
+            InputSerialization={
+                "CSV": {
+                    "FileHeaderInfo": "USE",
+                },
+                "CompressionType": "GZIP" if is_compressed else "NONE",
+            },
+            OutputSerialization={
+                "CSV": {
+                    "QuoteFields": "ASNEEDED",
+                }
+            },
+        )
+        gp_practices = []
+        for event in s3_select["Payload"]:
+            if "Records" in event:
+                for gp_practice in event["Records"]["Payload"].decode("utf-8").splitlines():
+                    gp_practices.append(gp_practice)
 
-        Args:
-            per_registered_gp (dict): A dict of registered GP's
-        """
-
-        headers = ["nhs_number", "dispensing_flag"]
-
-        for gp, patients in per_registered_gp.items():
-            stream = io.StringIO()
-
-            writer = csv.DictWriter(stream, fieldnames=headers, lineterminator="\n")
-            writer.writeheader()
-            writer.writerows(patients)
-
-            csv_results_string = stream.getvalue().strip()
-
-            try:
-                self.s3.put_object(
-                    Body=csv_results_string, Bucket=self.output_bucket, Key=f"{gp}.csv"
-                )
-
-            except ClientError as err:
-                self.log_object.write_log(
-                    "LR21C03",
-                    log_row_dict={
-                        "file_name": self.upload_key,
+        # For each GP Practice invoke this Lambda again to split out the data
+        for gp_practice in list(set(gp_practices)):
+            self.log_object.write_log(
+                "LR21I04",
+                log_row_dict={
+                    "file_name": key,
+                    "bucket": self.input_bucket,
+                    "gp_practice": gp_practice,
+                },
+            )
+            lambda_.invoke(
+                FunctionName=self.context.invoked_function_arn,
+                InvocationType="Event",
+                Payload=json.dumps(
+                    {
+                        "gp_practice": gp_practice,
                         "bucket": self.input_bucket,
-                    },
-                )
+                        "key": key,
+                        "is_compressed": is_compressed,
+                    }
+                ).encode("utf-8"),
+            )
 
+    def invoked(self, gp_practice: str, bucket: str, key: str, is_compressed: bool = True):
         self.log_object.write_log(
-            "LR21I01",
+            "LR21I05",
             log_row_dict={
-                "practice_count": len(per_registered_gp),
-                "bucket": self.input_bucket,
+                "file_name": key,
+                "bucket": bucket,
+                "gp_practice": gp_practice,
             },
         )
 
-    def cleanup_files(self):
-        """Cleanup any file from the LR-22 output bucket, which hasn't been recently modified and remove the DSA
-        upload file from LR-20 input bucket"""
+        # S3 Select the GP Practice data out of the combined file
+        s3_select = s3.select_object_content(
+            Bucket=bucket,
+            Key=key,
+            Expression=f"SELECT nhs_number, dispensing_flag FROM s3object s WHERE s.gp_practice = '{gp_practice}'",
+            ExpressionType="SQL",
+            InputSerialization={
+                "CSV": {
+                    "FileHeaderInfo": "USE",
+                },
+                "CompressionType": "GZIP" if is_compressed else "NONE",
+            },
+            OutputSerialization={
+                "CSV": {
+                    "QuoteFields": "ASNEEDED",
+                }
+            },
+        )
+
+        # get output stream
+        csv_data = b"nhs_number,dispensing_flag\n"
+        for event in s3_select["Payload"]:
+            if "Records" in event:
+                csv_data += event["Records"]["Payload"]
+
+        # write to S3 file named gp_practice
+        s3.put_object(Body=csv_data, Bucket=self.output_bucket, Key=f"{gp_practice}.csv")
+        self.log_object.write_log(
+            "LR21I06",
+            log_row_dict={
+                "file_name": key,
+                "bucket": bucket,
+                "gp_practice": gp_practice,
+            },
+        )
+
+    # TODO: what is the business requirement around this?
+    #   Having this delete GP Files after 4 hours will mean unless we recieve new data from DPS every 4 hours, we will have no PDS data to compare against for the GP
+    #   However, this cleanup only happens when we recieve a new file, so it may only cleanup when we recieve daily(?) from DPS
+    def cleanup_files(
+        self, input_bucket: str, input_key: str, output_bucket: str, maximum_age_hours: int = 4
+    ):
+        """Cleanup any file from the LR-22 output bucket, which haven't been recently modified
+        Remove the DSA upload file from LR-20 input bucket"""
 
         try:
-            minimum_last_update = get_datetime_now() - timedelta(hours=4)
+            minimum_last_update = get_datetime_now() - timedelta(hours=maximum_age_hours)
 
+            # Clean up split out GP Files
             paginator = self.s3.get_paginator("list_objects_v2")
-            pages = paginator.paginate(Bucket=self.output_bucket)
-
+            pages = paginator.paginate(Bucket=output_bucket)
             for page in pages:
                 for obj in page.get("Contents", []):
                     mod_date = localize_date(obj["LastModified"])
-
                     if mod_date < minimum_last_update:
-                        self.s3.delete_object(Bucket=self.output_bucket, Key=obj["Key"])
-
+                        self.s3.delete_object(Bucket=output_bucket, Key=obj["Key"])
                         self.log_object.write_log(
-                            "LR21I02",
+                            "LR21I07",
                             log_row_dict={
                                 "file_name": obj["Key"],
-                                "bucket": self.input_bucket,
+                                "bucket": output_bucket,
                             },
                         )
 
-            self.s3.delete_object(Bucket=self.input_bucket, Key=self.upload_key)
-
-            self.log_object.write_log(
-                "LR21I03",
-                log_row_dict={
-                    "file_name": self.upload_key,
-                    "bucket": self.input_bucket,
-                },
-            )
-
+            # Clean up split out PDS Supplementary data file
+            paginator = self.s3.get_paginator("list_objects_v2")
+            pages = paginator.paginate(Bucket=input_bucket)
+            for page in pages:
+                for obj in page.get("Contents", []):
+                    mod_date = localize_date(obj["LastModified"])
+                    if mod_date < minimum_last_update:
+                        self.s3.delete_object(Bucket=input_bucket, Key=obj["Key"])
+                        self.log_object.write_log(
+                            "LR21I08",
+                            log_row_dict={
+                                "file_name": obj["Key"],
+                                "bucket": input_bucket,
+                            },
+                        )
         except Exception:
             self.log_object.write_log(
-                "LR21C04",
+                "LR21W02",
                 log_row_dict={
-                    "bucket": self.input_bucket,
+                    "bucket": input_bucket,
                 },
             )

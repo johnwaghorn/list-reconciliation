@@ -1,10 +1,12 @@
 data "aws_s3_bucket" "mesh_bucket" {
-  count  = var.suffix == "prod" ? 1 : 0
+  count = var.suffix == "prod" ? 1 : 0
+
   bucket = "list-rec-${var.suffix}-mesh"
 }
 
 resource "aws_s3_bucket" "mesh_dummy" {
-  count         = var.suffix == "prod" ? 0 : 1
+  count = var.suffix == "prod" ? 0 : 1
+
   bucket        = "mesh-dummy-${var.suffix}"
   acl           = "private"
   force_destroy = var.force_destroy
