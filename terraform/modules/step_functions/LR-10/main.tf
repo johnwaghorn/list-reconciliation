@@ -54,7 +54,8 @@ resource "aws_sfn_state_machine" "LR-10" {
           }
         }
       ],
-      "Next": "Invoke LR14 send list rec results"
+      "Next": "Invoke LR14 send list rec results",
+      "ResultPath": null
     },
     "Invoke LR14 send list rec results": {
       "Type": "Task",
