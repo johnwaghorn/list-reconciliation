@@ -12,22 +12,26 @@ locals {
   mesh_mailboxes = {
     default = [
       {
-        id = "X26OT178"
+        id = "X26OT181"
         outbound_mappings = [
           {
-            dest_mailbox = "X26OT179"
-            workflow_id  = "TESTWORKFLOW"
+            dest_mailbox = "X26OT188"
+            workflow_id  = "RSLISTRECONCILIATIONPCSE"
           }
         ]
       },
       {
-        id = "X26OT179"
+        id = "X26OT178"
         outbound_mappings = [
           {
-            dest_mailbox = "X26OT178"
-            workflow_id  = "TESTWORKFLOW"
+            dest_mailbox = "INTERNALSPINE"
+            workflow_id  = "LISTRECONCILIATIONWORKITEM-Data"
           }
         ]
+      },
+      {
+        id                = "X26OT179"
+        outbound_mappings = []
       }
     ]
   }

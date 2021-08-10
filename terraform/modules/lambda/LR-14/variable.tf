@@ -10,14 +10,6 @@ variable "lambda_name" {
   type = string
 }
 
-variable "mesh_send_bucket_arn" {
-  type = string
-}
-
-variable "mesh_send_bucket" {
-  type = string
-}
-
 variable "registrations_output_bucket" {
   type = string
 }
@@ -26,7 +18,7 @@ variable "registrations_output_bucket_arn" {
   type = string
 }
 
-variable "demographics_table_arn" {
+variable "demographics_differences_table_arn" {
   type = string
 }
 
@@ -42,7 +34,7 @@ variable "errors_table_arn" {
   type = string
 }
 
-variable "demographics_table_name" {
+variable "demographics_differences_table_name" {
   type = string
 }
 
@@ -58,11 +50,11 @@ variable "errors_table_name" {
   type = string
 }
 
-variable "demographics_differences_table_name" {
+variable "mesh_send_bucket" {
   type = string
 }
 
-variable "demographics_differences_table_arn" {
+variable "mesh_send_bucket_arn" {
   type = string
 }
 
@@ -78,10 +70,6 @@ variable "lambda_handler" {
   type = string
 }
 
-variable "cloudwatch_kms_key" {
-  type = map(string)
-}
-
 variable "dynamodb_kms_key" {
   type = map(string)
 }
@@ -90,11 +78,11 @@ variable "s3_kms_key" {
   type = map(string)
 }
 
-variable "mesh_kms_key" {
+variable "ssm_kms_key" {
   type = map(string)
 }
 
-variable "ssm_kms_key" {
+variable "mesh_kms_key" {
   type = map(string)
 }
 
@@ -102,6 +90,18 @@ variable "mesh_ssm" {
   type = string
 }
 
+variable "email_ssm" {
+  type = string
+}
+
+variable "pcse_email" {
+  type = string
+}
+
+variable "listrec_email" {
+  type = string
+}
+
 variable "log_retention_in_days" {
-  type = number
+  type = string
 }

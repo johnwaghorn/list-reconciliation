@@ -44,13 +44,13 @@ output "buckets" {
       bucket = aws_s3_bucket.LR-22.id
       arn    = aws_s3_bucket.LR-22.arn
     }
-    LR-23 = {
-      bucket = aws_s3_bucket.LR-23.id
-      arn    = aws_s3_bucket.LR-23.arn
-    }
     LR-26 = {
       bucket = aws_s3_bucket.LR-26.id
       arn    = aws_s3_bucket.LR-26.arn
+    }
+    mesh_bucket = {
+      bucket = var.suffix == "prod" ? data.aws_s3_bucket.mesh_bucket[0].id : aws_s3_bucket.mesh_dummy[0].id
+      arn    = var.suffix == "prod" ? data.aws_s3_bucket.mesh_bucket[0].arn : aws_s3_bucket.mesh_dummy[0].arn
     }
   }
 }

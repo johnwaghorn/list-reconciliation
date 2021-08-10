@@ -11,18 +11,18 @@ import pytest
 
 
 from services.jobs import JobNotFound
-from utils.database.models import JobStats, Jobs
+from utils.database.models import JobStats
 
-MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")
+MESH_BUCKET = os.getenv("MESH_BUCKET")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
 
 
 @freeze_time("2020-04-06 13:40:00+01:00")
 def test_process_demographic_differences(
-    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler
+    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, ssm, mesh_ssm
 ):
     job_id = "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"
-    response = lambda_handler.process_demographic_differences(job_id)
+    actual_response = lambda_handler.process_demographic_differences(job_id)
 
     expected = {
         "system": {
@@ -87,8 +87,8 @@ def test_process_demographic_differences(
     s3 = boto3.client("s3")
     actual = json.loads(
         s3.get_object(
-            Bucket=MESH_SEND_BUCKET,
-            Key="7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json",
+            Bucket=MESH_BUCKET,
+            Key="outbound_X26OT178TEST_to_INTERNALSPINE/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json",
         )["Body"]
         .read()
         .decode()
@@ -119,7 +119,6 @@ def test_process_demographic_differences(
 
     assert list(actual_csv) == list(expected_csv)
 
-    job = Jobs.get(job_id, "Y123452")
     jobstats = JobStats.get(job_id)
 
     assert jobstats.PdsUpdatedRecords == 0
@@ -129,18 +128,20 @@ def test_process_demographic_differences(
     assert jobstats.PotentialGpUpdateRecords == 0
     assert jobstats.TotalRecords == 1
 
-    assert response == {
+    expected_response = {
         "status": "success",
         "message": f"Demographic differences processed for JobId {job_id}",
         "work_items": [
-            f"s3://{MESH_SEND_BUCKET}/7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json"
+            f"s3://{MESH_BUCKET}/outbound_X26OT178TEST_to_INTERNALSPINE/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json"
         ],
         "summary": f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-CDD-20200406134000.csv",
     }
 
+    assert actual_response == expected_response
+
 
 def test_process_demographic_differences_no_diffs_for_job(
-    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler
+    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, mesh_ssm
 ):
     with pytest.raises(JobNotFound):
         lambda_handler.process_demographic_differences("ABC123")

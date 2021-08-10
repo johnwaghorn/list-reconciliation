@@ -7,6 +7,7 @@ locals {
     LR-09 = "LR_09_scheduled_check"
     LR-11 = "LR_11_gp_registration_status"
     LR-12 = "LR_12_pds_registration_status"
+    LR-14 = "LR_14_send_list_rec_results"
     LR-15 = "LR_15_process_demo_diffs"
     LR-24 = "LR_24_save_records_to_s3"
     LR-21 = "LR_21_split_dps_extract"
@@ -186,14 +187,45 @@ module "LR-12" {
   pds_ssm_access_token                  = var.pds_ssm_access_token
 }
 
+module "LR-14" {
+  source                              = "./LR-14"
+  lambda_name                         = local.lambda_name.LR-14
+  runtime                             = var.runtime
+  lambda_timeout                      = var.lambda_timeout
+  package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
+  mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
+  mesh_send_bucket                    = var.s3_buckets.mesh_bucket.bucket
+  registrations_output_bucket_arn     = var.s3_buckets.LR-13.arn
+  registrations_output_bucket         = var.s3_buckets.LR-13.bucket
+  jobs_table_arn                      = var.dynamodb_tables.jobs.arn
+  jobs_table_name                     = var.dynamodb_tables.jobs.name
+  job_stats_table_arn                 = var.dynamodb_tables.jobs_stats.arn
+  job_stats_table_name                = var.dynamodb_tables.jobs_stats.name
+  errors_table_arn                    = var.dynamodb_tables.errors.arn
+  errors_table_name                   = var.dynamodb_tables.errors.name
+  demographics_differences_table_name = var.dynamodb_tables.demographics_differences.name
+  demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
+  suffix                              = var.suffix
+  lambda_handler                      = var.lambda_handler
+  dynamodb_kms_key                    = var.dynamodb_kms_key
+  s3_kms_key                          = var.s3_kms_key
+  ssm_kms_key                         = var.ssm_kms_key
+  mesh_kms_key                        = var.mesh_kms_key
+  log_retention_in_days               = var.log_retention_in_days
+  mesh_ssm                            = var.mesh_ssm_prefix
+  email_ssm                           = var.email_ssm_prefix
+  pcse_email                          = var.pcse_email
+  listrec_email                       = var.listrec_email
+}
+
 module "LR-15" {
   source                              = "./LR-15"
   lambda_name                         = local.lambda_name.LR-15
   runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
-  mesh_send_bucket_arn                = var.s3_buckets.LR-23.arn
-  mesh_send_bucket                    = var.s3_buckets.LR-23.bucket
+  mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
+  mesh_send_bucket                    = var.s3_buckets.mesh_bucket.bucket
   registrations_output_bucket_arn     = var.s3_buckets.LR-13.arn
   registrations_output_bucket         = var.s3_buckets.LR-13.bucket
   demographics_table_arn              = var.dynamodb_tables.demographics.arn
@@ -211,7 +243,10 @@ module "LR-15" {
   cloudwatch_kms_key                  = var.cloudwatch_kms_key
   dynamodb_kms_key                    = var.dynamodb_kms_key
   s3_kms_key                          = var.s3_kms_key
+  mesh_kms_key                        = var.mesh_kms_key
   log_retention_in_days               = var.log_retention_in_days
+  ssm_kms_key                         = var.ssm_kms_key
+  mesh_ssm                            = var.mesh_ssm_prefix
 }
 
 module "LR-21" {

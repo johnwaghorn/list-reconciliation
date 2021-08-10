@@ -9,3 +9,8 @@ def pds_url():
 @pytest.fixture(scope="session")
 def lambda_context():
     return {"aws_request_id": "TEST"}
+
+
+@pytest.fixture
+def mock_email(monkeypatch):
+    monkeypatch.setattr("services.send_email_exchangelib.send_exchange_email", lambda x, y, z: None)

@@ -1,4 +1,5 @@
 # LR-15 generates consolidated csv file with the respective GP Practice comparision records
+tags : wip
 
 * setup: empty table "demographic_table"
 * setup: empty table "demographics_difference_table"

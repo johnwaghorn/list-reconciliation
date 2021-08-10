@@ -5,23 +5,25 @@ from typing import Dict, List, Tuple
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
+from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
 from services.jobs import get_job
 from utils import write_to_mem_csv
 from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.datetimezone import get_datetime_now
 from utils.logger import success, log_dynamodb_error, UNHANDLED_ERROR
 from utils.statuses import JobStatus
+from utils.ssm import get_ssm_params
 
 MANUAL_VALIDATION = "Manual Validation"
-
-
-S3 = boto3.client("s3")
 
 
 class DemographicDifferences(LambdaApplication):
     def __init__(self):
         super().__init__()
         self.job_id = None
+        self.mesh_params = get_ssm_params(
+            self.system_config["MESH_SSM_PREFIX"], self.system_config["AWS_REGION"]
+        )
 
     def initialise(self):
         pass
@@ -229,6 +231,12 @@ class DemographicDifferences(LambdaApplication):
         practice_code = job.PracticeCode
         now = get_datetime_now().strftime("%Y%m%d%H%M%S")
 
+        listrec_mesh_id, spinedsa_mesh_id = get_mesh_mailboxes(
+            json.loads(self.mesh_params["mesh_mappings"]),
+            self.mesh_params["listrec_spinedsa_workflow"],
+        )
+
+        mesh = AWSMESHMailbox(listrec_mesh_id, self.log_object)
         for patient_id, diff in patients.items():
             patient_record = Demographics.get(patient_id, job_id)
             (
@@ -248,14 +256,12 @@ class DemographicDifferences(LambdaApplication):
             job_potential_pds_updates += potential_pds_updates
             job_potential_gp_updates += potential_gp_updates
 
-            key = f"{job_id}/{practice_code}-WIP-{job_id}-{patient_record.NhsNumber}-{now}.json"
-
-            S3.put_object(
-                Bucket=self.system_config["MESH_SEND_BUCKET"],
-                Key=key,
-                Body=json.dumps(dsa_item),
+            key = f"{practice_code}-WIP-{job_id}-{patient_record.NhsNumber}-{now}.json"
+            sent_file = mesh.send_message(
+                spinedsa_mesh_id, key, json.dumps(dsa_item), overwrite=True
             )
-            out_files.append(f"s3://{self.system_config['MESH_SEND_BUCKET']}/{key}")
+
+            out_files.append(sent_file)
 
         self.log_object.write_log(
             "UTI9995",
@@ -297,7 +303,8 @@ class DemographicDifferences(LambdaApplication):
 
         stream = write_to_mem_csv(summary_records, header)
         csv_key = f"{job_id}/{practice_code}-CDD-{now}.csv"
-        S3.put_object(
+        s3 = boto3.client("s3")
+        s3.put_object(
             Body=stream.getvalue(),
             Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
             Key=csv_key,

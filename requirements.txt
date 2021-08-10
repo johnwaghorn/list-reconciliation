@@ -1,4 +1,5 @@
 boto3==1.18.16
+exchangelib==3.2.0
 python-dateutil==2.8.2
 pynamodb==5.1.0
 requests==2.26.0

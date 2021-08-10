@@ -134,14 +134,15 @@ output "lr_26_bucket" {
   value = module.s3.buckets.LR-26.bucket
 }
 
-output "lr_23_bucket" {
-  value = module.s3.buckets.LR-23.bucket
-}
-
 output "lr_20_bucket" {
   value = module.s3.buckets.LR-20.bucket
 }
 
+output "mesh_bucket" {
+  value = module.s3.buckets.mesh_bucket.bucket
+}
+
 output "pds_url" {
   value = module.lambda.pds_url
+
 }

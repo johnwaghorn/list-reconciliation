@@ -1,11 +1,11 @@
-import os
 from datetime import datetime
+
+import json
+import os
 
 import boto3
 import pytest
-from moto import mock_dynamodb2, mock_s3
-from pytz import timezone
-
+from moto import mock_dynamodb2, mock_s3, mock_ssm
 
 from lambda_code.LR_15_process_demo_diffs.lr_15_lambda_handler import (
     DemographicDifferences,
@@ -23,12 +23,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 AWS_REGION = os.getenv("AWS_REGION")
-MESH_SEND_BUCKET = os.getenv("MESH_SEND_BUCKET")
+MESH_BUCKET = os.getenv("MESH_BUCKET")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
+MESH_SSM_PREFIX = os.getenv("MESH_SSM_PREFIX")
 
 
-@pytest.fixture(scope="module")
-def lambda_handler():
+@pytest.fixture
+def lambda_handler(ssm, mesh_ssm):
     app = DemographicDifferences()
     return app
 
@@ -156,10 +157,46 @@ def s3():
     with mock_s3():
         s3 = boto3.client("s3", region_name=AWS_REGION)
         s3.create_bucket(
-            Bucket=MESH_SEND_BUCKET,
+            Bucket=MESH_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
         s3.create_bucket(
             Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
+
+
+@pytest.fixture
+def ssm():
+    with mock_ssm():
+        yield boto3.client("ssm", region_name=AWS_REGION)
+
+
+@pytest.fixture
+def mesh_ssm(ssm):
+    mappings = json.dumps(
+        [
+            {
+                "id": "X26OT178TEST",
+                "outbound_mappings": [
+                    {
+                        "dest_mailbox": "INTERNALSPINE",
+                        "workflow_id": "LISTRECONCILIATIONWORKITEM-Data",
+                    }
+                ],
+            }
+        ]
+    )
+    ssm.put_parameter(
+        Name=f"{MESH_SSM_PREFIX}/mesh_mappings",
+        Value=mappings,
+        Type="String",
+        Overwrite=True,
+    )
+    ssm.put_parameter(
+        Name=f"{MESH_SSM_PREFIX}/listrec_spinedsa_workflow",
+        Value="LISTRECONCILIATIONWORKITEM-Data",
+        Type="String",
+        Overwrite=True,
+    )
+    yield

@@ -42,3 +42,11 @@ resource "aws_s3_bucket_object" "upload-test-pds-registration-data-2" {
   source = "../../../test/unittests/lambdas/data/Y123452.csv"
   etag   = filemd5("../../../test/unittests/lambdas/data/Y123452.csv")
 }
+
+resource "aws_s3_bucket_object" "upload-test-pds-registration-data-3" {
+  bucket = var.LR_22_bucket
+  key    = "Y12345.csv"
+  acl    = "private"
+  source = "../../../test/unittests/lambdas/data/Y12345.csv"
+  etag   = filemd5("../../../test/unittests/lambdas/data/Y12345.csv")
+}

@@ -63,6 +63,58 @@ locals {
     prod    = "rate(5 minutes)"
   }
 
+  mesh_mappings = {
+    default = [
+      {
+        id = "X26OT181TEST"
+        outbound_mappings = [
+          {
+            dest_mailbox = "X26OT188TEST"
+            workflow_id  = "RSLISTRECONCILIATIONPCSE"
+          }
+        ]
+      },
+      {
+        id = "X26OT178TEST"
+        outbound_mappings = [
+          {
+            dest_mailbox = "INTERNALSPINE"
+            workflow_id  = "LISTRECONCILIATIONWORKITEM-Data"
+          }
+        ]
+      },
+      {
+        id                = "X26OT179TEST"
+        outbound_mappings = []
+      }
+    ]
+    preprod = [
+      {
+        id = "X26OT181"
+        outbound_mappings = [
+          {
+            dest_mailbox = "X26OT188"
+            workflow_id  = "RSLISTRECONCILIATIONPCSE"
+          }
+        ]
+      },
+      {
+        id = "X26OT178"
+        outbound_mappings = [
+          {
+            dest_mailbox = "INTERNALSPINE"
+            workflow_id  = "LISTRECONCILIATIONWORKITEM-Data"
+          }
+        ]
+      },
+      {
+        id                = "X26OT179"
+        outbound_mappings = []
+      }
+    ]
+    prod = []
+  }
+
   tags = {
     TagVersion         = "1"
     Programme          = "SpinePod5"

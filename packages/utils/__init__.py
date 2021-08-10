@@ -6,6 +6,8 @@ import io
 
 from retrying import retry
 
+import boto3
+
 from utils.datetimezone import get_datetime_now
 
 
@@ -126,3 +128,13 @@ def retry_func(func: callable, **kwargs) -> Any:
         return func()
 
     return retry_func()
+
+
+def mesh_send_target(mesh_from, mesh_to, key):
+    return f"outbound_{mesh_from}_to_{mesh_to}/{key}"
+
+
+def s3_copy(from_bucket, from_key, to_bucket, to_key):
+    res = boto3.resource("s3")
+    copy_source = {"Bucket": from_bucket, "Key": from_key}
+    res.meta.client.copy(copy_source, to_bucket, to_key)

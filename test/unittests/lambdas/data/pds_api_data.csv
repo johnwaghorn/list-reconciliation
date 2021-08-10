@@ -4,3 +4,5 @@ nhs_number,surname,forename,prefix,birthdate,gender,address,postcode,gp,code,gp_
 7000000007,Pavey,Nikki-Stevens,Miss,1923-11-21,female,"19 Main Street,Logan,Durham,London",ZE3 9JY,,REDACTED,2012-05-22,6
 1000000010,Forsyth,Karen,Mrs,1956-12-02,female,"Railway Cottage,12 Leeds Court,The Square,Wormley,Bradford,Yorkshire",BR1 234,Y123452,U,2012-05-22,2
 1100000011,Forsyth,Bruce,Mr,1951-12-02,male,"Railway Cottage,12 Leeds Court,The Square,Wormley,Bradford,Yorkshire",BR1 234,Y123451,U,2012-05-21,2
+8000000007,Davies,"Paul,Philip",Mr,2009-10-22,male,"1 Trevelyan Square,Leeds,West Yorkshire",LS1 6UP,Y12345,R,2012-05-22,2
+1100000010,Forsyth,Bruce,Mr,1951-12-02,male,"Railway Cottage,12 Leeds Court,The Square,Wormley,Bradford,Yorkshire",BR1 234,Y12345,U,2012-05-21,2

@@ -14,3 +14,11 @@ output "pds_ssm_private_key" {
 output "pds_ssm_app_key" {
   value = aws_ssm_parameter.pds_fhir_app_key.arn
 }
+
+output "mesh_ssm_parameters_path" {
+  value = "${var.prefix}/mesh"
+}
+
+output "email_ssm_parameters_path" {
+  value = "${var.prefix}/email"
+}

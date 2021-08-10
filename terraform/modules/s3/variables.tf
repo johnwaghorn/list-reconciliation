@@ -11,6 +11,10 @@ variable "kms_key_arn" {
   type = string
 }
 
+variable "mesh_kms_key" {
+  type = string
+}
+
 variable "log_retention_in_days" {
   description = "How many days to retain logs for"
   type        = number

@@ -54,6 +54,14 @@ output "lr_15_lambda" {
   value = module.LR-15.LR-15-lambda
 }
 
+output "lr_14_lambda" {
+  value = module.LR-14.LR-14-lambda
+}
+
+output "lr_14_lambda_arn" {
+  value = module.LR-14.LR-14-lambda_arn
+}
+
 output "lr_15_lambda_arn" {
   value = module.LR-15.LR-15-lambda_arn
 }

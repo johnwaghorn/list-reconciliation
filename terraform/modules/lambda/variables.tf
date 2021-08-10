@@ -53,6 +53,34 @@ variable "s3_kms_key" {
   type = map(string)
 }
 
+variable "ssm_kms_key" {
+  type = map(string)
+}
+
+variable "mesh_kms_key" {
+  type = map(string)
+}
+
+variable "pcse_email" {
+  type = string
+}
+
+variable "listrec_email" {
+  type = string
+}
+
+variable "pds_ssm_prefix" {
+  type = string
+}
+
+variable "mesh_ssm_prefix" {
+  type = string
+}
+
+variable "email_ssm_prefix" {
+  type = string
+}
+
 variable "mesh_post_office_open" {
   description = "If set to True, messages will be moved from Mesh Inbound to LR-01 Inbound"
   type        = string
@@ -85,15 +113,6 @@ variable "lr_09_event_schedule_expression" {
 
 variable "lr_25_event_schedule_expression" {
   description = "How often should LR-25 be called"
-  type        = string
-}
-
-variable "ssm_kms_key" {
-  type = map(string)
-}
-
-variable "pds_ssm_prefix" {
-  description = "PDS SSM parameter path"
   type        = string
 }
 

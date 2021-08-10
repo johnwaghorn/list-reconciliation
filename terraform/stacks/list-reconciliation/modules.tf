@@ -1,16 +1,24 @@
 module "lambda" {
   source = "../../modules/lambda"
 
-  suffix                = local.environment
-  pds_base_url          = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
-  runtime               = "python3.8"
-  lambda_handler        = "main.lambda_handler"
-  s3_buckets            = module.s3.buckets
-  cloudwatch_kms_key    = module.kms["cloudwatch"].output
-  dynamodb_kms_key      = module.kms["dynamodb"].output
-  s3_kms_key            = module.kms["s3"].output
-  ssm_kms_key           = module.kms["ssm"].output
-  pds_ssm_prefix        = module.ssm.pds_ssm_parameters_path
+  suffix             = local.environment
+  pds_base_url       = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
+  pcse_email         = local.environment == "prod" ? "pcse.dataquality@nhs.net" : "pcrm.gplistreconciliation@nhs.net"
+  listrec_email      = "pcrm.gplistreconciliation@nhs.net"
+  runtime            = "python3.8"
+  lambda_handler     = "main.lambda_handler"
+  s3_buckets         = module.s3.buckets
+  cloudwatch_kms_key = module.kms["cloudwatch"].output
+  dynamodb_kms_key   = module.kms["dynamodb"].output
+  s3_kms_key         = module.kms["s3"].output
+  ssm_kms_key        = module.kms["ssm"].output
+  pds_ssm_prefix     = module.ssm.pds_ssm_parameters_path
+  mesh_kms_key = local.environment == "prod" ? {
+    id  = data.aws_kms_key.mesh_kms[0].id
+    arn = data.aws_kms_key.mesh_kms[0].arn
+  } : module.kms["mesh"].output
+  mesh_ssm_prefix       = module.ssm.mesh_ssm_parameters_path
+  email_ssm_prefix      = module.ssm.email_ssm_parameters_path
   pds_ssm_access_token  = module.ssm.pds_ssm_access_token
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 
@@ -72,6 +80,7 @@ module "s3" {
   suffix                = local.environment
   kms_key_arn           = module.kms["s3"].output.arn
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
+  mesh_kms_key          = local.environment == "prod" ? data.aws_kms_key.mesh_kms[0].arn : module.kms["mesh"].output.arn
 }
 
 module "lr_10_registration_orchestration" {
@@ -80,6 +89,7 @@ module "lr_10_registration_orchestration" {
   name         = "LR_10_registration-differences-${local.environment}"
   lr_11_lambda = module.lambda.lr_11_lambda_arn
   lr_12_lambda = module.lambda.lr_12_lambda_arn
+  lr_14_lambda = module.lambda.lr_14_lambda_arn
   lr_15_lambda = module.lambda.lr_15_lambda_arn
 }
 
@@ -89,6 +99,7 @@ module "kms" {
     dynamodb   = { name = "dynamodb-${local.environment}" }
     ssm        = { name = "ssm-${local.environment}" }
     s3         = { name = "s3-${local.environment}" }
+    mesh       = { name = "mesh-${local.environment}" }
   }
   source = "../../modules/kms"
 
@@ -107,7 +118,8 @@ module "test_data" {
 }
 
 module "ssm" {
-  source      = "../../modules/ssm"
-  prefix      = local.environment
-  ssm_kms_arn = module.kms["ssm"].output.arn
+  source        = "../../modules/ssm"
+  prefix        = local.environment
+  ssm_kms_arn   = module.kms["ssm"].output.arn
+  mesh_mappings = try(local.mesh_mappings[local.environment], local.mesh_mappings["default"])
 }
