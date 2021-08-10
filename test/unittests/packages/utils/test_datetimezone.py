@@ -18,7 +18,7 @@ def test_get_datetime_now_returns_correct_time():
     assert actual.hour == 3
     assert actual.minute == 21
     assert actual.second == 34
-    assert actual.tzinfo.tzname(actual) == "GMT"
+    assert actual.tzinfo.tzname(actual) == "UTC"
 
 
 @freeze_time("2020-02-01 12:21:34")
@@ -64,7 +64,7 @@ def test_localize_date_without_tz_returns_correct_date():
     expected_hour = 14
     expected_minute = 30
     expected_second = 0
-    expected_tz = "Europe/London"
+    expected_tz = "UTC"
 
     actual = localize_date(datetime.now())
 
@@ -82,10 +82,10 @@ def test_localize_date_with_tz_returns_correct_date():
     expected_year = 2021
     expected_month = 5
     expected_day = 7
-    expected_hour = 19
+    expected_hour = 18
     expected_minute = 30
     expected_second = 0
-    expected_tz = "Europe/London"
+    expected_tz = "UTC"
 
     actual = localize_date(datetime.now(timezone("US/Eastern")))
 

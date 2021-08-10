@@ -11,8 +11,6 @@ from pynamodb.attributes import (
 from pynamodb.models import Model
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 
-from utils.database.attributes import GMTDateTimeAttribute
-
 AWS_REGION = os.getenv("AWS_REGION")
 
 DEMOGRAPHICS_TABLE = os.getenv("DEMOGRAPHICS_TABLE")
@@ -126,7 +124,7 @@ class Errors(Model):
     Type = UnicodeAttribute()
     Name = UnicodeAttribute()
     Description = UnicodeAttribute()
-    Timestamp = GMTDateTimeAttribute()
+    Timestamp = UTCDateTimeAttribute()
     Traceback = UnicodeAttribute()
 
 
@@ -151,7 +149,7 @@ class Jobs(Model):
     Id = UnicodeAttribute(hash_key=True)
     PracticeCode = UnicodeAttribute(range_key=True)
     FileName = UnicodeAttribute()
-    Timestamp = GMTDateTimeAttribute()
+    Timestamp = UTCDateTimeAttribute()
     StatusId = UnicodeAttribute()
     IdIndex = JobsIdIndex()
 

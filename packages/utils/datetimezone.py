@@ -2,7 +2,7 @@ from datetime import datetime
 from pytz import timezone, utc
 
 
-def get_datetime_now(specified_timezone: str = "Europe/London") -> datetime:
+def get_datetime_now(specified_timezone: str = "UTC") -> datetime:
     """Get current localized datetime
 
     Args:
@@ -17,7 +17,7 @@ def get_datetime_now(specified_timezone: str = "Europe/London") -> datetime:
 
 def localize_date(
     unlocalized_date: datetime = get_datetime_now(),
-    specified_timezone: str = "Europe/London",
+    specified_timezone: str = "UTC",
 ) -> datetime:
     """Localizes a specified datetime
 

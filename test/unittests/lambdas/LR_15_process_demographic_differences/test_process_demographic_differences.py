@@ -16,7 +16,7 @@ MESH_BUCKET = os.getenv("MESH_BUCKET")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
 
 
-@freeze_time("2020-04-06 13:40:00+01:00")
+@freeze_time("2020-04-06 13:40:00+00:00")
 def test_process_demographic_differences(
     demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, ssm, mesh_ssm
 ):
