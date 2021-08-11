@@ -111,10 +111,8 @@ class PDSRegistrationStatus(LambdaApplication):
                     pds_record = self.api.get_pds_record(nhs_number, job_id)
 
                 except PDSAPIError as err:
-                    msg = f"Error fetching PDS record for NHS number {nhs_number}, {err.details}"
-                    error_response = log_dynamodb_error(
-                        self.log_object, job_id, err.details["code"], msg
-                    )
+                    msg = f"Error fetching PDS record for NHS number {nhs_number}, {err}"
+                    error_response = log_dynamodb_error(self.log_object, job_id, err, msg)
 
                     raise PDSAPIError(json.dumps(error_response)) from err
 

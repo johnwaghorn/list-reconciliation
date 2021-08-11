@@ -133,6 +133,7 @@ class SendListRecResults(LambdaApplication):
                 "subject": subject,
                 "message": body,
             },
+            self.log_object,
         )
 
     def start(self):

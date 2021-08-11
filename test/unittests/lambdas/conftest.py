@@ -13,4 +13,6 @@ def lambda_context():
 
 @pytest.fixture
 def mock_email(monkeypatch):
-    monkeypatch.setattr("services.send_email_exchangelib.send_exchange_email", lambda x, y, z: None)
+    monkeypatch.setattr(
+        "services.send_email_exchangelib.send_exchange_email", lambda w, x, y, z: None
+    )

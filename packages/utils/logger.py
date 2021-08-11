@@ -40,7 +40,7 @@ def log_dynamodb_error(
     tb = traceback.format_exc()
     logger.write_log(
         "UTI9997",
-        None,
+        sys.exc_info(),
         {
             "logger": "Dynamo",
             "level": "Error",
@@ -63,13 +63,14 @@ def log_dynamodb_error(
             Traceback=tb,
             Timestamp=time,
         )
+
         item.save()
 
     except Exception:
         log_message = f"JobId: {job_id}, Unable to log error to Errors table"
         logger.write_log(
             "UTI9997",
-            tb,
+            sys.exc_info(),
             {"logger": "Dynamo", "level": "ERROR", "message": log_message},
         )
 

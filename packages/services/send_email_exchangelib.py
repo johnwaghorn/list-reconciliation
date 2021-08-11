@@ -27,7 +27,7 @@ def send_exchange_email(username: str, password: str, event: dict, log_object: L
     Autodiscovery.INITIAL_RETRY_POLICY = FaultTolerance(max_wait=10)
     credentials = Credentials(username, password)
     try:
-        account = get_account(credentials)
+        account = get_account(credentials, log_object)
         log_object.write_log(
             "UTI9995",
             None,

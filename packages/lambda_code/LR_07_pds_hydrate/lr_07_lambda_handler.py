@@ -69,6 +69,7 @@ class PdsHydrate(LambdaApplication):
 
         try:
             json.dumps(self.pds_hydrate(patient.JobId, patient))
+
             retry_func(
                 lambda: self.s3.delete_object(
                     Bucket=self.system_config["LR_06_BUCKET"], Key=upload_key
