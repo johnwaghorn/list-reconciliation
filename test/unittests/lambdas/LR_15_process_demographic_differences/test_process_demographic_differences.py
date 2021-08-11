@@ -9,7 +9,6 @@ from freezegun import freeze_time
 import boto3
 import pytest
 
-
 from services.jobs import JobNotFound
 from utils.database.models import JobStats
 
@@ -54,6 +53,7 @@ def test_process_demographic_differences(
             },
             "pdsData": {
                 "scn": "1",
+                "security": "U",
                 "birthDate": "2002-02-01",
                 "gender": "male",
                 "name": [
@@ -109,10 +109,10 @@ def test_process_demographic_differences(
 
     expected_csv = csv.reader(
         StringIO(
-            """nhsNumber,gp_birthDate,gp_gender,gp_name_given,gp_name_family,gp_name_previousFamily,gp_name_prefix,gp_address_line1,gp_address_line2,gp_address_line3,gp_address_line4,gp_address_line5,gp_postalCode,gp_generalPractitionerOds,pds_scn,pds_birthDate,pds_gender,pds_name_given,pds_name_family,pds_name_prefix,pds_address,pds_postalCode,pds_generalPractitionerOds,ruleId,guidance
-1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-SN-01,Manual Validation
-1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-DB-01,Manual Validation
-1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-AD-02,Manual Validation
+            """nhsNumber,gp_birthDate,gp_gender,gp_name_given,gp_name_family,gp_name_previousFamily,gp_name_prefix,gp_address_line1,gp_address_line2,gp_address_line3,gp_address_line4,gp_address_line5,gp_postalCode,gp_generalPractitionerOds,pds_scn,pds_security,pds_birthDate,pds_gender,pds_name_given,pds_name_family,pds_name_prefix,pds_address,pds_postalCode,pds_generalPractitionerOds,ruleId,guidance
+1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,U,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-SN-01,Manual Validation
+1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,U,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-DB-01,Manual Validation
+1234567890,20020101,1,JOHN,JONES,,MR,FLAT A,THE STREET,,EAST,,E1   1AA,Y123452,1,U,2002-02-01,male,JOHN,JOHNSON,MR,"FLAT A,THE STREET,EAST",E1   1ZZ,Y123452,MN-BR-AD-02,Manual Validation
 """
         )
     )

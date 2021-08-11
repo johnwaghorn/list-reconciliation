@@ -33,7 +33,7 @@ python-package:
 unittests:
 	pytest
 
-# Formating
+# Formatting
 black:
 	python -m black --line-length 100 .
 

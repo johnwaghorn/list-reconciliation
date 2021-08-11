@@ -1,4 +1,4 @@
-from LR_25_mesh_post_office.conftest import (
+from .conftest import (
     DATA_FILE,
     MOCK_INBOUND_BUCKET,
     MOCK_INBOUND_KEY,

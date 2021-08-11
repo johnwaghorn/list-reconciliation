@@ -56,8 +56,10 @@ class GPRegistrations(LambdaApplication):
 
         results = Demographics.JobIdIndex.query(
             job_id,
-            filter_condition=Demographics.GP_RegistrationStatus
-            != GPRegistrationStatus.MATCHED.value,
+            filter_condition=(
+                Demographics.GP_RegistrationStatus != GPRegistrationStatus.MATCHED.value
+            )
+            & (Demographics.PDS_Sensitive == "U"),
         )
 
         rows = [

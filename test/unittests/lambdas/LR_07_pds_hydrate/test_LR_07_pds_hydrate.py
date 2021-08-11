@@ -7,6 +7,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 REGION_NAME = "eu-west-2"
+import pytest
 
 
 def test_write_into_table(
@@ -326,3 +327,140 @@ def test_gp_registration_Unmatched_in_demographics_table(
     }
 
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "test_id,nhs_number,Id,job_id,expected_demographics",
+    [
+        (
+            "REDACTED",
+            "9449306060",
+            "54",
+            "50",
+            {
+                "IsComparisonCompleted": False,
+                "GP_AddressLine1": "1 Trevelyan Square",
+                "GP_AddressLine2": "Boar's Head Lane",
+                "GP_AddressLine3": "City Centre",
+                "GP_AddressLine4": "Leeds",
+                "GP_AddressLine5": "West Yorkshire",
+                "GP_DateOfBirth": "20101025",
+                "GP_DrugsDispensedMarker": False,
+                "GP_Forenames": "Jane",
+                "GP_Gender": "2",
+                "GP_GpPracticeCode": "Y123452",
+                "GP_HaCipher": "TEST",
+                "GP_PostCode": "LS1 6AE",
+                "GP_PreviousSurname": "TEST",
+                "GP_RegistrationStatus": "Deducted Patient Match",
+                "GP_Surname": "Smith",
+                "GP_Title": "Mrs",
+                "GP_TransactionDate": "2021-01-01",
+                "GP_TransactionId": "1234",
+                "GP_TransactionTime": "01:00:00",
+                "Id": "54",
+                "JobId": "50",
+                "NhsNumber": "9449306060",
+                "PDS_Sensitive": "REDACTED",
+                "PDS_Address": [],
+                "PDS_DateOfBirth": "",
+                "PDS_Forenames": [],
+                "PDS_Gender": "",
+                "PDS_GpPracticeCode": "",
+                "PDS_GpRegisteredDate": "",
+                "PDS_PostCode": "",
+                "PDS_Surname": "",
+                "PDS_Titles": [],
+                "PDS_Version": "",
+            },
+        ),
+        (
+            "restricted",
+            "9449310378",
+            "55",
+            "50",
+            {
+                "IsComparisonCompleted": False,
+                "GP_AddressLine1": "1 Trevelyan Square",
+                "GP_AddressLine2": "Boar's Head Lane",
+                "GP_AddressLine3": "City Centre",
+                "GP_AddressLine4": "Leeds",
+                "GP_AddressLine5": "West Yorkshire",
+                "GP_DateOfBirth": "20101025",
+                "GP_DrugsDispensedMarker": False,
+                "GP_Forenames": "Jane",
+                "GP_Gender": "2",
+                "GP_GpPracticeCode": "Y123452",
+                "GP_HaCipher": "TEST",
+                "GP_PostCode": "LS1 6AE",
+                "GP_PreviousSurname": "TEST",
+                "GP_RegistrationStatus": "Deducted Patient Match",
+                "GP_Surname": "Smith",
+                "GP_Title": "Mrs",
+                "GP_TransactionDate": "2021-01-01",
+                "GP_TransactionId": "1234",
+                "GP_TransactionTime": "01:00:00",
+                "Id": "55",
+                "JobId": "50",
+                "NhsNumber": "9449310378",
+                "PDS_Address": [],
+                "PDS_DateOfBirth": "1982-05-25",
+                "PDS_Forenames": ["MALEAH"],
+                "PDS_Gender": "Male",
+                "PDS_GpPracticeCode": "",
+                "PDS_GpRegisteredDate": "",
+                "PDS_PostCode": "",
+                "PDS_Sensitive": "R",
+                "PDS_Surname": "GEELAN",
+                "PDS_Titles": ["MS"],
+                "PDS_Version": "2",
+            },
+        ),
+    ],
+)
+def test_sensitive_patients(
+    lambda_handler,
+    create_LR08_demographic_comparison_lambda,
+    create_dynamodb_tables,
+    nhs_number,
+    test_id,
+    job_id,
+    Id,
+    mock_response,
+    expected_demographics,
+):
+    expected_response = {
+        "status": "success",
+        "message": f"Retrieved PDS data for JobId: {job_id}, PatientId: {Id}, NhsNumber: {nhs_number}",
+    }
+    record = Demographics(
+        Id=Id,
+        JobId=job_id,
+        NhsNumber=nhs_number,
+        GP_DateOfBirth="20101025",
+        GP_Gender="2",
+        GP_GpPracticeCode="Y123452",
+        GP_Title="Mrs",
+        GP_Forenames="Jane",
+        GP_Surname="Smith",
+        GP_AddressLine1="1 Trevelyan Square",
+        GP_AddressLine2="Boar's Head Lane",
+        GP_AddressLine3="City Centre",
+        GP_AddressLine4="Leeds",
+        GP_AddressLine5="West Yorkshire",
+        GP_PostCode="LS1 6AE",
+        IsComparisonCompleted=False,
+        GP_HaCipher="TEST",
+        GP_TransactionDate="2021-01-01",
+        GP_TransactionTime="01:00:00",
+        GP_TransactionId="1234",
+        GP_PreviousSurname="TEST",
+        GP_DrugsDispensedMarker=False,
+    )
+
+    response = lambda_handler.pds_hydrate(job_id, record)
+
+    actual = Demographics.get(Id, job_id).attribute_values
+
+    assert response == expected_response
+    assert actual == expected_demographics

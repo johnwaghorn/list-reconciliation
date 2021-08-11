@@ -50,6 +50,7 @@ PATIENTS = [
         GP_Title="Mr",
         GP_Gender="1",
         PDS_GpRegisteredDate=None,
+        PDS_Sensitive="U",
     ),
     Demographics(
         "29263475-1c38-4d2e-a477-0004ba9f04b2",
@@ -73,6 +74,7 @@ PATIENTS = [
         GP_Title="Dr",
         GP_Gender="0",
         PDS_GpRegisteredDate="2019-04-01",
+        PDS_Sensitive="U",
     ),
     Demographics(
         "31c8aa5e-c545-11eb-ae00-5b6c199ee918",
@@ -96,6 +98,7 @@ PATIENTS = [
         GP_Title="Maj",
         GP_Gender="1",
         PDS_GpRegisteredDate="2019-04-02",
+        PDS_Sensitive="U",
     ),
     Demographics(
         "37c100aa-c545-11eb-a75b-1315385e9b21",
@@ -119,6 +122,7 @@ PATIENTS = [
         GP_Title="Miss",
         GP_Gender="2",
         PDS_GpRegisteredDate="2019-04-03",
+        PDS_Sensitive="U",
     ),
     Demographics(
         "6cea6924-1ed9-423e-a69f-6d868f58b278",
@@ -130,6 +134,7 @@ PATIENTS = [
         GP_TransactionTime="123",
         NhsNumber="1235",
         GP_RegistrationStatus="Matched",
+        PDS_Sensitive="U",
     ),
     Demographics(
         "50e1b957-2fc4-44b0-8e60-d8f9ca162022",
@@ -141,6 +146,7 @@ PATIENTS = [
         GP_TransactionTime="123",
         NhsNumber="1236",
         GP_RegistrationStatus="Matched",
+        PDS_Sensitive="U",
     ),
 ]
 

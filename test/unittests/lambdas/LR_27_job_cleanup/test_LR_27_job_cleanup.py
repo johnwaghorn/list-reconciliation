@@ -1,6 +1,6 @@
 import pytest
 
-from LR_27_job_cleanup.conftest import JOB_ID, MOCK_REGISTRATIONS_OUTPUT_BUCKET
+from conftest import JOB_ID, MOCK_REGISTRATIONS_OUTPUT_BUCKET
 from utils.database.models import Jobs, InFlight
 from utils.statuses import JobStatus
 

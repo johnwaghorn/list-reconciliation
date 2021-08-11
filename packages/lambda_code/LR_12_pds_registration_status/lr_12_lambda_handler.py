@@ -12,7 +12,7 @@ from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.database.models import Demographics, JobStats
 from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
-from utils.pds_api_service import PDSAPIHelper, PDSAPIError
+from utils.pds_api_service import PDSAPIHelper, PDSAPIError, SensitiveMarkers
 
 
 class PDSRegistrationStatus(LambdaApplication):
@@ -109,32 +109,45 @@ class PDSRegistrationStatus(LambdaApplication):
             if nhs_number not in job_nhs_numbers:
                 try:
                     pds_record = self.api.get_pds_record(nhs_number, job_id)
+                    if any(
+                        marker.value == pds_record.get("sensitive") for marker in SensitiveMarkers
+                    ):
+                        self.log_object.write_log(
+                            "UTI9995",
+                            None,
+                            {
+                                "logger": "LR12.Lambda",
+                                "level": "INFO",
+                                "message": "Sensitive patient, skipping registration",
+                            },
+                        )
+                        continue
 
                 except PDSAPIError as err:
                     msg = f"Error fetching PDS record for NHS number {nhs_number}, {err}"
                     error_response = log_dynamodb_error(self.log_object, job_id, err, msg)
 
                     raise PDSAPIError(json.dumps(error_response)) from err
-
-                rows.append(
-                    {
-                        "SURNAME": pds_record["surname"],
-                        "FORENAMES": " ".join(pds_record["forenames"]),
-                        "DOB": pds_record["date_of_birth"],
-                        "NHS NO.": nhs_number,
-                        "ADD 1": pds_record["address"][0],
-                        "ADD 2": pds_record["address"][1],
-                        "ADD 3": pds_record["address"][2],
-                        "ADD 4": pds_record["address"][3],
-                        "ADD 5": pds_record["address"][4],
-                        "POSTCODE": pds_record["postcode"],
-                        "TITLE": ", ".join(pds_record["title"]),
-                        "SEX": pds_record["gender"],
-                        "DATE ACCEPT.": datetime.strptime(
-                            pds_record["gp_registered_date"], "%Y-%m-%d"
-                        ).date(),
-                    }
-                )
+                if pds_record:
+                    rows.append(
+                        {
+                            "SURNAME": pds_record["surname"],
+                            "FORENAMES": " ".join(pds_record["forenames"]),
+                            "DOB": pds_record["date_of_birth"],
+                            "NHS NO.": nhs_number,
+                            "ADD 1": pds_record["address"][0],
+                            "ADD 2": pds_record["address"][1],
+                            "ADD 3": pds_record["address"][2],
+                            "ADD 4": pds_record["address"][3],
+                            "ADD 5": pds_record["address"][4],
+                            "POSTCODE": pds_record["postcode"],
+                            "TITLE": ", ".join(pds_record["title"]),
+                            "SEX": pds_record["gender"],
+                            "DATE ACCEPT.": datetime.strptime(
+                                pds_record["gp_registered_date"], "%Y-%m-%d"
+                            ).date(),
+                        }
+                    )
 
         try:
             job_stat = JobStats.get(job_id)

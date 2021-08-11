@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
@@ -10,6 +10,7 @@ from services.jobs import get_job
 from utils import write_to_mem_csv
 from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.datetimezone import get_datetime_now
+from utils.pds_api_service import SensitiveMarkers
 from utils.logger import success, log_dynamodb_error, UNHANDLED_ERROR
 from utils.statuses import JobStatus
 from utils.ssm import get_ssm_params
@@ -60,7 +61,9 @@ class DemographicDifferences(LambdaApplication):
         patient_record: Demographics, demo_diffs: List[DemographicsDifferences]
     ) -> Tuple[Dict, int, int, int, int, int]:
         """Creates a DSA work item payload containing a single patient record with
-        one or more demographic differences identified. Determines further actions
+        one or more demographic differences identified.
+        Demographic differences list is empty for Sensitive patients
+        Determines further actions
         based on rules provided by the listrec_comparison_engine definitions and
         provides counts for the types of actions determined.
 
@@ -123,6 +126,7 @@ class DemographicDifferences(LambdaApplication):
                 },
                 "pdsData": {
                     "scn": patient_record.PDS_Version,
+                    "security": patient_record.PDS_Sensitive,
                     "birthDate": patient_record.PDS_DateOfBirth,
                     "gender": patient_record.PDS_Gender,
                     "name": [
@@ -151,43 +155,40 @@ class DemographicDifferences(LambdaApplication):
 
     @staticmethod
     def summarise_dsa_work_item(dsa_work_item: Dict):
-        summary_records = []
-
         patient = dsa_work_item["patient"]
+        summary_record_dict = {
+            "nhsNumber": patient["nhsNumber"],
+            "gp_birthDate": patient["gpData"]["birthDate"],
+            "gp_gender": patient["gpData"]["gender"],
+            "gp_name_given": patient["gpData"]["name"]["given"],
+            "gp_name_family": patient["gpData"]["name"]["family"],
+            "gp_name_previousFamily": patient["gpData"]["name"]["previousFamily"],
+            "gp_name_prefix": patient["gpData"]["name"]["prefix"],
+            "gp_address_line1": patient["gpData"]["address"]["line1"],
+            "gp_address_line2": patient["gpData"]["address"]["line2"],
+            "gp_address_line3": patient["gpData"]["address"]["line3"],
+            "gp_address_line4": patient["gpData"]["address"]["line4"],
+            "gp_address_line5": patient["gpData"]["address"]["line5"],
+            "gp_postalCode": patient["gpData"]["postalCode"],
+            "gp_generalPractitionerOds": patient["gpData"]["generalPractitionerOds"],
+            "pds_scn": patient["pdsData"]["scn"],
+            "pds_security": patient["pdsData"]["security"],
+            "pds_birthDate": patient["pdsData"]["birthDate"],
+            "pds_gender": patient["pdsData"]["gender"],
+            "pds_name_given": " ".join(patient["pdsData"]["name"][0]["given"]),
+            "pds_name_family": patient["pdsData"]["name"][0]["family"],
+            "pds_name_prefix": ",".join(patient["pdsData"]["name"][0]["prefix"]),
+            "pds_address": ",".join(patient["pdsData"]["address"]),
+            "pds_postalCode": patient["pdsData"]["postalCode"],
+            "pds_generalPractitionerOds": patient["pdsData"]["generalPractitionerOds"],
+        }
         demographic_diffs = dsa_work_item["differences"]
 
-        for demographic_diff in demographic_diffs:
-            summary_records.append(
-                {
-                    "nhsNumber": patient["nhsNumber"],
-                    "gp_birthDate": patient["gpData"]["birthDate"],
-                    "gp_gender": patient["gpData"]["gender"],
-                    "gp_name_given": patient["gpData"]["name"]["given"],
-                    "gp_name_family": patient["gpData"]["name"]["family"],
-                    "gp_name_previousFamily": patient["gpData"]["name"]["previousFamily"],
-                    "gp_name_prefix": patient["gpData"]["name"]["prefix"],
-                    "gp_address_line1": patient["gpData"]["address"]["line1"],
-                    "gp_address_line2": patient["gpData"]["address"]["line2"],
-                    "gp_address_line3": patient["gpData"]["address"]["line3"],
-                    "gp_address_line4": patient["gpData"]["address"]["line4"],
-                    "gp_address_line5": patient["gpData"]["address"]["line5"],
-                    "gp_postalCode": patient["gpData"]["postalCode"],
-                    "gp_generalPractitionerOds": patient["gpData"]["generalPractitionerOds"],
-                    "pds_scn": patient["pdsData"]["scn"],
-                    "pds_birthDate": patient["pdsData"]["birthDate"],
-                    "pds_gender": patient["pdsData"]["gender"],
-                    "pds_name_given": " ".join(patient["pdsData"]["name"][0]["given"]),
-                    "pds_name_family": patient["pdsData"]["name"][0]["family"],
-                    "pds_name_prefix": ",".join(patient["pdsData"]["name"][0]["prefix"]),
-                    "pds_address": ",".join(patient["pdsData"]["address"]),
-                    "pds_postalCode": patient["pdsData"]["postalCode"],
-                    "pds_generalPractitionerOds": patient["pdsData"]["generalPractitionerOds"],
-                    "ruleId": demographic_diff["ruleId"],
-                    "guidance": demographic_diff["guidance"],
-                }
-            )
-
-        return summary_records
+        if demographic_diffs:
+            return [{**summary_record_dict, **difference} for difference in demographic_diffs]
+        else:
+            # Sensitive patients
+            return [{**summary_record_dict, "ruleId": "sensitive", "guidance": "Manual Validation"}]
 
     def process_demographic_differences(self, job_id: str) -> Dict:
         """Process and output demographic differences for a job, creating DSA work
@@ -204,6 +205,10 @@ class DemographicDifferences(LambdaApplication):
         demographic_diffs = DemographicsDifferences.JobIdIndex.query(job_id)
 
         patients = defaultdict(list)
+        demographic_diffs = DemographicsDifferences.JobIdIndex.query(job_id)
+        sensitive_patients = self.process_sensitive_patients(job_id)
+        if sensitive_patients:
+            patients.update(sensitive_patients)
 
         for demographic_diff in demographic_diffs:
             patients[demographic_diff.PatientId].append(demographic_diff)
@@ -289,6 +294,7 @@ class DemographicDifferences(LambdaApplication):
             "gp_postalCode",
             "gp_generalPractitionerOds",
             "pds_scn",
+            "pds_security",
             "pds_birthDate",
             "pds_gender",
             "pds_name_given",
@@ -355,3 +361,31 @@ class DemographicDifferences(LambdaApplication):
         )
 
         return out
+
+    @staticmethod
+    def process_sensitive_patients(job_id) -> Dict[str, List[Any]]:
+        """
+        Get sensitive patient details from Demographic table , the sensitive status could be
+        "R","V", "REDACTED"
+
+        Args:
+             job_id:str
+        Returns:
+               dict of Sensitive patients
+               { record_id:[] }
+        """
+        # Sensitive records are not available in Demographics Difference
+        # Get them from Demographic table
+        sensitive_records = Demographics.JobIdIndex.query(
+            job_id,
+            filter_condition=(
+                (Demographics.PDS_Sensitive == SensitiveMarkers.RESTRICTED.value)
+                | (Demographics.PDS_Sensitive == SensitiveMarkers.VERY_RESTRICTED.value)
+                | (Demographics.PDS_Sensitive == SensitiveMarkers.REDACTED.value)
+            ),
+        )
+        # Demographic difference list is empty
+        if sensitive_records:
+            return {records.Id: [] for records in sensitive_records}
+        else:
+            return
