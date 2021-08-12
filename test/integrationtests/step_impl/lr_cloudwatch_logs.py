@@ -7,21 +7,14 @@ from .lr_03_dynamodb import get_latest_jobid
 import os
 
 import boto3
-import time
 import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
-# On github
-access_key = os.getenv("AWS_PUBLIC_KEY")
-secret_key = os.getenv("AWS_PRIVATE_KEY")
-dev = boto3.session.Session(access_key, secret_key)
-
 region_name = "eu-west-2"
 test_datetime = get_datetime_now()
-client = dev.client("logs", region_name)
+client = boto3.client("logs", region_name)
 
 LR02_LAMBDA = get_terraform_output("lr_02_lambda")
 
@@ -45,6 +38,5 @@ def connect_to_cloudwatch_get_request_id():
 
     while response == None or response["status"] == "Running":
         print("Waiting for query to complete ...")
-        time.sleep(10)
         response = client.get_query_results(queryId=query_id)
         print(response)

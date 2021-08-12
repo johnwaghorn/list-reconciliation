@@ -1,12 +1,6 @@
 from getgauge.python import step, Messages
 from .tf_aws_resources import get_terraform_output
 import boto3
-import os
-
-# On github
-access_key = os.getenv("AWS_PUBLIC_KEY")
-secret_key = os.getenv("AWS_PRIVATE_KEY")
-dev = boto3.session.Session(access_key, secret_key)
 
 REGION_NAME = "eu-west-2"
 JOBS_TABLE = get_terraform_output("jobs_table")
@@ -15,7 +9,7 @@ INFLIGHT_TABLE = get_terraform_output("in_flight_table")
 
 @step("connect to lr-03 dynamodb and get the latest JobId for a gppractice file")
 def get_latest_jobid():
-    dev1 = dev.resource("dynamodb", REGION_NAME)
+    dev1 = boto3.resource("dynamodb", REGION_NAME)
     job_table = dev1.Table(JOBS_TABLE)
     job_data = job_table.scan()
     job_items = []
@@ -30,7 +24,7 @@ def get_latest_jobid():
 
 @step("get InFlight table item count")
 def get_inflight_table_itemcount():
-    dev1 = dev.resource("dynamodb", region_name="eu-west-2")
+    dev1 = boto3.resource("dynamodb", REGION_NAME)
     inflight_table = dev1.Table(INFLIGHT_TABLE)
     inflight_data = inflight_table.scan()
     print(inflight_data)

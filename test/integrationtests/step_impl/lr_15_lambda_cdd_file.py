@@ -1,7 +1,6 @@
 import json
 import os
-import time
-
+from weakref import KeyedRef
 import boto3
 from getgauge.python import data_store, Messages, step
 
@@ -60,12 +59,26 @@ def upload_test_data_files_to_lr_22(path):
         raise
 
 
+@step("upload test data file <filename> in <path> to lr-22")
+def upload_test_data_files_to_lr_22(filename, path):
+    try:
+        s3.upload_file(os.path.join(DATA, path, filename), LR_22_BUCKET, filename)
+        use_waiters_check_object_exists(LR_22_BUCKET, filename)
+        Messages.write_message("Test data uploaded")
+    except FileNotFoundError:
+        Messages.write_message("File not found")
+        raise
+
+
 @step("upload gpfile file <testfile> to LR-01")
 def upload_gpextract_file_into_s3(testfile):
     gp_file = create_gp_file(testfile, "DOW~1")
     destination_filename = os.path.basename(gp_file)
     try:
         s3.upload_file(gp_file, LR_01_BUCKET, f"{InputFolderType.IN.value}{destination_filename}")
+        use_waiters_check_object_exists(
+            LR_01_BUCKET, f"{InputFolderType.PASS.value}{destination_filename}"
+        )
         Messages.write_message("Upload Successful")
     except FileNotFoundError:
         Messages.write_message("File not found")
@@ -89,33 +102,35 @@ def execute_step_function_lr_10_assert_succeeded():
 
     if stepfunction["status"] == "SUCCEEDED":
         # Get the LR-10 output filename and put it into a Gauge datastore so other steps can pick it up
-        filename = json.loads(json.loads(stepfunction["output"])[0])["summary"]
-        Messages.write_message(f"FILENAME {filename}")
-        bucket = filename.split("/")[2]
-        key = "/".join(filename.split("/")[3:])
-        data_store.scenario["lr_10"] = {"job_id": job_id, "bucket": bucket, "key": key}
+        output = json.loads(stepfunction["output"])
+        data_store.scenario["lr_10"] = {"job_id": job_id, "output": output}
         assert True
 
 
 @step(
-    "ensure produced CDD file contains the expected consolidated records as in <expected_data_file>"
+    "ensure produced <filetype> file contains the expected consolidated records as in <expected_data_file>"
 )
-def assert_expected_file_in_lr13(expected_data_file):
-    job_id = data_store.scenario["job_id"]
+def assert_expected_file_in_lr13(filetype, expected_data_file):
+    job_id = data_store.scenario["lr_10"]["job_id"]
+    
     if not job_id:
         job_id = get_latest_jobid()
 
     lr_10 = data_store.scenario["lr_10"]
     if not lr_10:
         assert False
+    try :
+        expected_filename = next(file for file in lr_10["output"]["files"] if filetype in file)
+        bucket = LR_13_BUCKET
+        key = f"{job_id}/{expected_filename}"
 
-    bucket = lr_10["bucket"]
-    key = lr_10["key"]
+    except StopIteration: 
+        assert False, f"{filetype} is wrong"
 
     assert await_s3_object_exists(
         bucket, key
     ), f"Could not find file: {bucket}/{key} for job_id: {job_id}"
-    assert "CDD" in key, f"Output file: {bucket}/{key} was not type: CDD"
+    assert filetype in key, f"Output file: {bucket}/{key} was not type: {filetype}"
 
     job_object = s3.get_object(Bucket=LR_13_BUCKET, Key=key)
     sorted_job_data = sorted(job_object["Body"].read().decode("utf-8").splitlines())
@@ -127,8 +142,3 @@ def assert_expected_file_in_lr13(expected_data_file):
             assert (
                 job_row.rstrip() == expected_row.rstrip()
             ), f"File: {bucket}/{key}\nJob row: {job_row}\nExpected row: {expected_row}\nError: expected record not found"
-
-
-@step("wait for <seconds> seconds to allow other jobs to process")
-def wait_for_seconds(seconds):
-    time.sleep(int(seconds))

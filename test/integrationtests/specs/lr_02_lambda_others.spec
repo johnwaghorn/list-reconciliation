@@ -4,9 +4,9 @@
 
 ## test to ensure when lambda LR-02 is triggered and check file is validated and passed sucessfully
 ---------------------------------------------------------------------------------------------------
-Tags: wip
-* setup steps: clear all files in LR_01 bucket folders and dynamodb Inflight table
-* connect to s3 and upload gpfile file "A82023_GPR4LNA1.EIA" for successful file validation
+* setup steps to empty all buckets
+* setup steps to empty all database tables
+* connect to s3 and upload gpfile file "LR_02/A82023_GPR4LNA1.EIA" for successful file validation
 * connect to pass folder and check if it has loaded the test file
 
 
@@ -18,9 +18,3 @@ Tags: wip
 ## test to ensure when lambda LR-02 is triggered with invalid payload should throw key error
 --------------------------------------------------------------------------------------------
 * connect and trigger lambda LR-02 with invalid payload
-
-## test to validate invalid record type
----------------------------------------
-Tags: wip
-* connect to s3 and upload gp file with invalid item "DOWNLOAD" in row "DOW~1" at position "0"
-* connect to s3 failed folder and assert failure message "Row 1 for all records must start with 'DOW~1'"

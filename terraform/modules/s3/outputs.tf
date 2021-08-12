@@ -43,7 +43,7 @@ output "buckets" {
     LR-22 = {
       bucket = aws_s3_bucket.LR-22.id
       arn    = aws_s3_bucket.LR-22.arn
-    }
+    },
     LR-26 = {
       bucket = aws_s3_bucket.LR-26.id
       arn    = aws_s3_bucket.LR-26.arn

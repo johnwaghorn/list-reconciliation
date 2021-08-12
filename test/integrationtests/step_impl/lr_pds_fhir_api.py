@@ -2,7 +2,7 @@ import os
 import requests
 import json
 
-from getgauge.python import step, Messages
+from getgauge.python import step
 
 URL = "https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4/Patient"
 ROOT = os.path.dirname(os.path.abspath(__file__))

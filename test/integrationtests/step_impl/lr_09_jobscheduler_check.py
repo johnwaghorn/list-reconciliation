@@ -1,17 +1,10 @@
 from getgauge.python import step, Messages
-import time
 import boto3
 import json
-import os
 import base64
 
-from utils.datetimezone import get_datetime_now
-from .tf_aws_resources import get_terraform_output
 
-# On github
-access_key = os.getenv("AWS_PUBLIC_KEY")
-secret_key = os.getenv("AWS_PRIVATE_KEY")
-dev = boto3.session.Session(access_key, secret_key)
+from .tf_aws_resources import get_terraform_output
 
 REGION_NAME = "eu-west-2"
 LR_09_LAMBDA_ARN = get_terraform_output("lr_09_lambda")
@@ -19,7 +12,7 @@ LR_09_LAMBDA_ARN = get_terraform_output("lr_09_lambda")
 
 @step("trigger lr09 and expected statuscode is <expstatuscode>")
 def trigger_lr09(expstatuscode):
-    client = dev.client("lambda", REGION_NAME)
+    client = boto3.client("lambda", REGION_NAME)
     response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
     for key, value in response.items():
         if key == "ResponseMetadata":
@@ -28,9 +21,8 @@ def trigger_lr09(expstatuscode):
 
 @step("trigger lr09 and ensure scheduled checked successfully completed")
 def trigger_lr09_get_requestid():
-    time.sleep(10)
-    client = dev.client("lambda", REGION_NAME)
-    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
+    client = boto3.client("lambda", REGION_NAME)
+    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload="{}")
 
     for key, value in response.items():
         if key == "ResponseMetadata":

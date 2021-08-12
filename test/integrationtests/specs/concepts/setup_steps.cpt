@@ -1,0 +1,23 @@
+# setup steps to empty related tables and buckets for LR-15 tests
+* setup: empty table "demographic_table"
+* setup: empty table "demographics_difference_table"
+* setup: empty table "in_flight_table"
+* setup: empty bucket "lr_01_bucket"
+* setup: empty bucket "lr_13_bucket"
+* setup: empty bucket "lr_22_bucket"
+
+# setup steps to empty all buckets
+* setup steps: clear all files in LR_01 bucket folders
+* setup: empty bucket "lr_06_bucket"
+* setup: empty bucket "lr_13_bucket"
+* setup: empty bucket "lr_20_bucket"
+* setup: empty bucket "lr_22_bucket"
+
+
+# setup steps to empty all database tables
+* setup: empty table "demographic_table"
+* setup: empty table "demographics_difference_table"
+* setup: empty table "errors_table"
+* setup: empty table "in_flight_table"
+* setup: empty table "jobs_stats_table"
+* setup: empty table "jobs_table"

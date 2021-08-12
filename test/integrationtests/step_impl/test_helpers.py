@@ -35,12 +35,13 @@ def create_timestamp():
     return get_datetime_now().now().strftime("%Y%m%d%H%M%S%f")
 
 
-def await_stepfunction_succeeded(execution_arn, poll_limit=5, poll_count=0, poll_sleep=5):
+def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll_sleep=10):
     while True:
         describe_execution = stepfunctions.describe_execution(executionArn=execution_arn)
         status = describe_execution["status"]
+        output = describe_execution.get("output")
 
-        if status == "SUCCEEDED":
+        if status == "SUCCEEDED" and output:
             return describe_execution
         else:
             poll_count += 1
@@ -50,3 +51,6 @@ def await_stepfunction_succeeded(execution_arn, poll_limit=5, poll_count=0, poll
             return describe_execution
 
         time.sleep(poll_sleep)
+
+def is_content_present(response):
+    return "Contents" in response
