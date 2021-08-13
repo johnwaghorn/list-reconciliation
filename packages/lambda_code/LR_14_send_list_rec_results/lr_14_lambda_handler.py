@@ -1,24 +1,22 @@
-from typing import List
-
 import json
 import os
+from typing import List
 
 import boto3
-
 from spine_aws_common.lambda_application import LambdaApplication
 
+import services.send_email_exchangelib
 from .listrec_results_email_template import BODY
 from utils.logger import success
 from utils.database.models import Jobs, DemographicsDifferences, JobStats
 from utils.ssm import get_ssm_params
 from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
 
-import services.send_email_exchangelib
-
 
 class SendListRecResults(LambdaApplication):
     def __init__(self):
         super().__init__()
+        self.send_emails = self.system_config["SEND_EMAILS"] == "true"
         self.mesh_params = get_ssm_params(
             self.system_config["MESH_SSM_PREFIX"], self.system_config["AWS_REGION"]
         )
@@ -125,16 +123,31 @@ class SendListRecResults(LambdaApplication):
                 "message": f"Sending email from {self.system_config['LISTREC_EMAIL']} to {self.system_config['PCSE_EMAIL']}",
             },
         )
-        services.send_email_exchangelib.send_exchange_email(
-            self.system_config["LISTREC_EMAIL"],
-            self.email_params["list_rec_email_password"],
-            {
-                "email_addresses": [self.system_config["PCSE_EMAIL"]],
-                "subject": subject,
-                "message": body,
-            },
-            self.log_object,
-        )
+
+        from_address = str(self.system_config["LISTREC_EMAIL"])
+        email = {
+            "email_addresses": [self.system_config["PCSE_EMAIL"]],
+            "subject": subject,
+            "message": body,
+        }
+
+        if self.send_emails:
+            services.send_email_exchangelib.send_exchange_email(
+                from_address,
+                self.email_params["list_rec_email_password"],
+                email,
+                self.log_object,
+            )
+        else:
+            self.log_object.write_log(
+                "UTI9995",
+                None,
+                {
+                    "logger": "LR14.Lambda",
+                    "level": "INFO",
+                    "message": f"Email sending={self.send_emails}. Did not send message subject={email['subject']} from={from_address} to={','.join(email['email_addresses'])} with body={email['message']}",
+                },
+            )
 
     def start(self):
         self.job_id = self.event["job_id"]

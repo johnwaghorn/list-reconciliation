@@ -21,6 +21,7 @@ module "lambda" {
   email_ssm_prefix      = module.ssm.email_ssm_parameters_path
   pds_ssm_access_token  = module.ssm.pds_ssm_access_token
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
+  send_emails           = try(local.send_emails[local.environment], local.send_emails["default"])
 
   lr_09_event_schedule_expression = try(local.lr_09_event_schedule_expression[local.environment], local.lr_09_event_schedule_expression["default"])
   lr_25_event_schedule_expression = try(local.lr_25_event_schedule_expression[local.environment], local.lr_25_event_schedule_expression["default"])

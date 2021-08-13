@@ -37,6 +37,7 @@ resource "aws_lambda_function" "LR-14-Lambda" {
       PCSE_EMAIL                        = var.pcse_email
       MESH_SSM_PREFIX                   = "/${var.mesh_ssm}/"
       EMAIL_SSM_PREFIX                  = "/${var.email_ssm}/"
+      SEND_EMAILS                       = var.send_emails
     }
   }
 

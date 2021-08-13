@@ -105,3 +105,8 @@ variable "listrec_email" {
 variable "log_retention_in_days" {
   type = string
 }
+
+variable "send_emails" {
+  description = "Toggle to enable actual sending of emails"
+  type        = bool
+}

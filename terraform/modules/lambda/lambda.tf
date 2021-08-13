@@ -216,6 +216,7 @@ module "LR-14" {
   email_ssm                           = var.email_ssm_prefix
   pcse_email                          = var.pcse_email
   listrec_email                       = var.listrec_email
+  send_emails                         = var.send_emails
 }
 
 module "LR-15" {

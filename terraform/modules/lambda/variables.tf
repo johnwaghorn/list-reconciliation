@@ -119,3 +119,8 @@ variable "lr_25_event_schedule_expression" {
 variable "pds_ssm_access_token" {
   type = string
 }
+
+variable "send_emails" {
+  description = "Toggle to enable actual sending of emails"
+  type        = bool
+}

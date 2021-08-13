@@ -27,6 +27,12 @@ locals {
     prod    = "alias/list-rec-prod-mesh"
   }
 
+  send_emails = {
+    default = false
+    preprod = true
+    prod    = true
+  }
+
   mesh_post_office_open = {
     default = "False"
     preprod = "True"
