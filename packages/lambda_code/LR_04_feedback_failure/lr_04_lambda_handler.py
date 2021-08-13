@@ -12,6 +12,7 @@ from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import (
     INVALID_STRUCTURE,
 )
 from utils import InputFolderType
+from utils.datetimezone import localize_date
 from utils.exceptions import FeedbackLogError
 from utils.logger import log_dynamodb_error, success
 
@@ -254,7 +255,9 @@ class FeedbackFailure(LambdaApplication):
             body (str): formatted body of email
         """
 
-        date_string = self.upload_date.strftime("%H:%M:%S on %d/%m/%Y")
+        date_string = localize_date(self.upload_date, specified_timezone="Europe/London").strftime(
+            "%H:%M:%S on %d/%m/%Y"
+        )
 
         header = (
             f"The GP file: {self.log['file']} failed validation at {date_string}.\n"

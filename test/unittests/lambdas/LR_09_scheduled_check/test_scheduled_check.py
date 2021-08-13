@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from utils.database.models import InFlight, Jobs, JobStats
 from utils.statuses import JobStatus
 
-from LR_09_scheduled_check.conftest import JOB_ID
+from .conftest import JOB_ID
 
 
 def test_empty_inflight_doesnt_process_jobs(create_dynamo_tables, lambda_handler):

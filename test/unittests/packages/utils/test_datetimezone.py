@@ -52,7 +52,6 @@ def test_get_datetime_now_with_different_timezone_returns_correct_time(
 
 def test_get_datetime_now_returns_correct_type():
     actual = get_datetime_now()
-
     assert type(actual) == datetime
 
 
@@ -77,22 +76,35 @@ def test_localize_date_without_tz_returns_correct_date():
     assert actual.tzinfo.zone == expected_tz
 
 
-@freeze_time("2021-05-07T14:30:00.000000-0400")
-def test_localize_date_with_tz_returns_correct_date():
-    expected_year = 2021
-    expected_month = 5
-    expected_day = 7
-    expected_hour = 18
-    expected_minute = 30
-    expected_second = 0
-    expected_tz = "UTC"
+@freeze_time("2021-02-07T14:30:00.000000+0000")
+@pytest.mark.parametrize(
+    "tz",
+    [
+        ("UTC"),
+        ("GMT"),
+        ("GB"),
+        ("Europe/London"),
+    ],
+)
+def test_localize_date_with_tz_returns_correct_date_not_in_daylight_saving(
+    tz: str,
+):
+    actual = localize_date(unlocalized_date=datetime.utcnow(), specified_timezone=tz)
+    assert actual.tzinfo.zone == tz
 
-    actual = localize_date(datetime.now(timezone("US/Eastern")))
 
-    assert actual.year == expected_year
-    assert actual.month == expected_month
-    assert actual.day == expected_day
-    assert actual.hour == expected_hour
-    assert actual.minute == expected_minute
-    assert actual.second == expected_second
-    assert actual.tzinfo.zone == expected_tz
+@freeze_time("2021-08-07T14:30:00.000000+0000")
+@pytest.mark.parametrize(
+    "tz",
+    [
+        ("UTC"),
+        ("GMT"),
+        ("GB"),
+        ("Europe/London"),
+    ],
+)
+def test_localize_date_with_tz_returns_correct_date_in_daylight_saving(
+    tz: str,
+):
+    actual = localize_date(unlocalized_date=datetime.utcnow(), specified_timezone=tz)
+    assert actual.tzinfo.zone == tz

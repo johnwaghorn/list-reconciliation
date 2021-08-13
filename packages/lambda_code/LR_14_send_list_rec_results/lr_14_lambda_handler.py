@@ -7,10 +7,12 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 import services.send_email_exchangelib
 from .listrec_results_email_template import BODY
-from utils.logger import success
-from utils.database.models import Jobs, DemographicsDifferences, JobStats
-from utils.ssm import get_ssm_params
 from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
+from spine_aws_common.lambda_application import LambdaApplication
+from utils.database.models import DemographicsDifferences, Jobs, JobStats
+from utils.datetimezone import localize_date
+from utils.logger import success
+from utils.ssm import get_ssm_params
 
 
 class SendListRecResults(LambdaApplication):
@@ -65,7 +67,9 @@ class SendListRecResults(LambdaApplication):
         job = Jobs.IdIndex.query(self.job_id).next()
         job_stat = JobStats.get(self.job_id)
 
-        timestamp = job.Timestamp.strftime("%H:%M:%S on %d/%m/%Y")
+        timestamp = localize_date(job.Timestamp, specified_timezone="Europe/London").strftime(
+            "%H:%M:%S on %d/%m/%Y"
+        )
         email_subject = f"PDS Comparison run at {timestamp} against Practice: {job.PracticeCode} - {job.FileName} - Registrations Output"
 
         filelist = "\n    - ".join(filenames)

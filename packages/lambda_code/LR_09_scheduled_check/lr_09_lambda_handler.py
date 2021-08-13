@@ -6,6 +6,7 @@ import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.database.models import Jobs, InFlight, Demographics, JobStats
+from utils.datetimezone import get_datetime_now, localize_date
 from utils.logger import log_dynamodb_error
 from utils.statuses import JobStatus
 
@@ -51,8 +52,8 @@ class ScheduledCheck(LambdaApplication):
 
     @staticmethod
     def is_job_timed_out(timestamp: datetime, job_timeout_hours: int) -> bool:
-        cutoff_time = datetime.now() - timedelta(hours=job_timeout_hours)
-        return timestamp.replace(tzinfo=None) < cutoff_time
+        cutoff_time = get_datetime_now() - timedelta(hours=job_timeout_hours)
+        return localize_date(timestamp) < cutoff_time
 
     @staticmethod
     def update_job_stats(job_id: str, total_records: int) -> None:

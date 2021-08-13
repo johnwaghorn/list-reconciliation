@@ -66,6 +66,9 @@ apply:
 	rm -f ./terraform_outputs_${stack}.json|| true
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
 
+output:
+	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
+
 destroy:
 	terraform -chdir=./terraform/stacks/${stack} destroy -auto-approve
 

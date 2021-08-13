@@ -60,7 +60,7 @@ def upload_test_data_files_to_lr_22(path):
 
 
 @step("upload test data file <filename> in <path> to lr-22")
-def upload_test_data_files_to_lr_22(filename, path):
+def upload_test_data_files_in_path_to_lr_22(filename, path):
     try:
         s3.upload_file(os.path.join(DATA, path, filename), LR_22_BUCKET, filename)
         use_waiters_check_object_exists(LR_22_BUCKET, filename)
@@ -112,19 +112,19 @@ def execute_step_function_lr_10_assert_succeeded():
 )
 def assert_expected_file_in_lr13(filetype, expected_data_file):
     job_id = data_store.scenario["lr_10"]["job_id"]
-    
+
     if not job_id:
         job_id = get_latest_jobid()
 
     lr_10 = data_store.scenario["lr_10"]
     if not lr_10:
         assert False
-    try :
+    try:
         expected_filename = next(file for file in lr_10["output"]["files"] if filetype in file)
         bucket = LR_13_BUCKET
         key = f"{job_id}/{expected_filename}"
 
-    except StopIteration: 
+    except StopIteration:
         assert False, f"{filetype} is wrong"
 
     assert await_s3_object_exists(

@@ -20,8 +20,8 @@ def test_send_list_rec_results_ok(
     event = {"job_id": "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"}
     response = lambda_handler.main(event, lambda_context)
 
-    expected_title = "PDS Comparison run at 14:48:37 on 27/05/2021 against Practice: Y123452 - Y123452.E1A - Registrations Output"
-    expected_body = """The GP file: Y123452.E1A has been compared to PDS at 14:48:37 on 27/05/2021
+    expected_title = "PDS Comparison run at 15:48:37 on 27/05/2021 against Practice: Y123452 - Y123452.E1A - Registrations Output"
+    expected_body = """The GP file: Y123452.E1A has been compared to PDS at 15:48:37 on 27/05/2021
 
 3 patient records were found on PDS, that were not in the GP file.
 
