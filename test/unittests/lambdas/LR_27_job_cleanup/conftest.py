@@ -59,7 +59,7 @@ def create_job_item(dynamodb):
         JOB_ID,
         PracticeCode=PRACTICE_CODE,
         FileName=DATA_FILE,
-        StatusId=JobStatus.DEMOGRAPHICS_DIFFERENCES_PROCESSED.value,
+        StatusId=JobStatus.COMPLETE.value,
         Timestamp=parse("1970-01-01 00:00:00.000000"),
     )
     job.save()

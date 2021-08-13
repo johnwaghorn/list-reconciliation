@@ -150,15 +150,27 @@ def populate_inflight_table(create_dynamo_tables):
 
 @pytest.fixture
 def populate_jobs_table(create_dynamo_tables):
-    job = Jobs(
-        JOB_ID[1],
-        PracticeCode="JSABCDEF",
-        FileName="JSHTST.EAA",
-        StatusId="1",
-        Timestamp=parse("2021-05-27 14:48:37.274977"),
-    )
+    items = [
+        Jobs(
+            JOB_ID[1],
+            PracticeCode="JSABCDEF",
+            FileName="JSHTST.EAA",
+            StatusId="1",
+            Timestamp=parse("2021-05-27 14:48:37.274977"),
+        ),
+        Jobs(
+            JOB_ID[4],
+            PracticeCode="UINKJNKM",
+            FileName="UINKJN.EAA",
+            StatusId="1",
+            Timestamp=parse("2021-05-27 14:48:37.274977"),
+        ),
+    ]
 
-    job.save()
+    with Jobs.batch_write() as batch:
+        for item in items:
+            batch.save(item)
+
     yield
 
 

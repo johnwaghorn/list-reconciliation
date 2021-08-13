@@ -346,7 +346,7 @@ class DemographicDifferences(LambdaApplication):
         )
 
         job = get_job(job_id)
-        job.update(actions=[Jobs.StatusId.set(JobStatus.DEMOGRAPHICS_DIFFERENCES_PROCESSED.value)])
+        job.update(actions=[Jobs.StatusId.set(JobStatus.COMPLETE.value)])
 
         self.log_object.write_log(
             "UTI9995",

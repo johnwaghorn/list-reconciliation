@@ -78,7 +78,7 @@ class ScheduledCheck(LambdaApplication):
         """
         Scheduled checker to check the in flight jobs status.
         If they have finished, push them through to LR-10 (step function)
-        If they have passed the cutoff time, delete the job and raise a log that can be alerted on
+        If they have passed the cutoff time, delete the in flight job item and raise a log that can be alerted on
         """
         processed_jobs = []
         skipped_jobs = []
@@ -89,7 +89,7 @@ class ScheduledCheck(LambdaApplication):
             if self.is_job_complete(item.JobId, int(item.TotalRecords)):
                 InFlight.delete(item)
                 self.update_job_stats(item.JobId, int(item.TotalRecords))
-                self.update_job_status(item.JobId, JobStatus.PDS_FHIR_API_PROCESSED.value)
+                self.update_job_status(item.JobId, JobStatus.RECORDS_PROCESSED.value)
                 self.trigger_step_function(item.JobId)
                 processed_jobs.append(item.JobId)
             elif self.is_job_timed_out(item.Timestamp, self.job_timeout_hours):

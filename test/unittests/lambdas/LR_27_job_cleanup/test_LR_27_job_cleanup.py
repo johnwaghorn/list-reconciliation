@@ -81,7 +81,7 @@ def test_update_job_status(job_cleanup, create_job_item):
     jobs = Jobs.query(JOB_ID)
     for job in jobs:
         assert job.Id == JOB_ID
-        assert job.StatusId == JobStatus.DEMOGRAPHICS_DIFFERENCES_PROCESSED.value
+        assert job.StatusId == JobStatus.COMPLETE.value
 
     job_cleanup.update_job_status(JOB_ID)
 
