@@ -1,7 +1,3 @@
-variable "runtime" {
-  type = string
-}
-
 variable "lambda_timeout" {
   type    = number
   default = 300

@@ -5,7 +5,6 @@ module "lambda" {
   pds_base_url          = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
   pcse_email            = try(local.pcse_email[local.environment], local.pcse_email["default"])
   listrec_email         = "pcrm.gplistreconciliation@nhs.net"
-  runtime               = "python3.8"
   lambda_handler        = "main.lambda_handler"
   s3_buckets            = module.s3.buckets
   cloudwatch_kms_key    = module.kms["cloudwatch"].output

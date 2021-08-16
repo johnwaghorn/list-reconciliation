@@ -1,5 +1,6 @@
 variable "runtime" {
-  type = string
+  type    = string
+  default = "python3.9"
 }
 
 variable "lambda_timeout" {

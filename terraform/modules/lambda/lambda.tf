@@ -21,7 +21,6 @@ module "LR-02" {
 
   lambda_name           = local.lambda_name.LR-02
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
-  runtime               = var.runtime
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
   lr_01_inbound_folder  = var.s3_buckets.LR-01.inbound_key
@@ -46,7 +45,6 @@ module "LR-04" {
 
   lambda_name           = local.lambda_name.LR-04
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
-  runtime               = var.runtime
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
   suffix                = var.suffix
@@ -65,7 +63,6 @@ module "LR-07" {
 
   lambda_name                          = local.lambda_name.LR-07
   package_layer_arn                    = aws_lambda_layer_version.package_layer.arn
-  runtime                              = var.runtime
   lambda_timeout                       = var.lambda_timeout
   lr_08_lambda                         = module.LR-08.LR-08-lambda_arn
   demographics_table_arn               = var.dynamodb_tables.demographics.arn
@@ -90,7 +87,6 @@ module "LR-08" {
   source = "./LR-08"
 
   lambda_name                         = local.lambda_name.LR-08
-  runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
   demographics_table_arn              = var.dynamodb_tables.demographics.arn
@@ -109,7 +105,6 @@ module "LR-09" {
   source = "./LR-09"
 
   lambda_name                     = local.lambda_name.LR-09
-  runtime                         = var.runtime
   lambda_timeout                  = var.lambda_timeout
   package_layer_arn               = aws_lambda_layer_version.package_layer.arn
   lr_10_step_function_arn         = var.step_functions.lr_10_registration_orchestration.arn
@@ -134,7 +129,6 @@ module "LR-11" {
   source = "./LR-11"
 
   lambda_name                     = local.lambda_name.LR-11
-  runtime                         = var.runtime
   lambda_timeout                  = var.lambda_timeout
   package_layer_arn               = aws_lambda_layer_version.package_layer.arn
   registrations_output_bucket_arn = var.s3_buckets.LR-13.arn
@@ -157,7 +151,6 @@ module "LR-12" {
   source = "./LR-12"
 
   lambda_name                           = local.lambda_name.LR-12
-  runtime                               = var.runtime
   lambda_timeout                        = var.lambda_timeout
   package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
   registrations_output_bucket_arn       = var.s3_buckets.LR-13.arn
@@ -188,7 +181,6 @@ module "LR-14" {
   source = "./LR-14"
 
   lambda_name                         = local.lambda_name.LR-14
-  runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
   mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
@@ -220,7 +212,6 @@ module "LR-15" {
   source = "./LR-15"
 
   lambda_name                         = local.lambda_name.LR-15
-  runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
   mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
@@ -250,7 +241,6 @@ module "LR-21" {
   source = "./LR-21"
 
   lambda_name                     = local.lambda_name.LR-21
-  runtime                         = var.runtime
   package_layer_arn               = aws_lambda_layer_version.package_layer.arn
   supplementary_input_bucket      = var.s3_buckets.LR-20.bucket
   supplementary_input_bucket_arn  = var.s3_buckets.LR-20.arn
@@ -268,7 +258,6 @@ module "LR-24" {
 
   lambda_name           = local.lambda_name.LR-24
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
-  runtime               = var.runtime
   lambda_timeout        = var.lambda_timeout
   suffix                = var.suffix
   lr-06-bucket          = var.s3_buckets.LR-06.bucket
@@ -284,7 +273,6 @@ module "lr_25" {
 
   lambda_name                     = local.lambda_name.lr_25
   package_layer_arn               = aws_lambda_layer_version.package_layer.arn
-  runtime                         = var.runtime
   suffix                          = var.suffix
   mesh_kms_key_alias              = var.mesh_kms_key_alias
   mesh_post_office_open           = var.mesh_post_office_open
@@ -300,7 +288,6 @@ module "lr_27" {
 
   lambda_name                           = local.lambda_name.lr_27
   package_layer_arn                     = aws_lambda_layer_version.package_layer.arn
-  runtime                               = var.runtime
   suffix                                = var.suffix
   cloudwatch_kms_key                    = var.cloudwatch_kms_key
   dynamodb_kms_key                      = var.dynamodb_kms_key

@@ -24,10 +24,10 @@ format: fmt black
 # Packaging
 python-package:
 	rm -r ./lambda_layer || true
-	mkdir -p ./lambda_layer/python/lib/python3.8/site-packages
+	mkdir -p ./lambda_layer/python/lib/python3.9/site-packages
 	echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || true
-	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" public.ecr.aws/sam/build-python3.8 python -m pip install --cache-dir .pip_cache -r requirements.txt -t ./lambda_layer/python/lib/python3.8/site-packages
-	cp -r ./packages/* ./lambda_layer/python/lib/python3.8/site-packages
+	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" --entrypoint python public.ecr.aws/lambda/python:3.9 -m pip install --cache-dir .pip_cache -r requirements.txt -t ./lambda_layer/python/lib/python3.9/site-packages
+	cp -r ./packages/* ./lambda_layer/python/lib/python3.9/site-packages
 
 # Testing
 unittests:
