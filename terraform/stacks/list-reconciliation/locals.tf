@@ -43,10 +43,21 @@ locals {
     default = []
     preprod = [
       {
-        name = "GPData"
+        name = "SupplementaryPdsData"
         inbound = {
           bucket = "list-rec-preprod-mesh"
           key    = "inbound_X26OT179"
+        },
+        outbound = {
+          bucket = module.s3.buckets.LR-20.bucket
+          key    = ""
+        }
+      },
+      {
+        name = "GpPracticeData"
+        inbound = {
+          bucket = "list-rec-preprod-mesh"
+          key    = "inbound_X26OT181"
         },
         outbound = {
           bucket = module.s3.buckets.LR-01.bucket
