@@ -22,7 +22,7 @@ resource "aws_lambda_function" "LR-24-lambda" {
   role             = aws_iam_role.role.arn
   runtime          = var.runtime
   timeout          = local.lambda_timeout
-  layers           = [var.package_layer_arn]
+  layers           = var.lambda_layers
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   depends_on = [aws_cloudwatch_log_group.lambda]

@@ -7,8 +7,8 @@ variable "lambda_timeout" {
   type = number
 }
 
-variable "package_layer_arn" {
-  type = string
+variable "lambda_layers" {
+  type = list(string)
 }
 
 variable "lambda_name" {

@@ -16,18 +16,24 @@ job_id ?= 00000000-0000-0000-0000-000000000000
 all: python-package init apply
 test: integrationtests unittests
 format: fmt black
+python-package: packages-layer dependencies-layer
 
 #
 # Python
 #
 
 # Packaging
-python-package:
-	rm -r ./lambda_layer || true
-	mkdir -p ./lambda_layer/python/lib/python3.9/site-packages
+
+packages-layer:
+	rm -r ./packages_layer || true
+	mkdir -p ./packages_layer/python/
+	cp -r ./packages/* ./packages_layer/python/
+
+dependencies-layer:
+	rm -r ./dependencies_layer || true
+	mkdir -p ./dependencies_layer/python/
 	echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || true
-	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" --entrypoint python public.ecr.aws/lambda/python:3.9 -m pip install --cache-dir .pip_cache -r requirements.txt -t ./lambda_layer/python/lib/python3.9/site-packages
-	cp -r ./packages/* ./lambda_layer/python/lib/python3.9/site-packages
+	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" --entrypoint python public.ecr.aws/lambda/python:3.9 -m pip install --cache-dir .pip_cache -r requirements.txt -t ./dependencies_layer/python/
 
 # Testing
 unittests:
@@ -65,6 +71,9 @@ apply:
 	terraform -chdir=./terraform/stacks/${stack} apply -auto-approve
 	rm -f ./terraform_outputs_${stack}.json|| true
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
+
+apply-lambda: packages-layer
+	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.lambda.module.${lambda}
 
 output:
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json

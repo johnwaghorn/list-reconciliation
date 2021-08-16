@@ -7,8 +7,8 @@ variable "lambda_name" {
   type = string
 }
 
-variable "package_layer_arn" {
-  type = string
+variable "lambda_layers" {
+  type = list(string)
 }
 
 variable "source_bucket" {

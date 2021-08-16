@@ -3,8 +3,8 @@ variable "runtime" {
   default = "python3.9"
 }
 
-variable "package_layer_arn" {
-  type = string
+variable "lambda_layers" {
+  type = list(string)
 }
 
 variable "lambda_name" {

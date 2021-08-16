@@ -25,7 +25,7 @@ resource "aws_lambda_function" "LR-02-Lambda" {
   runtime          = var.runtime
   memory_size      = local.memory_size
   timeout          = local.lambda_timeout
-  layers           = [var.package_layer_arn]
+  layers           = var.lambda_layers
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {

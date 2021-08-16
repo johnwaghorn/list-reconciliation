@@ -35,7 +35,7 @@ def run_prd_fhir_get_patient_details_api(patient_id):
 @step(
     "trigger fhir r4 patient api for patient_id <patient_id> and assert status code 412 for missing X-Request-ID"
 )
-def run_prd_fhir_get_patient_details_api(patient_id):
+def run_prd_fhir_get_patient_details_api_asssert_412(patient_id):
     url = URL + "/" + patient_id
     pds_url_headers = {
         "accept": "application/fhir+json",
@@ -44,4 +44,6 @@ def run_prd_fhir_get_patient_details_api(patient_id):
     }
 
     response = requests.get(url, headers=pds_url_headers)
-    assert response.status_code == 412, f"Invalid code raised other than 412, instead raised {response.status_code}"
+    assert (
+        response.status_code == 412
+    ), f"Invalid code raised other than 412, instead raised {response.status_code}"

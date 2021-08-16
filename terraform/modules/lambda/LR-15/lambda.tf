@@ -22,7 +22,7 @@ resource "aws_lambda_function" "LR-15-Lambda" {
   role             = aws_iam_role.role.arn
   runtime          = var.runtime
   timeout          = local.lambda_timeout
-  layers           = [var.package_layer_arn]
+  layers           = var.lambda_layers
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
