@@ -28,8 +28,6 @@ module "LR-02" {
   lr_06_bucket          = var.s3_buckets.LR-06.bucket
   lr_04_lambda_arn      = module.LR-04.LR-04-lambda_arn
   lr_24_lambda_arn      = module.LR-24.LR-24-lambda_arn
-  errors_table_arn      = var.dynamodb_tables.errors.arn
-  errors_table_name     = var.dynamodb_tables.errors.name
   in_flight_table_arn   = var.dynamodb_tables.in_flight.arn
   in_flight_table_name  = var.dynamodb_tables.in_flight.name
   jobs_table_arn        = var.dynamodb_tables.jobs.arn
@@ -49,12 +47,9 @@ module "LR-04" {
   runtime               = var.runtime
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
-  errors_table_arn      = var.dynamodb_tables.errors.arn
-  errors_table_name     = var.dynamodb_tables.errors.name
   suffix                = var.suffix
   lambda_handler        = var.lambda_handler
   cloudwatch_kms_key    = var.cloudwatch_kms_key
-  dynamodb_kms_key      = var.dynamodb_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
 }
@@ -68,8 +63,6 @@ module "LR-07" {
   lr_08_lambda             = module.LR-08.LR-08-lambda_arn
   demographics_table_arn   = var.dynamodb_tables.demographics.arn
   demographics_table_name  = var.dynamodb_tables.demographics.name
-  errors_table_arn         = var.dynamodb_tables.errors.arn
-  errors_table_name        = var.dynamodb_tables.errors.name
   lr_06_bucket_arn         = var.s3_buckets.LR-06.arn
   lr_06_bucket             = var.s3_buckets.LR-06.bucket
   mock_pds_data_bucket_arn = var.mock_pds_data_bucket.arn
@@ -93,8 +86,6 @@ module "LR-08" {
   package_layer_arn                   = aws_lambda_layer_version.package_layer.arn
   demographics_table_arn              = var.dynamodb_tables.demographics.arn
   demographics_table_name             = var.dynamodb_tables.demographics.name
-  errors_table_arn                    = var.dynamodb_tables.errors.arn
-  errors_table_name                   = var.dynamodb_tables.errors.name
   demographics_differences_table_name = var.dynamodb_tables.demographics_differences.name
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
@@ -120,8 +111,6 @@ module "LR-09" {
   job_stats_table_name            = var.dynamodb_tables.jobs_stats.name
   in_flight_table_arn             = var.dynamodb_tables.in_flight.arn
   in_flight_table_name            = var.dynamodb_tables.in_flight.name
-  errors_table_arn                = var.dynamodb_tables.errors.arn
-  errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
   cloudwatch_kms_key              = var.cloudwatch_kms_key
@@ -145,8 +134,6 @@ module "LR-11" {
   jobs_table_name                 = var.dynamodb_tables.jobs.name
   job_stats_table_arn             = var.dynamodb_tables.jobs_stats.arn
   job_stats_table_name            = var.dynamodb_tables.jobs_stats.name
-  errors_table_arn                = var.dynamodb_tables.errors.arn
-  errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
   cloudwatch_kms_key              = var.cloudwatch_kms_key
@@ -171,8 +158,6 @@ module "LR-12" {
   jobs_table_name                       = var.dynamodb_tables.jobs.name
   job_stats_table_arn                   = var.dynamodb_tables.jobs_stats.arn
   job_stats_table_name                  = var.dynamodb_tables.jobs_stats.name
-  errors_table_arn                      = var.dynamodb_tables.errors.arn
-  errors_table_name                     = var.dynamodb_tables.errors.name
   mock_pds_data_bucket_arn              = var.mock_pds_data_bucket.arn
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
@@ -201,8 +186,6 @@ module "LR-14" {
   jobs_table_name                     = var.dynamodb_tables.jobs.name
   job_stats_table_arn                 = var.dynamodb_tables.jobs_stats.arn
   job_stats_table_name                = var.dynamodb_tables.jobs_stats.name
-  errors_table_arn                    = var.dynamodb_tables.errors.arn
-  errors_table_name                   = var.dynamodb_tables.errors.name
   demographics_differences_table_name = var.dynamodb_tables.demographics_differences.name
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
@@ -235,8 +218,6 @@ module "LR-15" {
   jobs_table_name                     = var.dynamodb_tables.jobs.name
   job_stats_table_arn                 = var.dynamodb_tables.jobs_stats.arn
   job_stats_table_name                = var.dynamodb_tables.jobs_stats.name
-  errors_table_arn                    = var.dynamodb_tables.errors.arn
-  errors_table_name                   = var.dynamodb_tables.errors.name
   demographics_differences_table_name = var.dynamodb_tables.demographics_differences.name
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
@@ -259,12 +240,9 @@ module "LR-21" {
   supplementary_input_bucket_arn  = var.s3_buckets.LR-20.arn
   supplementary_output_bucket     = var.s3_buckets.LR-22.bucket
   supplementary_output_bucket_arn = var.s3_buckets.LR-22.arn
-  errors_table_arn                = var.dynamodb_tables.errors.arn
-  errors_table_name               = var.dynamodb_tables.errors.name
   suffix                          = var.suffix
   lambda_handler                  = var.lambda_handler
   cloudwatch_kms_key              = var.cloudwatch_kms_key
-  dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
 }
@@ -275,14 +253,11 @@ module "LR-24" {
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
   runtime               = var.runtime
   lambda_timeout        = var.lambda_timeout
-  errors_table_arn      = var.dynamodb_tables.errors.arn
-  errors_table_name     = var.dynamodb_tables.errors.name
   suffix                = var.suffix
   lr-06-bucket          = var.s3_buckets.LR-06.bucket
   lr-06-bucket_arn      = var.s3_buckets.LR-06.arn
   lambda_handler        = var.lambda_handler
   cloudwatch_kms_key    = var.cloudwatch_kms_key
-  dynamodb_kms_key      = var.dynamodb_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
 }
@@ -298,7 +273,6 @@ module "lr_25" {
   mesh_post_office_open           = var.mesh_post_office_open
   mesh_post_office_mappings       = var.mesh_post_office_mappings
   cloudwatch_kms_key              = var.cloudwatch_kms_key
-  dynamodb_kms_key                = var.dynamodb_kms_key
   s3_kms_key                      = var.s3_kms_key
   log_retention_in_days           = var.log_retention_in_days
   lr_25_event_schedule_expression = var.lr_25_event_schedule_expression

@@ -54,10 +54,6 @@ module "lambda" {
       name = module.in_flight.dynamo_table_name
       arn  = module.in_flight.dynamo_table_arn
     }
-    errors = {
-      name = module.errors.dynamo_table_name
-      arn  = module.errors.dynamo_table_arn
-    }
     demographics_differences = {
       name = module.demographics_differences.dynamo_table_name
       arn  = module.demographics_differences.dynamo_table_arn
@@ -65,10 +61,6 @@ module "lambda" {
     jobs_stats = {
       name = module.jobs_stats.dynamo_table_name
       arn  = module.jobs_stats.dynamo_table_arn
-    }
-    statuses = {
-      name = module.statuses.dynamo_table_name
-      arn  = module.statuses.dynamo_table_arn
     }
   }
 }

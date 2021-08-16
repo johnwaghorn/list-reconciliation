@@ -1,5 +1,4 @@
 import json
-from typing import Dict
 from uuid import uuid4
 
 from spine_aws_common.lambda_application import LambdaApplication

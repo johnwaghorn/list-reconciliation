@@ -86,20 +86,12 @@ output "in_flight_table" {
   value = module.in_flight.dynamo_table_name
 }
 
-output "errors_table" {
-  value = module.errors.dynamo_table_name
-}
-
 output "demographics_difference_table" {
   value = module.demographics_differences.dynamo_table_name
 }
 
 output "jobs_stats_table" {
   value = module.jobs_stats.dynamo_table_name
-}
-
-output "statuses_table" {
-  value = module.statuses.dynamo_table_name
 }
 
 output "lr_12_lambda" {

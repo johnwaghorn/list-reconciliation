@@ -30,10 +30,6 @@ variable "job_stats_table_arn" {
   type = string
 }
 
-variable "errors_table_arn" {
-  type = string
-}
-
 variable "demographics_differences_table_name" {
   type = string
 }
@@ -43,10 +39,6 @@ variable "jobs_table_name" {
 }
 
 variable "job_stats_table_name" {
-  type = string
-}
-
-variable "errors_table_name" {
   type = string
 }
 

@@ -25,11 +25,5 @@ resource "aws_lambda_function" "LR-24-lambda" {
   layers           = [var.package_layer_arn]
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
-  environment {
-    variables = {
-      ERRORS_TABLE = var.errors_table_name
-    }
-  }
-
   depends_on = [aws_cloudwatch_log_group.lambda]
 }

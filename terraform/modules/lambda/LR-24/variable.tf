@@ -18,14 +18,6 @@ variable "lr-06-bucket" {
   type = string
 }
 
-variable "errors_table_arn" {
-  type = string
-}
-
-variable "errors_table_name" {
-  type = string
-}
-
 variable "lambda_timeout" {
   type = number
 }
@@ -39,10 +31,6 @@ variable "lambda_handler" {
 }
 
 variable "cloudwatch_kms_key" {
-  type = map(string)
-}
-
-variable "dynamodb_kms_key" {
   type = map(string)
 }
 

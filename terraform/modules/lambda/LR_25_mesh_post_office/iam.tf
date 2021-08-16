@@ -60,7 +60,6 @@ data "aws_iam_policy_document" "policy" {
 
     resources = [
       var.cloudwatch_kms_key.arn,
-      var.dynamodb_kms_key.arn,
       var.s3_kms_key.arn
     ]
   }

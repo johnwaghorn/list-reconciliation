@@ -8,7 +8,7 @@ import pytest
 from freezegun import freeze_time
 
 
-from utils.database.models import JobStats, Errors
+from utils.database.models import JobStats
 
 
 AWS_REGION = os.getenv("AWS_REGION")

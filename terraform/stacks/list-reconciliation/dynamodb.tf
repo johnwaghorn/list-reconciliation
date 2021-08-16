@@ -103,36 +103,3 @@ module "demographics_differences" {
     }
   ]
 }
-
-#tfsec:ignore:aws-dynamodb-enable-recovery
-module "errors" {
-  source          = "../../modules/dynamodb"
-  table_name      = "Errors-${local.environment}"
-  table_hash_key  = "Id"
-  table_range_key = "JobId"
-  kms_key_arn     = module.kms["dynamodb"].output.arn
-  attributes = [
-    {
-      name = "Id"
-      type = "S"
-    },
-    {
-      name = "JobId"
-      type = "S"
-    }
-  ]
-}
-
-#tfsec:ignore:aws-dynamodb-enable-recovery
-module "statuses" {
-  source         = "../../modules/dynamodb"
-  table_name     = "Statuses-${local.environment}"
-  table_hash_key = "Id"
-  kms_key_arn    = module.kms["dynamodb"].output.arn
-  attributes = [
-    {
-      name = "Id"
-      type = "S"
-    },
-  ]
-}

@@ -1,8 +1,6 @@
 import json
-import os
 
 import boto3
-from botocore.retries import bucket
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.database.models import Jobs, InFlight

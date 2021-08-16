@@ -6,7 +6,6 @@ from freezegun import freeze_time
 from moto import mock_dynamodb2, mock_s3
 
 from lambda_code.LR_21_split_dps_extract.lr_21_lambda_handler import SplitDPSExtract
-from utils.database.models import Errors
 
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -103,11 +102,4 @@ def upload_invalid_dps_data_to_s3():
             f"{INVALID_DATA_FILE}",
         )
 
-        yield
-
-
-@pytest.fixture
-def create_dynamodb_tables():
-    with mock_dynamodb2():
-        Errors.create_table()
         yield

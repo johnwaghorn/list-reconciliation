@@ -60,8 +60,7 @@ resource "aws_iam_policy" "policy" {
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.demographics_table_arn}",
-                "${var.demographics_differences_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.demographics_differences_table_arn}"
             ]
         },
         {
@@ -79,13 +78,6 @@ resource "aws_iam_policy" "policy" {
             ],
             "Resource": [
                 "${var.demographics_table_arn}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "dynamodb:PutItem",
-            "Resource": [
-                "${var.errors_table_arn}"
             ]
         }
     ]

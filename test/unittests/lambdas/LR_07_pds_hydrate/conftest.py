@@ -10,7 +10,7 @@ from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
 
 from lambda_code.LR_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
 
-from utils.database.models import Demographics, Errors
+from utils.database.models import Demographics
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -41,7 +41,6 @@ def upload_pds_mock_data_to_s3():
 @pytest.fixture
 def create_dynamodb_tables():
     with mock_dynamodb2():
-        Errors.create_table()
         Demographics.create_table()
         yield
 

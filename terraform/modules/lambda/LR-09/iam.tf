@@ -63,8 +63,7 @@ resource "aws_iam_policy" "policy" {
                 "${var.demographics_table_arn}",
                 "${var.in_flight_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.job_stats_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.job_stats_table_arn}"
             ]
         },
         {
@@ -102,7 +101,6 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
-                "${var.errors_table_arn}",
                 "${var.job_stats_table_arn}",
                 "${var.jobs_table_arn}"
             ]

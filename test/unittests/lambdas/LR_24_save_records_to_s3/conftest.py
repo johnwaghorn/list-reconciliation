@@ -6,7 +6,6 @@ import pytest
 from moto import mock_s3, mock_dynamodb2
 
 from lambda_code.LR_24_save_records_to_s3.lr24_lambda_handler import SaveRecordsToS3
-from utils.database.models import Errors
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -29,7 +28,6 @@ def s3():
 @pytest.fixture
 def create_dynamodb_tables():
     with mock_dynamodb2():
-        Errors.create_table()
         yield
 
 

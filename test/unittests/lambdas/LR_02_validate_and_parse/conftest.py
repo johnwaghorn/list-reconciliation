@@ -9,7 +9,7 @@ import pytest
 from moto import mock_dynamodb2, mock_s3, mock_iam, mock_lambda
 
 from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
-from utils.database.models import Demographics, Errors, Jobs, InFlight
+from utils.database.models import Demographics, Jobs, InFlight
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -54,7 +54,6 @@ def upload_invalid_mock_data_to_s3(create_bucket):
 @pytest.fixture
 def create_dynamodb_tables():
     with mock_dynamodb2():
-        Errors.create_table()
         Demographics.create_table()
         Jobs.create_table()
         InFlight.create_table()

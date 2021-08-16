@@ -27,7 +27,6 @@ resource "aws_lambda_function" "LR-08-Lambda" {
   environment {
     variables = {
       DEMOGRAPHICS_TABLE             = var.demographics_table_name
-      ERRORS_TABLE                   = var.errors_table_name
       DEMOGRAPHICS_DIFFERENCES_TABLE = var.demographics_differences_table_name
     }
   }

@@ -71,8 +71,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.job_stats_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.job_stats_table_arn}"
             ]
         },
         {
@@ -82,7 +81,6 @@ resource "aws_iam_policy" "policy" {
                 "${var.demographics_table_arn}",
                 "${var.demographics_table_arn}/index/*",
                 "${var.jobs_table_arn}",
-                "${var.errors_table_arn}",
                 "${var.jobs_table_arn}/index/*"
             ]
         },
@@ -104,8 +102,7 @@ resource "aws_iam_policy" "policy" {
             "Effect": "Allow",
             "Action": "dynamodb:PutItem",
             "Resource": [
-                "${var.job_stats_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.job_stats_table_arn}"
             ]
         }
     ]

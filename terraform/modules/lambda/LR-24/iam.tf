@@ -53,16 +53,6 @@ resource "aws_iam_policy" "policy" {
         },
         {
             "Effect": "Allow",
-            "Action": "dynamodb:DescribeTable",
-            "Resource": "${var.errors_table_arn}"
-        },
-        {
-            "Effect": "Allow",
-            "Action": "dynamodb:PutItem",
-            "Resource": "${var.errors_table_arn}"
-        },
-        {
-            "Effect": "Allow",
             "Action": [
               "kms:Encrypt",
               "kms:Decrypt",
@@ -71,7 +61,6 @@ resource "aws_iam_policy" "policy" {
             ],
             "Resource": [
                 "${var.cloudwatch_kms_key.arn}",
-                "${var.dynamodb_kms_key.arn}",
                 "${var.s3_kms_key.arn}"
             ]
         }

@@ -7,7 +7,7 @@ from comparison_engine.schema import ConfigurationError
 from lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler import (
     DemographicComparison,
 )
-from utils.database.models import Demographics, Errors, DemographicsDifferences
+from utils.database.models import Demographics, DemographicsDifferences
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +19,6 @@ def lambda_handler():
 @pytest.fixture
 def create_dynamodb_tables():
     with mock_dynamodb2():
-        Errors.create_table()
         Demographics.create_table()
         DemographicsDifferences.create_table()
         yield

@@ -10,7 +10,7 @@ import pytest
 
 
 from lambda_code.LR_14_send_list_rec_results.lr_14_lambda_handler import SendListRecResults
-from utils.database.models import Errors, DemographicsDifferences, Jobs, JobStats
+from utils.database.models import DemographicsDifferences, Jobs, JobStats
 
 REGION_NAME = os.environ.get("AWS_REGION")
 MESH_BUCKET = os.getenv("MESH_BUCKET")
@@ -63,7 +63,6 @@ def lambda_handler(ssm, mesh_ssm, email_ssm, mock_email):
 @pytest.fixture
 def dynamodb():
     with mock_dynamodb2():
-        Errors.create_table()
         DemographicsDifferences.create_table()
         Jobs.create_table()
         JobStats.create_table()

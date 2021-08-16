@@ -34,19 +34,11 @@ variable "in_flight_table_arn" {
   type = string
 }
 
-variable "errors_table_arn" {
-  type = string
-}
-
 variable "jobs_table_name" {
   type = string
 }
 
 variable "in_flight_table_name" {
-  type = string
-}
-
-variable "errors_table_name" {
   type = string
 }
 

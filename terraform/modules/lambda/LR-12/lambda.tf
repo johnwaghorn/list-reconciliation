@@ -31,7 +31,6 @@ resource "aws_lambda_function" "LR-12-Lambda" {
       DEMOGRAPHICS_TABLE                      = var.demographics_table_name
       JOBS_TABLE                              = var.jobs_table_name
       JOB_STATS_TABLE                         = var.job_stats_table_name
-      ERRORS_TABLE                            = var.errors_table_name
       LR_13_REGISTRATIONS_OUTPUT_BUCKET       = var.registrations_output_bucket
       LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = var.pds_practice_registrations_bucket
       PDS_BASE_URL                            = var.pds_base_url

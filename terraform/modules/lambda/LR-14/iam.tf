@@ -86,8 +86,7 @@ resource "aws_iam_policy" "policy" {
             "Resource": [
                 "${var.demographics_differences_table_arn}",
                 "${var.jobs_table_arn}",
-                "${var.job_stats_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.job_stats_table_arn}"
             ]
         },
         {

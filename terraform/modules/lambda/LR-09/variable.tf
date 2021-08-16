@@ -50,14 +50,6 @@ variable "in_flight_table_name" {
   type = string
 }
 
-variable "errors_table_arn" {
-  type = string
-}
-
-variable "errors_table_name" {
-  type = string
-}
-
 variable "suffix" {
   type = string
 }

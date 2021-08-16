@@ -28,7 +28,6 @@ resource "aws_lambda_function" "LR-07-Lambda" {
   environment {
     variables = {
       DEMOGRAPHICS_TABLE            = var.demographics_table_name
-      ERRORS_TABLE                  = var.errors_table_name
       DEMOGRAPHIC_COMPARISON_LAMBDA = var.lr_08_lambda
       PDS_BASE_URL                  = var.pds_base_url
       LR_06_BUCKET                  = var.lr_06_bucket

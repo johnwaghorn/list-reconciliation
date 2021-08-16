@@ -31,7 +31,6 @@ resource "aws_lambda_function" "LR-04-Lambda" {
   environment {
     variables = {
       AWS_S3_REGISTRATION_EXTRACT_BUCKET = var.source_bucket
-      ERRORS_TABLE                       = var.errors_table_name
     }
   }
 

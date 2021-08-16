@@ -4,11 +4,7 @@ from datetime import datetime
 from typing import Dict
 from uuid import uuid4
 
-import logging
-import sys
-import traceback
-
-from utils.database.models import Errors, Jobs
+from utils.database.models import Jobs
 
 from utils.datetimezone import get_datetime_now
 
@@ -47,34 +43,6 @@ def log_dynamodb_error(
             "message": f"JobId: {job_id}, error_id: {error_id}, {msg}",
         },
     )
-    try:
-        type_ = sys.exc_info()[0].__name__
-
-    except AttributeError:
-        type_ = name
-
-    try:
-        item = Errors(
-            error_id,
-            JobId=job_id or "99999999-0909-0909-0909-999999999999",
-            Type=type_,
-            Name=name,
-            Description=msg,
-            Traceback=tb,
-            Timestamp=time,
-        )
-
-        item.save()
-
-    except Exception:
-        log_message = f"JobId: {job_id}, Unable to log error to Errors table"
-        logger.write_log(
-            "UTI9997",
-            sys.exc_info(),
-            {"logger": "Dynamo", "level": "ERROR", "message": log_message},
-        )
-
-        raise
 
     return {"status": "error", "message": msg, "error_id": error_id, "traceback": tb}
 

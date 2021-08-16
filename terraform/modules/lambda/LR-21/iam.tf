@@ -79,17 +79,8 @@ resource "aws_iam_policy" "policy" {
             ],
             "Resource": [
                 "${var.cloudwatch_kms_key.arn}",
-                "${var.dynamodb_kms_key.arn}",
                 "${var.s3_kms_key.arn}"
             ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-              "dynamodb:DescribeTable",
-              "dynamodb:PutItem"
-            ],
-            "Resource": "${var.errors_table_arn}"
         }
     ]
   }

@@ -12,7 +12,6 @@ from lambda_code.LR_15_process_demo_diffs.lr_15_lambda_handler import (
 )
 from utils.database.models import (
     Demographics,
-    Errors,
     Jobs,
     JobStats,
     DemographicsDifferences,
@@ -108,7 +107,6 @@ DIFFERENCES = [
 @pytest.fixture
 def dynamodb():
     with mock_dynamodb2():
-        Errors.create_table()
         Demographics.create_table()
         DemographicsDifferences.create_table()
         Jobs.create_table()

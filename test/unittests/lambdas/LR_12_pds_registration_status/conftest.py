@@ -4,13 +4,12 @@ from datetime import datetime
 import boto3
 import pytest
 from moto import mock_dynamodb2, mock_s3
-from pytz import timezone
 
 
 from lambda_code.LR_12_pds_registration_status.lr_12_lambda_handler import (
     PDSRegistrationStatus,
 )
-from utils.database.models import Demographics, Errors, Jobs, JobStats
+from utils.database.models import Demographics, Jobs, JobStats
 
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -69,7 +68,6 @@ PATIENTS = [
 @pytest.fixture
 def dynamodb():
     with mock_dynamodb2():
-        Errors.create_table()
         Demographics.create_table()
         Jobs.create_table()
         JobStats.create_table()

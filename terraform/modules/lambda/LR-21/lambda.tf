@@ -32,7 +32,6 @@ resource "aws_lambda_function" "LR-21-Lambda" {
     variables = {
       LR_20_SUPPLEMENTARY_INPUT_BUCKET  = var.supplementary_input_bucket
       LR_22_SUPPLEMENTARY_OUTPUT_BUCKET = var.supplementary_output_bucket
-      ERRORS_TABLE                      = var.errors_table_name
     }
   }
 

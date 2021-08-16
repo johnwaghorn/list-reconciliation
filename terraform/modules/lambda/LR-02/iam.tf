@@ -60,8 +60,7 @@ resource "aws_iam_policy" "policy" {
             "Action": "dynamodb:DescribeTable",
             "Resource": [
                 "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.in_flight_table_arn}"
             ]
         },
         {
@@ -77,8 +76,7 @@ resource "aws_iam_policy" "policy" {
             "Action": "dynamodb:PutItem",
             "Resource": [
                 "${var.jobs_table_arn}",
-                "${var.in_flight_table_arn}",
-                "${var.errors_table_arn}"
+                "${var.in_flight_table_arn}"
             ]
         },
         {

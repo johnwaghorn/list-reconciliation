@@ -32,7 +32,7 @@ def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3, lambda_handle
 
 
 def test_lr_21_handler_invalid_event_fails(
-    upload_valid_dps_data_to_s3, create_dynamodb_tables, lambda_handler, lambda_context
+    upload_valid_dps_data_to_s3, lambda_handler, lambda_context
 ):
     event = {"error": "error"}
     expected_response = "Unhandled error when processing supplementary data file in LR-21"
@@ -178,7 +178,6 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(
 
 def test_split_dps_extract_with_invalid_file_raises_invalid_error(
     upload_invalid_dps_data_to_s3,
-    create_dynamodb_tables,
     lambda_handler,
     lambda_context,
 ):
@@ -191,7 +190,6 @@ def test_split_dps_extract_with_invalid_file_raises_invalid_error(
 
 def test_handler_with_invalid_file_raises_invalid_error(
     upload_invalid_dps_data_to_s3,
-    create_dynamodb_tables,
     lambda_handler,
     lambda_context,
 ):
