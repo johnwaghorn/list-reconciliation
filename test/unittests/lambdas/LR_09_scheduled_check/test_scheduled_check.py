@@ -14,7 +14,7 @@ def test_empty_inflight_doesnt_process_jobs(create_dynamo_tables, lambda_handler
 
     assert response is not None
     assert response["status"] == "success"
-    assert response["message"] == "Scheduled checked successfully completed."
+    assert response["message"] == "LR09 Lambda application stopped"
     assert len(response["processed_jobs"]) == 0
     assert len(response["skipped_jobs"]) == 0
 
@@ -44,7 +44,7 @@ def test_four_inflight_records_one_processed_correctly_one_timed_out_two_skipped
 
     assert response is not None
     assert response["status"] == "success"
-    assert response["message"] == "Scheduled checked successfully completed."
+    assert response["message"] == "LR09 Lambda application stopped"
 
     assert len(response["processed_jobs"]) == 1
     assert JOB_ID[1] in response["processed_jobs"]

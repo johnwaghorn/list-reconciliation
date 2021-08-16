@@ -1,4 +1,5 @@
-import json
+import os
+
 from uuid import uuid4
 
 from spine_aws_common.lambda_application import LambdaApplication
@@ -6,12 +7,15 @@ from spine_aws_common.lambda_application import LambdaApplication
 from comparison_engine.core import compare_records
 from listrec_comparison_engine import listrec_comparisons
 from utils.database.models import DemographicsDifferences, Demographics
-from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
+from utils.logger import success, error, Message
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class DemographicComparison(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.job_id = None
         self.patient_id = None
 
@@ -25,40 +29,27 @@ class DemographicComparison(LambdaApplication):
 
             self.log_object.set_internal_id(self.job_id)
 
-            self.response = json.dumps(self.demographic_comparisons(self.job_id, self.patient_id))
+            self.response = self.demographic_comparisons()
 
         except KeyError as err:
-            error_message = f"Lambda event has missing {str(err)} key"
-            self.response = {"message": error_message}
-            self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR08.Lambda",
-                    "level": "INFO",
-                    "message": self.response["message"],
-                },
+            self.response = error(
+                f"LR08 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
             )
 
-        except Exception as err:
-            msg = f"Unhandled error patient_id: {self.patient_id}"
-            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR08 Lambda", self.log_object.internal_id
+            )
 
-            raise type(err)(error_response) from err
-
-    def demographic_comparisons(self, job_id: str, patient_id: str) -> Success:
+    def demographic_comparisons(self) -> Message:
         """Compare PDS and GP demographic data for a record, logging the result to
         DynamoDB.
 
-        Args:
-            patient_id (str): Internal ID of the patient to process.
-            job_id (str): ID of the job the comparison is being applied under.
-
         Returns:
-            Dict: A result containing a status and message
+            Message: A result containing a status and message
         """
 
-        record = Demographics.get(patient_id, job_id)
+        record = Demographics.get(self.patient_id, self.job_id)
 
         common_cols = ["Id", "JobId", "NhsNumber"]
 
@@ -76,24 +67,34 @@ class DemographicComparison(LambdaApplication):
                 pds_record[col] = val
 
         if gp_record["GP_GpPracticeCode"] != pds_record["PDS_GpPracticeCode"]:
-            msg = (
-                f"GP Codes for job_id: {self.job_id} patient_id: {self.patient_id} do not "
-                f"match (GP: {gp_record['GP_GpPracticeCode']}, PDS: {pds_record['PDS_GpPracticeCode']})"
-            )
             self.log_object.write_log(
-                "UTI9995",
-                None,
-                {"logger": "demographic comparison", "level": "INFO", "message": msg},
+                "LR08I04",
+                log_row_dict={
+                    "patient_id": self.patient_id,
+                    "job_id": self.job_id,
+                },
             )
 
-            return {"status": "success", "message": msg}
+            return success(
+                f'LR08 Lambda application stopped for jobId="{self.job_id}"',
+                self.log_object.internal_id,
+            )
 
         results = compare_records(listrec_comparisons, gp_record, pds_record)
+
+        self.log_object.write_log(
+            "LR08I01",
+            log_row_dict={
+                "differences_count": len(results),
+                "patient_id": self.patient_id,
+                "job_id": self.job_id,
+            },
+        )
 
         with DemographicsDifferences.batch_write() as batch:
             items = [
                 DemographicsDifferences(
-                    str(uuid4()), JobId=job_id, PatientId=patient_id, RuleId=result
+                    str(uuid4()), JobId=self.job_id, PatientId=self.patient_id, RuleId=result
                 )
                 for result in results
             ]
@@ -101,6 +102,17 @@ class DemographicComparison(LambdaApplication):
             for item in items:
                 batch.save(item)
 
+        self.log_object.write_log(
+            "LR08I02", log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id}
+        )
+
         record.update(actions=[Demographics.IsComparisonCompleted.set(True)])
 
-        return success(f"Comparison applied for job_id {self.job_id} patient_id {self.patient_id}")
+        self.log_object.write_log(
+            "LR08I03", log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id}
+        )
+
+        return success(
+            f"LR08 Lambda application stopped for jobId='{self.job_id}'",
+            self.log_object.internal_id,
+        )

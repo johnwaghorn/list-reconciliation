@@ -1,4 +1,5 @@
 import os
+import pytest
 
 from utils.database.models import Demographics
 from utils.logger import success
@@ -7,7 +8,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 REGION_NAME = "eu-west-2"
-import pytest
+JOB_ID = "50"
 
 
 def test_write_into_table(
@@ -18,6 +19,8 @@ def test_write_into_table(
     lambda_handler,
     mock_response,
 ):
+    lambda_handler.job_id = JOB_ID
+
     record = Demographics(
         "50",
         "50",
@@ -42,12 +45,12 @@ def test_write_into_table(
         GP_PreviousSurname="TEST",
         GP_DrugsDispensedMarker=False,
     )
-    response = lambda_handler.pds_hydrate("50", record)
-    expected_response = success(
-        "Retrieved PDS data for JobId: 50, PatientId: 50, NhsNumber: 9000000009"
-    )
 
-    assert response == expected_response
+    response = lambda_handler.pds_hydrate(record)
+
+    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
+
+    assert response["message"] == expected_response
 
     actual = Demographics.get("50", "50").attribute_values
 
@@ -104,6 +107,8 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
     lambda_handler,
     mock_response,
 ):
+    lambda_handler.job_id = JOB_ID
+
     record = Demographics(
         Id="51",
         JobId="50",
@@ -129,8 +134,9 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
         GP_DrugsDispensedMarker=False,
     )
 
-    response = lambda_handler.pds_hydrate("50", record)
-    expected_response = "Retrieved PDS data for JobId: 50, PatientId: 51, NhsNumber: 8000000008"
+    response = lambda_handler.pds_hydrate(record)
+
+    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
 
     assert response["message"] == expected_response
 
@@ -138,7 +144,7 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
 
     expected = {
         "Id": "51",
-        "JobId": "50",
+        "JobId": JOB_ID,
         "NhsNumber": "8000000008",
         "GP_DateOfBirth": "20091022",
         "GP_Gender": "1",
@@ -189,6 +195,8 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
     lambda_handler,
     mock_response,
 ):
+    lambda_handler.job_id = JOB_ID
+
     record = Demographics(
         Id="52",
         JobId="50",
@@ -214,8 +222,9 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
         GP_DrugsDispensedMarker=False,
     )
 
-    response = lambda_handler.pds_hydrate("50", record)
-    expected_response = "Retrieved PDS data for JobId: 50, PatientId: 52, NhsNumber: 9449306060"
+    response = lambda_handler.pds_hydrate(record)
+
+    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
 
     assert response["message"] == expected_response
 
@@ -269,6 +278,8 @@ def test_gp_registration_Unmatched_in_demographics_table(
     mock_auth_post,
     mock_response,
 ):
+    lambda_handler.job_id = JOB_ID
+
     record = Demographics(
         Id="53",
         JobId="50",
@@ -294,15 +305,16 @@ def test_gp_registration_Unmatched_in_demographics_table(
         GP_DrugsDispensedMarker=False,
     )
 
-    response = lambda_handler.pds_hydrate("50", record)
-    expected_response = "PDS data not found for JobId: 50, PatientId: 53, NhsNumber: 6000000006"
+    response = lambda_handler.pds_hydrate(record)
+
+    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
 
     assert response["message"] == expected_response
 
     actual = Demographics.get("53", "50").attribute_values
     expected = {
         "Id": "53",
-        "JobId": "50",
+        "JobId": JOB_ID,
         "NhsNumber": "6000000006",
         "GP_DateOfBirth": "19231121",
         "GP_Gender": "1",
@@ -429,10 +441,8 @@ def test_sensitive_patients(
     mock_response,
     expected_demographics,
 ):
-    expected_response = {
-        "status": "success",
-        "message": f"Retrieved PDS data for JobId: {job_id}, PatientId: {Id}, NhsNumber: {nhs_number}",
-    }
+    lambda_handler.job_id = JOB_ID
+
     record = Demographics(
         Id=Id,
         JobId=job_id,
@@ -458,9 +468,9 @@ def test_sensitive_patients(
         GP_DrugsDispensedMarker=False,
     )
 
-    response = lambda_handler.pds_hydrate(job_id, record)
+    response = lambda_handler.pds_hydrate(record)
 
     actual = Demographics.get(Id, job_id).attribute_values
 
-    assert response == expected_response
-    assert actual == expected_demographics
+    assert response["status"] == "success"
+    assert response["message"] == f"LR07 Lambda application stopped for jobId='{JOB_ID}'"

@@ -3,10 +3,9 @@ import os
 import boto3
 import pytest
 from freezegun import freeze_time
-from moto import mock_dynamodb2, mock_s3
+from moto import mock_s3
 
 from lambda_code.LR_21_split_dps_extract.lr_21_lambda_handler import SplitDPSExtract
-
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")

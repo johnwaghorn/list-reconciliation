@@ -52,5 +52,6 @@ def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll
 
         time.sleep(poll_sleep)
 
+
 def is_content_present(response):
     return "Contents" in response

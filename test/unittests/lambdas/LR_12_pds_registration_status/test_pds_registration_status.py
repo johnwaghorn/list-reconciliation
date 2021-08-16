@@ -1,5 +1,4 @@
 import csv
-import json
 import os
 from io import StringIO
 
@@ -10,13 +9,17 @@ from freezegun import freeze_time
 
 from utils.database.models import JobStats
 
-
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
+LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv("LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET")
 PDS_API_RETRIES = os.getenv("PDS_API_RETRIES")
+JOB_ID = "ABC123"
 
 
 def test_get_practice_patients(s3, lambda_handler):
+    lambda_handler.job_id = "50"
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+    lambda_handler.lr22_bucket = LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET
 
     actual = lambda_handler.get_practice_patients("Y123452")
 
@@ -32,8 +35,11 @@ def test_get_practice_patients(s3, lambda_handler):
 def test_get_pds_exclusive_registrations_with_no_existing_job_stats_ok(
     demographics, jobs, s3, lambda_handler, mock_jwt_encode, mock_auth_post, mock_response
 ):
+    lambda_handler.job_id = JOB_ID
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+    lambda_handler.lr22_bucket = LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET
 
-    lambda_handler.get_pds_exclusive_registrations("ABC123")
+    lambda_handler.get_pds_exclusive_registrations()
 
     only_on_pds_actual = JobStats.get("ABC123").OnlyOnPdsRecords
 
@@ -46,16 +52,14 @@ def test_get_pds_exclusive_registrations_with_no_existing_job_stats_ok(
         pytest.param(
             {"job_id": ""},
             {
-                "status": "error",
-                "message": "Unhandled error getting PDS registrations. JobId: 99999999-0909-0909-0909-999999999999",
+                "message": "Unhandled exception caught in LR12 Lambda",
             },
             id="Empty_Job_id",
         ),
         pytest.param(
             {"job_id": "blah"},
             {
-                "status": "error",
-                "message": "Unhandled error getting PDS registrations. JobId: blah",
+                "message": "Unhandled exception caught in LR12 Lambda",
             },
             id="Non-Existing Job_id",
         ),
@@ -71,8 +75,11 @@ def test_lambda_handler_for(
     input_job,
     expected,
 ):
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+    lambda_handler.lr22_bucket = LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET
+
     result = lambda_handler.main(input_job, lambda_context)
-    assert result["status"] == expected["status"]
+
     assert result["message"] == expected["message"]
 
 
@@ -80,7 +87,11 @@ def test_lambda_handler_for(
 def test_get_pds_exclusive_registrations_ok(
     demographics, jobstats, jobs, s3, mock_response, lambda_handler, lambda_context
 ):
-    response = json.loads(lambda_handler.main({"job_id": "ABC123"}, lambda_context))
+    lambda_handler.job_id = JOB_ID
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+    lambda_handler.lr22_bucket = LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET
+
+    response = lambda_handler.main({"job_id": "ABC123"}, lambda_context)
 
     s3 = boto3.client("s3")
 

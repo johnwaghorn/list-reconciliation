@@ -24,7 +24,9 @@ PDS_ONLY_DATA_PATH = "OnlyOnPDS/"
 MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 
 
-@step("setup step: upload MESH data on LR-20 and check output in LR-22 for expected file <expected_filename>")
+@step(
+    "setup step: upload MESH data on LR-20 and check output in LR-22 for expected file <expected_filename>"
+)
 def setup_step_connect_to_s3_bucket_lr_20_upload_data(expected_filename):
     dps_data = "dps_data.csv"
     upload_dps_data = os.path.join(DATA, PDS_ONLY_DATA_PATH + dps_data)

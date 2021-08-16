@@ -3,7 +3,7 @@ import os
 import boto3
 import pytest
 
-from moto import mock_s3, mock_dynamodb2
+from moto import mock_s3
 
 from lambda_code.LR_24_save_records_to_s3.lr24_lambda_handler import SaveRecordsToS3
 
@@ -22,12 +22,6 @@ def s3():
             Bucket=LR_06_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
         )
-        yield
-
-
-@pytest.fixture
-def create_dynamodb_tables():
-    with mock_dynamodb2():
         yield
 
 

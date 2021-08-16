@@ -14,21 +14,25 @@ from utils.database.models import JobStats
 
 MESH_BUCKET = os.getenv("MESH_BUCKET")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
+JOBID = "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"
 
 
 @freeze_time("2020-04-06 13:40:00+00:00")
 def test_process_demographic_differences(
     demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, ssm, mesh_ssm
 ):
-    job_id = "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"
-    actual_response = lambda_handler.process_demographic_differences(job_id)
+    lambda_handler.job_id = JOBID
+    lambda_handler.log_object.set_internal_id(JOBID)
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+
+    actual_response = lambda_handler.process_demographic_differences()
 
     expected = {
         "system": {
             "name": "GP List Reconciliation",
             "source": "GP System",
             "patientId": "c7c8b6e2-8ce2-4bc6-804e-3d7ac4054bd1",
-            "jobId": job_id,
+            "jobId": JOBID,
         },
         "patient": {
             "nhsNumber": "1234567890",
@@ -119,7 +123,7 @@ def test_process_demographic_differences(
 
     assert list(actual_csv) == list(expected_csv)
 
-    jobstats = JobStats.get(job_id)
+    jobstats = JobStats.get(JOBID)
 
     assert jobstats.PdsUpdatedRecords == 0
     assert jobstats.GpUpdatedRecords == 0
@@ -130,11 +134,12 @@ def test_process_demographic_differences(
 
     expected_response = {
         "status": "success",
-        "message": f"Demographic differences processed for JobId {job_id}",
+        "message": f"LR15 Lambda application stopped for jobId='{JOBID}'",
         "work_items": [
             f"s3://{MESH_BUCKET}/outbound_X26OT178TEST_to_INTERNALSPINE/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json"
         ],
         "summary": f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-CDD-20200406134000.csv",
+        "internal_id": JOBID,
     }
 
     assert actual_response == expected_response
@@ -143,5 +148,8 @@ def test_process_demographic_differences(
 def test_process_demographic_differences_no_diffs_for_job(
     demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, mesh_ssm
 ):
+    lambda_handler.job_id = "ABC123"
+    lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
+
     with pytest.raises(JobNotFound):
-        lambda_handler.process_demographic_differences("ABC123")
+        lambda_handler.process_demographic_differences()

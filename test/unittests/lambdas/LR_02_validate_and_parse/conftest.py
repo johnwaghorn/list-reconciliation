@@ -9,13 +9,12 @@ import pytest
 from moto import mock_dynamodb2, mock_s3, mock_iam, mock_lambda
 
 from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
-from utils.database.models import Demographics, Jobs, InFlight
+from utils.database.models import Jobs, InFlight
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 MOCK_BUCKET = os.environ.get("AWS_S3_REGISTRATION_EXTRACT_BUCKET")
-MOCK_QUEUE = os.environ.get("AWS_PATIENT_RECORD_SQS")
 REGION_NAME = os.environ.get("AWS_REGION")
 
 JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
@@ -54,7 +53,6 @@ def upload_invalid_mock_data_to_s3(create_bucket):
 @pytest.fixture
 def create_dynamodb_tables():
     with mock_dynamodb2():
-        Demographics.create_table()
         Jobs.create_table()
         InFlight.create_table()
         yield

@@ -1,26 +1,33 @@
 import json
-import sys
-from datetime import datetime
-
+import os
 import boto3
+
+from uuid import UUID
+from datetime import datetime
 from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
+
+from utils import InputFolderType
+from utils.datetimezone import localize_date
+from utils.exceptions import FeedbackLogError
+from utils.logger import success, error, Message
 
 from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import (
     INVALID_FILENAME,
     INVALID_RECORDS,
     INVALID_STRUCTURE,
 )
-from utils import InputFolderType
-from utils.datetimezone import localize_date
-from utils.exceptions import FeedbackLogError
-from utils.logger import log_dynamodb_error, success
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class FeedbackFailure(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        self.s3 = boto3.client("s3")
         self.bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
+        self.job_id = None
         self.log_key = None
         self.log_filename = None
         self.failed_key = None
@@ -34,144 +41,76 @@ class FeedbackFailure(LambdaApplication):
         try:
             prefix = f"{InputFolderType.FAIL.value}logs/"
 
-            self.log_object.set_internal_id(self._create_new_internal_id())
             self.log_key = self.event["Records"][0]["s3"]["object"]["key"]
             self.log_filename = str(self.log_key).replace(prefix, "")
 
-            self.response = self.process_failed_file()
+            try:
+                self.job_id = self.log_filename.split("-FailedFile-")[1].replace(".json", "")
 
-            self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR04.Lambda",
-                    "level": "INFO",
-                    "message": self.response["message"],
-                },
-            )
+                # Check job_id string is a valid UUID
+                UUID(str(self.job_id))
+
+                self.log_object.set_internal_id(self.job_id)
+
+            except (IndexError, ValueError):
+                raise FeedbackLogError("LOG filename is missing valid Job Id")
+
+            self.response = self.process_failed_upload_file()
 
         except FeedbackLogError as err:
-            error_message = f"LR-04 processed an invalid log file: {self.log_key}"
             self.log_object.write_log(
-                "UTI9998",
-                sys.exc_info(),
-                {
-                    "logger": "LR04.Lambda",
-                    "level": "ERROR",
-                    "message": str(err),
+                "LR04C01",
+                log_row_dict={
+                    "log_key": self.log_key,
+                    "error": str(err),
+                    "job_id": self.job_id,
                 },
             )
-            self.response = {"message": error_message}
 
-            raise
+            self.response = error(
+                "LR04 Lambda accessed invalid log file", self.log_object.internal_id
+            )
 
         except KeyError as err:
-            error_message = f"Lambda event has missing {str(err)} key"
-            self.log_object.write_log(
-                "UTI9998",
-                sys.exc_info(),
-                {
-                    "logger": "LR04.Lambda",
-                    "level": "ERROR",
-                    "message": error_message,
-                },
+            self.response = error(
+                f"LR04 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
             )
-            self.response = {"message": error_message}
 
-            raise
-
-        except Exception as err:
-            self.log_object.write_log(
-                "UTI9998",
-                sys.exc_info(),
-                {
-                    "logger": "LR04.Lambda",
-                    "level": "ERROR",
-                    "message": str(err),
-                },
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR04 Lambda", self.log_object.internal_id
             )
-            self.response = {"message": str(err)}
 
-            raise type(err)(str(err)) from err
-
-    def process_failed_file(self) -> success:
+    def process_failed_upload_file(self) -> Message:
         """Reads LOG data and process the failed GP extract file, sends email containing invalid reasons,
             and cleans bucket
 
         Returns:
-            success: A dict result containing a status and message
+            Message: A dict result containing a status and message
         """
 
         self.read_log()
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR04.Lambda",
-                "level": "INFO",
-                "message": "LR-04 successfully read log file",
-            },
-        )
 
         self.validate_log()
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR04.Lambda",
-                "level": "INFO",
-                "message": "LR-04 successfully validated log file",
-            },
-        )
 
         self.send_email()
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR04.Lambda",
-                "level": "INFO",
-                "message": "LR-04 successfully sent email",
-            },
-        )
 
         self.cleanup_files()
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR04.Lambda",
-                "level": "INFO",
-                "message": "LR-04 successfully cleaned up S3 files",
-            },
-        )
 
-        return success(
-            f"Invalid file={self.failed_key} handled successfully from log={self.log_filename}"
-        )
+        return success(f"LR04 Lambda application stopped", self.log_object.internal_id)
 
     def read_log(self):
         """Read LOG file and extract error information into a dictionary"""
 
         try:
-            client = boto3.client("s3")
-
-            log_obj = client.get_object(Bucket=self.bucket, Key=self.log_key)
+            log_obj = self.s3.get_object(Bucket=self.bucket, Key=self.log_key)
 
             log_data = log_obj["Body"].read().decode("utf-8")
-
             log = json.loads(log_data)
 
-        except (UnicodeDecodeError, ValueError) as err:
-            msg = f"Invalid log data detected in: {self.log_key}"
-            error_response = log_dynamodb_error(
-                self.log_object,
-                "99999999-04-0404-0404-999999999999",
-                "HANDLED_ERROR",
-                msg,
-            )
-
-            raise FeedbackLogError(error_response) from err
+        except (UnicodeDecodeError, ValueError):
+            msg = f"LOG file contains invalid data. Could not read file contents"
+            raise FeedbackLogError(msg)
 
         self.log = log
 
@@ -182,75 +121,69 @@ class FeedbackFailure(LambdaApplication):
             FeedbackLogError: If validation fails
         """
 
-        client = boto3.client("s3")
-
         try:
             failed_file_date = datetime.strptime(self.log["upload_date"], "%Y-%m-%d %H:%M:%S.%f%z")
-            self.upload_date = failed_file_date
 
+            self.upload_date = failed_file_date
             self.failed_key = f"{InputFolderType.FAIL.value}{self.log['file']}"
 
             try:
-                client.get_object(Bucket=self.bucket, Key=self.failed_key)
+                self.s3.get_object(Bucket=self.bucket, Key=self.failed_key)
 
-            except ClientError as err:
+            except ClientError:
                 raise FeedbackLogError(
-                    "LOG contains reference to failed file that could not be found"
+                    f"LOG file contains reference to failed file='{self.failed_key}' that could not be found"
                 )
 
             error_types = [INVALID_RECORDS, INVALID_STRUCTURE, INVALID_FILENAME]
             error_type = self.log["error_type"]
 
             if error_type not in error_types:
-                raise FeedbackLogError("LOG contains invalid error type")
+                raise FeedbackLogError("LOG file contains an invalid error type")
 
             if error_type == INVALID_RECORDS:
                 total_records = self.log["total_records"]
                 if not isinstance(total_records, int) and not total_records > 0:
-                    raise FeedbackLogError("LOG contains unusable record total")
+                    raise FeedbackLogError("LOG file contains unusable record total")
 
                 total_invalid_records = self.log["total_invalid_records"]
                 if not isinstance(total_invalid_records, int) and not total_invalid_records > 0:
-                    raise FeedbackLogError("LOG contains unusable invalid record total")
+                    raise FeedbackLogError("LOG file contains unusable invalid record total")
 
             if not self.log["message"]:
-                raise FeedbackLogError("LOG contains invalid message")
+                raise FeedbackLogError("LOG file contains invalid error message")
 
-        except (ValueError, KeyError, FeedbackLogError) as err:
-            msg = f"Log file: {self.log_key} does not contain the required data or format"
-            error_response = log_dynamodb_error(
-                self.log_object,
-                "99999999-04-0404-0404-999999999999",
-                "HANDLED_ERROR",
-                msg,
+            self.log_object.write_log(
+                "LR04I01",
+                log_row_dict={"log_key": self.log_key, "job_id": self.job_id},
             )
 
-            raise FeedbackLogError(error_response) from err
+        except (ValueError, KeyError):
+            msg = f"LOG file contains invalid data. Could not read file contents"
+            raise FeedbackLogError(msg)
 
     def send_email(self):
-        """Send an email based on LOG info"""
+        """Send an email based on LOG file info"""
 
         to = "test@nhs.net"
         subject = (
             f"Validation Failure - PDS Comparison validation failure against '{self.log['file']}'"
         )
-        body = self.create_body()
+        body = self.create_email_body()
 
         output = f"To: {to}\nSubject: {subject}\n{body}"
 
         self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR04.Lambda",
-                "level": "INFO",
-                "message": output,
+            "LR04I02",
+            log_row_dict={
+                "email_address": self.log_key,
+                "upload_filename": self.log["file"],
+                "job_id": self.job_id,
             },
         )
 
-    def create_body(self) -> str:
+    def create_email_body(self) -> str:
         """Create body of email using LOG's error type and log data
-
         Returns:
             body (str): formatted body of email
         """
@@ -270,26 +203,7 @@ class FeedbackFailure(LambdaApplication):
         log_message = self.log["message"]
 
         if error_type == INVALID_RECORDS:
-            records = log_message
-
-            invalid_records_msg = ""
-
-            for record in records:
-                invalid_reasons = record["_INVALID_"]
-                line_number = invalid_reasons["ON_LINES"]
-
-                del record["_INVALID_"]["ON_LINES"]
-
-                invalid_records_msg += f"Invalid Record on lines {line_number}\n"
-                invalid_records_msg += (
-                    "\n".join([f"- {record['_INVALID_'][r]}" for r in record["_INVALID_"]]) + "\n"
-                )
-
-            body += (
-                f"Total records: {self.log['total_records']}\n"
-                f"Total invalid records: {self.log['total_invalid_records']}\n"
-                f"\nThe reasons for the failure are:\n{invalid_records_msg}"
-            )
+            body = self.create_invalid_records_body(body, log_message)
 
         else:
             body += "The reasons for the failure are:\n"
@@ -302,21 +216,42 @@ class FeedbackFailure(LambdaApplication):
 
         return body
 
+    def create_invalid_records_body(self, body: str, records: dict) -> str:
+        """Append email body with formatted invalid records
+        Args:
+            body (str): Formatted body of email
+            records (dict): Dictionary of invalid records
+        Returns:
+            body (str): Formatted body of email appended with records
+        """
+
+        invalid_records_msg = ""
+
+        for record in records:
+            invalid_reasons = record["_INVALID_"]
+            line_number = invalid_reasons["ON_LINES"]
+
+            del record["_INVALID_"]["ON_LINES"]
+
+            invalid_records_msg += f"Invalid Record on lines {line_number}\n"
+            invalid_records_msg += (
+                "\n".join([f"- {record['_INVALID_'][r]}" for r in record["_INVALID_"]]) + "\n"
+            )
+
+        body += (
+            f"Total records: {self.log['total_records']}\n"
+            f"Total invalid records: {self.log['total_invalid_records']}\n"
+            f"\nThe reasons for the failure are:\n{invalid_records_msg}"
+        )
+
+        return body
+
     def cleanup_files(self):
         """Cleanup failed GP file and failed log file from s3"""
 
-        client = boto3.client("s3")
+        self.s3.delete_object(Bucket=self.bucket, Key=self.failed_key)
 
-        try:
-            client.delete_object(Bucket=self.bucket, Key=self.failed_key)
-
-        except ClientError as err:
-            msg = f"LR-04 failed to remove failed upload file: {self.failed_key}"
-            error_response = log_dynamodb_error(
-                self.log_object,
-                "99999999-04-0404-0404-999999999999",
-                "HANDLED_ERROR",
-                msg,
-            )
-
-            raise Exception(error_response) from err
+        self.log_object.write_log(
+            "LR04I03",
+            log_row_dict={"upload_filename": self.log["file"], "job_id": self.job_id},
+        )

@@ -9,16 +9,19 @@ LR_06_BUCKET = os.environ.get("LR_06_BUCKET")
 REGION_NAME = os.environ.get("AWS_REGION")
 
 
-def test_save_records_to_s3_saves_records(
-    s3, create_dynamodb_tables, lambda_handler, lambda_context, records
-):
+def test_save_records_to_s3_saves_records(s3, lambda_handler, lambda_context, records):
     event = {
         "id_cols": ["job_id", "practice_code", "id"],
         "destination_bucket": LR_06_BUCKET,
         "source": "TEST",
         "records": [json.dumps(record) for record in records],
     }
-    lambda_handler.main(event=event, context=lambda_context)
+
+    response = lambda_handler.main(event=event, context=lambda_context)
+
+    expected = f"LR24 Lambda application stopped"
+
+    assert response["message"] == expected
 
     s3_client = boto3.client("s3")
 
@@ -38,14 +41,16 @@ def test_save_records_to_s3_saves_records(
     )
 
 
-def test_save_records_to_s3_raises_KeyError(
-    s3, create_dynamodb_tables, lambda_handler, lambda_context, records
-):
+def test_save_records_to_s3_raises_Exception(s3, lambda_handler, lambda_context, records):
     event = {
         "id_cols": ["col_doesnt_exist", "practice_code", "id"],
         "destination_bucket": LR_06_BUCKET,
         "source": "TEST",
         "records": [json.dumps(record) for record in records],
     }
+
     response = lambda_handler.main(event=event, context=lambda_context)
-    assert response.strip().split("\n")[-1] == "KeyError: 'col_doesnt_exist'"
+
+    expected = f"Unhandled exception in LR24 Lambda"
+
+    assert response["message"] == expected

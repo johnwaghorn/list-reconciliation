@@ -1,19 +1,23 @@
 import json
-
+import os
 import boto3
+
 from spine_aws_common.lambda_application import LambdaApplication
 
 from gp_file_parser.utils import empty_string
 from utils import retry_func
 from utils.database.models import Demographics
-from utils.logger import log_dynamodb_error, success, Success, UNHANDLED_ERROR
 from utils.pds_api_service import PDSAPIError, PDSAPIHelper
+from utils.logger import success, error, Message
 from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class PdsHydrate(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.s3 = boto3.client("s3")
         self.api = PDSAPIHelper(self.system_config)
         self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
@@ -39,7 +43,6 @@ class PdsHydrate(LambdaApplication):
         )
 
         self.job_id = str(body["job_id"])
-
         self.log_object.set_internal_id(self.job_id)
 
         patient = Demographics(
@@ -68,7 +71,8 @@ class PdsHydrate(LambdaApplication):
         )
 
         try:
-            json.dumps(self.pds_hydrate(patient.JobId, patient))
+            self.response = self.pds_hydrate(patient)
+            self.response.update({"internal_id": self.log_object.internal_id})
 
             retry_func(
                 lambda: self.s3.delete_object(
@@ -79,54 +83,48 @@ class PdsHydrate(LambdaApplication):
                 stop_max_attempt_number=10,
             )
 
-        except KeyError as err:
-            error_message = f"Lambda event has missing {str(err)} key"
-            self.response = {"message": error_message}
+        except PDSAPIError:
             self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR07.Lambda",
-                    "level": "INFO",
-                    "message": self.response["message"],
+                "LR07C01",
+                log_row_dict={
+                    "patient_id": patient.Id,
+                    "nhs_number": patient.NhsNumber,
+                    "job_id": self.job_id,
                 },
             )
 
-        except Exception as err:
-            msg = f"Unhandled error JobId: {patient.JobId}, PatientId: {patient.Id} NhsNumber: {patient.NhsNumber}"
-            error_response = log_dynamodb_error(
-                self.log_object, patient.JobId, UNHANDLED_ERROR, msg
+            self.response = error(
+                f'Error fetching PDS record for patientId="{patient.Id}" for nhsNumber="{patient.NhsNumber}" for jobId="{self.job_id}"',
+                self.log_object.internal_id,
             )
 
-            raise Exception(error_response) from err
+        except KeyError as err:
+            self.response = error(
+                f"LR07 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+            )
 
-        self.response = success(
-            f"Processed JobId: {patient.JobId}, PatientId: {patient.Id} NhsNumber: {patient.NhsNumber}"
-        )
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR07 Lambda", self.log_object.internal_id
+            )
 
-    def pds_hydrate(self, job_id: str, record: Demographics) -> Success:
+    def pds_hydrate(self, record: Demographics) -> Message:
         """Populate an existing Demographics DynamoDB record with PDS data and trigger LR08.
 
-        Args:
-            job_id (str): ID of the job the comparison is being applied under.
-            record (Demographics): Demographics record to process.
-
         Returns:
-            Success
-
-        Raises:
-            PDSAPIError: If the PDS FHIR API call fails, the error message contains
-                the response content from the API call.
+            Message: A dict result containing a status and message
         """
 
-        try:
-            pds_record = self.api.get_pds_record(record.NhsNumber, job_id)
+        pds_record = self.api.get_pds_record(record.NhsNumber, self.job_id)
 
-        except PDSAPIError as err:
-            msg = f"Error fetching PDS record for NHS number {record.NhsNumber}, {str(err)}"
-            error_response = log_dynamodb_error(self.log_object, job_id, str(err), msg)
-
-            raise PDSAPIError(json.dumps(error_response)) from err
+        self.log_object.write_log(
+            "LR07I01",
+            log_row_dict={
+                "patient_id": record.Id,
+                "nhs_number": record.NhsNumber,
+                "job_id": self.job_id,
+            },
+        )
 
         status = get_gp_registration_status(record.GP_GpPracticeCode, pds_record)
 
@@ -141,8 +139,18 @@ class PdsHydrate(LambdaApplication):
                 stop_max_attempt_number=10,
             )
 
+            self.log_object.write_log(
+                "LR07I04",
+                log_row_dict={
+                    "patient_id": record.Id,
+                    "nhs_number": record.NhsNumber,
+                    "job_id": self.job_id,
+                },
+            )
+
             return success(
-                f"PDS data not found for JobId: {job_id}, PatientId: {record.Id}, NhsNumber: {record.NhsNumber}"
+                f"LR07 Lambda application stopped for jobId='{self.job_id}'",
+                self.log_object.internal_id,
             )
 
         retry_func(
@@ -151,6 +159,7 @@ class PdsHydrate(LambdaApplication):
             wait_exponential_max=10000,
             stop_max_attempt_number=10,
         )
+
         record.update(
             actions=[
                 Demographics.PDS_GpPracticeCode.set(pds_record["gp_practicecode"]),
@@ -168,24 +177,23 @@ class PdsHydrate(LambdaApplication):
             ]
         )
 
+        self.log_object.write_log(
+            "LR07I02",
+            log_row_dict={"patient_id": record.Id, "job_id": self.job_id},
+        )
+
         self.lambda_.invoke(
             FunctionName=self.system_config["DEMOGRAPHIC_COMPARISON_LAMBDA"],
             InvocationType="Event",
-            Payload=json.dumps({"patient_id": record.Id, "job_id": job_id}),
-        )
-
-        self.response = success(
-            f"Retrieved PDS data for JobId: {job_id}, PatientId: {record.Id}, NhsNumber: {record.NhsNumber}"
+            Payload=json.dumps({"patient_id": record.Id, "job_id": self.job_id}),
         )
 
         self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR07.Lambda",
-                "level": "INFO",
-                "message": json.dumps(self.response),
-            },
+            "LR07I03",
+            log_row_dict={"job_id": self.job_id},
         )
 
-        return self.response
+        return success(
+            f"LR07 Lambda application stopped for jobId='{self.job_id}'",
+            self.log_object.internal_id,
+        )

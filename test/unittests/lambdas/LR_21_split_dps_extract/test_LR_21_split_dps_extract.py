@@ -24,19 +24,20 @@ def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3, lambda_handle
 
     response = lambda_handler.main(event, lambda_context)
 
-    expected = success(
-        f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
-    )
+    expected = "LR21 Lambda application stopped"
 
-    assert response == expected
+    assert response["message"] == expected
 
 
 def test_lr_21_handler_invalid_event_fails(
     upload_valid_dps_data_to_s3, lambda_handler, lambda_context
 ):
     event = {"error": "error"}
-    expected_response = "Unhandled error when processing supplementary data file in LR-21"
+
+    expected_response = "LR21 Lambda tried to access missing key='Records'"
+
     result = lambda_handler.main(event, lambda_context)
+
     assert expected_response in result["message"]
 
 
@@ -48,11 +49,9 @@ def test_split_dps_handler_expect_success(
 
     response = app.split_dps_extract()
 
-    expected = success(
-        f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
-    )
+    expected_response = "LR21 Lambda application stopped"
 
-    assert response == expected
+    assert response["message"] == expected_response
 
     # Test S3 file existence
     client = boto3.client("s3")
@@ -113,11 +112,9 @@ def test_cleanup_outdated_files_exceeds_minimum_date_expect_success(
     # Add new test data
     response = app.split_dps_extract()
 
-    expected = success(
-        f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
-    )
+    expected_response = "LR21 Lambda application stopped"
 
-    assert response == expected
+    assert response["message"] == expected_response
 
     # Test cleanup
     pages = paginator.paginate(Bucket=MOCK_OUTPUT_BUCKET)
@@ -158,11 +155,9 @@ def test_cleanup_outdated_files_within_minimum_date_expect_success(
     # Add new test data
     response = app.split_dps_extract()
 
-    expected = success(
-        f"LR-21 processed Supplementary data successfully, from file: {VALID_DATA_FILE}"
-    )
+    expected_response = "LR21 Lambda application stopped"
 
-    assert response == expected
+    assert response["message"] == expected_response
 
     # Test cleanup
     pages = paginator.paginate(Bucket=MOCK_OUTPUT_BUCKET)
@@ -197,6 +192,8 @@ def test_handler_with_invalid_file_raises_invalid_error(
 
     result = lambda_handler.main(event, lambda_context)
 
-    expected_response = f"LR-21 processed an invalid DSA file: {INVALID_DATA_FILE}"
+    expected_response = (
+        f'LR21 Lambda processed an invalid DSA file in uploadPath="{INVALID_DATA_FILE}"'
+    )
 
-    assert expected_response in result["message"]
+    assert result["message"] == expected_response

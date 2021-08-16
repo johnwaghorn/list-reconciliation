@@ -1,19 +1,24 @@
-import json
-
+import os
 import boto3
+
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.database.models import Demographics, JobStats
-from utils.logger import success, Success, log_dynamodb_error, UNHANDLED_ERROR
+from utils.logger import success, error, Message
 from utils.registration_status import GPRegistrationStatus
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class GPRegistrations(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        self.s3 = boto3.client("s3")
         self.job_id = None
+        self.bucket = None
 
     def initialise(self):
         pass
@@ -21,37 +26,32 @@ class GPRegistrations(LambdaApplication):
     def start(self):
         try:
             self.job_id = str(self.event["job_id"])
+            self.bucket = self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"]
 
             self.log_object.set_internal_id(self.job_id)
 
-            self.response = json.dumps(self.get_gp_exclusive_registrations(self.job_id))
+            self.response = self.get_gp_exclusive_registrations(self.job_id)
 
         except KeyError as err:
-            error_message = f"Lambda event has missing {str(err)} key"
-            self.response = {"message": error_message}
-            self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR11.Lambda",
-                    "level": "INFO",
-                    "message": self.response["message"],
-                },
+            self.response = error(
+                f"LR11 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
             )
 
-        except Exception as err:
-            msg = f"Unhandled error getting gp registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
-            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR11 Lambda", self.log_object.internal_id
+            )
 
-            raise Exception(error_response) from err
-
-    def get_gp_exclusive_registrations(self, job_id: str) -> Success:
+    def get_gp_exclusive_registrations(self, job_id: str) -> Message:
         """Create a GP-only registration differences file
 
         Args:
             job_id (str): Job ID.
 
+        Returns:
+            Message: A dict result containing a status and message
         """
+
         practice_code = get_job(job_id).PracticeCode
 
         results = Demographics.JobIdIndex.query(
@@ -91,6 +91,13 @@ class GPRegistrations(LambdaApplication):
         else:
             job_stat.update(actions=[JobStats.OnlyOnGpRecords.set(len(rows))])
 
+        self.log_object.write_log(
+            "LR11I01",
+            log_row_dict={
+                "job_id": self.job_id,
+            },
+        )
+
         filename = get_registration_filename(practice_code, RegistrationType.GP)
 
         header = [
@@ -112,13 +119,26 @@ class GPRegistrations(LambdaApplication):
         stream = write_to_mem_csv(rows, header)
 
         key = f"{job_id}/{filename}"
-        boto3.client("s3").put_object(
+        self.s3.put_object(
             Body=stream.getvalue(),
-            Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
+            Bucket=self.bucket,
             Key=key,
         )
 
-        out = success(f"Got {len(rows)} GP-only registrations")
-        out.update(filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}")
+        self.log_object.write_log(
+            "LR11I02",
+            log_row_dict={
+                "file_name": filename,
+                "record_count": len(rows),
+                "bucket": self.bucket,
+                "job_id": self.job_id,
+            },
+        )
 
-        return out
+        response = success(
+            f"LR11 Lambda application stopped for jobId='{self.job_id}'",
+            self.log_object.internal_id,
+        )
+        response.update(filename=f"s3://{self.bucket}/{key}")
+
+        return response

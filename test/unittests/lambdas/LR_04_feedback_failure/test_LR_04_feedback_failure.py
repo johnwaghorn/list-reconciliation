@@ -1,13 +1,7 @@
-import json
 import os
 import boto3
 
 from freezegun import freeze_time
-
-from services.jobs import get_job
-from utils.datetimezone import get_datetime_now
-from utils.database.models import Jobs
-from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -16,7 +10,7 @@ MOCK_BUCKET = os.environ.get("AWS_S3_REGISTRATION_EXTRACT_BUCKET")
 REGION_NAME = os.environ.get("AWS_REGION")
 
 FAILED_FILE = "A12023_GPR4LNA1.CSB"
-LOG_FILE = "A12023_GPR4LNA1.CSB_FailedFile_20200406144000.json"
+LOG_FILE = "A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
 
 
 def test_lr_04_handler_invalid_event_raises_key_error(
@@ -24,7 +18,7 @@ def test_lr_04_handler_invalid_event_raises_key_error(
 ):
     event = {"error": "error"}
 
-    expected_response = "Lambda event has missing 'Records' key"
+    expected_response = "LR04 Lambda tried to access missing key='Records'"
 
     result = lambda_handler.main(event, lambda_context)
 
@@ -39,10 +33,9 @@ def test_lr04_lambda_handler_valid_file(
 
     result = app.main(event=lr_04_event, context=lambda_context)
 
-    assert (
-        f"Invalid file=fail/{FAILED_FILE} handled successfully from log={LOG_FILE}"
-        in result["message"]
-    )
+    expected = "LR04 Lambda application stopped"
+
+    assert result["message"] == expected
 
 
 @freeze_time("2020-04-06 13:40:00")
@@ -53,10 +46,9 @@ def test_lr04_lambda_handler_process_valid_log_successfully(
 
     result = app.main(event=lr_04_event, context=lambda_context)
 
-    assert (
-        f"Invalid file=fail/{FAILED_FILE} handled successfully from log={LOG_FILE}"
-        in result["message"]
-    )
+    expected = "LR04 Lambda application stopped"
+
+    assert result["message"] == expected
 
     # Test file cleanup
     client = boto3.client("s3")

@@ -8,6 +8,8 @@ from datetime import date, datetime
 from collections import Counter
 from typing import Iterable, Dict, List, Union, Tuple
 
+from botocore.client import BaseClient
+
 from utils import InputFolderType
 from utils.datetimezone import get_datetime_now
 from utils.exceptions import InvalidGPExtract, InvalidStructure
@@ -320,10 +322,6 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
 
     valid_file = validate_filename(os.path.basename(filepath), process_datetime)
 
-    LOG.info(
-        f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
-    )
-
     results = parse_gp_extract_text(
         open(filepath, "r").read(),
         process_datetime=process_datetime or get_datetime_now(),
@@ -417,10 +415,9 @@ def output_records(
     count, records = process_invalid_records(records, include_reason=include_reason)
 
     invalid_count = sum(count.values())
-    LOG.info(f"Invalid/total records: {invalid_count}/{len(records)}")
+
     if invalid_threshold is not None and (invalid_threshold <= invalid_count):
         records = list(filter(lambda x: x.get(INVALID), records))
-        LOG.info("Invalids threshold exceeded, only outputting invalid records")
 
     for record in records:
         invalid = record.get(INVALID)
@@ -435,7 +432,6 @@ def output_records(
         writer = csv.DictWriter(records_file, header)
         writer.writeheader()
         writer.writerows(records)
-        LOG.info(f"Records file: {records_path}")
 
     count_dict = [{"COLUMN": k, "COUNT": v} for k, v in count.items()]
 
@@ -444,7 +440,6 @@ def output_records(
         writer = csv.DictWriter(count_file, ["COLUMN", "COUNT"])
         writer.writeheader()
         writer.writerows(count_dict)
-        LOG.info(f"Summary file: {count_path}")
 
 
 def process_gp_extract(
@@ -472,6 +467,7 @@ def process_gp_extract(
 
 
 def parse_gp_extract_file_s3(
+    s3: BaseClient,
     bucket_name: str,
     file_key: str,
     process_datetime: datetime = None,
@@ -479,6 +475,7 @@ def parse_gp_extract_file_s3(
     """Convert a GP extract file into records with fieldnames.
 
     Args:
+        s3 (BaseClient): boto3 s3 client
         bucket_name (str): s3 bucket name
         file_key (str): s3 object file key
         process_datetime (datetime): Time of processing.
@@ -487,15 +484,9 @@ def parse_gp_extract_file_s3(
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
     """
 
-    s3_client = boto3.client("s3")
-
     valid_file = validate_filename(file_key.replace(InputFolderType.IN.value, ""), process_datetime)
 
-    LOG.info(
-        f"Processing extract from {valid_file['practice_code']} created on {valid_file['extract_date'].date()}"
-    )
-
-    file_obj = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+    file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
     file_data = file_obj["Body"].read()
 
     results = parse_gp_extract_text(

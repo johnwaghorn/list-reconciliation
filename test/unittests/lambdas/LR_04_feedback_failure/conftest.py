@@ -2,12 +2,9 @@ import os
 import boto3
 import pytest
 
-from freezegun import freeze_time
-from moto import mock_dynamodb2, mock_s3
+from moto import mock_s3
 
 from lambda_code.LR_04_feedback_failure.lr_04_lambda_handler import FeedbackFailure
-from utils import get_datetime_now
-from utils.database.models import Errors
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -19,7 +16,7 @@ JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
 PRACTICE_CODE = "A82023"
 
 FAILED_FILE = "A12023_GPR4LNA1.CSB"
-LOG_FILE = "A12023_GPR4LNA1.CSB_FailedFile_20200406144000.json"
+LOG_FILE = "A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
 
 
 @pytest.fixture
@@ -38,13 +35,6 @@ def upload_mock_data_to_s3(create_bucket):
     client = boto3.client("s3")
     client.upload_file(os.path.join(DATA, f"{FAILED_FILE}"), MOCK_BUCKET, f"fail/{FAILED_FILE}")
     client.upload_file(os.path.join(DATA, f"{LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{LOG_FILE}")
-
-
-@pytest.fixture
-def create_dynamodb_tables():
-    with mock_dynamodb2():
-        Errors.create_table()
-        yield
 
 
 @pytest.fixture(scope="module")

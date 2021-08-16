@@ -11,44 +11,82 @@ from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
 from spine_aws_common.lambda_application import LambdaApplication
 from utils.database.models import DemographicsDifferences, Jobs, JobStats
 from utils.datetimezone import localize_date
-from utils.logger import success
 from utils.ssm import get_ssm_params
+from utils.logger import success, error, Message
+
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class SendListRecResults(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.send_emails = self.system_config["SEND_EMAILS"] == "true"
         self.mesh_params = get_ssm_params(
             self.system_config["MESH_SSM_PREFIX"], self.system_config["AWS_REGION"]
         )
-
         self.email_params = get_ssm_params(
             self.system_config["EMAIL_SSM_PREFIX"], self.system_config["AWS_REGION"]
         )
+        self.job_id = None
         self.pcse_mesh_id = None
 
     def initialise(self):
         pass
 
-    def get_registration_and_demographic_outputs(self):
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR14.Lambda",
-                "level": "INFO",
-                "message": f"Gathering files to send results for JobId {self.job_id}",
-            },
+    def start(self):
+        try:
+            self.job_id = self.event["job_id"]
+
+            self.log_object.set_internal_id(self.job_id)
+
+            self.response = self.send_list_rec_results()
+
+        except KeyError as err:
+            self.response = error(
+                f"LR14 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+            )
+
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR14 Lambda", self.log_object.internal_id
+            )
+
+    def send_list_rec_results(self) -> Message:
+        """Send List-Rec results using MESH and email
+
+        Returns:
+            Message: A result containing a status and message
+        """
+
+        filenames, files = self.get_registration_and_demographic_outputs()
+
+        email_subject, email_body = self.generate_email(filenames)
+
+        self.send_mesh_files(filenames, files)
+
+        self.send_email(email_subject, email_body)
+
+        output = success(
+            f"Email and files sent to {self.system_config['PCSE_EMAIL']}, MESH: {self.pcse_mesh_id}",
+            self.log_object.internal_id,
         )
 
+        output.update(email_subject=email_subject, email_body=email_body, files=filenames)
+
+        return output
+
+    def get_registration_and_demographic_outputs(self):
         s3 = boto3.client("s3")
+
         filenames = [
             os.path.basename(obj["Key"])
             for obj in s3.list_objects_v2(
                 Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"], Prefix=self.job_id
             )["Contents"]
         ]
+
         files = [
             s3.get_object(
                 Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
@@ -58,6 +96,13 @@ class SendListRecResults(LambdaApplication):
             .decode("utf-8")
             for filename in filenames
         ]
+
+        self.log_object.write_log(
+            "LR14I01",
+            log_row_dict={
+                "job_id": self.job_id,
+            },
+        )
 
         return filenames, files
 
@@ -86,16 +131,6 @@ class SendListRecResults(LambdaApplication):
             job_id=self.job_id,
         )
 
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR14.Lambda",
-                "level": "INFO",
-                "message": email_subject + "\n" + email_body,
-            },
-        )
-
         return email_subject, email_body
 
     def send_mesh_files(self, filenames: List[str], files: List[str]):
@@ -105,29 +140,20 @@ class SendListRecResults(LambdaApplication):
         )
         self.pcse_mesh_id = pcse_mesh_id
 
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR14.Lambda",
-                "level": "INFO",
-                "message": f"Sending files via MESH to {pcse_mesh_id}",
-            },
-        )
         mesh = AWSMESHMailbox(listrec_mesh_id, self.log_object)
         mesh.send_messages(pcse_mesh_id, zip(filenames, files), overwrite=True)
 
-    def send_email(self, subject, body):
         self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR14.Lambda",
-                "level": "INFO",
-                "message": f"Sending email from {self.system_config['LISTREC_EMAIL']} to {self.system_config['PCSE_EMAIL']}",
+            "LR14I02",
+            log_row_dict={
+                "count": len(files),
+                "mesh_id": pcse_mesh_id,
+                "workflow_id": self.mesh_params["listrec_pcse_workflow"],
+                "job_id": self.job_id,
             },
         )
 
+    def send_email(self, subject, body):
         from_address = str(self.system_config["LISTREC_EMAIL"])
         email = {
             "email_addresses": [self.system_config["PCSE_EMAIL"]],
@@ -153,18 +179,11 @@ class SendListRecResults(LambdaApplication):
                 },
             )
 
-    def start(self):
-        self.job_id = self.event["job_id"]
-
-        filenames, files = self.get_registration_and_demographic_outputs()
-
-        email_subject, email_body = self.generate_email(filenames)
-
-        self.send_mesh_files(filenames, files)
-
-        self.send_email(email_subject, email_body)
-
-        self.response = success(
-            f"Email and files sent to {self.system_config['PCSE_EMAIL']}, MESH: {self.pcse_mesh_id}"
+        self.log_object.write_log(
+            "LR14I03",
+            log_row_dict={
+                "receiving_address": [self.system_config["PCSE_EMAIL"]],
+                "subject": subject,
+                "job_id": self.job_id,
+            },
         )
-        self.response.update(email_subject=email_subject, email_body=email_body, files=filenames)

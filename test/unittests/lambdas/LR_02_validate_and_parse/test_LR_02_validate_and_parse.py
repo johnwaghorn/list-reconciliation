@@ -6,13 +6,11 @@ from freezegun import freeze_time
 
 from utils.datetimezone import get_datetime_now
 from utils.database.models import Jobs, InFlight
-from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
 
 MOCK_BUCKET = os.environ.get("AWS_S3_REGISTRATION_EXTRACT_BUCKET")
-MOCK_QUEUE = os.environ.get("AWS_PATIENT_RECORD_SQS")
 REGION_NAME = os.environ.get("AWS_REGION")
 
 JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
@@ -26,7 +24,7 @@ def test_lr_02_handler_invalid_event_raises_key_error(
 ):
     event = {"error": "error"}
 
-    expected_response = "Lambda event has missing 'Records' key"
+    expected_response = "LR02 Lambda tried to access missing key='Records'"
 
     result = lambda_handler.main(event, lambda_context)
 
@@ -46,7 +44,7 @@ def test_lr02_lambda_handler_valid_file(
 
     result = app.main(event=lr_02_valid_file_event, context=lambda_context)
 
-    assert f"{VALID_FILE} processed successfully for Job" in result["message"]
+    assert f"LR02 Lambda application stopped for jobId=" in result["message"]
 
 
 @freeze_time("2020-04-06 13:40:00")
@@ -62,7 +60,7 @@ def test_lr02_lambda_handler_invalid_file(
 
     result = app.main(event=lr_02_invalid_file_event, context=lambda_context)
 
-    assert f"{INVALID_FILE} handled successfully for Job" in result["message"]
+    assert f"LR02 Lambda application stopped for jobId=" in result["message"]
 
 
 @freeze_time("2020-04-06 13:40:00")
@@ -81,9 +79,9 @@ def test_validate_and_process_with_valid_upload_handles_correctly(
 
     response = app.validate_and_process_extract()
 
-    expected = success(f"{VALID_FILE} processed successfully for Job: {JOB_ID}")
+    expected = f"LR02 Lambda application stopped for jobId='{JOB_ID}'"
 
-    assert response == expected
+    assert response["message"] == expected
 
     # Test Job validity
     expected_job = Jobs(
@@ -131,9 +129,9 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
 
     response = app.validate_and_process_extract()
 
-    expected = success(f"Invalid file {INVALID_FILE} handled successfully for Job: {JOB_ID}")
+    expected = f"LR02 Lambda application stopped for jobId='{JOB_ID}'"
 
-    assert response == expected
+    assert response["message"] == expected
 
     # Test S3 validity
     with open(os.path.join(DATA, f"{INVALID_FILE}")) as f:
@@ -154,10 +152,10 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
         "message": [r"Header must be 503\*"],
     }
 
-    expected_log_key = "fail/logs/A12023_GPR4LNA1.CSB_FailedFile_20200406134000.json"
-    actual_log_key = (
-        f"fail/logs/{INVALID_FILE}_FailedFile_{get_datetime_now().strftime('%Y%m%d%H%M%S')}.json"
+    expected_log_key = (
+        "fail/logs/A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
     )
+    actual_log_key = f"fail/logs/{INVALID_FILE}-FailedFile-{JOB_ID}.json"
 
     assert expected_log_key == actual_log_key
 

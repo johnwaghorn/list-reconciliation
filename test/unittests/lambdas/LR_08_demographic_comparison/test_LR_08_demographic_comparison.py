@@ -73,7 +73,10 @@ def demographics_record(create_dynamodb_tables):
 
 
 def test_demographics_comparison_ok(demographics_record, lambda_handler):
-    lambda_handler.demographic_comparisons("50", "50")
+    lambda_handler.job_id = "50"
+    lambda_handler.patient_id = "50"
+
+    lambda_handler.demographic_comparisons()
     result = DemographicsDifferences.scan()
     actual = {record.attribute_values["RuleId"] for record in result}
     expected = {"MN-BR-DB-01", "MN-BR-AD-01"}
@@ -82,13 +85,17 @@ def test_demographics_comparison_ok(demographics_record, lambda_handler):
 
 
 def test_record_doesnt_exist_raises_DemographicsDoesNotExist(demographics_record, lambda_handler):
-    with pytest.raises(Demographics.DoesNotExist):
+    lambda_handler.job_id = "500"
+    lambda_handler.patient_id = "500"
 
-        lambda_handler.demographic_comparisons("500", "500")
+    with pytest.raises(Demographics.DoesNotExist):
+        lambda_handler.demographic_comparisons()
 
 
 def test_bad_config_raises_ConfigurationError(demographics_record, lambda_handler):
+    lambda_handler.job_id = "50"
+    lambda_handler.patient_id = "50"
 
     lambda_code.LR_08_demographic_comparison.lr_08_lambda_handler.listrec_comparisons = None
     with pytest.raises(ConfigurationError):
-        lambda_handler.demographic_comparisons("50", "50")
+        lambda_handler.demographic_comparisons()

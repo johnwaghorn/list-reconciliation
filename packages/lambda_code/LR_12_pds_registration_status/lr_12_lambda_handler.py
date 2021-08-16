@@ -1,24 +1,30 @@
 import csv
 import io
-import json
-from datetime import datetime
-from typing import Dict, List
-
 import boto3
 import botocore
+import os
+
+from datetime import datetime
+from typing import List
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
 from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.database.models import Demographics, JobStats
-from utils.logger import log_dynamodb_error, success, UNHANDLED_ERROR
 from utils.pds_api_service import PDSAPIHelper, PDSAPIError, SensitiveMarkers
+from utils.logger import success, error, Message
+
+cwd = os.path.dirname(__file__)
+ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
 
 class PDSRegistrationStatus(LambdaApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
+        self.s3 = boto3.client("s3")
         self.api = PDSAPIHelper(self.system_config)
+        self.lr13_bucket = self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"]
+        self.lr22_bucket = self.system_config["LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"]
         self.job_id = None
 
     def initialise(self):
@@ -30,27 +36,17 @@ class PDSRegistrationStatus(LambdaApplication):
 
             self.log_object.set_internal_id(self.job_id)
 
-            self.response = json.dumps(self.get_pds_exclusive_registrations(self.job_id))
+            self.response = self.get_pds_exclusive_registrations()
 
         except KeyError as err:
-            error_message = f"Lambda event has missing {str(err)} key"
-            self.response = {"message": error_message}
-            self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR12.Lambda",
-                    "level": "INFO",
-                    "message": self.response["message"],
-                },
+            self.response = error(
+                f"LR12 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
             )
 
-        except Exception as err:
-            msg = f"Unhandled error getting PDS registrations. JobId: {self.job_id or '99999999-0909-0909-0909-999999999999'}"
-            error_response = log_dynamodb_error(self.log_object, self.job_id, UNHANDLED_ERROR, msg)
-            self.response = error_response
-
-            raise Exception(error_response) from err
+        except Exception:
+            self.response = error(
+                f"Unhandled exception caught in LR12 Lambda", self.log_object.internal_id
+            )
 
     def get_practice_patients(self, practice_code: str) -> List[str]:
         """Get NHS numbers for patients registered at a practice from PDS extract.
@@ -62,25 +58,26 @@ class PDSRegistrationStatus(LambdaApplication):
             List[str]: List of NHS Numbers.
         """
 
-        s3 = boto3.client("s3")
         key = f"{practice_code}.csv"
-        bucket_path = f"{self.system_config['LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET']}/{key}"
-        self.log_object.write_log(
-            "UTI9995",
-            None,
-            {
-                "logger": "LR12.Lambda",
-                "level": "INFO",
-                "message": f"Fetching {bucket_path}",
-            },
-        )
+        bucket_path = f"{self.lr22_bucket}/{key}"
 
         try:
-            obj = s3.get_object(
-                Bucket=self.system_config["LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"],
+            obj = self.s3.get_object(
+                Bucket=self.lr22_bucket,
                 Key=key,
             )
+
         except botocore.exceptions.ClientError:
+            self.log_object.write_log(
+                "LR12C01",
+                log_row_dict={
+                    "file_name": key,
+                    "bucket_name": self.lr22_bucket,
+                    "practice_code": practice_code,
+                    "job_id": self.job_id,
+                },
+            )
+
             raise FileNotFoundError(f"File does not exist: {bucket_path}")
 
         contents = obj["Body"].read().decode()
@@ -88,46 +85,56 @@ class PDSRegistrationStatus(LambdaApplication):
 
         return records
 
-    def get_pds_exclusive_registrations(self, job_id: str) -> Dict[str, str]:
+    def get_pds_exclusive_registrations(self) -> Message:
         """Create a PDS-only registration differences file
 
-        Args:
-            job_id (str): Job ID.
-
+        Returns:
+            Message: A result containing a status and message
         """
 
-        practice_code = get_job(job_id).PracticeCode
+        practice_code = get_job(self.job_id).PracticeCode
         practice_patients = self.get_practice_patients(practice_code)
+
+        self.log_object.write_log(
+            "LR12I01",
+            log_row_dict={
+                "practice_code": practice_code,
+                "bucket": self.lr22_bucket,
+                "job_id": self.job_id,
+            },
+        )
 
         rows = []
 
-        job_nhs_numbers = [r.NhsNumber for r in Demographics.JobIdIndex.query(job_id)]
+        job_nhs_numbers = [r.NhsNumber for r in Demographics.JobIdIndex.query(self.job_id)]
 
         for patient in practice_patients:
             nhs_number = patient["nhs_number"]
 
             if nhs_number not in job_nhs_numbers:
                 try:
-                    pds_record = self.api.get_pds_record(nhs_number, job_id)
+                    pds_record = self.api.get_pds_record(nhs_number, self.job_id)
                     if any(
                         marker.value == pds_record.get("sensitive") for marker in SensitiveMarkers
                     ):
                         self.log_object.write_log(
-                            "UTI9995",
-                            None,
-                            {
-                                "logger": "LR12.Lambda",
-                                "level": "INFO",
-                                "message": "Sensitive patient, skipping registration",
+                            "LR12I02",
+                            log_row_dict={
+                                "nhs_number": nhs_number,
+                                "job_id": self.job_id,
                             },
                         )
                         continue
 
                 except PDSAPIError as err:
-                    msg = f"Error fetching PDS record for NHS number {nhs_number}, {err}"
-                    error_response = log_dynamodb_error(self.log_object, job_id, err, msg)
+                    self.log_object.write_log(
+                        "LR12C02",
+                        log_row_dict={
+                            "nhs_number": nhs_number,
+                            "job_id": self.job_id,
+                        },
+                    )
 
-                    raise PDSAPIError(json.dumps(error_response)) from err
                 if pds_record:
                     rows.append(
                         {
@@ -150,13 +157,20 @@ class PDSRegistrationStatus(LambdaApplication):
                     )
 
         try:
-            job_stat = JobStats.get(job_id)
+            job_stat = JobStats.get(self.job_id)
 
         except JobStats.DoesNotExist:
-            JobStats(job_id, OnlyOnPdsRecords=len(rows)).save()
+            JobStats(self.job_id, OnlyOnPdsRecords=len(rows)).save()
 
         else:
             job_stat.update(actions=[JobStats.OnlyOnPdsRecords.set(len(rows))])
+
+        self.log_object.write_log(
+            "LR12I03",
+            log_row_dict={
+                "job_id": self.job_id,
+            },
+        )
 
         filename = get_registration_filename(practice_code, RegistrationType.PDS)
 
@@ -177,14 +191,27 @@ class PDSRegistrationStatus(LambdaApplication):
         ]
         stream = write_to_mem_csv(rows, header)
 
-        key = f"{job_id}/{filename}"
-        boto3.client("s3").put_object(
+        key = f"{self.job_id}/{filename}"
+        self.s3.put_object(
             Body=stream.getvalue(),
-            Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
+            Bucket=self.lr13_bucket,
             Key=key,
         )
 
-        out = success("Got PDS-only registrations")
-        out.update(filename=f"s3://{self.system_config['LR_13_REGISTRATIONS_OUTPUT_BUCKET']}/{key}")
+        self.log_object.write_log(
+            "LR12I04",
+            log_row_dict={
+                "file_name": filename,
+                "record_count": len(rows),
+                "bucket": self.lr13_bucket,
+                "job_id": self.job_id,
+            },
+        )
 
-        return out
+        response = success(
+            f"LR12 Lambda application stopped for jobId='{self.job_id}'",
+            self.log_object.internal_id,
+        )
+        response.update(filename=f"s3://{self.lr13_bucket}/{key}")
+
+        return response
