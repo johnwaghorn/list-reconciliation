@@ -4,6 +4,9 @@ updates:
     directory: "/"
     allow:
       - dependency-type: "all"
+    ignore:
+      - dependency-name: "exchangelib"
+      - dependency-name: "tzlocal"
     schedule:
       interval: "daily"
     pull-request-branch-name:
