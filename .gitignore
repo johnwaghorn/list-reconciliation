@@ -120,6 +120,7 @@ fabric.properties
 # https://plugins.jetbrains.com/plugin/7896-markdown-navigator-enhanced
 .idea/**/markdown-navigator.xml
 .idea/**/markdown-navigator-enh.xml
+
 .idea/**/markdown-navigator/
 
 # Cache file creation bug
@@ -514,6 +515,9 @@ logs
 
 # Gauge - reports dir
 *reports*
+
+# Pytest html report
+*report*
 
 # Gauge - python compiled files
 *.pyc

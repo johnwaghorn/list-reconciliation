@@ -30,4 +30,11 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: |
-          pytest
+            pytest --html=report/reports.html
+      - name: Upload unit test report artifact
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit test report
+          path: report/*
+          retention-days: 2
