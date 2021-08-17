@@ -2,7 +2,6 @@ locals {
   name                = "list-reconciliation-${local.environment}"
   environment         = lower(terraform.workspace)
   data_classification = local.environment == "prod" ? "5" : "1"
-
   tags = {
     TagVersion         = "1"
     Programme          = "SpinePod5"

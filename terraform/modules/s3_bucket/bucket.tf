@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "bucket" {
   bucket        = "${var.environment}-${var.name}"
-  acl           = var.name == "lr-26-access-logs" ? "log-delivery-write" : "private"
+  acl           = var.s3_acl
   force_destroy = var.s3_force_destroy_bucket
 
   server_side_encryption_configuration {
@@ -18,8 +18,7 @@ resource "aws_s3_bucket" "bucket" {
   }
 
   dynamic "logging" {
-    # we don't want to collect logs from the logging bucket itself
-    for_each = var.name != "lr-26-access-logs" ? [var.name] : []
+    for_each = var.s3_logging_enabled ? [var.name] : []
 
     content {
       target_bucket = var.s3_logging_bucket_name

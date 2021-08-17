@@ -26,6 +26,11 @@ variable "log_retention_in_days" {
   }
 }
 
+variable "s3_acl" {
+  type    = string
+  default = "private"
+}
+
 variable "s3_force_destroy_bucket" {
   type    = bool
   default = false

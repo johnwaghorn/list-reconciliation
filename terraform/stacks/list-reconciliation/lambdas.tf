@@ -317,3 +317,18 @@ module "lr_27_job_cleanup" {
     LR_13_REGISTRATIONS_OUTPUT_BUCKET = module.lr_13_reg_diffs_output.bucket.bucket
   }
 }
+
+module "lr_29_firehose_transform" {
+  source = "../../modules/lambda_function"
+
+  name                   = "lr_29_firehose_transform"
+  environment            = local.environment
+  kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+
+  lambda_layers         = [module.packages.layer.arn]
+  log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
+
+  environment_variables = {
+    SPLUNK_SOURCETYPE = "pcrm-listrecon:aws:cloudwatch_logs"
+  }
+}
