@@ -52,6 +52,10 @@ module "LR-04" {
   cloudwatch_kms_key    = var.cloudwatch_kms_key
   s3_kms_key            = var.s3_kms_key
   log_retention_in_days = var.log_retention_in_days
+  email_ssm             = var.email_ssm_prefix
+  pcse_email            = var.pcse_email
+  listrec_email         = var.listrec_email
+  ssm_kms_key           = var.ssm_kms_key
 }
 
 module "LR-07" {

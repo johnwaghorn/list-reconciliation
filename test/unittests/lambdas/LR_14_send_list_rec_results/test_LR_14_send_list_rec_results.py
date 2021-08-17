@@ -32,9 +32,9 @@ item/s to resolve, with 0 record/s being automatically updated in PDS and
 3 record/s being provided for the GP Practice to review and update.
 
 The files generated can be found in your MESH mailbox:
-    - cdd.csv
-    - gponly.csv
-    - pdsonly.csv
+    • cdd.csv
+    • gponly.csv
+    • pdsonly.csv
 
 For support reference, the Reconciliation Run Id associated to this email is: 7b207bdb-2937-4e17-a1a9-57a2bbf3e358"""
 

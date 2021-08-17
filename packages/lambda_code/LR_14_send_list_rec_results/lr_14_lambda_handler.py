@@ -117,7 +117,7 @@ class SendListRecResults(LambdaApplication):
         )
         email_subject = f"PDS Comparison run at {timestamp} against Practice: {job.PracticeCode} - {job.FileName} - Registrations Output"
 
-        filelist = "\n    - ".join(filenames)
+        filelist = "\n    • ".join(filenames)
         email_body = BODY.format(
             filename=job.FileName,
             timestamp=timestamp,

@@ -65,21 +65,20 @@ resource "aws_iam_policy" "policy" {
             ],
             "Resource": [
                 "${var.cloudwatch_kms_key.arn}",
-                "${var.s3_kms_key.arn}"
+                "${var.s3_kms_key.arn}",
+                "${var.ssm_kms_key.arn}"
             ]
         },
         {
             "Effect": "Allow",
             "Action": [
-              "kms:Encrypt",
-              "kms:Decrypt",
-              "kms:ReEncrypt*",
-              "kms:GenerateDataKey*"
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
             ],
-            "Resource": [
-                "${var.cloudwatch_kms_key.arn}",
-                "${var.s3_kms_key.arn}"
-            ]
+            "Resource":[
+                  "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${var.email_ssm}/*"
+           ]
         }
     ]
   }

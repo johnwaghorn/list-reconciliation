@@ -31,6 +31,9 @@ resource "aws_lambda_function" "LR-04-Lambda" {
   environment {
     variables = {
       AWS_S3_REGISTRATION_EXTRACT_BUCKET = var.source_bucket
+      LISTREC_EMAIL                      = var.listrec_email
+      PCSE_EMAIL                         = var.pcse_email
+      EMAIL_SSM_PREFIX                   = "/${var.email_ssm}/"
     }
   }
 

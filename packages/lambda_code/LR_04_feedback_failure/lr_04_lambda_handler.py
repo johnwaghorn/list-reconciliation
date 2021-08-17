@@ -11,6 +11,8 @@ from utils import InputFolderType
 from utils.datetimezone import localize_date
 from utils.exceptions import FeedbackLogError
 from utils.logger import success, error, Message
+from utils.ssm import get_ssm_params
+import services.send_email_exchangelib
 
 from lambda_code.LR_02_validate_and_parse.lr_02_lambda_handler import (
     INVALID_FILENAME,
@@ -27,6 +29,9 @@ class FeedbackFailure(LambdaApplication):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.s3 = boto3.client("s3")
         self.bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
+        self.email_params = get_ssm_params(
+            self.system_config["EMAIL_SSM_PREFIX"], self.system_config["AWS_REGION"]
+        )
         self.job_id = None
         self.log_key = None
         self.log_filename = None
@@ -93,11 +98,18 @@ class FeedbackFailure(LambdaApplication):
 
         self.validate_log()
 
-        self.send_email()
+        email_subject, email_body = self.send_email()
 
         self.cleanup_files()
 
-        return success(f"LR04 Lambda application stopped", self.log_object.internal_id)
+        output = success(
+            f"LR04 Lambda application stopped for jobId='{self.job_id}'",
+            self.log_object.internal_id,
+        )
+
+        output.update(email_subject=email_subject, email_body=email_body)
+
+        return output
 
     def read_log(self):
         """Read LOG file and extract error information into a dictionary"""
@@ -135,6 +147,8 @@ class FeedbackFailure(LambdaApplication):
                     f"LOG file contains reference to failed file='{self.failed_key}' that could not be found"
                 )
 
+            failed_file_date = localize_date(failed_file_date, specified_timezone="Europe/London")
+
             error_types = [INVALID_RECORDS, INVALID_STRUCTURE, INVALID_FILENAME]
             error_type = self.log["error_type"]
 
@@ -165,13 +179,22 @@ class FeedbackFailure(LambdaApplication):
     def send_email(self):
         """Send an email based on LOG file info"""
 
-        to = "test@nhs.net"
+        to = self.system_config["PCSE_EMAIL"]
         subject = (
             f"Validation Failure - PDS Comparison validation failure against '{self.log['file']}'"
         )
         body = self.create_email_body()
 
-        output = f"To: {to}\nSubject: {subject}\n{body}"
+        services.send_email_exchangelib.send_exchange_email(
+            self.system_config["LISTREC_EMAIL"],
+            self.email_params["list_rec_email_password"],
+            {
+                "email_addresses": [to],
+                "subject": subject,
+                "message": body,
+            },
+            self.log_object,
+        )
 
         self.log_object.write_log(
             "LR04I02",
@@ -182,15 +205,16 @@ class FeedbackFailure(LambdaApplication):
             },
         )
 
+        return subject, body
+
     def create_email_body(self) -> str:
         """Create body of email using LOG's error type and log data
+
         Returns:
             body (str): formatted body of email
         """
 
-        date_string = localize_date(self.upload_date, specified_timezone="Europe/London").strftime(
-            "%H:%M:%S on %d/%m/%Y"
-        )
+        date_string = self.upload_date.strftime("%H:%M:%S on %d/%m/%Y")
 
         header = (
             f"The GP file: {self.log['file']} failed validation at {date_string}.\n"
@@ -207,7 +231,7 @@ class FeedbackFailure(LambdaApplication):
 
         else:
             body += "The reasons for the failure are:\n"
-            message = "- " + "\n- ".join(log_message)
+            message = "    •" + "\n    • ".join(log_message)
             body += message
 
         footer = "\nPlease check and amend the file content and upload again.\n"
@@ -218,9 +242,11 @@ class FeedbackFailure(LambdaApplication):
 
     def create_invalid_records_body(self, body: str, records: dict) -> str:
         """Append email body with formatted invalid records
+
         Args:
             body (str): Formatted body of email
             records (dict): Dictionary of invalid records
+
         Returns:
             body (str): Formatted body of email appended with records
         """
@@ -235,7 +261,7 @@ class FeedbackFailure(LambdaApplication):
 
             invalid_records_msg += f"Invalid Record on lines {line_number}\n"
             invalid_records_msg += (
-                "\n".join([f"- {record['_INVALID_'][r]}" for r in record["_INVALID_"]]) + "\n"
+                "\n".join([f"   • {record['_INVALID_'][r]}" for r in record["_INVALID_"]]) + "\n"
             )
 
         body += (
