@@ -10,12 +10,12 @@ DATA = os.path.join(ROOT, "..", "..", "lambdas", "data")
 
 
 def test_expired_token(create_mock_ssm_valid_access_token, pds_api):
-    response = pds_api._is_token_expired()
+    response = pds_api._is_token_invalid()
     assert not response
 
 
 def test_valid_token(create_mock_ssm_expired_access_token, pds_api):
-    response = pds_api._is_token_expired()
+    response = pds_api._is_token_invalid()
     assert response
 
 

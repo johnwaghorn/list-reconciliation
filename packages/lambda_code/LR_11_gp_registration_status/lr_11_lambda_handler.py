@@ -8,6 +8,7 @@ from utils import write_to_mem_csv, get_registration_filename, RegistrationType
 from utils.database.models import Demographics, JobStats
 from utils.logger import success, error, Message
 from utils.registration_status import GPRegistrationStatus
+from utils.pds_api_service import SensitiveMarkers
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -59,7 +60,13 @@ class GPRegistrations(LambdaApplication):
             filter_condition=(
                 Demographics.GP_RegistrationStatus != GPRegistrationStatus.MATCHED.value
             )
-            & (Demographics.PDS_Sensitive == "U"),
+            & ~(
+                Demographics.PDS_Sensitive.is_in(
+                    SensitiveMarkers.RESTRICTED.value,
+                    SensitiveMarkers.VERY_RESTRICTED.value,
+                    SensitiveMarkers.REDACTED.value,
+                )
+            ),
         )
 
         rows = [

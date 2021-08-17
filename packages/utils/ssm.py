@@ -1,6 +1,7 @@
 import boto3
 import os
 import json
+from botocore.exceptions import ClientError
 
 
 def ssm_client(region):
@@ -25,11 +26,14 @@ def get_ssm_params(ssm_path, region):
     return ssm_params_dict
 
 
-def put_ssm_params(ssm_path, data_string, string_type, region):
+def put_ssm_params(ssm_path, data_string, region, string_type="SecureString"):
     try:
         ssm = ssm_client(region)
         ssm.put_parameter(
             Name=ssm_path, Value=json.dumps(data_string), Type=string_type, Overwrite=True
         )
-    except ssm_client.exceptions.TooManyUpdates:
-        raise RuntimeError("SSM TooManyUpdates")
+    except ClientError:
+        # ignore TooManyUpdates Exceptions as other lambda have already updated the token
+        # there is no way to catch TooManyUpdates exception in botocore exceptions  hence clientError as
+        # suggested by AWS
+        pass

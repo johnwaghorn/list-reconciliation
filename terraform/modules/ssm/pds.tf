@@ -4,6 +4,12 @@ resource "aws_ssm_parameter" "pds_fhir_api_private_key" {
   type      = "SecureString"
   value     = "To Replace"
   key_id    = var.ssm_kms_arn
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "pds_fhir_access_token" {
@@ -20,4 +26,10 @@ resource "aws_ssm_parameter" "pds_fhir_app_key" {
   type      = "SecureString"
   value     = "To Replace"
   key_id    = var.ssm_kms_arn
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }

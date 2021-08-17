@@ -74,6 +74,7 @@ class DemographicComparison(LambdaApplication):
                     "job_id": self.job_id,
                 },
             )
+            record.update(actions=[Demographics.IsComparisonCompleted.set(True)])
 
             return success(
                 f'LR08 Lambda application stopped for jobId="{self.job_id}"',

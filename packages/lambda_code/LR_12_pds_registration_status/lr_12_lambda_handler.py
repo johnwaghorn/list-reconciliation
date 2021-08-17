@@ -1,5 +1,9 @@
 import csv
 import io
+import json
+from datetime import datetime
+from typing import Dict, List
+
 import boto3
 import botocore
 import os
@@ -114,7 +118,7 @@ class PDSRegistrationStatus(LambdaApplication):
             if nhs_number not in job_nhs_numbers:
                 try:
                     pds_record = self.api.get_pds_record(nhs_number, self.job_id)
-                    if any(
+                    if pds_record and any(
                         marker.value == pds_record.get("sensitive") for marker in SensitiveMarkers
                     ):
                         self.log_object.write_log(
@@ -136,6 +140,7 @@ class PDSRegistrationStatus(LambdaApplication):
                     )
 
                 if pds_record:
+                    pds_record["address"].extend([None, None, None, None, None])
                     rows.append(
                         {
                             "SURNAME": pds_record["surname"],
@@ -152,7 +157,9 @@ class PDSRegistrationStatus(LambdaApplication):
                             "SEX": pds_record["gender"],
                             "DATE ACCEPT.": datetime.strptime(
                                 pds_record["gp_registered_date"], "%Y-%m-%d"
-                            ).date(),
+                            ).date()
+                            if pds_record["gp_registered_date"]
+                            else "",
                         }
                     )
 
