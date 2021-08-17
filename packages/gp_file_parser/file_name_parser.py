@@ -1,3 +1,4 @@
+import os
 import re
 
 from datetime import datetime
@@ -25,6 +26,9 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
     """
 
     filename = filename.upper()
+
+    if filename and filename.endswith('.DAT'):
+        filename = os.path.splitext(filename)[0]
 
     if len(filename) > 19:
         msg = ["Filename exceeds character limit"]
@@ -70,6 +74,7 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
     extract_date = process_date(process_datetime, valid_extension.group(1))
 
     return {
+        "filename": filename,
         "extract_date": extract_date,
         "practice_code": practice_code,
         "ha_cipher": ha_cipher,
