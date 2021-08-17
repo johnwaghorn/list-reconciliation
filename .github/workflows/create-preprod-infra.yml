@@ -70,7 +70,7 @@ jobs:
           # Ensure gpextract and mock_data install location is available to Gauge
           export PATH=$PATH:/opt/github_runner/.local/bin
           make integrationtest-deps
-          make integrationtests
+          make integrationtests-preprod
       - name: Upload Integration tests result artifact
         if: always()
         uses: actions/upload-artifact@v2

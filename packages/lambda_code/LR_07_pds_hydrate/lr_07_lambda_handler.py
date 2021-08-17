@@ -1,15 +1,16 @@
 import json
 import os
-import boto3
+import traceback
 
+import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from gp_file_parser.utils import empty_string
 from utils import retry_func
 from utils.database.models import Demographics
+from utils.logger import Message, error, success
 from utils.pds_api_service import PDSAPIError, PDSAPIHelper
-from utils.logger import success, error, Message
-from utils.registration_status import get_gp_registration_status, GPRegistrationStatus
+from utils.registration_status import GPRegistrationStatus, get_gp_registration_status
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -83,13 +84,14 @@ class PdsHydrate(LambdaApplication):
                 stop_max_attempt_number=10,
             )
 
-        except PDSAPIError:
+        except PDSAPIError as err:
             self.log_object.write_log(
                 "LR07C01",
                 log_row_dict={
                     "patient_id": patient.Id,
                     "nhs_number": patient.NhsNumber,
                     "job_id": self.job_id,
+                    "response_message": traceback.format_exc(),
                 },
             )
 

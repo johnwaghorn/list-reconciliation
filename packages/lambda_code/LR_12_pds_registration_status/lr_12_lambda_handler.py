@@ -1,22 +1,19 @@
 import csv
 import io
-import json
+import os
+import traceback
 from datetime import datetime
 from typing import Dict, List
 
 import boto3
 import botocore
-import os
-
-from datetime import datetime
-from typing import List
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
-from utils import write_to_mem_csv, get_registration_filename, RegistrationType
+from utils import RegistrationType, get_registration_filename, write_to_mem_csv
 from utils.database.models import Demographics, JobStats
-from utils.pds_api_service import PDSAPIHelper, PDSAPIError, SensitiveMarkers
-from utils.logger import success, error, Message
+from utils.logger import Message, error, success
+from utils.pds_api_service import PDSAPIError, PDSAPIHelper, SensitiveMarkers
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -136,6 +133,7 @@ class PDSRegistrationStatus(LambdaApplication):
                         log_row_dict={
                             "nhs_number": nhs_number,
                             "job_id": self.job_id,
+                            "response_message": traceback.format_exc(),
                         },
                     )
 

@@ -114,12 +114,24 @@ output "lr_15_lambda" {
   value = module.lambda.lr_15_lambda
 }
 
+output "lr_25_lambda" {
+  value = module.lambda.lr_25_lambda
+}
+
 output "lr_06_bucket" {
   value = module.s3.buckets.LR-06.bucket
 }
 
 output "LR-24-lambda" {
   value = module.lambda.lr_24_lambda
+}
+
+output "LR_25_lambda" {
+  value = module.lambda.lr_25_lambda
+}
+
+output "LR_25_lambda_arn" {
+  value = module.lambda.lr_25_lambda_arn
 }
 
 output "lr_26_bucket" {
@@ -134,7 +146,10 @@ output "mesh_bucket" {
   value = module.s3.buckets.mesh_bucket.bucket
 }
 
+output "mesh_inbound" {
+  value = "inbound_${try(local.mesh_mappings[local.environment][2].id, local.mesh_mappings["default"][2].id)}"
+}
+
 output "pds_url" {
   value = module.lambda.pds_url
-
 }

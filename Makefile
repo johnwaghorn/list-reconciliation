@@ -94,6 +94,9 @@ integrationtest-deps:
 
 # Running
 integrationtests:
+	cd ./test/integrationtests && gauge run --tags "!wip,!preprod" ./specs
+
+integrationtests-preprod:
 	cd ./test/integrationtests && gauge run --tags "!wip" ./specs
 
 #
