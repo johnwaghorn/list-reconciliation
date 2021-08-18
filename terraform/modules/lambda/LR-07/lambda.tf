@@ -1,7 +1,7 @@
 locals {
   name                           = "${var.lambda_name}-${var.suffix}"
   lambda_timeout                 = 900
-  reserved_concurrent_executions = 300
+  reserved_concurrent_executions = var.lr_07_reserved_concurrent_executions
 }
 
 data "archive_file" "lambda_zip" {

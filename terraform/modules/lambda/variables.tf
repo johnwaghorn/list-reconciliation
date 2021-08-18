@@ -124,3 +124,8 @@ variable "send_emails" {
   description = "Toggle to enable actual sending of emails"
   type        = bool
 }
+
+variable "lr_07_reserved_concurrent_executions" {
+  description = "Number of Lambda Reserved Concurrent Executions"
+  type        = number
+}

@@ -59,27 +59,29 @@ module "LR-04" {
 }
 
 module "LR-07" {
-  source                   = "./LR-07"
-  lambda_name              = local.lambda_name.LR-07
-  package_layer_arn        = aws_lambda_layer_version.package_layer.arn
-  runtime                  = var.runtime
-  lambda_timeout           = var.lambda_timeout
-  lr_08_lambda             = module.LR-08.LR-08-lambda_arn
-  demographics_table_arn   = var.dynamodb_tables.demographics.arn
-  demographics_table_name  = var.dynamodb_tables.demographics.name
-  lr_06_bucket_arn         = var.s3_buckets.LR-06.arn
-  lr_06_bucket             = var.s3_buckets.LR-06.bucket
-  mock_pds_data_bucket_arn = var.mock_pds_data_bucket.arn
-  suffix                   = var.suffix
-  lambda_handler           = var.lambda_handler
-  cloudwatch_kms_key       = var.cloudwatch_kms_key
-  dynamodb_kms_key         = var.dynamodb_kms_key
-  s3_kms_key               = var.s3_kms_key
-  log_retention_in_days    = var.log_retention_in_days
-  ssm_kms_key              = var.ssm_kms_key
-  pds_ssm_prefix           = var.pds_ssm_prefix
-  pds_ssm_access_token     = var.pds_ssm_access_token
-  pds_base_url             = var.pds_base_url
+  source = "./LR-07"
+
+  lambda_name                          = local.lambda_name.LR-07
+  package_layer_arn                    = aws_lambda_layer_version.package_layer.arn
+  runtime                              = var.runtime
+  lambda_timeout                       = var.lambda_timeout
+  lr_08_lambda                         = module.LR-08.LR-08-lambda_arn
+  demographics_table_arn               = var.dynamodb_tables.demographics.arn
+  demographics_table_name              = var.dynamodb_tables.demographics.name
+  lr_06_bucket_arn                     = var.s3_buckets.LR-06.arn
+  lr_06_bucket                         = var.s3_buckets.LR-06.bucket
+  mock_pds_data_bucket_arn             = var.mock_pds_data_bucket.arn
+  suffix                               = var.suffix
+  lambda_handler                       = var.lambda_handler
+  cloudwatch_kms_key                   = var.cloudwatch_kms_key
+  dynamodb_kms_key                     = var.dynamodb_kms_key
+  s3_kms_key                           = var.s3_kms_key
+  log_retention_in_days                = var.log_retention_in_days
+  ssm_kms_key                          = var.ssm_kms_key
+  pds_ssm_prefix                       = var.pds_ssm_prefix
+  pds_ssm_access_token                 = var.pds_ssm_access_token
+  pds_base_url                         = var.pds_base_url
+  lr_07_reserved_concurrent_executions = var.lr_07_reserved_concurrent_executions
 }
 
 module "LR-08" {

@@ -83,3 +83,8 @@ variable "pds_ssm_prefix" {
 variable "pds_ssm_access_token" {
   type = string
 }
+
+variable "lr_07_reserved_concurrent_executions" {
+  description = "Number of Lambda Reserved Concurrent Executions"
+  type        = number
+}

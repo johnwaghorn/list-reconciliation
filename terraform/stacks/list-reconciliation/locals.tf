@@ -132,6 +132,12 @@ locals {
     prod = []
   }
 
+  lr_07_reserved_concurrent_executions = {
+    default = null
+    preprod = 300
+    prod    = 300
+  }
+
   tags = {
     TagVersion         = "1"
     Programme          = "SpinePod5"
