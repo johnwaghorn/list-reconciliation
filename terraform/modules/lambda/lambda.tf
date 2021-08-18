@@ -17,7 +17,8 @@ locals {
 }
 
 module "LR-02" {
-  source                = "./LR-02"
+  source = "./LR-02"
+
   lambda_name           = local.lambda_name.LR-02
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
   runtime               = var.runtime
@@ -41,7 +42,8 @@ module "LR-02" {
 }
 
 module "LR-04" {
-  source                = "./LR-04"
+  source = "./LR-04"
+
   lambda_name           = local.lambda_name.LR-04
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
   runtime               = var.runtime
@@ -85,7 +87,8 @@ module "LR-07" {
 }
 
 module "LR-08" {
-  source                              = "./LR-08"
+  source = "./LR-08"
+
   lambda_name                         = local.lambda_name.LR-08
   runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
@@ -103,7 +106,8 @@ module "LR-08" {
 }
 
 module "LR-09" {
-  source                          = "./LR-09"
+  source = "./LR-09"
+
   lambda_name                     = local.lambda_name.LR-09
   runtime                         = var.runtime
   lambda_timeout                  = var.lambda_timeout
@@ -127,7 +131,8 @@ module "LR-09" {
 }
 
 module "LR-11" {
-  source                          = "./LR-11"
+  source = "./LR-11"
+
   lambda_name                     = local.lambda_name.LR-11
   runtime                         = var.runtime
   lambda_timeout                  = var.lambda_timeout
@@ -149,7 +154,8 @@ module "LR-11" {
 }
 
 module "LR-12" {
-  source                                = "./LR-12"
+  source = "./LR-12"
+
   lambda_name                           = local.lambda_name.LR-12
   runtime                               = var.runtime
   lambda_timeout                        = var.lambda_timeout
@@ -179,7 +185,8 @@ module "LR-12" {
 }
 
 module "LR-14" {
-  source                              = "./LR-14"
+  source = "./LR-14"
+
   lambda_name                         = local.lambda_name.LR-14
   runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
@@ -196,6 +203,7 @@ module "LR-14" {
   demographics_differences_table_arn  = var.dynamodb_tables.demographics_differences.arn
   suffix                              = var.suffix
   lambda_handler                      = var.lambda_handler
+  cloudwatch_kms_key                  = var.cloudwatch_kms_key
   dynamodb_kms_key                    = var.dynamodb_kms_key
   s3_kms_key                          = var.s3_kms_key
   ssm_kms_key                         = var.ssm_kms_key
@@ -209,7 +217,8 @@ module "LR-14" {
 }
 
 module "LR-15" {
-  source                              = "./LR-15"
+  source = "./LR-15"
+
   lambda_name                         = local.lambda_name.LR-15
   runtime                             = var.runtime
   lambda_timeout                      = var.lambda_timeout
@@ -238,7 +247,8 @@ module "LR-15" {
 }
 
 module "LR-21" {
-  source                          = "./LR-21"
+  source = "./LR-21"
+
   lambda_name                     = local.lambda_name.LR-21
   runtime                         = var.runtime
   package_layer_arn               = aws_lambda_layer_version.package_layer.arn
@@ -254,7 +264,8 @@ module "LR-21" {
 }
 
 module "LR-24" {
-  source                = "./LR-24"
+  source = "./LR-24"
+
   lambda_name           = local.lambda_name.LR-24
   package_layer_arn     = aws_lambda_layer_version.package_layer.arn
   runtime               = var.runtime
