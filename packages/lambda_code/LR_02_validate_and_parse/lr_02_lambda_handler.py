@@ -83,7 +83,7 @@ class ValidateAndParse(LambdaApplication):
             )
 
             self.upload_filename = validated_file["filename"]
-            
+
             self.log_object.write_log(
                 "LR02I05",
                 log_row_dict={

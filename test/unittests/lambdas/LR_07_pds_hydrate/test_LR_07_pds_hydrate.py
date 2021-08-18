@@ -2,7 +2,6 @@ import os
 import pytest
 
 from utils.database.models import Demographics
-from utils.logger import success
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -469,8 +468,6 @@ def test_sensitive_patients(
     )
 
     response = lambda_handler.pds_hydrate(record)
-
-    actual = Demographics.get(Id, job_id).attribute_values
 
     assert response["status"] == "success"
     assert response["message"] == f"LR07 Lambda application stopped for jobId='{JOB_ID}'"

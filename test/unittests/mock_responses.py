@@ -1,3 +1,26 @@
+from datetime import datetime, timedelta
+
+LAST_RESET = datetime.now()
+RESPONSES = 0
+MAX_RESPONSES_PER_SECOND = 15
+
+
+def respond():
+    global LAST_RESET
+    global RESPONSES
+
+    if datetime.now() - LAST_RESET >= timedelta(seconds=1):
+        RESPONSES = 0
+        LAST_RESET = datetime.now()
+
+    RESPONSES += 1
+
+    if RESPONSES > MAX_RESPONSES_PER_SECOND:
+        return 429, False
+    else:
+        return 200, True
+
+
 class MockResponse(object):
     def __init__(self, mock_url):
 
@@ -10,6 +33,7 @@ class MockResponse(object):
             "8000000008": ("U", "unrestricted"),
             "7000000007": ("U", "unrestricted"),
             "6000000006": ("U", "RESOURCE_NOT_FOUND"),
+            "1000000100": ("TOO_MANY_REQUESTS", "TOO_MANY_REQUESTS"),
         }
         if (
             self.patients[self.patient_id][0] == "REDACTED"
@@ -17,6 +41,8 @@ class MockResponse(object):
         ):
             self.status_code = 404
             self.ok = False
+        elif self.patients[self.patient_id][1] == "TOO_MANY_REQUESTS":
+            self.status_code, self.ok = respond()
         else:
             self.status_code = 200
             self.ok = True
@@ -71,6 +97,28 @@ class MockResponse(object):
                                 "version": "1",
                                 "code": "INVALIDATED_RESOURCE",
                                 "display": "Resource Id is invalid",
+                                "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode",
+                            }
+                        ]
+                    },
+                    "severity": "error",
+                    "code": "value",
+                }
+            ],
+        }
+
+    @staticmethod
+    def too_many_requests():
+        return {
+            "resourceType": "OperationOutcome",
+            "issue": [
+                {
+                    "details": {
+                        "coding": [
+                            {
+                                "version": "1",
+                                "code": "TOO_MANY_REQUESTS",
+                                "display": "TOO_MANY_REQUESTS",
                                 "system": "https://fhir.nhs.uk/R4/CodeSystem/Spine-ErrorOrWarningCode",
                             }
                         ]
@@ -271,10 +319,14 @@ class MockResponse(object):
             ],
         }
 
+    def unrestricted_1000000100(self):
+        return self.unrestricted_80000000008()
+
     def json(self):
-        if self.patients[self.patient_id][0] == "REDACTED":
+        patient_status = self.patients[self.patient_id][0]
+        if patient_status == "REDACTED":
             return self.redacted()
-        elif self.patients[self.patient_id][0] == "U":
+        elif patient_status == "U":
             func = {
                 "9000000009": self.unrestricted_90000000009,
                 "8000000008": self.unrestricted_80000000008,
@@ -282,6 +334,11 @@ class MockResponse(object):
                 "6000000006": self.unrestricted_60000000006,
             }
             return func[self.patient_id]()
+        elif patient_status == "TOO_MANY_REQUESTS":
+            if self.status_code == 429:
+                return self.too_many_requests()
+            else:
+                return self.unrestricted_1000000100()
         else:
             return self.restricted()
 

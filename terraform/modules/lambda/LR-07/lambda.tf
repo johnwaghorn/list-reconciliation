@@ -1,6 +1,7 @@
 locals {
-  name           = "${var.lambda_name}-${var.suffix}"
-  lambda_timeout = 300
+  name                           = "${var.lambda_name}-${var.suffix}"
+  lambda_timeout                 = 900
+  reserved_concurrent_executions = 300
 }
 
 data "archive_file" "lambda_zip" {
@@ -16,14 +17,15 @@ resource "aws_cloudwatch_log_group" "lambda" {
 }
 
 resource "aws_lambda_function" "LR-07-Lambda" {
-  function_name    = local.name
-  filename         = data.archive_file.lambda_zip.output_path
-  handler          = var.lambda_handler
-  role             = aws_iam_role.role.arn
-  runtime          = var.runtime
-  timeout          = var.lambda_timeout
-  layers           = [var.package_layer_arn]
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  function_name                  = local.name
+  filename                       = data.archive_file.lambda_zip.output_path
+  handler                        = var.lambda_handler
+  role                           = aws_iam_role.role.arn
+  runtime                        = var.runtime
+  timeout                        = var.lambda_timeout
+  layers                         = [var.package_layer_arn]
+  source_code_hash               = data.archive_file.lambda_zip.output_base64sha256
+  reserved_concurrent_executions = local.reserved_concurrent_executions
 
   environment {
     variables = {

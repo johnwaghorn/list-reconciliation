@@ -27,7 +27,7 @@ def validate_filename(filename: str, process_datetime: datetime = None) -> dict:
 
     filename = filename.upper()
 
-    if filename and filename.endswith('.DAT'):
+    if filename and filename.endswith(".DAT"):
         filename = os.path.splitext(filename)[0]
 
     if len(filename) > 19:

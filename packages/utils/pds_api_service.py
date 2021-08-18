@@ -1,16 +1,20 @@
-import uuid
 from enum import Enum
-from typing import Dict
-from time import time
-import jwt
-from typing import Union
-import requests
-from jsonpath_ng import parse
-from utils.ssm import get_ssm_params, put_ssm_params
-import json
 from json import JSONDecodeError
+from time import time
+from typing import Dict
+from typing import Union
+
 import datetime
+import json
+import uuid
+
+from jsonpath_ng import parse
 from retrying import retry
+
+import jwt
+import requests
+
+from utils.ssm import get_ssm_params, put_ssm_params
 
 SIGNING_ALG = "RS512"
 PDS_URL_PATH = "personal-demographics/FHIR/R4"
@@ -179,7 +183,7 @@ class PDSAPIHelper:
                 auth_header = {"Authorization": f"Bearer {token['access_token']}"}
                 headers.update(auth_header)
 
-            response: requests = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
+            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
 
         except requests.exceptions.ConnectionError:
             raise PDSAPIError(f"Connection error: {self.pds_url}")

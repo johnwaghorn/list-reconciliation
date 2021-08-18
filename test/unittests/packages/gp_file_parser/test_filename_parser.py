@@ -14,7 +14,7 @@ def test_validate_filename_valid_uppercase_filename_returns_valid():
     filename = "A82023_GPR4BRF1.B1A.DAT"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.B1A',
+        "filename": "A82023_GPR4BRF1.B1A",
         "extract_date": datetime.now(),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -30,7 +30,7 @@ def test_validate_filename_valid_lowercase_filename_returns_valid():
     filename = "a82023_gpr4brf1.b1b"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.B1B',
+        "filename": "A82023_GPR4BRF1.B1B",
         "extract_date": datetime.now(),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -46,7 +46,7 @@ def test_validate_filename_valid_mixcase_filename_returns_valid():
     filename = "A82023_gPr4brf1.B1c.dAt"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.B1C',
+        "filename": "A82023_GPR4BRF1.B1C",
         "extract_date": datetime.now(),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -195,7 +195,7 @@ def test_validate_filename_valid_month_indicator_parses_date_correctly():
     filename = f"A82023_GPR4BRF1.{valid_month_indicator}5A"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.B5A',
+        "filename": "A82023_GPR4BRF1.B5A",
         "extract_date": datetime.now(),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -213,7 +213,7 @@ def test_validate_filename_valid_day_indicator_parses_date_correctly():
     filename = f"A82023_GPR4BRF1.L{valid_day_indicator}A"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.LFA',
+        "filename": "A82023_GPR4BRF1.LFA",
         "extract_date": datetime.now(),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -245,7 +245,7 @@ def test_validate_filename_new_year_start_indicator_returns_valid():
     filename = "A82023_GPR4BRF1.LIA.dat"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.LIA',
+        "filename": "A82023_GPR4BRF1.LIA",
         "extract_date": datetime(2019, 12, 18),
         "practice_code": "A82023",
         "ha_cipher": "BRF",
@@ -262,7 +262,7 @@ def test_validate_filename_new_year_limit_indicator_returns_valid():
     filename = "A82023_GPR4BRF1.LVA.dat"
 
     expected = {
-        'filename': 'A82023_GPR4BRF1.LVA',
+        "filename": "A82023_GPR4BRF1.LVA",
         "extract_date": datetime(2019, 12, 31),
         "practice_code": "A82023",
         "ha_cipher": "BRF",

@@ -8,6 +8,8 @@ from comparison_engine.core import compare_records
 from listrec_comparison_engine import listrec_comparisons
 from utils.database.models import DemographicsDifferences, Demographics
 from utils.logger import success, error, Message
+from utils.registration_status import GPRegistrationStatus
+
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -66,7 +68,7 @@ class DemographicComparison(LambdaApplication):
             elif col.startswith("PDS_"):
                 pds_record[col] = val
 
-        if gp_record["GP_GpPracticeCode"] != pds_record["PDS_GpPracticeCode"]:
+        if gp_record["GP_RegistrationStatus"] != GPRegistrationStatus.MATCHED.value:
             self.log_object.write_log(
                 "LR08I04",
                 log_row_dict={
