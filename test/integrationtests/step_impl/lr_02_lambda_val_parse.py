@@ -4,6 +4,7 @@ from getgauge.python import step
 from getgauge.python import Messages
 from utils.datetimezone import get_datetime_now
 from .lr_beforehooks import use_waiters_check_object_exists
+from .test_helpers import PDS_API_ENV
 
 import boto3
 import json
@@ -15,7 +16,7 @@ from .tf_aws_resources import get_terraform_output
 # On github
 REGION_NAME = "eu-west-2"
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "data")
+DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_02_LAMBDA_ARN = get_terraform_output("lr_02_lambda_arn")
 
@@ -162,18 +163,21 @@ def readfile_in_s3_failed_invalid_item(search_word):
     if "Contents" in lr_01_fail_response:
         for object in lr_01_fail_response["Contents"]:
             use_waiters_check_object_exists(LR_01_BUCKET, object["Key"])
-            data = s3.get_object(Bucket=LR_01_BUCKET, Key=object.get("Key"))
-            contents = data["Body"].read().decode("utf-8").splitlines()
-            actual_line = []
-            line_num = 0
+            if "logs" in object.get("Key"):
+                data = s3.get_object(Bucket=LR_01_BUCKET, Key=object.get("Key"))
+                contents = data["Body"].read().decode("utf-8").splitlines()
+                actual_line = []
+                line_num = 0
 
-            for line in contents:
-                actual_line.append(line)
-                actual_key = actual_line[line_num]
-                if search_word in actual_key:
-                    Messages.write_message(str(actual_key))
-                    Messages.write_message("row validation successful")
-                    assert search_word in actual_key
+                for line in contents:
+                    actual_line.append(line)
+                    actual_key = actual_line[line_num]
+
+                    if search_word in actual_key:
+                        Messages.write_message(str(actual_key))
+                        Messages.write_message("row validation successful")
+                        assert search_word in actual_key
+                line_num = line_num + 1
 
 
 @step("connect to pass folder and check if it has loaded the test file")

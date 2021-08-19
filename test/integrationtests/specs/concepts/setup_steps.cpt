@@ -12,6 +12,7 @@
 * setup: empty bucket "lr_13_bucket"
 * setup: empty bucket "lr_20_bucket"
 * setup: empty bucket "lr_22_bucket"
+* setup: empty bucket "mesh_bucket"
 
 
 # setup steps to empty all database tables

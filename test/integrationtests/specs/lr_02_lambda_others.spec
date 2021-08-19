@@ -1,7 +1,6 @@
 # Scenarios for LR-02 lambda to validate and parse the GP file
 --------------------------------------------------------------
 
-
 ## test to ensure when lambda LR-02 is triggered and check file is validated and passed sucessfully
 ---------------------------------------------------------------------------------------------------
 * setup steps to empty all buckets

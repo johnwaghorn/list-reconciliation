@@ -13,7 +13,7 @@
 |F323meric       |DOW~1|9       |"_INVALID_": {"FORENAMES": "Forename - must contain only uppercase alphabetic characters and space, apostrophe, hyphen, comma or full-stop. Max length 35.", "ON_LINES": "6-7"}                                                                                                                                                                                                     |
 |prev323meric    |DOW~1|10      |"_INVALID_": {"PREV_SURNAME": "Surname - must contain only uppercase alphabetic characters and space, apostrophe or hyphen. Max length 35.", "ON_LINES": "6-7"}                                                                                                                                                                                                                     |
 |Title           |DOW~1|11      |"_INVALID_": {"TITLE": "Title - must contain only uppercase alphabetic characters and space, apostrophe or hyphen. Max length 35.", "ON_LINES": "6-7"}                                                                                                                                                                                                                              |
-|SEX             |DOW~1|12      |"_INVALID_": {"SEX": "Sex - Must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.", "ON_LINES": "6-7"}                                                                                                                                                                                                                                            |
+|SEX%£^%£        |DOW~1|12      |"_INVALID_": {"SEX": "Sex - Must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified.", "ON_LINES": "6-7"}                                                                                                                                                                                                                                            |
 |22220101        |DOW~1|13      |"_INVALID_": {"DOB": "Date of Birth - Must be a date in the past in the format YYYYMMDD.", "ON_LINES": "6-7"}                                                                                                                                                                                                                                                                       |
 |''1 sdsd        |DOW~1|14      |"_INVALID_": {"ADDRESS_LINE1": "Address Line - Must contain only uppercase alphabetic characters and space, apostrophe, hyphen, comma or full-stop. Max length 35.", "ON_LINES": "6-7"}                                                                                                                                                                                             |
 |'addingln2toln1 |DOW~1|15      |"error_type": "INVALID_STRUCTURE", "message": ["Row 2 for all records must start with 'DOW~2'"]                                                                                                                                                                                                                                                                                     |
@@ -24,12 +24,12 @@
 |E1DD1AA         |DOW~2|6       |"_INVALID_": {"DATE_OF_DOWNLOAD": "Transaction/Record Date and Time - Must be a valid transmission date and timestamp, in the format YYYMMDDHHMM, which is less than 14 days old and not in the future.", "DRUGS_DISPENSED_MARKER": "Drug Dispensed Marker - Must be 'Y' or blank.", "ON_LINES": "6-7"}         |
 
 
-
 * setup steps to empty all buckets
 
 ## test to ensure correct validation messages are logged in the fail logs folder for different invalid scenarios
 ----------------------------------------------------------------------------------------------------------------
 * connect to s3 and upload gp file with invalid item <InvalidItem> in row <Row> at position <Position>
+* wait for "5" seconds to allow other jobs to process
 * connect to s3 failed folder and assert failure message <InvalidMessage>
 
 

@@ -16,7 +16,7 @@ dynamodb = boto3.resource("dynamodb")
 def use_waiters_check_object_exists(bucket_name, key_name):
     try:
         waiter = s3.get_waiter("object_exists")
-        waiter.wait(Bucket=bucket_name, Key=key_name, WaiterConfig={"Delay": 10, "MaxAttempts": 6})
+        waiter.wait(Bucket=bucket_name, Key=key_name, WaiterConfig={"Delay": 10, "MaxAttempts": 8})
         Messages.write_message("Object exists: " + bucket_name + "/" + key_name)
 
     except FileNotFoundError:

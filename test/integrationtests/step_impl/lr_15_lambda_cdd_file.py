@@ -1,8 +1,5 @@
-import json
-import os
-from weakref import KeyedRef
-import boto3
 from getgauge.python import data_store, Messages, step
+from .test_helpers import PDS_API_ENV
 
 from .test_helpers import (
     create_timestamp,
@@ -15,9 +12,12 @@ from .lr_beforehooks import use_waiters_check_object_exists
 from .tf_aws_resources import get_terraform_output
 from utils import InputFolderType
 
+import json
+import os
+import boto3
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "data")
-EXPECTED_DATA = os.path.join(ROOT, "data", "LR_13")
+DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
@@ -29,22 +29,6 @@ REGION_NAME = "eu-west-2"
 dynamodb = boto3.resource("dynamodb", REGION_NAME)
 s3 = boto3.client("s3", REGION_NAME)
 stepfunctions = boto3.client("stepfunctions", REGION_NAME)
-
-
-@step("upload mock pds data in <path> to S3")
-def upload_mock_pds_data(path):
-    try:
-        pds_api_prefix = "pds_api_data.csv"
-        s3.upload_file(
-            os.path.join(DATA, path, pds_api_prefix),
-            MOCK_PDS_DATA,
-            pds_api_prefix,
-        )
-        use_waiters_check_object_exists(MOCK_PDS_DATA, pds_api_prefix)
-        Messages.write_message("PDS data uploaded")
-    except FileNotFoundError:
-        Messages.write_message("File not found")
-        raise
 
 
 @step("upload test data files in <path> to lr-22")
@@ -104,6 +88,12 @@ def execute_step_function_lr_10_assert_succeeded():
         # Get the LR-10 output filename and put it into a Gauge datastore so other steps can pick it up
         output = json.loads(stepfunction["output"])
         data_store.scenario["lr_10"] = {"job_id": job_id, "output": output}
+        if (
+            data_store.scenario["lr_10"]["output"]["message"]
+            == "Unhandled exception caught in LR14 Lambda"
+        ):
+            Messages.write_message("Check LR_12, LR_15 and LR_14 lambda Outputs")
+            assert False
         assert True
 
 
@@ -135,7 +125,7 @@ def assert_expected_file_in_lr13(filetype, expected_data_file):
     job_object = s3.get_object(Bucket=LR_13_BUCKET, Key=key)
     sorted_job_data = sorted(job_object["Body"].read().decode("utf-8").splitlines())
 
-    expected_data_path = os.path.join(EXPECTED_DATA, expected_data_file)
+    expected_data_path = os.path.join(DATA, expected_data_file)
     with open(expected_data_path, "r") as expected_data:
         sorted_expected_data = sorted(expected_data)
         for job_row, expected_row in zip(sorted_job_data, sorted_expected_data):

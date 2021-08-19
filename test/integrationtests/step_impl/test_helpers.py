@@ -11,6 +11,8 @@ REGION_NAME = "eu-west-2"
 dynamodb = boto3.resource("dynamodb", REGION_NAME)
 s3 = boto3.client("s3", REGION_NAME)
 stepfunctions = boto3.client("stepfunctions", REGION_NAME)
+PDS_URL = get_terraform_output("pds_url")
+PDS_API_ENV = PDS_URL.split("/")[2].split(".")[0]
 
 
 def await_s3_object_exists(bucket, key):

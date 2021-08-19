@@ -64,13 +64,11 @@ class DemographicDifferences(LambdaApplication):
         Determines further actions
         based on rules provided by the listrec_comparison_engine definitions and
         provides counts for the types of actions determined.
-
         Args:
             patient_record (Dict): The patient record, following the Demographics
                 data model in utils.database.models.
             demo_diffs (List[Dict]): The demographic differences following the
                 DemographicsDifferences data model in utils.database.models.
-
         Returns:
             Tuple[Dict, int, int, int, int, int]: (DSA work item, human_validations,
                 pds_updated, gp_updated, potential_pds_updates, potential_gp_updates)
@@ -192,7 +190,6 @@ class DemographicDifferences(LambdaApplication):
         """Process and output demographic differences for a job, creating DSA work
         item json objects for each patient in a job which has one or more
         demographic differences.
-
         Returns:
             Message: Success message including filenames created.
         """

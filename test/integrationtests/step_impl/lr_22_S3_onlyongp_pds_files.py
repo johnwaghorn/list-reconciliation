@@ -1,3 +1,4 @@
+from .test_helpers import PDS_API_ENV
 from .lr_beforehooks import use_waiters_check_object_exists
 from getgauge.python import step
 from getgauge.python import Messages
@@ -7,7 +8,7 @@ from .tf_aws_resources import get_terraform_output
 
 REGION_NAME = "eu-west-2"
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "data/LR_22")
+DATA = os.path.join(PDS_API_ENV, "LR_22")
 LR_22_BUCKET = get_terraform_output("lr_22_bucket")
 
 
