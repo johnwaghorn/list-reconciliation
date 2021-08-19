@@ -1,4 +1,4 @@
-name: Create preprod infrastructure on AWS and run integration tests
+name: Create PreProd Stacks and Run Integration Tests
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   create-preprod-list-reconciliation-stack:
-    name: Create preprod List Reconciliation stack on AWS
+    name: Create PreProd List Reconciliation Stack
     runs-on: self-hosted
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -50,7 +50,7 @@ jobs:
           make apply stack="mesh"
 
   run-integration-tests:
-    name: Run integration tests
+    name: Run Integration Tests
     runs-on: self-hosted
     needs:
       - create-preprod-list-reconciliation-stack
@@ -75,13 +75,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Test report
+          name: integration_test_report
           path: test/integrationtests/reports/html-report/*
           retention-days: 2
       - name: Upload Integration tests logs artifact
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Test logs
+          name: integration_test_logs
           path: test/integrationtests/logs/*
           retention-days: 2

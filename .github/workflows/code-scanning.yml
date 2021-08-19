@@ -20,15 +20,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
           languages: "python"
-
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
 
@@ -39,13 +36,11 @@ jobs:
     steps:
       - name: Clone repo
         uses: actions/checkout@v2
-
       - name: tfsec
         uses: tfsec/tfsec-sarif-action@master
         with:
           working_directory: "./terraform/stacks/list-reconciliation"
           sarif_file: tfsec_list-reconciliation.sarif
-
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
         with:

@@ -27,6 +27,11 @@ locals {
     prod    = "alias/list-rec-prod-mesh"
   }
 
+  pcse_email = {
+    default = "pcrm.gplistreconciliation@nhs.net"
+    prod    = "pcse.dataquality@nhs.net"
+  }
+
   send_emails = {
     default = false
     preprod = true

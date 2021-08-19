@@ -1,4 +1,4 @@
-name: Create feature branch infrastructure on AWS run system integration tests
+name: Create Feature Branch List Reconciliation Stack and run Integration Tests
 on:
   push:
     branches-ignore:
@@ -6,8 +6,8 @@ on:
       - master
 
 jobs:
-  create-feature-branch-infra:
-    name: Create feature branch infrastructure on AWS run system integration tests
+  create-feature-branch-list-reconciliation-stack:
+    name: Create Feature Branch List Reconciliation Stack
     runs-on: self-hosted
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -36,6 +36,17 @@ jobs:
           name: terraform-output
           path: ./terraform_outputs_list-reconciliation.json
           retention-days: 2
+
+  run-integration-tests:
+    name: Run Integration Tests
+    runs-on: self-hosted
+    needs:
+      - create-feature-branch-list-reconciliation-stack
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: terraform-output
       - name: Assume Role in Dev Account for Integration Tests
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -52,13 +63,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Test report
+          name: integration_test_report
           path: test/integrationtests/reports/html-report/*
           retention-days: 2
       - name: Upload Integration tests logs artifact
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: Test logs
+          name: integration_test_logs
           path: test/integrationtests/logs/*
           retention-days: 2

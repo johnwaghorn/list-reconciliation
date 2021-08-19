@@ -139,6 +139,11 @@ class PDSRegistrationStatus(LambdaApplication):
 
                 if pds_record:
                     pds_record["address"].extend([None, None, None, None, None])
+                    date_accept = (
+                        datetime.strptime(pds_record["gp_registered_date"], "%Y-%m-%d").date()
+                        if pds_record["gp_registered_date"]
+                        else ""
+                    )
                     rows.append(
                         {
                             "SURNAME": pds_record["surname"],
@@ -153,11 +158,7 @@ class PDSRegistrationStatus(LambdaApplication):
                             "POSTCODE": pds_record["postcode"],
                             "TITLE": ", ".join(pds_record["title"]),
                             "SEX": pds_record["gender"],
-                            "DATE ACCEPT.": datetime.strptime(
-                                pds_record["gp_registered_date"], "%Y-%m-%d"
-                            ).date()
-                            if pds_record["gp_registered_date"]
-                            else "",
+                            "DATE ACCEPT.": date_accept,
                         }
                     )
 

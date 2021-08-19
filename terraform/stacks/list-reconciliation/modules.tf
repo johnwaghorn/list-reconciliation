@@ -1,22 +1,18 @@
 module "lambda" {
   source = "../../modules/lambda"
 
-  suffix             = local.environment
-  pds_base_url       = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
-  pcse_email         = local.environment == "prod" ? "pcse.dataquality@nhs.net" : "pcrm.gplistreconciliation@nhs.net"
-  listrec_email      = "pcrm.gplistreconciliation@nhs.net"
-  runtime            = "python3.8"
-  lambda_handler     = "main.lambda_handler"
-  s3_buckets         = module.s3.buckets
-  cloudwatch_kms_key = module.kms["cloudwatch"].output
-  dynamodb_kms_key   = module.kms["dynamodb"].output
-  s3_kms_key         = module.kms["s3"].output
-  ssm_kms_key        = module.kms["ssm"].output
-  pds_ssm_prefix     = module.ssm.pds_ssm_parameters_path
-  mesh_kms_key = local.environment == "prod" ? {
-    id  = data.aws_kms_key.mesh_kms[0].id
-    arn = data.aws_kms_key.mesh_kms[0].arn
-  } : module.kms["mesh"].output
+  suffix                = local.environment
+  pds_base_url          = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
+  pcse_email            = try(local.pcse_email[local.environment], local.pcse_email["default"])
+  listrec_email         = "pcrm.gplistreconciliation@nhs.net"
+  runtime               = "python3.8"
+  lambda_handler        = "main.lambda_handler"
+  s3_buckets            = module.s3.buckets
+  cloudwatch_kms_key    = module.kms["cloudwatch"].output
+  dynamodb_kms_key      = module.kms["dynamodb"].output
+  s3_kms_key            = module.kms["s3"].output
+  ssm_kms_key           = module.kms["ssm"].output
+  pds_ssm_prefix        = module.ssm.pds_ssm_parameters_path
   mesh_ssm_prefix       = module.ssm.mesh_ssm_parameters_path
   email_ssm_prefix      = module.ssm.email_ssm_parameters_path
   pds_ssm_access_token  = module.ssm.pds_ssm_access_token
@@ -27,6 +23,11 @@ module "lambda" {
 
   lr_09_event_schedule_expression = try(local.lr_09_event_schedule_expression[local.environment], local.lr_09_event_schedule_expression["default"])
   lr_25_event_schedule_expression = try(local.lr_25_event_schedule_expression[local.environment], local.lr_25_event_schedule_expression["default"])
+
+  mesh_kms_key = local.environment == "prod" ? {
+    id  = data.aws_kms_key.mesh_kms[0].id
+    arn = data.aws_kms_key.mesh_kms[0].arn
+  } : module.kms["mesh"].output
 
   mesh_kms_key_alias        = try(local.mesh_kms_key_alias[local.environment], local.mesh_kms_key_alias["default"])
   mesh_post_office_open     = try(local.mesh_post_office_open[local.environment], local.mesh_post_office_open["default"])

@@ -1,5 +1,9 @@
 name: Destroy feature branch infrastructure on AWS
 on:
+  delete:
+    branches-ignore:
+      - master
+      - preprod
   pull_request:
     types:
       - closed

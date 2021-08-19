@@ -82,7 +82,7 @@ class SaveRecordsToS3(LambdaApplication):
             self.log_object.write_log(
                 "LR24I03",
                 log_row_dict={
-                    "records": len(records),
+                    "count": len(records),
                     "source": source,
                     "bucket": destination_bucket,
                 },
