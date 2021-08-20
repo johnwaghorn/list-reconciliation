@@ -33,6 +33,10 @@ class TooManyRequests(Exception):
     pass
 
 
+class UnknownError(Exception):
+    pass
+
+
 class PDSParamStore(Enum):
     PDS_APP_KEY = "pds_api_app_key"
     PDS_PRIVATE_KEY = "pds_api_private_key"
@@ -151,12 +155,15 @@ class PDSAPIHelper:
             return token
 
         except Exception as e:
-            raise PDSAPIError(e)
+            raise PDSAPIError(e) from e
 
     @retry(
         wait_exponential_multiplier=100,
         wait_exponential_max=2000,
-        retry_on_exception=lambda x: isinstance(x, (ExpiredTokenError, TooManyRequests)),
+        retry_on_exception=lambda x: isinstance(
+            x, (ExpiredTokenError, TooManyRequests, UnknownError)
+        ),
+        stop_max_attempt_number=20,
     )
     def get_pds_record(self, nhs_number: str, job_id: str) -> Dict[str, str]:
         """
@@ -184,7 +191,6 @@ class PDSAPIHelper:
                 token = self.get_access_token()
                 auth_header = {"Authorization": f"Bearer {token['access_token']}"}
                 headers.update(auth_header)
-
             response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
 
         except requests.exceptions.ConnectionError:
@@ -197,10 +203,8 @@ class PDSAPIHelper:
             list_rec_pds_data: dict = self.convert_pds_to_list_rec_data()
             return list_rec_pds_data
 
-        elif str(status).startswith("4"):
-            list_rec_pds_data = self.process_status_4xx_responses(
-                response, status, nhs_number, job_id
-            )
+        elif not str(status).startswith("2"):
+            list_rec_pds_data = self.process_non_2xx_responses(response, status, nhs_number, job_id)
             return list_rec_pds_data
 
         else:
@@ -263,12 +267,12 @@ class PDSAPIHelper:
         for item in json_expr.find(self.pds_data):
             return item.value
 
-    def process_status_4xx_responses(
+    def process_non_2xx_responses(
         self, response: requests, status_code: int, nhs_number: str, job_id: uuid
     ) -> Union[Dict[str, str], None]:
         """
-        Process all http status codes with 4xx responses
-        if status code is 4xx and there is JSONDecodeError
+        Process all http status codes with non-2xx responses
+        if status code is not 2xx and there is JSONDecodeError
         the implication is that API hasn't returned any json (data).
         in that case just return None to Lambda
 
@@ -306,6 +310,10 @@ class PDSAPIHelper:
 
             elif status_code == 429:
                 raise TooManyRequests("Too many requests")
+
+            elif error_code == "UNKNOWN_ERROR":
+                message = f"API response for patient {nhs_number}: http_status_code: {status_code}, error_code: {error_code}, error_details:{error_details}"
+                raise UnknownError(message)
 
             else:
                 message = f"API response for patient {nhs_number}: http_status_code: {status_code}, error_code: {error_code}, error_details:{error_details}"

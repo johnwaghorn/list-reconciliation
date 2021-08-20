@@ -45,6 +45,14 @@ class PdsHydrate(LambdaApplication):
 
         self.job_id = str(body["job_id"])
         self.log_object.set_internal_id(self.job_id)
+        self.log_object.write_log(
+            "LR07I05",
+            log_row_dict={
+                "patient_id": body["id"],
+                "nhs_number": body["NHS_NUMBER"],
+                "job_id": self.job_id,
+            },
+        )
 
         patient = Demographics(
             Id=body["id"],
@@ -72,6 +80,14 @@ class PdsHydrate(LambdaApplication):
         )
 
         try:
+            self.log_object.write_log(
+                "LR07I05",
+                log_row_dict={
+                    "patient_id": body["id"],
+                    "nhs_number": body["NHS_NUMBER"],
+                    "job_id": self.job_id,
+                },
+            )
             self.response = self.pds_hydrate(patient)
             self.response.update({"internal_id": self.log_object.internal_id})
 
@@ -116,7 +132,6 @@ class PdsHydrate(LambdaApplication):
         Returns:
             Message: A dict result containing a status and message
         """
-
         pds_record = self.api.get_pds_record(record.NhsNumber, self.job_id)
 
         self.log_object.write_log(

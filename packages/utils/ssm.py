@@ -2,12 +2,25 @@ import boto3
 import os
 import json
 from botocore.exceptions import ClientError
+from retrying import retry
 
 
 def ssm_client(region):
     return boto3.client("ssm", region_name=region)
 
 
+def ssm_retry_exception(exception):
+    if isinstance(exception, (ClientError)):
+        if "ThrottlingException" in str(exception) or "ConnectionClosedError" in str(exception):
+            return True
+
+
+@retry(
+    wait_exponential_multiplier=100,
+    wait_exponential_max=2000,
+    retry_on_exception=ssm_retry_exception,
+    stop_max_attempt_number=10,
+)
 def get_ssm_params(ssm_path, region):
     ssm = ssm_client(region)
 
@@ -26,14 +39,22 @@ def get_ssm_params(ssm_path, region):
     return ssm_params_dict
 
 
+@retry(
+    wait_exponential_multiplier=100,
+    wait_exponential_max=2000,
+    retry_on_exception=ssm_retry_exception,
+    stop_max_attempt_number=10,
+)
 def put_ssm_params(ssm_path, data_string, region, string_type="SecureString"):
     try:
         ssm = ssm_client(region)
         ssm.put_parameter(
             Name=ssm_path, Value=json.dumps(data_string), Type=string_type, Overwrite=True
         )
-    except ClientError:
+        return True
+    except ClientError as err:
         # ignore TooManyUpdates Exceptions as other lambda have already updated the token
         # there is no way to catch TooManyUpdates exception in botocore exceptions  hence clientError as
         # suggested by AWS
-        pass
+        if "TooManyUpdates" in str(err):
+            pass
