@@ -24,6 +24,7 @@ flake8 = "*"
 freezegun = "*"
 getgauge = "==0.3.15"
 listrec = {editable = true, path = "."}
+locust = ">=2.1.0"
 moto = "*"
 pipenv = "*"
 polling = "*"

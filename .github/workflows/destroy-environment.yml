@@ -39,7 +39,7 @@ jobs:
       - name: Terraform Init
         run: |
           make init stack="mesh"
-          make workspace env="preprod" stack="mesh"
+          make workspace env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
       - name: Terraform Destroy
         run: |
           make destroy stack="mesh"
