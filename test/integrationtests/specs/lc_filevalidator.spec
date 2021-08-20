@@ -1,8 +1,7 @@
-# ListRecon_File Validator Tests
----------------------------------
+# File Validator Tests
 
-   |Description                                                                                                                  |DateTime|File                  |Expected Message                                                                                                                   |
-   |-----------------------------------------------------------------------------------------------------------------------------|--------|-------------------   |-----------------------------------------------------------------------------------------------------------------------------------|
+   |Description                                                                                                                  |DateTime|File                  |Expected Message                                                                                                                                            |
+   |-----------------------------------------------------------------------------------------------------------------------------|--------|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
    |Ensure when correct file name with valid date is given the file is processed successfully                                    |20210315|A82023_GPR4LNA1.C1A   |Success                                                                                                                                                     |
    |Ensure when file name is capitals the file is processed successfully                                                         |20210315|A82023_GPR4LNA1.C1A   |Success                                                                                                                                                     |
    |Ensure when file name is small letters the file is processed successfully                                                    |20210315|a82023_gpr4lna1.c1a   |Success                                                                                                                                                     |
@@ -21,13 +20,15 @@
    |Ensure future file from the last date of the year should fail                                                                |20210115|A82023_GPR4LNA1.LVA   |{'message': ['File date must not be from the future']}Failed                                                                                                |
    |Ensure file older that 14 days from the last date of the year should fail - edge case                                        |20211231|A82023_GPR4LNA1.AVA   |{'message': ['File date must not be older than 14 days']}Failed                                                                                             |
 
+## Validate GP files with the provided table values and ensure the respective validation messages are received
 
-## validate GP files with the provided table values and ensure the respective validation messages are received
 * run gpextract for scenario <Description> using file <File> and date <DateTime> and ensure expected message is <Expected Message>
 
-## validate GP file to check the columns on the invalid records count csv file is as expected
+## Validate GP file to check the columns on the invalid records count csv file is as expected
+
 * run gpextract for scenario "positive scenario" using file "A82023_GPR4LNA1.C1A" and date "20210315" and ensure expected message is "Success"
 * assert "records.csv" file keys are as expected
 
-## validate  for non existing GP file
+## Validate for non existing GP file
+
 * run gpextract for scenario using not existing file and ensure expected message is "No such file or directory: 'A82023_GPR4LNA1.EDA'Failed"

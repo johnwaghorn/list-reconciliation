@@ -1,9 +1,9 @@
-# Tests for payload json files produced per patient in MESH OUTBOUND_INTERNALSPINE
+# Payload json files produced per patient in MESH OUTBOUND_INTERNALSPINE
 
 * setup steps to empty all buckets
 * setup steps to empty all database tables
 
-## test to ensure individual payload json file is produced sucessfully
+## Ensure individual payload json file is produced sucessfully
 
 * setup step: upload MESH data "OnlyOnPDS/dps_data.csv" on LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload test data files in "LR_15" to lr-22

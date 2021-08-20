@@ -15,7 +15,7 @@ LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_01_BUCKET_INBOUND = get_terraform_output("lr_01_bucket_inbound")
 LR_25_LAMBDA_ARN = get_terraform_output("LR_25_lambda_arn")
 MESH_BUCKET = "list-rec-preprod-mesh"
-MESH_INBOUND = get_terraform_output("inbound_X26OT179/")
+MESH_INBOUND = get_terraform_output("mesh_inbound")
 
 
 s3 = boto3.client("s3")
@@ -24,7 +24,6 @@ lambda_ = boto3.client("lambda")
 
 @step("send <filename> to mesh inbound folder")
 def send_file_to_mesh_outbound_folder(filename):
-
     temp_destdir = os.path.join(DATA, filename)
     row = "DOW~1"
     temp_destdir = create_gp_file(filename, row)
@@ -61,9 +60,10 @@ def connect_to_pass_folder_and_check_for_destination_folder():
             Key=os.path.join(InputFolderType.PASS.value, destination_filename),
         )
         Messages.write_message(
-            f"Object exists: s3://{os.path.join(MESH_BUCKET,InputFolderType.PASS.value,destination_filename)}"
+            f"Object exists: s3://{os.path.join(LR_01_BUCKET, InputFolderType.PASS.value, destination_filename)}"
         )
-
-    except FileNotFoundError:
-        Messages.write_message("File not found")
-        raise
+    except FileNotFoundError as e:
+        Messages.write_message(
+            f"Object not found: s3://{os.path.join(LR_01_BUCKET, InputFolderType.PASS.value, destination_filename)}"
+        )
+        raise e

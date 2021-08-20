@@ -147,7 +147,7 @@ output "mesh_bucket" {
 }
 
 output "mesh_inbound" {
-  value = "inbound_${try(local.mesh_mappings[local.environment][2].id, local.mesh_mappings["default"][2].id)}"
+  value = "inbound_${try(local.mesh_mappings[local.environment][0].id, local.mesh_mappings["default"][0].id)}"
 }
 
 output "pds_url" {

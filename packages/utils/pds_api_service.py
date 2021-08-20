@@ -135,6 +135,8 @@ class PDSAPIHelper:
                     "grant_type": "client_credentials",
                 }
 
+                # TODO ensure this response is not an error
+                # {"error": "invalid_request", "error_description": "Invalid iss/sub claims in JWT", "message_id": "rrt-6068836616924912677-c-geu2-30273-4334972-1"}
                 response = requests.post(self.pds_token_url, data=form_data)
                 token = response.json()
                 put_ssm_params(
@@ -321,14 +323,14 @@ class PDSAPIHelper:
         return True to fetch a new one
 
         Return:
-              bool
+            bool
         """
         try:
             token = json.loads(self.ssm_params[PDSParamStore.PDS_ACCESS_TOKEN.value])
             return self.is_token_expired(token)
 
         except JSONDecodeError:
-            # First run , token is not set
+            # First run, token is not set
             return True
 
     @staticmethod
