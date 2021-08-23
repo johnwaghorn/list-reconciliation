@@ -23,7 +23,6 @@ LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
 LR_13_BUCKET = get_terraform_output("lr_13_bucket")
 LR_22_BUCKET = get_terraform_output("lr_22_bucket")
-MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 
 REGION_NAME = "eu-west-2"
 dynamodb = boto3.resource("dynamodb", REGION_NAME)

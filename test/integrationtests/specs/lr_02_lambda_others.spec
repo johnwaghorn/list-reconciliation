@@ -4,7 +4,7 @@
 
 * setup steps to empty all buckets
 * setup steps to empty all database tables
-* connect to s3 and upload gpfile file "LR_02/A82023_GPR4LNA1.EIA" for successful file validation
+* connect to s3 and upload gpfile file "lr_02/A82023_GPR4LNA1.EIA" for successful file validation
 * connect to pass folder and check if it has loaded the test file
 
 ## Ensure when lambda LR-02 is triggered and response status code 202 is recieved

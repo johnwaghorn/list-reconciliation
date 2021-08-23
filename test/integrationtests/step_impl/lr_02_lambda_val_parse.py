@@ -39,7 +39,7 @@ def get_gppractice_out_path(filename_no_ext):
 @step("connect and trigger lambda LR-02 with invalid payload")
 def connect_to_lambda_lr02_with_invalid_payload():
     client = boto3.client("lambda", REGION_NAME)
-    payload_file = "LR_02/LR_02_Lambda_Invalid_Payload.txt"
+    payload_file = "lr_02/lr_02_Lambda_Invalid_Payload.txt"
     payload_temp = os.path.join(DATA, payload_file)
 
     with open(payload_temp) as jsonfile:
@@ -138,7 +138,7 @@ def upload_gpextract_file_into_s3(testfile):
     "connect to s3 and upload gp file with invalid item <invalid_item> in row <row1> at position <fieldlc>"
 )
 def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
-    testfile = "LR_02/A82023_GPR4LNA1.EIA"
+    testfile = "lr_02/A82023_GPR4LNA1.EIA"
     temp_destdir = create_gp_file(testfile, row, invalid_item, fieldlc)
 
     global destination_filename

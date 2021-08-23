@@ -1,3 +1,7 @@
+output "environment" {
+  value = local.environment
+}
+
 output "region" {
   value = "eu-west-2"
 }
@@ -98,10 +102,6 @@ output "lr_12_lambda" {
   value = module.lambda.lr_12_lambda
 }
 
-output "mock_pds_data" {
-  value = module.test_data[0].mock_pds_data_bucket_name
-}
-
 output "lr_13_bucket" {
   value = module.s3.buckets.LR-13.bucket
 }
@@ -151,5 +151,5 @@ output "mesh_inbound" {
 }
 
 output "pds_url" {
-  value = module.lambda.pds_url
+  value = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
 }

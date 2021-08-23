@@ -1,33 +1,33 @@
 locals {
   lambda_name = {
-    LR-02 = "LR_02_validate_and_parse"
-    LR-04 = "LR_04_feedback_failure"
-    LR-07 = "LR_07_pds_hydrate"
-    LR-08 = "LR_08_demographic_comparison"
-    LR-09 = "LR_09_scheduled_check"
-    LR-11 = "LR_11_gp_registration_status"
-    LR-12 = "LR_12_pds_registration_status"
-    LR-14 = "LR_14_send_list_rec_results"
-    LR-15 = "LR_15_process_demo_diffs"
-    LR-24 = "LR_24_save_records_to_s3"
-    LR-21 = "LR_21_split_dps_extract"
-    lr_25 = "LR_25_mesh_post_office"
-    lr_27 = "LR_27_job_cleanup"
+    lr_02 = "lr_02_validate_and_parse"
+    lr_04 = "lr_04_feedback_failure"
+    lr_07 = "lr_07_pds_hydrate"
+    lr_08 = "lr_08_demographic_comparison"
+    lr_09 = "lr_09_scheduled_check"
+    lr_11 = "lr_11_gp_registration_status"
+    lr_12 = "lr_12_pds_registration_status"
+    lr_14 = "lr_14_send_list_rec_results"
+    lr_15 = "lr_15_process_demo_diffs"
+    lr_21 = "lr_21_split_dps_extract"
+    lr_24 = "lr_24_save_records_to_s3"
+    lr_25 = "lr_25_mesh_post_office"
+    lr_27 = "lr_27_job_cleanup"
   }
 }
 
-module "LR-02" {
-  source = "./LR-02"
+module "lr_02_validate_and_parse" {
+  source = "./lr_02_validate_and_parse"
 
-  lambda_name           = local.lambda_name.LR-02
+  lambda_name           = local.lambda_name.lr_02
   lambda_layers         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
   lr_01_inbound_folder  = var.s3_buckets.LR-01.inbound_key
   lr_01_failed_folder   = var.s3_buckets.LR-01.fail_key
   lr_06_bucket          = var.s3_buckets.LR-06.bucket
-  lr_04_lambda_arn      = module.LR-04.LR-04-lambda_arn
-  lr_24_lambda_arn      = module.LR-24.LR-24-lambda_arn
+  lr_04_lambda_arn      = module.lr_04_feedback_failure.LR-04-lambda_arn
+  lr_24_lambda_arn      = module.lr_24_save_records_to_s3.LR-24-lambda_arn
   in_flight_table_arn   = var.dynamodb_tables.in_flight.arn
   in_flight_table_name  = var.dynamodb_tables.in_flight.name
   jobs_table_arn        = var.dynamodb_tables.jobs.arn
@@ -40,10 +40,10 @@ module "LR-02" {
   log_retention_in_days = var.log_retention_in_days
 }
 
-module "LR-04" {
-  source = "./LR-04"
+module "lr_04_feedback_failure" {
+  source = "./lr_04_feedback_failure"
 
-  lambda_name           = local.lambda_name.LR-04
+  lambda_name           = local.lambda_name.lr_04
   lambda_layers         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   source_bucket         = var.s3_buckets.LR-01.bucket
   source_bucket_arn     = var.s3_buckets.LR-01.arn
@@ -58,18 +58,17 @@ module "LR-04" {
   ssm_kms_key           = var.ssm_kms_key
 }
 
-module "LR-07" {
-  source = "./LR-07"
+module "lr_07_pds_hydrate" {
+  source = "./lr_07_pds_hydrate"
 
-  lambda_name                          = local.lambda_name.LR-07
+  lambda_name                          = local.lambda_name.lr_07
   lambda_layers                        = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   lambda_timeout                       = var.lambda_timeout
-  lr_08_lambda                         = module.LR-08.LR-08-lambda_arn
+  lr_08_lambda                         = module.lr_08_demographic_comparison.LR-08-lambda_arn
   demographics_table_arn               = var.dynamodb_tables.demographics.arn
   demographics_table_name              = var.dynamodb_tables.demographics.name
   lr_06_bucket_arn                     = var.s3_buckets.LR-06.arn
   lr_06_bucket                         = var.s3_buckets.LR-06.bucket
-  mock_pds_data_bucket_arn             = var.mock_pds_data_bucket.arn
   suffix                               = var.suffix
   lambda_handler                       = var.lambda_handler
   cloudwatch_kms_key                   = var.cloudwatch_kms_key
@@ -83,10 +82,10 @@ module "LR-07" {
   lr_07_reserved_concurrent_executions = var.lr_07_reserved_concurrent_executions
 }
 
-module "LR-08" {
-  source = "./LR-08"
+module "lr_08_demographic_comparison" {
+  source = "./lr_08_demographic_comparison"
 
-  lambda_name                         = local.lambda_name.LR-08
+  lambda_name                         = local.lambda_name.lr_08
   lambda_timeout                      = var.lambda_timeout
   lambda_layers                       = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   demographics_table_arn              = var.dynamodb_tables.demographics.arn
@@ -101,10 +100,10 @@ module "LR-08" {
   log_retention_in_days               = var.log_retention_in_days
 }
 
-module "LR-09" {
-  source = "./LR-09"
+module "lr_09_scheduled_check" {
+  source = "./lr_09_scheduled_check"
 
-  lambda_name                     = local.lambda_name.LR-09
+  lambda_name                     = local.lambda_name.lr_09
   lambda_timeout                  = var.lambda_timeout
   lambda_layers                   = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   lr_10_step_function_arn         = var.step_functions.lr_10_registration_orchestration.arn
@@ -125,10 +124,10 @@ module "LR-09" {
   lr_09_event_schedule_expression = var.lr_09_event_schedule_expression
 }
 
-module "LR-11" {
-  source = "./LR-11"
+module "lr_11_gp_registration_status" {
+  source = "./lr_11_gp_registration_status"
 
-  lambda_name                     = local.lambda_name.LR-11
+  lambda_name                     = local.lambda_name.lr_11
   lambda_timeout                  = var.lambda_timeout
   lambda_layers                   = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   registrations_output_bucket_arn = var.s3_buckets.LR-13.arn
@@ -147,10 +146,10 @@ module "LR-11" {
   log_retention_in_days           = var.log_retention_in_days
 }
 
-module "LR-12" {
-  source = "./LR-12"
+module "lr_12_pds_registration_status" {
+  source = "./lr_12_pds_registration_status"
 
-  lambda_name                           = local.lambda_name.LR-12
+  lambda_name                           = local.lambda_name.lr_12
   lambda_timeout                        = var.lambda_timeout
   lambda_layers                         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   registrations_output_bucket_arn       = var.s3_buckets.LR-13.arn
@@ -163,7 +162,6 @@ module "LR-12" {
   jobs_table_name                       = var.dynamodb_tables.jobs.name
   job_stats_table_arn                   = var.dynamodb_tables.jobs_stats.arn
   job_stats_table_name                  = var.dynamodb_tables.jobs_stats.name
-  mock_pds_data_bucket_arn              = var.mock_pds_data_bucket.arn
   pds_api_retries                       = var.pds_api_retries
   suffix                                = var.suffix
   lambda_handler                        = var.lambda_handler
@@ -177,10 +175,10 @@ module "LR-12" {
   pds_ssm_access_token                  = var.pds_ssm_access_token
 }
 
-module "LR-14" {
-  source = "./LR-14"
+module "lr_14_send_list_rec_results" {
+  source = "./lr_14_send_list_rec_results"
 
-  lambda_name                         = local.lambda_name.LR-14
+  lambda_name                         = local.lambda_name.lr_14
   lambda_timeout                      = var.lambda_timeout
   lambda_layers                       = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
@@ -208,10 +206,10 @@ module "LR-14" {
   send_emails                         = var.send_emails
 }
 
-module "LR-15" {
-  source = "./LR-15"
+module "lr_15_process_demo_diffs" {
+  source = "./lr_15_process_demo_diffs"
 
-  lambda_name                         = local.lambda_name.LR-15
+  lambda_name                         = local.lambda_name.lr_15
   lambda_timeout                      = var.lambda_timeout
   lambda_layers                       = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   mesh_send_bucket_arn                = var.s3_buckets.mesh_bucket.arn
@@ -237,10 +235,10 @@ module "LR-15" {
   mesh_ssm                            = var.mesh_ssm_prefix
 }
 
-module "LR-21" {
-  source = "./LR-21"
+module "lr_21_split_dps_extract" {
+  source = "./lr_21_split_dps_extract"
 
-  lambda_name                     = local.lambda_name.LR-21
+  lambda_name                     = local.lambda_name.lr_21
   lambda_layers                   = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   supplementary_input_bucket      = var.s3_buckets.LR-20.bucket
   supplementary_input_bucket_arn  = var.s3_buckets.LR-20.arn
@@ -253,10 +251,10 @@ module "LR-21" {
   log_retention_in_days           = var.log_retention_in_days
 }
 
-module "LR-24" {
-  source = "./LR-24"
+module "lr_24_save_records_to_s3" {
+  source = "./lr_24_save_records_to_s3"
 
-  lambda_name           = local.lambda_name.LR-24
+  lambda_name           = local.lambda_name.lr_24
   lambda_layers         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
   lambda_timeout        = var.lambda_timeout
   suffix                = var.suffix
@@ -268,8 +266,8 @@ module "LR-24" {
   log_retention_in_days = var.log_retention_in_days
 }
 
-module "lr_25" {
-  source = "./LR_25_mesh_post_office"
+module "lr_25_mesh_post_office" {
+  source = "./lr_25_mesh_post_office"
 
   lambda_name                     = local.lambda_name.lr_25
   lambda_layers                   = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]
@@ -283,8 +281,8 @@ module "lr_25" {
   lr_25_event_schedule_expression = var.lr_25_event_schedule_expression
 }
 
-module "lr_27" {
-  source = "./LR_27_job_cleanup"
+module "lr_27_job_cleanup" {
+  source = "./lr_27_job_cleanup"
 
   lambda_name                           = local.lambda_name.lr_27
   lambda_layers                         = [aws_lambda_layer_version.packages_layer.arn, aws_lambda_layer_version.dependencies_layer.arn]

@@ -1,14 +1,17 @@
+import csv
+import io
 from enum import Enum
 from typing import List, Any, Dict
 
-import csv
-import io
-
 from retrying import retry
 
-import boto3
-
 from utils.datetimezone import get_datetime_now
+
+
+class InvalidErrorType(Enum):
+    RECORDS = "INVALID_RECORDS"
+    STRUCTURE = "INVALID_STRUCTURE"
+    FILENAME = "INVALID_FILENAME"
 
 
 class InputFolderType(Enum):

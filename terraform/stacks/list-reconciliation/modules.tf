@@ -32,11 +32,6 @@ module "lambda" {
   mesh_post_office_open     = try(local.mesh_post_office_open[local.environment], local.mesh_post_office_open["default"])
   mesh_post_office_mappings = try(local.mesh_post_office_mappings[local.environment], local.mesh_post_office_mappings["default"])
 
-  mock_pds_data_bucket = {
-    arn  = module.test_data[0].mock_pds_data_bucket_arn
-    name = module.test_data[0].mock_pds_data_bucket_name
-  }
-
   step_functions = {
     lr_10_registration_orchestration = {
       arn = module.lr_10_registration_orchestration.arn
@@ -79,9 +74,9 @@ module "s3" {
 }
 
 module "lr_10_registration_orchestration" {
-  source = "../../modules/step_functions/LR-10"
+  source = "../../modules/step_functions/lr_10_registration_orchestration"
 
-  name         = "LR_10_registration-differences-${local.environment}"
+  name         = "lr_10_registration-differences-${local.environment}"
   lr_11_lambda = module.lambda.lr_11_lambda_arn
   lr_12_lambda = module.lambda.lr_12_lambda_arn
   lr_14_lambda = module.lambda.lr_14_lambda_arn
@@ -101,19 +96,9 @@ module "kms" {
   name = each.value.name
 }
 
-module "test_data" {
-  # only load test data in the non-prod accounts
-  count = local.environment != "prod" ? 1 : 0
-
-  source = "../../modules/test_data"
-
-  suffix       = local.environment
-  LR_22_bucket = module.s3.buckets.LR-22.bucket
-  kms_key_arn  = module.kms["s3"].output.arn
-}
-
 module "ssm" {
-  source        = "../../modules/ssm"
+  source = "../../modules/ssm"
+
   prefix        = local.environment
   ssm_kms_arn   = module.kms["ssm"].output.arn
   mesh_mappings = try(local.mesh_mappings[local.environment], local.mesh_mappings["default"])

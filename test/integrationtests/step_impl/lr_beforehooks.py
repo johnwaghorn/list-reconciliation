@@ -6,7 +6,6 @@ from .tf_aws_resources import get_terraform_output
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_13_BUCKET = get_terraform_output("lr_13_bucket")
 LR_22_BUCKET = get_terraform_output("lr_22_bucket")
-MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 INFLIGHT_TABLE = get_terraform_output("in_flight_table")
 
 s3 = boto3.client("s3")

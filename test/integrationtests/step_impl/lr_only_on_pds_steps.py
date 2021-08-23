@@ -20,7 +20,6 @@ EXPECTED_CSV_OUTPUT_FILE = "OnlyOnPDS-Expected-Output.csv"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data", PDS_API_ENV)
-MOCK_PDS_DATA = get_terraform_output("mock_pds_data")
 
 
 @step(
