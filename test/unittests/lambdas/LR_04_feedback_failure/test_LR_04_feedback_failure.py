@@ -85,7 +85,12 @@ def test_lr04_lambda_handler_process_valid_log_successfully(
 
 @freeze_time("2020-04-06 13:40:00")
 def test_lr04_lambda_handler_process_invalid_log_successfully(
-    upload_invalid_log_to_s3, lr_04_event_invalid_file, lambda_context, lambda_handler, ssm, email_ssm
+    upload_invalid_log_to_s3,
+    lr_04_event_invalid_file,
+    lambda_context,
+    lambda_handler,
+    ssm,
+    email_ssm,
 ):
     app = lambda_handler
 

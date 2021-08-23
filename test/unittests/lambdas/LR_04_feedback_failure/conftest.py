@@ -34,7 +34,9 @@ def create_bucket():
 @pytest.fixture
 def upload_invalid_log_to_s3(create_bucket):
     client = boto3.client("s3")
-    client.upload_file(os.path.join(DATA, f"{INVALID_LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{INVALID_LOG_FILE}")
+    client.upload_file(
+        os.path.join(DATA, f"{INVALID_LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{INVALID_LOG_FILE}"
+    )
 
 
 @pytest.fixture

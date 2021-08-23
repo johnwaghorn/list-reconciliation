@@ -44,8 +44,7 @@ black:
 	python -m black --line-length 100 .
 
 black-check:
-	# Remove always true once code is formatted
-	python -m black --line-length 100 --check . || true
+	python -m black --line-length 100 --check .
 
 #
 # Terraform
