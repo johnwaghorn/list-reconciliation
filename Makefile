@@ -47,14 +47,20 @@ uncompress-packages:
 
 # Testing
 unittests:
-	pytest -v --doctest-modules --cov=packages
+	pytest -v --doctest-modules --cov=packages --html=report/reports.html
+
+syntax-check:
+	flake8 --count --select=E9,F63,F7,F82 --show-source --statistics lambdas/ packages/ test/
+
+error-check:
+	flake8 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics lambdas/ packages/ test/
 
 # Formatting
 black:
-	python -m black --line-length 100 .
+	python -m black --line-length 100 lambdas/ packages/ test/
 
 black-check:
-	python -m black --line-length 100 --check .
+	python -m black --line-length 100 --check lambdas/ packages/ test/
 
 #
 # Terraform
@@ -111,6 +117,10 @@ integrationtests:
 
 integrationtests-preprod:
 	gauge run --verbose --tags "!wip,preprod" ./test/integrationtests/specs
+
+# TODO rename this and replace above once migrated
+behave-integration-tests:
+	behave ./test/integration
 
 #
 # Utilities

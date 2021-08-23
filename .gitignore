@@ -1,5 +1,6 @@
 ### List Reconciliation ###
 
+# Terraform
 terraform_outputs_*.json
 packages_layer/
 dependencies_layer/
@@ -326,6 +327,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+report/
 htmlcov/
 .tox/
 .nox/

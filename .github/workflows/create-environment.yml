@@ -32,13 +32,13 @@ jobs:
           pipenv run make black-check
       - name: Syntax check
         run: |
-          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - name: Error checks
+          pipenv run make syntax-check
+      - name: Error check
         run: |
-          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Run tests
+          pipenv run make error-check
+      - name: Test with pytest
         run: |
-          pipenv run pytest --html=report/reports.html
+          pipenv run make unittests
       - name: Upload unit test report artifact
         if: always()
         uses: actions/upload-artifact@v2
