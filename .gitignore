@@ -393,6 +393,7 @@ celerybeat.pid
 
 # Pip Cache
 .pip_cache/
+.pipenv_cache/
 
 # Environments
 .env

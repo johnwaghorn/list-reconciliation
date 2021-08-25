@@ -16,14 +16,14 @@ jobs:
     runs-on: self-hosted
     if: github.event.pull_request.merged == true
     env:
-      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
       FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
     steps:
       - uses: actions/checkout@v2
       - name: Python Package
+        # TODO this will be remove when using a shared packaging step
         run: |
-          make python-package
+          python -m pip install --upgrade pipenv
+          PATH=$PATH:/opt/github_runner/.local/bin make python-package
       - name: Terraform Init
         run: |
           make init

@@ -31,8 +31,7 @@ packages-layer:
 dependencies-layer:
 	rm -r ./dependencies_layer || true
 	mkdir -p ./dependencies_layer/python/
-	echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || true
-	docker run --rm -v $(PWD):/var/task -u $(shell id -u):$(shell id -g) -w="/var/task/" --entrypoint python public.ecr.aws/lambda/python:3.9 -m pip install --cache-dir .pip_cache -r requirements.txt -t ./dependencies_layer/python/
+	pipenv lock -r | pipenv run pip install --cache-dir .pip_cache --target ./dependencies_layer/python/ -r /dev/stdin
 
 # Testing
 unittests:
@@ -101,10 +100,10 @@ integrationtest-deps:
 
 # Running
 integrationtests:
-	cd ./test/integrationtests && gauge run --verbose --tags "!wip,e2e" ./specs
+	gauge run --verbose --tags "!wip,e2e" ./test/integrationtests/specs
 
 integrationtests-preprod:
-	cd ./test/integrationtests && gauge run --verbose --tags "!wip,preprod" ./specs
+	gauge run --verbose --tags "!wip,preprod" ./test/integrationtests/specs
 
 #
 # Utilities

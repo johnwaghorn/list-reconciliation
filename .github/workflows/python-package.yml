@@ -11,27 +11,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Install dependencies
         run: |
-          sudo apt-get install docker
-          python -m pip install --upgrade pip
-          python -m pip install flake8 pytest
-          pip install -r requirements.txt
-          pip install -r test_requirements.txt
-          pip install .
+          python -m pip install --upgrade pipenv
+          pipenv install --dev
       - name: Format check
         run: |
-          make black-check
+          pipenv run make black-check
       - name: Python syntax check
         run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Python error chhecks
         run: |
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: |
-          pytest --html=report/reports.html
+          pipenv run pytest --html=report/reports.html
       - name: Upload unit test report artifact
         if: always()
         uses: actions/upload-artifact@v2

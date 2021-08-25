@@ -8,14 +8,13 @@ jobs:
   create-preprod-list-reconciliation-stack:
     name: Create PreProd List Reconciliation Stack
     runs-on: self-hosted
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Python Package
+        # TODO this will be remove when using a shared packaging step
         run: |
-          make python-package
+          python -m pip install --upgrade pipenv
+          PATH=$PATH:/opt/github_runner/.local/bin make python-package
       - name: Terraform Init
         run: |
           make init
@@ -29,7 +28,7 @@ jobs:
       - name: Upload terraform output artifact
         uses: actions/upload-artifact@v2
         with:
-          name: terraform-output
+          name: terraform_outputs
           path: ./terraform_outputs_list-reconciliation.json
           retention-days: 2
 
@@ -58,7 +57,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
-          name: terraform-output
+          name: terraform_outputs
       - name: Assume Role in PreProd Account for Integration Tests
         uses: aws-actions/configure-aws-credentials@v1
         with:

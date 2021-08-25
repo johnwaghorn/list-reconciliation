@@ -1,8 +1,5 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as f:
-    dependencies = [r.strip() for r in f.readlines()]
-
 setup(
     name="listrec",
     version="0.0.1",
@@ -11,6 +8,6 @@ setup(
     license="",
     packages=find_packages(where="./packages"),
     package_dir={"": "packages"},
-    install_requires=dependencies,
+    install_requires=["pipenv"],
     entry_points={"console_scripts": ["gpextract = gp_file_parser.main:main"]},
 )
