@@ -1,5 +1,7 @@
 # List Reconciliation E2E Scenarios
 
+tags: e2e
+
 * setup steps to empty all buckets
 * setup steps to empty all database tables
 
