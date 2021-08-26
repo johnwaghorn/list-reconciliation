@@ -32,10 +32,20 @@ locals {
     prod    = "pcse.dataquality@nhs.net"
   }
 
+  listrec_email = {
+    default = "pcrm.gplistreconciliation@nhs.net"
+    prod    = "pcse.dataquality@nhs.net"
+  }
+
   send_emails = {
     default = false
     preprod = true
     prod    = true
+  }
+
+  # Number of hours old that a job is allowed to reach before it's cleaned up
+  lr_09_job_timeout_hours = {
+    default = 6
   }
 
   mesh_post_office_open = {
@@ -54,7 +64,7 @@ locals {
           key    = "inbound_X26OT179"
         },
         outbound = {
-          bucket = module.s3.buckets.LR-20.bucket
+          bucket = module.lr_20_pds_reg_input.bucket.bucket
           key    = ""
         }
       },
@@ -65,7 +75,7 @@ locals {
           key    = "inbound_X26OT181"
         },
         outbound = {
-          bucket = module.s3.buckets.LR-01.bucket
+          bucket = module.lr_01_gp_extract_input.bucket.bucket
           key    = "inbound"
         }
       }
@@ -143,13 +153,18 @@ locals {
     prod    = 300
   }
 
+  s3_force_destroy_bucket = {
+    default = true
+    prod    = false
+  }
+
   tags = {
     TagVersion         = "1"
-    Programme          = "SpinePod5"
+    Programme          = "PCRM"
     Project            = "ListReconciliation"
     DataClassification = local.data_classification
     Environment        = local.environment
     ServiceCategory    = local.environment == "prod" ? "Silver" : "N/A"
-    Tool               = "terraform"
+    Tool               = "Terraform"
   }
 }

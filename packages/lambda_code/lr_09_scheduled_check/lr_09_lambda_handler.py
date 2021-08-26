@@ -1,16 +1,15 @@
-import os
 import json
-import boto3
-
+import os
+import traceback
 from datetime import datetime, timedelta
-from typing import Dict
 
+import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
-from utils.database.models import Jobs, InFlight, Demographics, JobStats
+from utils.database.models import Demographics, InFlight, Jobs, JobStats
 from utils.datetimezone import get_datetime_now, localize_date
+from utils.logger import Message, error, success
 from utils.statuses import JobStatus
-from utils.logger import success, error, Message
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -29,15 +28,19 @@ class ScheduledCheck(LambdaApplication):
             self.log_object.set_internal_id(self._create_new_internal_id())
             self.response = self.process_finished_jobs()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR09 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR09 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR09 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR09 Lambda error='{traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     @staticmethod
     def is_job_complete(job_id: str, total_records: int) -> bool:

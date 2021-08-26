@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
@@ -23,13 +24,19 @@ class MeshPostOffice(LambdaApplication):
 
             self.response = self.process_post_office()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR25 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR25 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
-            self.response = error("Unhandled exception in LR25 Lambda", self.log_object.internal_id)
+        except Exception as e:
+            self.response = error(
+                "Unhandled exception in LR25 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
+            )
+            raise e
 
     def process_post_office(self) -> Message:
         """Handles post office process

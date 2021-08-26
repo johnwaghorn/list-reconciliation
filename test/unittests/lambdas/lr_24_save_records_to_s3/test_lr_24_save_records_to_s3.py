@@ -1,6 +1,8 @@
 import json
 import os
+
 import boto3
+import pytest
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -49,8 +51,5 @@ def test_save_records_to_s3_raises_Exception(s3, lambda_handler, lambda_context,
         "records": [json.dumps(record) for record in records],
     }
 
-    response = lambda_handler.main(event=event, context=lambda_context)
-
-    expected = f"Unhandled exception in LR24 Lambda"
-
-    assert response["message"] == expected
+    with pytest.raises(KeyError):
+        lambda_handler.main(event=event, context=lambda_context)

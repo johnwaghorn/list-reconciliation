@@ -13,5 +13,3 @@ checks:
       name: logging
       action: isPresent
     errorMessage: The required logging block was missing
-    relatedLinks:
-      - http://internal.acmecorp.com/standards/aws/tagging.html

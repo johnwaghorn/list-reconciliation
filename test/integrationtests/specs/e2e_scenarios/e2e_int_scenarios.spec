@@ -10,6 +10,7 @@ tags: e2e
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * connect to s3 and upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" for successful file validation
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check expected sensitivity as "R" on demographics table for nhsnumber "9000000025"
 * trigger lr09 and ensure scheduled checked successfully completed
@@ -17,14 +18,15 @@ tags: e2e
 * ensure produced "OnlyOnGP" file contains the expected consolidated records as in "lr_13/expected_onlyongp.txt"
 * ensure produced "OnlyOnPDS" file contains the expected consolidated records as in "lr_13/expected_onlyonPDS.txt"
 * ensure produced "CDD" file contains the expected consolidated records as in "lr_13/expected_cdd_file.txt"
-* connect to "lr_23/" s3 bucket and ensure patient payload record file with patientid "9000000017" is generated as expected "9000000017.json"
-* connect to "lr_23/" s3 bucket and ensure patient payload record file with patientid "9000000025" is generated as expected "9000000025.json"
+* connect to MESH bucket and ensure patient payload record file with patientid "9000000017" is generated as expected "9000000017.json"
+* connect to MESH bucket and ensure patient payload record file with patientid "9000000025" is generated as expected "9000000025.json"
 
 ## Ensure the data on mismatch records on onlyongp csv file  in the output bucket is as expected
 
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * connect to s3 and upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" for successful file validation
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check expected sensitivity as "R" on demographics table for nhsnumber "9000000025"
 * trigger lr09 and ensure scheduled checked successfully completed
@@ -36,6 +38,7 @@ tags: e2e
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check expected sensitivity as "R" on demographics table for nhsnumber "9000000025"
 * trigger lr09 and ensure scheduled checked successfully completed
@@ -47,6 +50,7 @@ tags: e2e
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check expected sensitivity as "R" on demographics table for nhsnumber "9000000025"
 * trigger lr09 and ensure scheduled checked successfully completed
@@ -57,6 +61,7 @@ tags: e2e
 
 * upload gpfile file "lr_07/Y12345_GPR4LNA1.EIA" to LR-01
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check demographic difference "MN-BR-DB-01" on demographics difference table for nhsnumber "9000000017"
 * check demographic difference "MN-BR-AD-02" on demographics difference table for nhsnumber "9000000017"
@@ -70,9 +75,10 @@ tags: e2e
 * setup step: upload PDS supplementary data "OnlyOnPDS/dps_data.csv" to LR-20 and check output in LR-22 for expected file "Y12345.csv"
 * upload gpfile file "lr_13/Y12345_GPR4LNA1.EIA" to LR-01
 * connect to lr-03 dynamodb and get the latest JobId for a gppractice file
+* wait for "15" seconds to allow other jobs to process
 * check expected sensitivity as "U" on demographics table for nhsnumber "9000000017"
 * check expected sensitivity as "R" on demographics table for nhsnumber "9000000025"
 * trigger lr09 and ensure scheduled checked successfully completed
 * ensure the status of the LR-10 has succeeded for the respective jobid
-* connect to "lr_23/" s3 bucket and ensure patient payload record file with patientid "9000000017" is generated as expected "9000000017.json"
-* connect to "lr_23/" s3 bucket and ensure patient payload record file with patientid "9000000025" is generated as expected "9000000025.json"
+* connect to MESH bucket and ensure patient payload record file with patientid "9000000017" is generated as expected "9000000017.json"
+* connect to MESH bucket and ensure patient payload record file with patientid "9000000025" is generated as expected "9000000025.json"

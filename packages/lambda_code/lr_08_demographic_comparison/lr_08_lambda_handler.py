@@ -1,5 +1,5 @@
 import os
-
+import traceback
 from uuid import uuid4
 
 from spine_aws_common.lambda_application import LambdaApplication
@@ -33,15 +33,19 @@ class DemographicComparison(LambdaApplication):
 
             self.response = self.demographic_comparisons()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR08 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR08 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR08 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR08 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     def demographic_comparisons(self) -> Message:
         """Compare PDS and GP demographic data for a record, logging the result to

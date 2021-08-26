@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
@@ -29,16 +30,18 @@ class SaveRecordsToS3(LambdaApplication):
             self.log_object.write_log(
                 "LR24I01",
                 log_row_dict={
-                    "records": len(records),
+                    "count": len(records),
                     "source": source,
                     "bucket": destination_bucket,
                 },
             )
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR24 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR24 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
         else:
             for record in records:
@@ -64,20 +67,21 @@ class SaveRecordsToS3(LambdaApplication):
                         log_row_dict={"id": id_, "bucket": destination_bucket, "source": source},
                     )
 
-                except Exception as err:
-                    columns = "job_id, practice_code, id"
-                    values = ", ".join(id_cols)
-
+                except Exception as e:
                     self.log_object.write_log(
                         "LR24C01",
-                        log_row_dict={"expected": columns, "values": values},
+                        log_row_dict={
+                            "id": id_,
+                            "bucket": destination_bucket,
+                            "source": source,
+                            "error": traceback.format_exc(),
+                        },
                     )
-
                     self.response = error(
-                        "Unhandled exception in LR24 Lambda", self.log_object.internal_id
+                        f"Unhandled exception in LR24 Lambda with error={traceback.format_exc()}",
+                        self.log_object.internal_id,
                     )
-
-                    return
+                    raise e
 
             self.log_object.write_log(
                 "LR24I03",

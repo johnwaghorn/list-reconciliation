@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 from typing import List
 
 import boto3
@@ -43,15 +44,19 @@ class SendListRecResults(LambdaApplication):
 
             self.response = self.send_list_rec_results()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR14 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR14 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR14 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR14 Lambda with error='{traceback.format_exc()}'",
+                self.log_object.internal_id,
             )
+            raise e
 
     def send_list_rec_results(self) -> Message:
         """Send List-Rec results using MESH and email

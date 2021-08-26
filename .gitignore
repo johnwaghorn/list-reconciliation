@@ -1,27 +1,22 @@
-*.zip
-*.gz
-openapi.tpl
-*.pem
-output.json
+### List Reconciliation ###
+
 terraform_outputs_*.json
-plan.out
-plan.out.json
-.python-version
-.terraform.lock.hcl
-.coverage
-.DS_Store
-lambda_layer/
 packages_layer/
 dependencies_layer/
-__MACOSX
 
+# Large file types
+*.zip
+*.gz
 
-# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,terraform,terragrunt,intellij,visualstudiocode,python
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,terraform,terragrunt,intellij,visualstudiocode,python
+# Sensitive file types
+*.crt
+*.key
+*.pem
 
-
-### Local Lambdas ###
-local_main.py
+# Gauge
+test/integrationtests/.gauge
+test/integrationtests/logs
+test/integrationtests/reports
 
 ### direnv ###
 .direnv
@@ -151,6 +146,7 @@ fabric.properties
 
 ### macOS ###
 # General
+__MACOSX
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -176,7 +172,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
 
 ### Node ###
 # Logs
@@ -430,6 +425,9 @@ dmypy.json
 .pytype/
 
 ### Terraform ###
+# Don't include lock files, can cause cross platform issues
+.terraform.lock.hcl
+
 # Local .terraform directories
 **/.terraform/*
 
@@ -459,19 +457,13 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 
-### Terragrunt ###
-# terragrunt cache directories
-**/.terragrunt-cache/*
-
 ### VisualStudioCode ###
-.vs
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
-
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
@@ -502,36 +494,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-# End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,terraform,terragrunt,intellij,visualstudiocode,python
-
-pg.docker
-tokenizers
-pgdocker_db.py
-.terraform.lock.hcl
-
-# Gauge - metadata dir
-.gauge
-
-# Gauge - log files dir
-logs
-
-# Gauge - reports dir
-*reports*
-
-# Pytest html report
-*report*
-
-# Gauge - python compiled files
-*.pyc
-
-# Gauge - vscode
-*reports*
-*.gauge*
-/.vscode
-
-# Terraform
-*.tfstate
-*.tfstate.backup
-*.tfstate.lock.info
-*.terraform/

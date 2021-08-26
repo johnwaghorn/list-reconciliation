@@ -100,7 +100,7 @@ class PdsHydrate(LambdaApplication):
                 stop_max_attempt_number=10,
             )
 
-        except PDSAPIError as err:
+        except PDSAPIError as e:
             self.log_object.write_log(
                 "LR07C01",
                 log_row_dict={
@@ -110,21 +110,25 @@ class PdsHydrate(LambdaApplication):
                     "response_message": traceback.format_exc(),
                 },
             )
-
             self.response = error(
-                f'Error fetching PDS record for patientId="{patient.Id}" for nhsNumber="{patient.NhsNumber}" for jobId="{self.job_id}"',
+                f"Error fetching PDS record for patientId='{patient.Id}' for nhsNumber='{patient.NhsNumber}' for jobId='{self.job_id}' with error='{traceback.format_exc()}'",
                 self.log_object.internal_id,
             )
+            raise e
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR07 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR07 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR07 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR07 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     def pds_hydrate(self, record: Demographics) -> Message:
         """Populate an existing Demographics DynamoDB record with PDS data and trigger LR08.

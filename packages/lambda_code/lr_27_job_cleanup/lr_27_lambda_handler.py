@@ -1,5 +1,6 @@
-import boto3
+import traceback
 
+import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.database.models import Jobs, InFlight
@@ -26,13 +27,19 @@ class JobCleanup(LambdaApplication):
 
             self.response = self.process_job_cleanup()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR27 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR27 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
-            self.response = error("Unhandled exception in LR27 Lambda", self.log_object.internal_id)
+        except Exception as e:
+            self.response = error(
+                f"Unhandled exception in LR27 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
+            )
+            raise e
 
     def process_job_cleanup(self) -> Message:
         job_exists = self.validate_job_id()

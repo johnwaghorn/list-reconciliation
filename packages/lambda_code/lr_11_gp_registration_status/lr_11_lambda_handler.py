@@ -1,6 +1,7 @@
 import os
-import boto3
+import traceback
 
+import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
@@ -33,15 +34,19 @@ class GPRegistrations(LambdaApplication):
 
             self.response = self.get_gp_exclusive_registrations(self.job_id)
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR11 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR11 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR11 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR11 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     def get_gp_exclusive_registrations(self, job_id: str) -> Message:
         """Create a GP-only registration differences file

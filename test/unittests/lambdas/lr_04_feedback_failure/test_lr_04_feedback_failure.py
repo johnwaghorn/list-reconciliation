@@ -1,7 +1,10 @@
 import os
-import boto3
 
+import boto3
+import pytest
 from freezegun import freeze_time
+
+from utils.exceptions import FeedbackLogError
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "data")
@@ -18,12 +21,8 @@ def test_lr_04_handler_invalid_event_raises_key_error(
     upload_valid_log_to_s3, lambda_handler, lambda_context, ssm, email_ssm
 ):
     event = {"error": "error"}
-
-    expected_response = "LR04 Lambda tried to access missing key='Records'"
-
-    result = lambda_handler.main(event, lambda_context)
-
-    assert expected_response in result["message"]
+    with pytest.raises(KeyError):
+        lambda_handler.main(event, lambda_context)
 
 
 @freeze_time("2020-04-06 13:40:00")
@@ -94,7 +93,5 @@ def test_lr04_lambda_handler_process_invalid_log_successfully(
 ):
     app = lambda_handler
 
-    response = app.main(event=lr_04_event_invalid_file, context=lambda_context)
-
-    assert response["status"] == "error"
-    assert response["message"] == f"LR04 Lambda accessed invalid log file"
+    with pytest.raises(FeedbackLogError):
+        app.main(event=lr_04_event_invalid_file, context=lambda_context)

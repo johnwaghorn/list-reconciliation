@@ -1,23 +1,19 @@
-# PDS - List reconciliation
+# List Reconciliation
 
-## Onboarding and day to day development
+Part of Primary Care Registration Management (PCRM)
 
-[Overview](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Development)
+## Links
 
-[Project Requirements](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Project+Requirements) 
+[List Reconciliation Solution Walkthrough](https://nhsd-confluence.digital.nhs.uk/display/PCRM/List+Reconciliation+Solution+Walkthrough)
 
-[First time setup steps](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Installation)
+[Developer Guide](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Developer+Guide)
 
-### Getting going in AWS
+[Key Operating Procedures](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Key+Operating+Procedures+for+List+Reconciliation?src=contextnavpagetreemode)
 
-[Install WSL, Docker, and dependencies](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Install+Terraform+and+AWS+prerequisites)
+[Functional Requirements](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Functional+Requirements?src=contextnavpagetreemode)
 
-[Set up your aws connection](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Set+up+the+AWS+connection)
+[Solution Design](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Solution+Design?src=contextnavpagetreemode)
 
-[Deploying to aws](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Deploying+to+AWS)
+[Testing](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Testing?src=contextnavpagetreemode)
 
-### Testing
-
-[Running the unit tests](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Running+the+unit+tests)
-
-[Running the integration tests](https://nhsd-confluence.digital.nhs.uk/display/PCRM/Running+the+Integration+tests)
+[Service & Support](https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?pageId=219710650&src=contextnavpagetreemode)

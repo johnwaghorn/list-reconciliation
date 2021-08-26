@@ -1,10 +1,10 @@
 import json
 import os
-import boto3
-
+import traceback
 from collections import defaultdict
 from typing import Dict, List, Tuple, Any
 
+import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
@@ -44,15 +44,19 @@ class DemographicDifferences(LambdaApplication):
 
             self.response = self.process_demographic_differences()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR15 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR15 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR15 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR15 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     @staticmethod
     def create_dsa_payload(

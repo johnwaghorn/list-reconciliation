@@ -6,7 +6,7 @@ import boto3
 import pytest
 from freezegun import freeze_time
 
-
+from services.jobs import JobNotFound
 from utils.database.models import JobStats
 
 AWS_REGION = os.getenv("AWS_REGION")
@@ -47,20 +47,14 @@ def test_get_pds_exclusive_registrations_with_no_existing_job_stats_ok(
 
 
 @pytest.mark.parametrize(
-    "input_job,expected",
+    "input_job",
     [
         pytest.param(
             {"job_id": ""},
-            {
-                "message": "Unhandled exception caught in LR12 Lambda",
-            },
             id="Empty_Job_id",
         ),
         pytest.param(
             {"job_id": "blah"},
-            {
-                "message": "Unhandled exception caught in LR12 Lambda",
-            },
             id="Non-Existing Job_id",
         ),
     ],
@@ -73,14 +67,12 @@ def test_lambda_handler_for(
     lambda_handler,
     lambda_context,
     input_job,
-    expected,
 ):
     lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
     lambda_handler.lr22_bucket = LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET
 
-    result = lambda_handler.main(input_job, lambda_context)
-
-    assert result["message"] == expected["message"]
+    with pytest.raises(JobNotFound):
+        lambda_handler.main(input_job, lambda_context)
 
 
 @freeze_time("2020-02-01 13:40:00")

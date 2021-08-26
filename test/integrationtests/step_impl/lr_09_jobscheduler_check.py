@@ -15,13 +15,14 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 EXPECTED_GP_ONLY_DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 
 s3 = boto3.client("s3", REGION_NAME)
+lambda_ = boto3.client("lambda", REGION_NAME)
 
 
 @step("trigger lr09 and expected statuscode is <expstatuscode>")
 def trigger_lr09(expstatuscode):
-    client = boto3.client("lambda", REGION_NAME)
-    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
-    for key, value in response.items():
+
+    response = lambda_.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
+    for key, _ in response.items():
         if key == "ResponseMetadata":
             assert response["ResponseMetadata"]["HTTPStatusCode"] == int(expstatuscode)
 
@@ -29,10 +30,9 @@ def trigger_lr09(expstatuscode):
 @step("trigger lr09 and ensure scheduled checked successfully completed")
 def trigger_lr09_get_requestid():
     expected_job_id = get_latest_jobid()
-    client = boto3.client("lambda", REGION_NAME)
-    response = client.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload="{}")
 
-    for key, value in response.items():
+    response = lambda_.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload="{}")
+    for key, _ in response.items():
         if key == "ResponseMetadata":
             tail_output = base64.b64decode(
                 response["ResponseMetadata"]["HTTPHeaders"]["x-amz-log-result"]
@@ -43,7 +43,7 @@ def trigger_lr09_get_requestid():
             try:
                 log_output.index(expected_line)
             except ValueError:
-                Messages.write_message("LR-09 scheduled check Unsucessfull")
+                Messages.write_message("LR-09 scheduled check unsuccessful")
             else:
                 Messages.write_message("LR-09 scheduled check sucessfully completed")
 

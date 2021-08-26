@@ -71,7 +71,7 @@ apply:
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
 
 apply-lambda: packages-layer
-	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.lambda.module.${lambda}
+	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.${lambda}
 
 output:
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json

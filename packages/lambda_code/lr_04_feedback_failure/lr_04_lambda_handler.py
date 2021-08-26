@@ -1,18 +1,19 @@
 import json
 import os
-import boto3
-
+import traceback
 from uuid import UUID
 from datetime import datetime
+
+import boto3
 from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
 
+import services.send_email_exchangelib
 from utils import InputFolderType, InvalidErrorType
 from utils.datetimezone import localize_date
 from utils.exceptions import FeedbackLogError
 from utils.logger import success, error, Message
 from utils.ssm import get_ssm_params
-import services.send_email_exchangelib
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -56,29 +57,34 @@ class FeedbackFailure(LambdaApplication):
 
             self.response = self.process_failed_upload_file()
 
-        except FeedbackLogError as err:
+        except FeedbackLogError as e:
             self.log_object.write_log(
                 "LR04C01",
                 log_row_dict={
                     "log_key": self.log_key,
-                    "error": str(err),
+                    "error": traceback.format_exc(),
                     "job_id": self.job_id,
                 },
             )
-
             self.response = error(
-                "LR04 Lambda accessed invalid log file", self.log_object.internal_id
+                f"LR04 Lambda accessed invalid log file with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR04 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR04 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR04 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR04 Lambda with error='{traceback.format_exc()}'",
+                self.log_object.internal_id,
             )
+            raise e
 
     def process_failed_upload_file(self) -> Message:
         """Reads LOG data and process the failed GP extract file, sends email containing invalid reasons,

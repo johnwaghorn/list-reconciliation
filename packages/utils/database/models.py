@@ -24,7 +24,7 @@ INFLIGHT_TABLE = os.getenv("INFLIGHT_TABLE")
 
 class DemographicsJobIdIndex(GlobalSecondaryIndex):
     class Meta:
-        index_name = "demographics-job_id-index"
+        index_name = "JobId"
         projection = AllProjection()
         read_capacity_units = 1000
         write_capacity_units = 1000
@@ -34,7 +34,7 @@ class DemographicsJobIdIndex(GlobalSecondaryIndex):
 
 class DemographicsDifferencesJobIdIndex(GlobalSecondaryIndex):
     class Meta:
-        index_name = "demographicsdifferences-job_id-index"
+        index_name = "JobId"
         projection = AllProjection()
         read_capacity_units = 1000
         write_capacity_units = 1000
@@ -44,7 +44,7 @@ class DemographicsDifferencesJobIdIndex(GlobalSecondaryIndex):
 
 class JobsIdIndex(GlobalSecondaryIndex):
     class Meta:
-        index_name = "jobs-id-index"
+        index_name = "JobId"
         projection = AllProjection()
         read_capacity_units = 1000
         write_capacity_units = 1000

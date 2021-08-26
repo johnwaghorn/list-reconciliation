@@ -1,17 +1,11 @@
-module "jobs" {
-  source                         = "../../modules/dynamodb"
-  table_name                     = "Jobs-${local.environment}"
-  table_hash_key                 = "Id"
-  table_range_key                = "PracticeCode"
-  point_in_time_recovery_enabled = true
-  kms_key_arn                    = module.kms["dynamodb"].output.arn
-  secondary_index = [
-    {
-      name            = "jobs-id-index",
-      hash_key        = "Id"
-      projection_type = "ALL"
-    }
-  ]
+module "lr_03_jobs" {
+  source = "../../modules/dynamodb_table"
+
+  table_name      = "${local.environment}-lr-03-jobs"
+  table_hash_key  = "Id"
+  table_range_key = "PracticeCode"
+  kms_key_arn     = module.kms["dynamodb"].key.arn
+
   attributes = [
     {
       name = "Id"
@@ -22,28 +16,23 @@ module "jobs" {
       type = "S"
     }
   ]
-}
 
-module "jobs_stats" {
-  source                         = "../../modules/dynamodb"
-  table_name                     = "JobStats-${local.environment}"
-  table_hash_key                 = "JobId"
-  point_in_time_recovery_enabled = true
-  kms_key_arn                    = module.kms["dynamodb"].output.arn
-  attributes = [
+  secondary_index = [
     {
-      name = "JobId"
-      type = "S"
+      name            = "JobId",
+      hash_key        = "Id"
+      projection_type = "ALL"
     }
   ]
 }
 
-#tfsec:ignore:aws-dynamodb-enable-recovery
-module "in_flight" {
-  source         = "../../modules/dynamodb"
-  table_name     = "InFlight-${local.environment}"
+module "lr_28_jobs_stats" {
+  source = "../../modules/dynamodb_table"
+
+  table_name     = "${local.environment}-lr-28-job-stats"
   table_hash_key = "JobId"
-  kms_key_arn    = module.kms["dynamodb"].output.arn
+  kms_key_arn    = module.kms["dynamodb"].key.arn
+
   attributes = [
     {
       name = "JobId"
@@ -53,19 +42,32 @@ module "in_flight" {
 }
 
 #tfsec:ignore:aws-dynamodb-enable-recovery
-module "demographics" {
-  source          = "../../modules/dynamodb"
-  table_name      = "Demographics-${local.environment}"
-  table_hash_key  = "Id"
-  table_range_key = "JobId"
-  kms_key_arn     = module.kms["dynamodb"].output.arn
-  secondary_index = [
+module "lr_29_in_flight" {
+  source = "../../modules/dynamodb_table"
+
+  table_name                     = "${local.environment}-lr-29-in-flight"
+  table_hash_key                 = "JobId"
+  kms_key_arn                    = module.kms["dynamodb"].key.arn
+  point_in_time_recovery_enabled = false
+
+  attributes = [
     {
-      name            = "demographics-job_id-index",
-      hash_key        = "JobId"
-      projection_type = "ALL"
+      name = "JobId"
+      type = "S"
     }
   ]
+}
+
+#tfsec:ignore:aws-dynamodb-enable-recovery
+module "lr_30_demographics" {
+  source = "../../modules/dynamodb_table"
+
+  table_name                     = "${local.environment}-lr-30-demographics"
+  table_hash_key                 = "Id"
+  table_range_key                = "JobId"
+  kms_key_arn                    = module.kms["dynamodb"].key.arn
+  point_in_time_recovery_enabled = false
+
   attributes = [
     {
       name = "Id"
@@ -76,22 +78,26 @@ module "demographics" {
       type = "S"
     }
   ]
-}
 
-#tfsec:ignore:aws-dynamodb-enable-recovery
-module "demographics_differences" {
-  source          = "../../modules/dynamodb"
-  table_name      = "DemographicsDifferences-${local.environment}"
-  table_hash_key  = "Id"
-  table_range_key = "JobId"
-  kms_key_arn     = module.kms["dynamodb"].output.arn
   secondary_index = [
     {
-      name            = "demographicsdifferences-job_id-index",
+      name            = "JobId",
       hash_key        = "JobId"
       projection_type = "ALL"
     }
   ]
+}
+
+#tfsec:ignore:aws-dynamodb-enable-recovery
+module "lr_31_demographics_differences" {
+  source = "../../modules/dynamodb_table"
+
+  table_name                     = "${local.environment}-lr-31-demographics-differences"
+  table_hash_key                 = "Id"
+  table_range_key                = "JobId"
+  kms_key_arn                    = module.kms["dynamodb"].key.arn
+  point_in_time_recovery_enabled = false
+
   attributes = [
     {
       name = "Id"
@@ -100,6 +106,14 @@ module "demographics_differences" {
     {
       name = "JobId"
       type = "S"
+    }
+  ]
+
+  secondary_index = [
+    {
+      name            = "JobId",
+      hash_key        = "JobId"
+      projection_type = "ALL"
     }
   ]
 }

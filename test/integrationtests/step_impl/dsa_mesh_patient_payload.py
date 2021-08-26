@@ -1,12 +1,13 @@
-from getgauge.python import step
+import json
+import os
 from tempfile import gettempdir
-from .tf_aws_resources import get_terraform_output
-from utils.datetimezone import get_datetime_now
-from .test_helpers import PDS_API_ENV
 
 import boto3
-import os
-import json
+from getgauge.python import step
+
+from .test_helpers import PDS_API_ENV
+from .tf_aws_resources import get_terraform_output
+from utils.datetimezone import get_datetime_now
 
 test_datetime = get_datetime_now()
 temp_dir = gettempdir()
@@ -16,6 +17,8 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 MESH_BUCKET = get_terraform_output("mesh_bucket")
 OUTBOUND_INTERNALSPINE = "outbound_X26OT178TEST_to_INTERNALSPINE"
+
+s3 = boto3.client("s3", REGION_NAME)
 
 
 def update_exp_patient_record_lr23(exp_path, patient_id, job_id):
@@ -32,12 +35,10 @@ def update_exp_patient_record_lr23(exp_path, patient_id, job_id):
 
 
 @step(
-    "connect to <lr_bucket> s3 bucket and ensure patient payload record file with patientid <patientid> is generated as expected <exp_datafile>"
+    "connect to MESH bucket and ensure patient payload record file with patientid <patientid> is generated as expected <exp_datafile>"
 )
-def assert_expected_file_in_lr13(lr_bucket, patientid, exp_datafile):
-    s3 = boto3.client("s3", REGION_NAME)
+def assert_expected_file_in_mesh_bucket(patientid, exp_datafile):
     result = s3.list_objects(Bucket=MESH_BUCKET)
-
     for filename in result.get("Contents"):
         if OUTBOUND_INTERNALSPINE in filename.get("Key") and patientid in filename.get("Key"):
             data = s3.get_object(Bucket=MESH_BUCKET, Key=filename.get("Key"))
@@ -47,7 +48,7 @@ def assert_expected_file_in_lr13(lr_bucket, patientid, exp_datafile):
             patient_id = act_contents["system"]["patientId"]
             job_id = act_contents["system"]["jobId"]
 
-            exp_path = os.path.join(DATA, lr_bucket + exp_datafile)
+            exp_path = os.path.join(DATA, "mesh", exp_datafile)
             exp_data = json.dumps(
                 update_exp_patient_record_lr23(exp_path, patient_id, job_id), indent=4
             )

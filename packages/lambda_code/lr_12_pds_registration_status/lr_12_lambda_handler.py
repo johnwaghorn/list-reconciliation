@@ -3,7 +3,7 @@ import io
 import os
 import traceback
 from datetime import datetime
-from typing import Dict, List
+from typing import List
 
 import boto3
 import botocore
@@ -39,15 +39,19 @@ class PDSRegistrationStatus(LambdaApplication):
 
             self.response = self.get_pds_exclusive_registrations()
 
-        except KeyError as err:
+        except KeyError as e:
             self.response = error(
-                f"LR12 Lambda tried to access missing key={str(err)}", self.log_object.internal_id
+                f"LR12 Lambda tried to access missing with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
-        except Exception:
+        except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR12 Lambda", self.log_object.internal_id
+                f"Unhandled exception caught in LR12 Lambda with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
     def get_practice_patients(self, practice_code: str) -> List[str]:
         """Get NHS numbers for patients registered at a practice from PDS extract.
