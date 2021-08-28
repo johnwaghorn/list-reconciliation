@@ -1,0 +1,191 @@
+name: Create Environment
+on:
+  push:
+
+jobs:
+  create-python-package:
+    name: Python Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Python
+        id: setup-python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Pipenv
+        run: |
+          python -m pip install --upgrade pipenv
+      - name: Cache Python
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.local/share/virtualenvs
+            ./.pip_cache
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
+      - name: Install dependencies
+        run: |
+          make python-deps
+      - name: Format check
+        run: |
+          pipenv run make black-check
+      - name: Syntax check
+        run: |
+          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Error checks
+        run: |
+          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Run tests
+        run: |
+          pipenv run pytest --html=report/reports.html
+      - name: Upload unit test report artifact
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit-test-report
+          path: ./report/*
+          retention-days: 2
+      - name: Create packages
+        run: |
+          make python-package
+      - name: Compress packages
+        run: |
+          make compress-packages
+      - name: Upload Packages Layer
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-packages
+          retention-days: 1
+          path: |
+            ./dependencies_layer.tgz
+            ./packages_layer.tgz
+
+  create-list-reconciliation-stack:
+    name: Create List Reconciliation Stack
+    runs-on: self-hosted
+    needs:
+      - create-python-package
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      # TODO confirm recieves all python packaging artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: python-packages
+      - name: Uncompress packages
+        run: |
+          make uncompress-packages
+      - name: Terraform Format Check
+        run: |
+          make fmt-check
+      - name: Terraform Init
+        run: |
+          make init
+          make workspace env=$(make get-branch-env)
+      - name: Terraform Validate
+        run: |
+          make validate
+      - name: Terraform Apply
+        run: |
+          make apply
+      - name: Upload terraform output artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform-outputs
+          path: ./terraform_outputs_list-reconciliation.json
+          retention-days: 2
+
+  create-mesh-stack:
+    name: Create Mesh Stack
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Terraform Format Check
+        run: |
+          make fmt-check
+      - name: Terraform Init
+        run: |
+          make init stack="mesh"
+          make workspace env="preprod" stack="mesh"
+      - name: Terraform Validate
+        run: |
+          make validate stack="mesh"
+      - name: Terraform Apply
+        if: github.ref == 'ref/head/master'
+        run: |
+          make apply stack="mesh"
+
+  run-integration-tests:
+    name: Run Integration Tests
+    runs-on: self-hosted
+    needs:
+      - create-list-reconciliation-stack
+      - create-mesh-stack
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Python
+        id: setup-python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Pipenv
+        run: |
+          python -m pip install --upgrade pipenv
+      - name: Cache Python
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.local/share/virtualenvs
+            ./.pip_cache
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
+      - name: Install dependencies
+        run: |
+          make python-deps
+      - name: Assume Role in Dev Account for Integration Tests
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          role-to-assume: "arn:aws:iam::092420156801:role/LRTerraformDeploy"
+          role-duration-seconds: 1200
+      - name: Assume Role in PreProd Account for Integration Tests
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          role-to-assume: "arn:aws:iam::287634746327:role/LRTerraformDeploy"
+          role-duration-seconds: 1200
+      - name: Download Terraform Output
+        uses: actions/download-artifact@v2
+        with:
+          name: terraform-outputs
+      - name: Run Integration tests
+        run: |
+          # Ensure gpextract and mock_data install location is available to Gauge
+          export PATH=$PATH:/opt/github_runner/.local/bin
+          pipenv run make integrationtests
+      - name: Run Integration PreProd tests
+        if: github.ref == 'ref/head/master'
+        run: |
+          # Ensure gpextract and mock_data install location is available to Gauge
+          export PATH=$PATH:/opt/github_runner/.local/bin
+          pipenv run make integrationtests-preprod
+      - name: Upload Integration tests result artifact
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-report
+          path: ./test/integrationtests/reports/html-report/*
+          retention-days: 2
+      - name: Upload Integration tests logs artifact
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-logs
+          path: ./test/integrationtests/logs/*
+          retention-days: 2

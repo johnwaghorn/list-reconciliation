@@ -1,0 +1,48 @@
+name: Destroy Environment
+on:
+  delete:
+    branches-ignore:
+      - master
+      - develop
+
+jobs:
+  destroy-list-reconciliation-stack:
+    name: Destroy List Reconciliation Stack
+    runs-on: self-hosted
+    if: github.event.pull_request.merged == true
+    env:
+      FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Create empty dependency directories
+        run: |
+          mkdir -p ./packages_layer
+          mkdir -p ./dependencies_layer
+      - name: Terraform Init
+        run: |
+          make init
+          make workspace env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+      - name: Terraform Destroy
+        run: |
+          make destroy
+      - name: Terraform Delete workspace
+        run: |
+          make workspace-delete env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+
+  destroy-mesh-stack:
+    name: Destroy Mesh Stack
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Terraform Init
+        run: |
+          make init stack="mesh"
+          make workspace env="preprod" stack="mesh"
+      - name: Terraform Destroy
+        run: |
+          make destroy stack="mesh"
+      - name: Terraform Delete workspace
+        run: |
+          make workspace-delete stack="mesh" env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
