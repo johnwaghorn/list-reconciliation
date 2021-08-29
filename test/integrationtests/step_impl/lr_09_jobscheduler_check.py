@@ -42,10 +42,9 @@ def trigger_lr09_get_requestid():
 
             try:
                 log_output.index(expected_line)
+                Messages.write_message("LR-09 scheduled check sucessfully completed")
             except ValueError:
                 Messages.write_message("LR-09 scheduled check unsuccessful")
-            else:
-                Messages.write_message("LR-09 scheduled check sucessfully completed")
 
     data = json.loads(response["Payload"].read())
     data_store.scenario["lr_09"] = {"lr_09_data": data}

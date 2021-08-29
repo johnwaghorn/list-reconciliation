@@ -1,6 +1,11 @@
 # LR-15 generates consolidated csv file with the respective GP Practice comparision records
 
-* setup steps to empty related tables and buckets for LR-15 tests
+* setup: empty table "demographics_table"
+* setup: empty table "demographics_differences_table"
+* setup: empty table "in_flight_table"
+* setup: empty bucket "lr_01_bucket"
+* setup: empty bucket "lr_13_bucket"
+* setup: empty bucket "lr_22_bucket"
 
 ## Consolidated Demographic Differences file is empty when comparison is not completed
 

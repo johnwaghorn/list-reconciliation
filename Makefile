@@ -122,6 +122,14 @@ integrationtests-preprod:
 behave-integration-tests:
 	behave ./test/integration
 
+
+#
+# Security
+#
+
+tfsec:
+	tfsec ./terraform/stacks/${stack}
+
 #
 # Utilities
 #

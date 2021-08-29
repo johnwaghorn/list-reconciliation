@@ -134,7 +134,7 @@ class MeshPostOffice(LambdaApplication):
         if delete_original:
             self.log_object.write_log(
                 "LR25I04",
-                log_row_dict={"old_key": {old_key}, "old_bucket": {old_bucket}},
+                log_row_dict={"file_name": old_key, "bucket": old_bucket},
             )
 
             self.s3.Object(old_bucket, old_key).delete()

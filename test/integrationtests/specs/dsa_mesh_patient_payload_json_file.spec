@@ -1,7 +1,7 @@
 # Payload json files produced per patient in MESH OUTBOUND_INTERNALSPINE
 
-* setup steps to empty all buckets
-* setup steps to empty all database tables
+* Empty all buckets
+* Empty all database tables
 
 ## Ensure individual payload json file is produced sucessfully
 

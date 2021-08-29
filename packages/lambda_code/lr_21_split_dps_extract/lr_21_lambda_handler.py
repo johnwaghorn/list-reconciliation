@@ -70,6 +70,13 @@ class SplitDPSExtract(LambdaApplication):
         return
 
     def s3_event(self, key: str, is_compressed: bool = True):
+        self.log_object.write_log(
+            "LR21I09",
+            log_row_dict={
+                "file_name": key,
+                "bucket": self.input_bucket,
+            },
+        )
         # S3 Select all the gp_practice codes, sadly there's no DISTINCT or UNIQUE available
         s3_select = s3.select_object_content(
             Bucket=self.input_bucket,

@@ -18,6 +18,21 @@ module "lr_02_validate_and_parse" {
   name                   = "lr_02_validate_and_parse"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 4
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+    { id = module.lambda_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write   = [module.lr_29_in_flight.table.arn, module.lr_03_jobs.table.arn]
   kms_read_write        = [module.kms["dynamodb"].key.arn, module.kms["s3"].key.arn]
@@ -26,7 +41,6 @@ module "lr_02_validate_and_parse" {
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_01_gp_extract_input.bucket.arn]
   ssm_read_only         = [module.list_rec_email_password.parameter.arn]
-
   environment_variables = {
     AWS_S3_REGISTRATION_EXTRACT_BUCKET = module.lr_01_gp_extract_input.bucket.bucket
     INFLIGHT_TABLE                     = module.lr_29_in_flight.table.name
@@ -36,19 +50,37 @@ module "lr_02_validate_and_parse" {
   }
 }
 
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_04_feedback_failure" {
   source = "../../modules/lambda_function"
 
   name                   = "lr_04_feedback_failure"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.private_subnets
+
+  cidr_block_egresses_length = 1
+  cidr_block_egresses = [
+    { cidr_block = "0.0.0.0/0", port = 443 }
+  ]
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   kms_read_write        = [module.kms["ssm"].key.arn, module.kms["s3"].key.arn]
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_01_gp_extract_input.bucket.arn]
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/email/*"]
-
   environment_variables = {
     AWS_S3_REGISTRATION_EXTRACT_BUCKET = module.lr_01_gp_extract_input.bucket.bucket
     EMAIL_SSM_PREFIX                   = "/${local.environment}/email/"
@@ -57,12 +89,32 @@ module "lr_04_feedback_failure" {
   }
 }
 
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_07_pds_hydrate" {
   source = "../../modules/lambda_function"
 
   name                   = "lr_07_pds_hydrate"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.private_subnets
+
+  cidr_block_egresses_length = 1
+  cidr_block_egresses = [
+    { cidr_block = "0.0.0.0/0", port = 443 }
+  ]
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 4
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+    { id = module.lambda_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write            = [module.lr_30_demographics.table.arn]
   kms_read_write                 = [module.kms["dynamodb"].key.arn, module.kms["ssm"].key.arn, module.kms["s3"].key.arn]
@@ -73,11 +125,9 @@ module "lr_07_pds_hydrate" {
   s3_read_write                  = [module.lr_06_patient_records.bucket.arn]
   ssm_read_write                 = [module.pds_api_access_token.parameter.arn]
   ssm_read_by_path               = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/pds/*"]
-
   environment_variables = {
     DEMOGRAPHIC_COMPARISON_LAMBDA = module.lr_08_demographic_comparison.lambda.arn
     DEMOGRAPHICS_TABLE            = module.lr_30_demographics.table.name
-    LR_06_BUCKET                  = module.lr_06_patient_records.bucket.bucket
     PDS_BASE_URL                  = try(local.pds_fhir_api_url[local.environment], local.pds_fhir_api_url["default"])
     SSM_STORE_PREFIX              = "/${local.environment}/pds/"
   }
@@ -89,6 +139,20 @@ module "lr_08_demographic_comparison" {
   name                   = "lr_08_demographic_comparison"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write   = [module.lr_30_demographics.table.arn, module.lr_31_demographics_differences.table.arn]
   kms_read_write        = [module.kms["dynamodb"].key.arn, module.kms["s3"].key.arn]
@@ -107,6 +171,21 @@ module "lr_09_scheduled_check" {
   name                   = "lr_09_scheduled_check"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 4
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+    { id = module.step_function_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write = [
     module.lr_30_demographics.table.arn, "${module.lr_30_demographics.table.arn}/index/*",
@@ -119,7 +198,6 @@ module "lr_09_scheduled_check" {
   lambda_layers             = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days     = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   step_functions_to_invoke  = [module.lr_10_registration_orchestration.step_function.arn]
-
   environment_variables = {
     DEMOGRAPHICS_TABLE      = module.lr_30_demographics.table.name
     INFLIGHT_TABLE          = module.lr_29_in_flight.table.name
@@ -136,6 +214,20 @@ module "lr_11_gp_registration_status" {
   name                   = "lr_11_gp_registration_status"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write = [
     module.lr_30_demographics.table.arn, "${module.lr_30_demographics.table.arn}/index/*",
@@ -146,7 +238,6 @@ module "lr_11_gp_registration_status" {
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn]
-
   environment_variables = {
     DEMOGRAPHICS_TABLE                = module.lr_30_demographics.table.name
     JOB_STATS_TABLE                   = module.lr_28_jobs_stats.table.name
@@ -155,12 +246,31 @@ module "lr_11_gp_registration_status" {
   }
 }
 
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_12_pds_registration_status" {
   source = "../../modules/lambda_function"
 
   name                   = "lr_12_pds_registration_status"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.private_subnets
+
+  cidr_block_egresses_length = 1
+  cidr_block_egresses = [
+    { cidr_block = "0.0.0.0/0", port = 443 }
+  ]
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write = [
     module.lr_30_demographics.table.arn, "${module.lr_30_demographics.table.arn}/index/*",
@@ -173,7 +283,6 @@ module "lr_12_pds_registration_status" {
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn, module.lr_22_pds_reg_output.bucket.arn]
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/pds/*"]
   ssm_read_write        = [module.pds_api_access_token.parameter.arn]
-
   environment_variables = {
     DEMOGRAPHICS_TABLE                      = module.lr_30_demographics.table.name
     JOB_STATS_TABLE                         = module.lr_28_jobs_stats.table.name
@@ -186,12 +295,31 @@ module "lr_12_pds_registration_status" {
   }
 }
 
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_14_send_list_rec_results" {
   source = "../../modules/lambda_function"
 
   name                   = "lr_14_send_list_rec_results"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.private_subnets
+
+  cidr_block_egresses_length = 1
+  cidr_block_egresses = [
+    { cidr_block = "0.0.0.0/0", port = 443 }
+  ]
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write = [
     module.lr_31_demographics_differences.table.arn, "${module.lr_31_demographics_differences.table.arn}/index/*",
@@ -206,7 +334,6 @@ module "lr_14_send_list_rec_results" {
     "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/mesh/*"
   ]
   s3_read_write = [module.lr_13_reg_diffs_output.bucket.arn, module.mesh_bucket.bucket.arn]
-
   environment_variables = {
     DEMOGRAPHICS_DIFFERENCES_TABLE    = module.lr_31_demographics_differences.table.name
     EMAIL_SSM_PREFIX                  = "/${local.environment}/email/"
@@ -227,6 +354,20 @@ module "lr_15_process_demo_diffs" {
   name                   = "lr_15_process_demo_diffs"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write = [
     module.lr_30_demographics.table.arn, "${module.lr_30_demographics.table.arn}/index/*",
@@ -239,7 +380,6 @@ module "lr_15_process_demo_diffs" {
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn, module.mesh_bucket.bucket.arn]
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/mesh/*"]
-
   environment_variables = {
     DEMOGRAPHICS_DIFFERENCES_TABLE    = module.lr_31_demographics_differences.table.name
     DEMOGRAPHICS_TABLE                = module.lr_30_demographics.table.name
@@ -257,6 +397,21 @@ module "lr_21_split_dps_extract" {
   name                   = "lr_21_split_dps_extract"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 4
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+    { id = module.lambda_endpoint.security_group.id, port = 443 },
+  ]
 
   kms_read_write        = [module.kms["s3"].key.arn]
   lambda_invoke_self    = true
@@ -264,7 +419,6 @@ module "lr_21_split_dps_extract" {
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_only          = [module.lr_20_pds_reg_input.bucket.arn]
   s3_read_write         = [module.lr_22_pds_reg_output.bucket.arn]
-
   environment_variables = {
     LR_20_SUPPLEMENTARY_INPUT_BUCKET  = module.lr_20_pds_reg_input.bucket.bucket
     LR_22_SUPPLEMENTARY_OUTPUT_BUCKET = module.lr_22_pds_reg_output.bucket.bucket
@@ -277,6 +431,20 @@ module "lr_24_save_records_to_s3" {
   name                   = "lr_24_save_records_to_s3"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   kms_read_write        = [module.kms["s3"].key.arn]
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
@@ -290,6 +458,20 @@ module "lr_25_mesh_post_office" {
   name                   = "lr_25_mesh_post_office"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   event_schedule_expression = try(local.lr_25_event_schedule_expression[local.environment], local.lr_25_event_schedule_expression["default"])
   kms_read_write            = [module.kms["mesh"].key.arn, module.kms["s3"].key.arn]
@@ -304,13 +486,26 @@ module "lr_27_job_cleanup" {
   name                   = "lr_27_job_cleanup"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   dynamodb_read_write   = [module.lr_03_jobs.table.arn, module.lr_29_in_flight.table.arn]
   kms_read_write        = [module.kms["dynamodb"].key.arn, module.kms["s3"].key.arn]
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn]
-
   environment_variables = {
     INFLIGHT_TABLE                    = module.lr_29_in_flight.table.name
     JOBS_TABLE                        = module.lr_03_jobs.table.name
@@ -324,6 +519,20 @@ module "lr_29_firehose_transform" {
   name                   = "lr_29_firehose_transform"
   environment            = local.environment
   kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = module.vpc.vpc_id
+  vpc_subnet_ids         = module.vpc.intra_subnets
+
+  prefix_list_egresses_length = 2
+  prefix_list_egresses = [
+    { id = module.s3_endpoint.endpoint.prefix_list_id, port = 443 },
+    { id = module.dynamodb_endpoint.endpoint.prefix_list_id, port = 443 }
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { id = module.cloudwatch_endpoint.security_group.id, port = 443 },
+    { id = module.kms_endpoint.security_group.id, port = 443 },
+    { id = module.ssm_endpoint.security_group.id, port = 443 },
+  ]
 
   lambda_layers         = [module.packages.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])

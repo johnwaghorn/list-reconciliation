@@ -1,7 +1,7 @@
 # LR-07 LR-08 lambda for file comparision
 
-* setup steps to empty all buckets
-* setup steps to empty all database tables
+* Empty all buckets
+* Empty all database tables
 
 ## Ensure expected comparision is done for the non sensitive patient matching the PDS record
 

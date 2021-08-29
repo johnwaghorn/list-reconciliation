@@ -22,7 +22,7 @@
    |E1DD1AA         |DOW~2|5       |"_INVALID_": {"DATE_OF_DOWNLOAD": "Transaction/Record Date and Time - Must be a valid transmission date and timestamp, in the format YYYMMDDHHMM, which is less than 14 days old and not in the future.", "POSTCODE": "Postcode - Must be 8 characters and in one of the following formats: AN   NAA, ANN  NAA, AAN  NAA, AANN NAA, ANA  NAA, AANA NAA.", "ON_LINES": "6-7"}       |
    |E1DD1AA         |DOW~2|6       |"_INVALID_": {"DATE_OF_DOWNLOAD": "Transaction/Record Date and Time - Must be a valid transmission date and timestamp, in the format YYYMMDDHHMM, which is less than 14 days old and not in the future.", "DRUGS_DISPENSED_MARKER": "Drug Dispensed Marker - Must be 'Y' or blank.", "ON_LINES": "6-7"}                                                                            |
 
-* setup steps to empty all buckets
+* Empty all buckets
 
 ## Ensure correct validation messages are logged in the fail logs folder for different invalid scenarios
 

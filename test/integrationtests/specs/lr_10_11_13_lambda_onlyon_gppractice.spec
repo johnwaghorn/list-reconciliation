@@ -1,7 +1,7 @@
 # LR-10 state function registration differences and LR-11 to produce GP only data
 
-* setup steps to empty all buckets
-* setup steps to empty all database tables
+* Empty all buckets
+* Empty all database tables
 
 ## Ensure that when the nhs_number and gp_code matches with the pds record then empty onlyonGP file should be produced
 

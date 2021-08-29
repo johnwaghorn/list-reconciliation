@@ -19,22 +19,26 @@ ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 class PdsHydrate(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
-        self.s3 = boto3.client("s3")
         self.api = PDSAPI(self.system_config)
-        self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
         self.job_id = None
-
-    def initialise(self):
-        pass
+        self.lambda_ = boto3.client("lambda")
+        self.s3 = boto3.client("s3")
 
     def start(self):
+        upload_bucket = self.event["Records"][0]["s3"]["bucket"]["name"]
         upload_key = self.event["Records"][0]["s3"]["object"]["key"]
+
+        self.log_object.write_log(
+            "LR07I06",
+            log_row_dict={
+                "file_name": upload_key,
+                "bucket": upload_bucket,
+            },
+        )
 
         body = json.loads(
             retry_func(
-                lambda: self.s3.get_object(
-                    Bucket=self.system_config["LR_06_BUCKET"], Key=upload_key
-                ),
+                lambda: self.s3.get_object(Bucket=upload_bucket, Key=upload_key),
                 wait_exponential_multiplier=1000,
                 wait_exponential_max=10000,
                 stop_max_attempt_number=10,
@@ -92,9 +96,7 @@ class PdsHydrate(LambdaApplication):
             self.response.update({"internal_id": self.log_object.internal_id})
 
             retry_func(
-                lambda: self.s3.delete_object(
-                    Bucket=self.system_config["LR_06_BUCKET"], Key=upload_key
-                ),
+                lambda: self.s3.delete_object(Bucket=upload_bucket, Key=upload_key),
                 wait_exponential_multiplier=1000,
                 wait_exponential_max=10000,
                 stop_max_attempt_number=10,

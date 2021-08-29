@@ -140,3 +140,50 @@ variable "reserved_concurrent_executions" {
   description = ""
   default     = null
 }
+
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
+variable "vpc_subnet_ids" {
+  description = "Subnet IDs for Lambda to execute in"
+  type        = list(string)
+  default     = []
+}
+
+variable "security_group_egresses_length" {
+  description = "Hack for creating Security Group Egresses"
+  type        = number
+  default     = 0
+}
+
+variable "security_group_egresses" {
+  description = "Security Group Egresses"
+  type        = list(object({ id = string, port = number }))
+  default     = []
+}
+
+variable "cidr_block_egresses_length" {
+  description = "Hack for creating CIDR Block Egresses"
+  type        = number
+  default     = 0
+}
+
+variable "cidr_block_egresses" {
+  description = "CIDR Block Egresses"
+  type        = list(object({ cidr_block = string, port = number }))
+  default     = []
+}
+
+variable "prefix_list_egresses_length" {
+  description = "Hack for creating Prefix List Egresses"
+  type        = number
+  default     = 0
+}
+
+variable "prefix_list_egresses" {
+  description = "Prefix List Egresses"
+  type        = list(object({ id = string, port = number }))
+  default     = []
+}

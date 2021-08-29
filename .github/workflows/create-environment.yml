@@ -71,7 +71,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      # TODO confirm recieves all python packaging artifacts
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:

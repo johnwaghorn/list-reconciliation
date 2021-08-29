@@ -22,4 +22,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
       filter_prefix       = lambda_function.value.key_prefix
     }
   }
+
+  depends_on = [
+    aws_lambda_permission.s3
+  ]
 }

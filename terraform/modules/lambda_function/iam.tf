@@ -18,6 +18,15 @@ data "aws_iam_policy_document" "role_assume" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "policy_vpc_attachment" {
+  role       = aws_iam_role.role.name
+  policy_arn = data.aws_iam_policy.policy_vpc.arn
+}
+
+data "aws_iam_policy" "policy_vpc" {
+  name = "AWSLambdaVPCAccessExecutionRole"
+}
+
 resource "aws_iam_role_policy_attachment" "policy_attachment" {
   role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.policy.arn

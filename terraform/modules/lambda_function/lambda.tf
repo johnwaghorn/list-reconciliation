@@ -17,5 +17,13 @@ resource "aws_lambda_function" "lambda" {
     }
   }
 
-  depends_on = [aws_cloudwatch_log_group.lambda]
+  vpc_config {
+    security_group_ids = [aws_security_group.lambda.id]
+    subnet_ids         = var.vpc_subnet_ids
+  }
+
+  depends_on = [
+    aws_cloudwatch_log_group.lambda,
+    aws_iam_role_policy_attachment.policy_vpc_attachment
+  ]
 }

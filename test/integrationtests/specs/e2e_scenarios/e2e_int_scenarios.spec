@@ -2,8 +2,8 @@
 
 tags: e2e
 
-* setup steps to empty all buckets
-* setup steps to empty all database tables
+* Empty all buckets
+* Empty all database tables
 
 ## Ensure that gponly, pdsonly, cdd files and MESH DSA payload are produced as expected
 

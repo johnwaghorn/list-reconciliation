@@ -91,7 +91,7 @@ class JobCleanup(LambdaApplication):
             self.log_object.write_log(
                 "LR27I03",
                 log_row_dict={
-                    "key": key,
+                    "file_name": key,
                     "bucket": self.registrations_output_bucket,
                     "job_id": self.job_id,
                 },
