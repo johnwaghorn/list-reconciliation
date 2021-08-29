@@ -1,7 +1,8 @@
 name: Create Environment
 on:
   push:
-
+    branches-ignore:
+      - master
 jobs:
   create-python-package:
     name: Python Package

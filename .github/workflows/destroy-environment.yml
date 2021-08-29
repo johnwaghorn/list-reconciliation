@@ -9,7 +9,6 @@ jobs:
   destroy-list-reconciliation-stack:
     name: Destroy List Reconciliation Stack
     runs-on: self-hosted
-    if: github.event.pull_request.merged == true
     env:
       FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
     steps:
@@ -33,6 +32,8 @@ jobs:
   destroy-mesh-stack:
     name: Destroy Mesh Stack
     runs-on: self-hosted
+    env:
+      FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
