@@ -36,7 +36,7 @@ jobs:
       - name: Terraform Init
         run: |
           make init stack="mesh"
-          make workspace env=$(make get-branch-env branch=${{ github.ref }})
+          make workspace stack="mesh" env=$(make get-branch-env branch=${{ github.ref }})
       - name: Terraform Destroy
         run: |
           make destroy stack="mesh"
