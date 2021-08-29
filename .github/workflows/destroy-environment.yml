@@ -19,13 +19,13 @@ jobs:
       - name: Terraform Init
         run: |
           make init
-          make workspace env=$(make get-branch-env branch=${{ github.ref }})
+          make workspace env=$(make get-branch-env branch=${{ github.event.ref }})
       - name: Terraform Destroy
         run: |
           make destroy
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete env=$(make get-branch-env branch=${{ github.ref }})
+          make workspace-delete env=$(make get-branch-env branch=${{ github.event.ref }})
 
   destroy-mesh-stack:
     name: Destroy Mesh Stack
@@ -36,10 +36,10 @@ jobs:
       - name: Terraform Init
         run: |
           make init stack="mesh"
-          make workspace stack="mesh" env=$(make get-branch-env branch=${{ github.ref }})
+          make workspace stack="mesh" env=$(make get-branch-env branch=${{ github.event.ref }})
       - name: Terraform Destroy
         run: |
           make destroy stack="mesh"
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete stack="mesh" env=$(make get-branch-env branch=${{ github.ref }})
+          make workspace-delete stack="mesh" env=$(make get-branch-env branch=${{ github.event.ref }})
