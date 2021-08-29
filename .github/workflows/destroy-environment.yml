@@ -9,8 +9,6 @@ jobs:
   destroy-list-reconciliation-stack:
     name: Destroy List Reconciliation Stack
     runs-on: self-hosted
-    env:
-      FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,29 +19,27 @@ jobs:
       - name: Terraform Init
         run: |
           make init
-          make workspace env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+          make workspace env=$(make get-branch-env branch=${{ github.ref }})
       - name: Terraform Destroy
         run: |
           make destroy
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+          make workspace-delete env=$(make get-branch-env branch=${{ github.ref }})
 
   destroy-mesh-stack:
     name: Destroy Mesh Stack
     runs-on: self-hosted
-    env:
-      FEATURE_BRANCH: ${GITHUB_HEAD_REF##*/}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Terraform Init
         run: |
           make init stack="mesh"
-          make workspace env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+          make workspace env=$(make get-branch-env branch=${{ github.ref }})
       - name: Terraform Destroy
         run: |
           make destroy stack="mesh"
       - name: Terraform Delete workspace
         run: |
-          make workspace-delete stack="mesh" env=$(make get-branch-env branch=${{ env.FEATURE_BRANCH }})
+          make workspace-delete stack="mesh" env=$(make get-branch-env branch=${{ github.ref }})
