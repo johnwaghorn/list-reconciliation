@@ -1,18 +1,15 @@
-from enum import Enum
-from json import JSONDecodeError
-from time import time
-from typing import Dict
-from typing import Union
-
 import datetime
 import json
 import uuid
-
-from jsonpath_ng import parse
-from retrying import retry
+from enum import Enum
+from json import JSONDecodeError
+from time import time
+from typing import Dict, Optional, Union
 
 import jwt
 import requests
+from jsonpath_ng import parse
+from retrying import retry
 
 from utils.ssm import get_ssm_params, put_ssm_params
 
@@ -91,13 +88,7 @@ PDS_DATA_MAPPING_CONFIG = {
 }
 
 
-class PDSAPIHelper:
-    """Class for FHIR PDS API request
-    system_config is a dict with all Lambda environmental variable
-    The keys are env variables and value is the value set
-
-    """
-
+class PDSAPI:
     def __init__(self, system_config: dict):
         self.pds_data = {}
         if not isinstance(system_config, dict):
@@ -165,7 +156,7 @@ class PDSAPIHelper:
         ),
         stop_max_attempt_number=20,
     )
-    def get_pds_record(self, nhs_number: str, job_id: str) -> Dict[str, str]:
+    def get_pds_record(self, nhs_number: str, job_id: uuid) -> Optional[Dict[str, str]]:
         """
         Calls FHIR/PDS API URL using patient's NHS NUMBER and returns the JSON including
         patients patients
@@ -191,8 +182,8 @@ class PDSAPIHelper:
                 token = self.get_access_token()
                 auth_header = {"Authorization": f"Bearer {token['access_token']}"}
                 headers.update(auth_header)
-            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
 
+            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
         except requests.exceptions.ConnectionError:
             raise PDSAPIError(f"Connection error: {self.pds_url}")
 
@@ -200,13 +191,9 @@ class PDSAPIHelper:
 
         if response.ok:
             self.pds_data = response.json()
-            list_rec_pds_data: dict = self.convert_pds_to_list_rec_data()
-            return list_rec_pds_data
-
+            return self.convert_pds_to_list_rec_data()
         elif not str(status).startswith("2"):
-            list_rec_pds_data = self.process_non_2xx_responses(response, status, nhs_number, job_id)
-            return list_rec_pds_data
-
+            return self.process_non_2xx_responses(response, status, nhs_number, job_id)
         else:
             raise PDSAPIError(
                 f"Patient {nhs_number} error_code: {status}, error_details:{response.text}"
@@ -247,7 +234,7 @@ class PDSAPIHelper:
             )
         return formatted_pds_data
 
-    def parse_json_data(self, field: str) -> str:
+    def parse_json_data(self, field: str) -> Optional[str]:
         """
         Find the value of the field passed on
 

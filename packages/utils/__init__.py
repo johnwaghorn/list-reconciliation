@@ -1,7 +1,7 @@
 import csv
 import io
 from enum import Enum
-from typing import List, Any, Dict
+from typing import Callable, List, Any, Dict
 
 from retrying import retry
 
@@ -62,7 +62,7 @@ class ChunkSizeError(Exception):
     pass
 
 
-def chunk_list(inlist: List[Any], chunk_size: int, sizing_func: callable) -> List[List[Any]]:
+def chunk_list(inlist: List[Any], chunk_size: int, sizing_func: Callable) -> List[List[Any]]:
     """Reduce a list of elements to a list of sub-lists, with each sub-list containing
     elements whose size totals no more than `chunk_size`, using `sizing_func` on each element
     to calculate the size required. Elements are evaluated in sequence and no attempt is made
@@ -107,7 +107,7 @@ def chunk_list(inlist: List[Any], chunk_size: int, sizing_func: callable) -> Lis
     return chunks
 
 
-def retry_func(func: callable, **kwargs) -> Any:
+def retry_func(func: Callable, **kwargs) -> Any:
     """Retries a function using retrying.retry https://pypi.org/project/retrying/.
 
     Args:

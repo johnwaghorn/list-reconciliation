@@ -9,7 +9,7 @@ class GPRegistrationStatus(Enum):
     DEDUCTED_PATIENT_MATCH = "Deducted Patient Match"
 
 
-def get_gp_registration_status(gp_gppracticecode: str, pds_record: Dict) -> GPRegistrationStatus:
+def get_gp_registration_status(gp_gppracticecode: str, pds_record: Dict) -> str:
     """Determine the GP registration status given a GP file gp code and a pds record.
 
     Args:

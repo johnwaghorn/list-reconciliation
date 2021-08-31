@@ -9,10 +9,10 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
 from services.jobs import get_job
+from services.pds_api import SensitiveMarkers
 from utils import write_to_mem_csv
 from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
 from utils.datetimezone import get_datetime_now
-from utils.pds_api_service import SensitiveMarkers
 from utils.logger import success, error, Message
 from utils.statuses import JobStatus
 from utils.ssm import get_ssm_params

@@ -1,13 +1,13 @@
 from functools import wraps
 from inspect import getmembers, isclass, isfunction
 from types import ModuleType
-from typing import Dict, Tuple, List, Any
+from typing import Callable, Dict, Tuple, List, Any
 
 import textwrap
 
 from comparison_engine.schema import LeftRecord, RightRecord, ConfigurationError
 
-DecoratedFuncs = Tuple[str, str, callable]
+DecoratedFuncs = Tuple[str, str, Callable]
 ComparisonResult = Dict[str, Dict[str, str]]
 RecordPair = Tuple[LeftRecord, RightRecord]
 
@@ -28,7 +28,7 @@ def module_from_string(name: str, source: str) -> ModuleType:
     return module
 
 
-def _parametrized(func: callable) -> callable:
+def _parametrized(func: Callable) -> Callable:
     """Decorator to allow action and comparison decorators to be implemented
     with parameters.
 
@@ -56,7 +56,7 @@ def _parametrized(func: callable) -> callable:
 
 
 @_parametrized
-def comparison(func: callable, id: str) -> callable:
+def comparison(func: Callable, id: str) -> Callable:
     """Decorator for identifying functions intended to compare left and right records.
 
     Usage:
@@ -65,11 +65,11 @@ def comparison(func: callable, id: str) -> callable:
             return left["DATE_OF_BIRTH"] != right["DATE_OF_BIRTH"]
 
     Args:
-        func (callable): Decorated function.
+        func (Callable): Decorated function.
         id (str): ID of the function, must be unique.
 
     Returns:
-        callable
+        Callable
     """
 
     @wraps(func)
@@ -83,7 +83,7 @@ def comparison(func: callable, id: str) -> callable:
 
 
 @_parametrized
-def action(func: callable, id: str, comparison_id: str) -> callable:
+def action(func: Callable, id: str, comparison_id: str) -> Callable:
     """Decorator for identifying functions intended to run as a result of the
     comparison left and right records. The linked comparison id is the comparison
     for which the action is run.
@@ -94,12 +94,12 @@ def action(func: callable, id: str, comparison_id: str) -> callable:
             call_api_to_update_record(left['date_of_birth'])
 
     Args:
-        func (callable): Decorated function.
+        func (Callable): Decorated function.
         id (str): ID of the function, must be unique.
         comparison_id (str): Comparison function id associated with the action. (default: {None})
 
     Returns:
-        callable
+        Callable
     """
 
     @wraps(func)
@@ -164,12 +164,12 @@ def get_records(module: ModuleType) -> RecordPair:
     return left, right
 
 
-def get_decorated_funcs(module: ModuleType, decorator: callable) -> DecoratedFuncs:
+def get_decorated_funcs(module: ModuleType, decorator: Callable) -> DecoratedFuncs:
     """Get decorated functions from a module, filtered by decorator type.
 
     Args:
         module (ModuleType): Module to search for decorated functions.
-        decorator (callable): Decorator function to filter.
+        decorator (Callable): Decorator function to filter.
 
     Returns:
         DecoratedFuncs: (id, name, comparison_function).
@@ -191,7 +191,9 @@ def get_decorated_funcs(module: ModuleType, decorator: callable) -> DecoratedFun
     return funcs
 
 
-def compare_records(module: ModuleType, left: Dict[str, Any], right: Dict[str, Any]) -> List[str]:
+def compare_records(
+    module: ModuleType, left: Dict[str, Any], right: Dict[str, Any]
+) -> ComparisonResult:
     """Apply comparisons to objects defined in module to the left and right records.
 
     Args:

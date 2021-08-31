@@ -10,10 +10,10 @@ import botocore
 from spine_aws_common.lambda_application import LambdaApplication
 
 from services.jobs import get_job
+from services.pds_api import PDSAPIError, PDSAPI, SensitiveMarkers
 from utils import RegistrationType, get_registration_filename, write_to_mem_csv
 from utils.database.models import Demographics, JobStats
 from utils.logger import Message, error, success
-from utils.pds_api_service import PDSAPIError, PDSAPIHelper, SensitiveMarkers
 
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
@@ -23,7 +23,7 @@ class PDSRegistrationStatus(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.s3 = boto3.client("s3")
-        self.api = PDSAPIHelper(self.system_config)
+        self.api = PDSAPI(self.system_config)
         self.lr13_bucket = self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"]
         self.lr22_bucket = self.system_config["LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"]
         self.job_id = None

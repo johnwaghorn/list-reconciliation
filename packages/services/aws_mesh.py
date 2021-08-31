@@ -1,5 +1,5 @@
-from typing import Generator, IO, List, Tuple
 import os
+from typing import Generator, IO, List, Tuple
 
 import boto3
 import botocore
@@ -7,8 +7,6 @@ import botocore
 from spine_aws_common.logger import Logger
 
 MESH_BUCKET = os.environ["MESH_BUCKET"]
-
-Files = List[Tuple[str, IO]]
 
 
 class InvalidFilename(Exception):
@@ -48,7 +46,7 @@ class AWSMESHMailbox:
         self.s3.put_object(Bucket=MESH_BUCKET, Key=key, Body=file)
         return f"s3://{MESH_BUCKET}/{key}"
 
-    def send_messages(self, destination_id: str, files: Files, overwrite=False):
+    def send_messages(self, destination_id: str, files: List[Tuple[str, IO]], overwrite=False):
         for filename, file in files:
             self.send_message(destination_id, filename, file, overwrite=overwrite)
 

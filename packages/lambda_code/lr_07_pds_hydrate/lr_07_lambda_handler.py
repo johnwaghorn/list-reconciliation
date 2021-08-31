@@ -6,10 +6,10 @@ import boto3
 from spine_aws_common.lambda_application import LambdaApplication
 
 from gp_file_parser.utils import empty_string
+from services.pds_api import PDSAPIError, PDSAPI
 from utils import retry_func
 from utils.database.models import Demographics
 from utils.logger import Message, error, success
-from utils.pds_api_service import PDSAPIError, PDSAPIHelper
 from utils.registration_status import GPRegistrationStatus, get_gp_registration_status
 
 cwd = os.path.dirname(__file__)
@@ -20,7 +20,7 @@ class PdsHydrate(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.s3 = boto3.client("s3")
-        self.api = PDSAPIHelper(self.system_config)
+        self.api = PDSAPI(self.system_config)
         self.lambda_ = boto3.client("lambda", region_name=self.system_config["AWS_REGION"])
         self.job_id = None
 

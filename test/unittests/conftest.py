@@ -9,8 +9,8 @@ import requests
 from moto import mock_ssm
 from spine_aws_common import LambdaApplication
 
-from utils.pds_api_service import PDSAPIHelper, PDSParamStore
-from .mock_responses import MockResponse, MockPostRepsone
+from services.pds_api import PDSAPI, PDSParamStore
+from .mock_responses import MockPostRepsone, MockResponse
 
 SSM_PARAM_PREFIX = os.getenv("SSM_STORE_PREFIX")
 REGION_NAME = os.environ.get("AWS_REGION")
@@ -135,6 +135,6 @@ def mock_auth_post(monkeypatch):
 @pytest.fixture(scope="function")
 def pds_api():
     lambda_app = LambdaApplication()
-    api = PDSAPIHelper(lambda_app.system_config)
+    api = PDSAPI(lambda_app.system_config)
     api.auth_required = False
     return api
