@@ -1,52 +1,48 @@
 import csv
 import logging
 import os
-import boto3
-
-from pathlib import Path
-from datetime import date, datetime
 from collections import Counter
-from typing import Iterable, Dict, List, Union, Tuple
+from datetime import date, datetime
+from pathlib import Path
+from typing import Dict, Iterable, List, Tuple, Union
 
 from botocore.client import BaseClient
-
-from utils import InputFolderType
-from utils.datetimezone import get_datetime_now
-from utils.exceptions import InvalidGPExtract, InvalidStructure
 
 from gp_file_parser.file_name_parser import validate_filename
 from gp_file_parser.utils import pairs
 from gp_file_parser.validators import (
-    VALIDATORS,
-    INVALID,
-    INVALID_RECORD,
-    INVALID_RECORD_DATA,
-    INVALID_RECORD_LEN,
-    RECORD_TYPE_1_COL,
-    RECORD_TYPE_2_COL,
-    GP_PRACTICECODE_COL,
-    HA_CIPHER_COL,
-    TRANS_DATETIME_COL,
-    TRANS_ID_COL,
-    NHS_NUMBER_COL,
-    SURNAME_COL,
-    FORENAMES_COL,
-    PREV_SURNAME_COL,
-    TITLE_COL,
-    SEX_COL,
-    DOB_COL,
     ADDRESS_LINE1_COL,
     ADDRESS_LINE2_COL,
     ADDRESS_LINE3_COL,
     ADDRESS_LINE4_COL,
     ADDRESS_LINE5_COL,
-    POSTCODE_COL,
-    DRUGS_DISPENSED_MARKER,
-    RPP_MILEAGE,
     BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER,
-    WALKING_UNITS,
+    DOB_COL,
+    DRUGS_DISPENSED_MARKER,
+    FORENAMES_COL,
+    GP_PRACTICECODE_COL,
+    HA_CIPHER_COL,
+    INVALID,
+    INVALID_RECORD,
+    INVALID_RECORD_DATA,
+    INVALID_RECORD_LEN,
+    NHS_NUMBER_COL,
+    POSTCODE_COL,
+    PREV_SURNAME_COL,
+    RECORD_TYPE_1_COL,
+    RECORD_TYPE_2_COL,
     RESIDENTIAL_INSTITUTE_CODE,
+    RPP_MILEAGE,
+    SEX_COL,
+    SURNAME_COL,
+    TITLE_COL,
+    TRANS_DATETIME_COL,
+    TRANS_ID_COL,
+    VALIDATORS,
+    WALKING_UNITS,
 )
+from utils import InputFolderType
+from utils.exceptions import InvalidGPExtract, InvalidStructure
 
 LOG = logging.getLogger("listrec")
 LOG.setLevel(logging.INFO)
@@ -272,7 +268,7 @@ def parse_gp_extract_text(
     for row in pairs(raw_text[start_idx:]):
         validated_record = _validate_record(
             _parse_row_columns(row, columns),
-            process_datetime=process_datetime or get_datetime_now(),
+            process_datetime=process_datetime or datetime.now(),
             gp_ha_cipher=gp_ha_cipher,
             other_ids=ids,
         )
@@ -324,7 +320,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
 
     results = parse_gp_extract_text(
         open(filepath, "r").read(),
-        process_datetime=process_datetime or get_datetime_now(),
+        process_datetime=process_datetime or datetime.now(),
         gp_ha_cipher=valid_file["ha_cipher"],
     )
 
@@ -491,7 +487,7 @@ def parse_gp_extract_file_s3(
 
     results = parse_gp_extract_text(
         file_data.decode("utf-8"),
-        process_datetime=process_datetime or get_datetime_now(),
+        process_datetime=process_datetime or datetime.now(),
         gp_ha_cipher=valid_file["ha_cipher"],
     )
 

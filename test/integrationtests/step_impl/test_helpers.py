@@ -1,11 +1,11 @@
 import time
+from datetime import datetime
 
 import boto3
 import botocore
 from getgauge.python import Messages
 
 from .tf_aws_resources import get_terraform_output
-from utils import get_datetime_now
 
 REGION_NAME = "eu-west-2"
 dynamodb = boto3.resource("dynamodb", REGION_NAME)
@@ -34,7 +34,7 @@ def get_latest_jobid():
 
 
 def create_timestamp():
-    return get_datetime_now().now().strftime("%Y%m%d%H%M%S%f")
+    return datetime.now().strftime("%Y%m%d%H%M%S%f")
 
 
 def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll_sleep=10):

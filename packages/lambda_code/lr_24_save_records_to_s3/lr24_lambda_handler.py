@@ -38,7 +38,7 @@ class SaveRecordsToS3(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR24 Lambda tried to access missing with error={traceback.format_exc()}",
+                f"LR24 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e

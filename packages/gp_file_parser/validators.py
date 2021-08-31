@@ -12,7 +12,6 @@ import string
 
 from typing import Tuple, Union, List
 from datetime import datetime, timedelta
-from utils.datetimezone import localize_date
 
 __all__ = [
     "INVALID",
@@ -233,11 +232,9 @@ def transaction_datetime(
             invalid_reason = INVALID_TRANS_DATETIME
 
         else:
-            localized_transaction_date = localize_date(transaction_datetime_val)
-
-            if (
-                localized_transaction_date < process_datetime - timedelta(days=14)
-            ) or localized_transaction_date > process_datetime:
+            past = transaction_datetime_val < process_datetime - timedelta(days=14)
+            future = transaction_datetime_val > process_datetime
+            if past or future:
                 invalid_reason = INVALID_TRANS_DATETIME
             transaction_datetime_val = str(transaction_datetime_val)
 
@@ -257,6 +254,7 @@ def nhs_number(nhs_number_val: str, **kwargs) -> ValidatedRecord:
     """
 
     invalid_reason = None
+
     if nhs_number_val in (None, ""):
         nhs_number_val = None
 

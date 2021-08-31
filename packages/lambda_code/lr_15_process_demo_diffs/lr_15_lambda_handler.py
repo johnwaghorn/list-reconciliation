@@ -12,7 +12,7 @@ from services.jobs import get_job
 from services.pds_api import SensitiveMarkers
 from utils import write_to_mem_csv
 from utils.database.models import JobStats, Jobs, DemographicsDifferences, Demographics
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from utils.logger import success, error, Message
 from utils.statuses import JobStatus
 from utils.ssm import get_ssm_params
@@ -46,7 +46,7 @@ class DemographicDifferences(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR15 Lambda tried to access missing with error={traceback.format_exc()}",
+                f"LR15 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e
@@ -228,7 +228,7 @@ class DemographicDifferences(LambdaApplication):
 
         job = get_job(self.job_id)
         practice_code = job.PracticeCode
-        now = get_datetime_now().strftime("%Y%m%d%H%M%S")
+        now = datetime.now().strftime("%Y%m%d%H%M%S")
 
         listrec_mesh_id, spinedsa_mesh_id = get_mesh_mailboxes(
             json.loads(self.mesh_params["mesh_mappings"]),

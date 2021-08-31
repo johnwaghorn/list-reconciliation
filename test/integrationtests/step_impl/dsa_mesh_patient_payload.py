@@ -7,9 +7,9 @@ from getgauge.python import step
 
 from .test_helpers import PDS_API_ENV
 from .tf_aws_resources import get_terraform_output
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 
-test_datetime = get_datetime_now()
+test_datetime = datetime.now()
 temp_dir = gettempdir()
 
 REGION_NAME = "eu-west-2"

@@ -180,5 +180,5 @@ class InFlight(Model):
         write_capacity_units = 1
 
     JobId = UnicodeAttribute(hash_key=True)
-    Timestamp = UTCDateTimeAttribute(default=datetime.utcnow())
+    Timestamp = UTCDateTimeAttribute(default=datetime.now())
     TotalRecords = NumberAttribute()

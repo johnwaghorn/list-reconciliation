@@ -5,7 +5,7 @@ from typing import Callable, List, Any, Dict
 
 from retrying import retry
 
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 
 
 class InvalidErrorType(Enum):
@@ -55,7 +55,7 @@ def get_registration_filename(practice_code: str, reg_type: RegistrationType) ->
     Returns:
         str: Filename containing formatted practice, dataset name and datetime.
     """
-    return f'{practice_code}-{reg_type.value}-{get_datetime_now().strftime("%Y%m%d%H%M%S")}.csv'
+    return f'{practice_code}-{reg_type.value}-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv'
 
 
 class ChunkSizeError(Exception):

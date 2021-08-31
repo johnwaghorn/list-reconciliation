@@ -1,8 +1,8 @@
 import json
 import os
 import traceback
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 import boto3
 from botocore.exceptions import ClientError
@@ -10,7 +10,6 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 import services.send_email_exchangelib
 from utils import InputFolderType, InvalidErrorType
-from utils.datetimezone import localize_date
 from utils.exceptions import FeedbackLogError
 from utils.logger import success, error, Message
 from utils.ssm import get_ssm_params
@@ -74,7 +73,7 @@ class FeedbackFailure(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR04 Lambda tried to access missing with error={traceback.format_exc()}",
+                f"LR04 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e
@@ -134,9 +133,7 @@ class FeedbackFailure(LambdaApplication):
         """
 
         try:
-            failed_file_date = datetime.strptime(self.log["upload_date"], "%Y-%m-%d %H:%M:%S.%f%z")
-
-            self.upload_date = failed_file_date
+            self.upload_date = datetime.strptime(self.log["upload_date"], "%Y-%m-%d %H:%M:%S.%f%z")
             self.failed_key = f"{InputFolderType.FAIL.value}{self.log['file']}"
 
             try:
@@ -146,8 +143,6 @@ class FeedbackFailure(LambdaApplication):
                 raise FeedbackLogError(
                     f"LOG file contains reference to failed file='{self.failed_key}' that could not be found"
                 )
-
-            failed_file_date = localize_date(failed_file_date, specified_timezone="Europe/London")
 
             error_types = [
                 InvalidErrorType.RECORDS.value,

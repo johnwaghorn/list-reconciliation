@@ -57,7 +57,6 @@ def mesh_post_office_open_multiple_mappings(
 
 @pytest.fixture
 def create_mock_ssm_param_mesh_post_office_open(ssm):
-    print("CALLED OPEN")
     ssm.put_parameter(
         Name=f"/{AWS_LAMBDA_FUNCTION_NAME}/mesh_post_office_open",
         Value="True",
@@ -69,7 +68,6 @@ def create_mock_ssm_param_mesh_post_office_open(ssm):
 
 @pytest.fixture
 def create_mock_ssm_param_mesh_post_office_closed(ssm):
-    print("CALLED CLOSED")
     ssm.put_parameter(
         Name=f"/{AWS_LAMBDA_FUNCTION_NAME}/mesh_post_office_open",
         Value="False",

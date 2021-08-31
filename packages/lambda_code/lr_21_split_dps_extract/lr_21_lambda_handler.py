@@ -1,12 +1,10 @@
 import os
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import boto3
-from botocore.exceptions import ClientError
 from spine_aws_common.lambda_application import LambdaApplication
 
-from utils.datetimezone import get_datetime_now, localize_date
 from utils.exceptions import InvalidPDSData
 from utils.logger import success, error, Message
 
@@ -175,14 +173,14 @@ class SplitDPSExtract(LambdaApplication):
         Remove the DSA upload file from LR-20 input bucket"""
 
         try:
-            minimum_last_update = get_datetime_now() - timedelta(hours=maximum_age_hours)
+            minimum_last_update = datetime.now() - timedelta(hours=maximum_age_hours)
 
             # Clean up split out GP Files
             paginator = self.s3.get_paginator("list_objects_v2")
             pages = paginator.paginate(Bucket=output_bucket)
             for page in pages:
                 for obj in page.get("Contents", []):
-                    mod_date = localize_date(obj["LastModified"])
+                    mod_date = obj["LastModified"]
                     if mod_date < minimum_last_update:
                         self.s3.delete_object(Bucket=output_bucket, Key=obj["Key"])
                         self.log_object.write_log(
@@ -198,7 +196,7 @@ class SplitDPSExtract(LambdaApplication):
             pages = paginator.paginate(Bucket=input_bucket)
             for page in pages:
                 for obj in page.get("Contents", []):
-                    mod_date = localize_date(obj["LastModified"])
+                    mod_date = obj["LastModified"]
                     if mod_date < minimum_last_update:
                         self.s3.delete_object(Bucket=input_bucket, Key=obj["Key"])
                         self.log_object.write_log(

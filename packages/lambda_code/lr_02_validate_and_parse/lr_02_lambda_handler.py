@@ -1,8 +1,9 @@
 import json
 import os
-import boto3
-
+import traceback
 from uuid import uuid4
+
+import boto3
 from pynamodb.exceptions import PynamoDBConnectionError, PutError
 from spine_aws_common.lambda_application import LambdaApplication
 
@@ -10,7 +11,7 @@ from gp_file_parser.parser import parse_gp_extract_file_s3
 from services.split_records_to_s3 import split_records_to_s3
 from utils import InputFolderType, InvalidErrorType
 from utils.database.models import Jobs, InFlight
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from utils.logger import success, error, Message
 from utils.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
 
@@ -18,11 +19,13 @@ from utils.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
+s3 = boto3.client("s3")
+
 
 class ValidateAndParse(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
-        self.s3 = boto3.client("s3")
+
         self.job_id = None
         self.practice_code = None
         self.upload_key = None
@@ -37,21 +40,22 @@ class ValidateAndParse(LambdaApplication):
             self.job_id = str(uuid4())
             self.upload_key = self.event["Records"][0]["s3"]["object"]["key"]
             self.upload_filename = self.upload_key.replace(InputFolderType.IN.value, "")
-
             self.log_object.set_internal_id(self.job_id)
-
             self.response = self.validate_and_process_extract()
 
         except KeyError as e:
             self.response = error(
-                f"LR02 Lambda tried to access missing key={str(e)}", self.log_object.internal_id
+                f"LR02 Lambda tried to access missing key with error={traceback.format_exc()}",
+                self.log_object.internal_id,
             )
+            raise e
 
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR02 Lambda: {str(e)}",
+                f"Unhandled exception caught in LR02 Lambda with error='{traceback.format_exc()}'",
                 self.log_object.internal_id,
             )
+            raise e
 
     def validate_and_process_extract(self) -> Message:
         """Handler to process and validate an uploaded S3 object containing a GP flat
@@ -61,7 +65,7 @@ class ValidateAndParse(LambdaApplication):
             success: A dict result containing a status and message
         """
 
-        self.upload_date = get_datetime_now()
+        self.upload_date = datetime.now()
 
         self.log_object.write_log(
             "LR02I01",
@@ -74,7 +78,7 @@ class ValidateAndParse(LambdaApplication):
 
         try:
             validated_file = parse_gp_extract_file_s3(
-                self.s3,
+                s3,
                 self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"],
                 self.upload_key,
                 self.upload_date,
@@ -205,7 +209,7 @@ class ValidateAndParse(LambdaApplication):
             self.job_id,
             PracticeCode=practice_code,
             FileName=self.upload_filename,
-            Timestamp=get_datetime_now(),
+            Timestamp=datetime.now(),
             StatusId="1",
         )
         job_item.save()
@@ -227,19 +231,19 @@ class ValidateAndParse(LambdaApplication):
         bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
         key = f"{prefix.value}{self.upload_filename}"
 
-        self.s3.copy_object(
+        s3.copy_object(
             Bucket=bucket,
             Key=key,
             CopySource={"Bucket": bucket, "Key": self.upload_key},
         )
 
-        self.s3.delete_object(Bucket=bucket, Key=self.upload_key)
+        s3.delete_object(Bucket=bucket, Key=self.upload_key)
 
         if error_message:
             log_filename = f"{self.upload_filename}-FailedFile-{self.job_id}.json"
             log_key = f"{InputFolderType.FAIL.value}logs/{log_filename}"
 
-            self.s3.put_object(Body=error_message, Bucket=bucket, Key=log_key)
+            s3.put_object(Body=error_message, Bucket=bucket, Key=log_key)
 
     def process_invalid_message(self, exception: Exception) -> str:
         """Create a formatted error message string based on raised

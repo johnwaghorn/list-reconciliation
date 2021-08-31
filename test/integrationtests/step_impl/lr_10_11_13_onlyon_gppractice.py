@@ -1,6 +1,6 @@
 from .lr_beforehooks import use_waiters_check_object_exists
 from getgauge.python import step, Messages, data_store
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from .tf_aws_resources import get_terraform_output
 from .test_helpers import PDS_API_ENV, get_latest_jobid, await_stepfunction_succeeded
 
@@ -9,7 +9,7 @@ import json
 import os
 
 REGION_NAME = "eu-west-2"
-TEST_DATETIME = get_datetime_now()
+TEST_DATETIME = datetime.now()
 LR_10_STATE_FUNCTION_ARN = get_terraform_output("lr_10_sfn_arn")
 LR_13_BUCKET = get_terraform_output("lr_13_bucket")
 s3 = boto3.client("s3", REGION_NAME)

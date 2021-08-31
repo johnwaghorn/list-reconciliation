@@ -1,10 +1,10 @@
 import argparse
 import datetime
 import logging
+from datetime import datetime
 
 from gp_file_parser.parser import process_gp_extract, LOG, InvalidGPExtract
 from gp_file_parser.file_name_parser import InvalidFilename
-from utils.datetimezone import get_datetime_now, localize_date
 
 
 def main():
@@ -35,8 +35,8 @@ def main():
     )
     parser.add_argument(
         "--process_date",
-        type=lambda x: localize_date(datetime.datetime.strptime(x, "%Y%m%d")),
-        default=get_datetime_now(),
+        type=lambda x: datetime.strptime(x, "%Y%m%d"),
+        default=datetime.now(),
         help="Set the processing datetime. (default: today's date)",
     )
 

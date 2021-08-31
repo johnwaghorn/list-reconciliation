@@ -1,6 +1,6 @@
 from getgauge.python import step
 from datetime import timedelta
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from .tf_aws_resources import get_terraform_output
 from .lr_03_dynamodb import get_latest_jobid
 
@@ -13,7 +13,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 region_name = "eu-west-2"
-test_datetime = get_datetime_now()
+test_datetime = datetime.now()
 client = boto3.client("logs", region_name)
 
 LR02_LAMBDA = get_terraform_output("lr_02_lambda")

@@ -4,7 +4,6 @@ from datetime import datetime
 
 from gp_file_parser import validators as v
 from gp_file_parser.parser import _validate_record
-from utils.datetimezone import get_datetime_now, localize_date
 
 
 @pytest.mark.parametrize(
@@ -349,27 +348,27 @@ def test_residential_institute_code_validator_return_values(val, expected):
     (
         (
             "201206060101",
-            localize_date(datetime(2012, 6, 20, 1, 1)),
+            datetime(2012, 6, 20, 1, 1),
             ("2012-06-06 01:01:00", None),
         ),
         (
             "201206060101",
-            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
+            datetime(2012, 6, 20, 1, 1, 1),
             ("2012-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
         (
             "2012060601",
-            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
+            datetime(2012, 6, 20, 1, 1, 1),
             ("2012060601", v.INVALID_TRANS_DATETIME),
         ),
         (
             "000000000000",
-            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
+            datetime(2012, 6, 20, 1, 1, 1),
             ("000000000000", v.INVALID_TRANS_DATETIME),
         ),
         (
             "201306060101",
-            localize_date(datetime(2012, 6, 20, 1, 1, 1)),
+            datetime(2012, 6, 20, 1, 1, 1),
             ("2013-06-06 01:01:00", v.INVALID_TRANS_DATETIME),
         ),
     ),
@@ -399,7 +398,7 @@ def test_ha_cipher_validators_return_values(val, gp_ha_cipher, expected):
 
 
 def test_validate_record_contains_invalid_dict():
-    assert _validate_record({"RECORD_TYPE_1": "Not"}, get_datetime_now()) == {
+    assert _validate_record({"RECORD_TYPE_1": "Not"}, datetime.now()) == {
         "RECORD_TYPE_1": None,
         "_INVALID_": {"RECORD_TYPE_1": v.INVALID_RECORD_TYPE_1},
     }

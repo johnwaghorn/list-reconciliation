@@ -1,10 +1,9 @@
 import os
 import pytest
-
 from datetime import datetime
+
 from freezegun import freeze_time
 
-from utils.datetimezone import get_datetime_now, localize_date
 from gp_file_parser.parser import (
     parse_gp_extract_text,
     parse_gp_extract_file,
@@ -85,7 +84,7 @@ def test_parse_gp_extract_text_parses_correctly():
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -158,7 +157,7 @@ def test_parse_gp_extract_text_with_junk_parses_correctly():
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -170,7 +169,7 @@ def test_parse_gp_extract_text_no_valid_records_raises_InvalidStructure():
     with pytest.raises(InvalidStructure):
         parse_gp_extract_text(
             text,
-            process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+            process_datetime=datetime(2020, 4, 6, 13, 40),
             gp_ha_cipher="LNA",
         )
 
@@ -246,7 +245,7 @@ def test_parse_gp_extract_text_with_columns_parses_correctly():
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -324,7 +323,7 @@ def test_parse_gp_extract_text_with_columns_and_junk_parses_correctly():
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -388,7 +387,7 @@ def test_parse_gp_extract_text_garbled_record_type1_returns_records(record_type)
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -438,7 +437,7 @@ def test_parse_gp_extract_text_garbled_record_type2_returns_records(record_type)
 
     actual = parse_gp_extract_text(
         text,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
         gp_ha_cipher="LNA",
     )
 
@@ -506,7 +505,7 @@ def test_parse_gp_extract_file_parses_correctly():
 
     actual = parse_gp_extract_file(
         file_path,
-        process_datetime=localize_date(datetime(2020, 4, 6, 13, 40)),
+        process_datetime=datetime(2020, 4, 6, 13, 40),
     )
 
     assert actual == expected

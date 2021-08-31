@@ -4,6 +4,7 @@ import traceback
 from typing import List
 
 import boto3
+import pytz
 from spine_aws_common.lambda_application import LambdaApplication
 
 import services.send_email_exchangelib
@@ -11,7 +12,6 @@ from .listrec_results_email_template import BODY
 from services.aws_mesh import AWSMESHMailbox, get_mesh_mailboxes
 from spine_aws_common.lambda_application import LambdaApplication
 from utils.database.models import DemographicsDifferences, Jobs, JobStats
-from utils.datetimezone import localize_date
 from utils.ssm import get_ssm_params
 from utils.logger import success, error, Message
 
@@ -46,7 +46,7 @@ class SendListRecResults(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR14 Lambda tried to access missing with error={traceback.format_exc()}",
+                f"LR14 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e
@@ -117,7 +117,7 @@ class SendListRecResults(LambdaApplication):
         job = Jobs.IdIndex.query(self.job_id).next()
         job_stat = JobStats.get(self.job_id)
 
-        timestamp = localize_date(job.Timestamp, specified_timezone="Europe/London").strftime(
+        timestamp = job.Timestamp.astimezone(pytz.timezone("Europe/London")).strftime(
             "%H:%M:%S on %d/%m/%Y"
         )
         email_subject = f"PDS Comparison run at {timestamp} against Practice: {job.PracticeCode} - {job.FileName} - Registrations Output"

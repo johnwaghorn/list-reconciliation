@@ -4,10 +4,10 @@ import traceback
 from datetime import datetime, timedelta
 
 import boto3
+import pytz
 from spine_aws_common.lambda_application import LambdaApplication
 
 from utils.database.models import Demographics, InFlight, Jobs, JobStats
-from utils.datetimezone import get_datetime_now, localize_date
 from utils.logger import Message, error, success
 from utils.statuses import JobStatus
 
@@ -30,7 +30,7 @@ class ScheduledCheck(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR09 Lambda tried to access missing with error={traceback.format_exc()}",
+                f"LR09 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e
@@ -51,8 +51,8 @@ class ScheduledCheck(LambdaApplication):
 
     @staticmethod
     def is_job_timed_out(timestamp: datetime, job_timeout_hours: int) -> bool:
-        cutoff_time = get_datetime_now() - timedelta(hours=job_timeout_hours)
-        return localize_date(timestamp) < cutoff_time
+        cutoff_time = datetime.now(tz=pytz.timezone("UTC")) - timedelta(hours=job_timeout_hours)
+        return timestamp.astimezone(pytz.timezone("UTC")) < cutoff_time
 
     def update_job_stats(self, job_id: str, total_records: int) -> None:
         job_stats = JobStats(job_id, TotalRecords=total_records)

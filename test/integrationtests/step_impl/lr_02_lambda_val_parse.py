@@ -2,7 +2,7 @@ from .lr_beforehooks import use_waiters_check_object_exists
 from utils import InputFolderType
 from getgauge.python import step
 from getgauge.python import Messages
-from utils.datetimezone import get_datetime_now
+from datetime import datetime
 from .lr_beforehooks import use_waiters_check_object_exists
 from .test_helpers import PDS_API_ENV
 
@@ -20,7 +20,7 @@ DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
 LR_02_LAMBDA_ARN = get_terraform_output("lr_02_lambda_arn")
 
-test_datetime = get_datetime_now()
+test_datetime = datetime.now()
 temp_dir = gettempdir()
 now = test_datetime - timedelta(hours=1)
 day = "123456789ABCDEFGHIJKLMNOPQRSTUV"[now.day - 1]
