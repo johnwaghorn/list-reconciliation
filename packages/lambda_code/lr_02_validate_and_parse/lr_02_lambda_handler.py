@@ -1,6 +1,7 @@
 import json
 import os
 import traceback
+from datetime import datetime
 from uuid import uuid4
 
 import boto3
@@ -11,7 +12,6 @@ from gp_file_parser.parser import parse_gp_extract_file_s3
 from services.split_records_to_s3 import split_records_to_s3
 from utils import InputFolderType, InvalidErrorType
 from utils.database.models import Jobs, InFlight
-from datetime import datetime
 from utils.logger import success, error, Message
 from utils.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
 
@@ -25,7 +25,6 @@ s3 = boto3.client("s3")
 class ValidateAndParse(LambdaApplication):
     def __init__(self):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
-
         self.job_id = None
         self.practice_code = None
         self.upload_key = None
