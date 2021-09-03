@@ -21,7 +21,7 @@
                 "sha256:5bf811059176142b64981fc96ff5a9ed4608aa424e3a0671d547771bdde629ea",
                 "sha256:6c60bd2f03952b0edeae53683904d024e7a7b4a05696f3ddc9b53e0cac329996"
             ],
-            "index": "pypi",
+            "markers": "python_full_version >= '3.6.1' and python_full_version < '4.0.0'",
             "version": "==1.20.2"
         },
         "aws-xray-sdk": {
@@ -412,7 +412,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_full_version < '4.0.0'",
             "version": "==1.26.6"
         },
         "wrapt": {
@@ -1068,11 +1068,11 @@
         },
         "locust": {
             "hashes": [
-                "sha256:00b7981b55e99fd84c7dc7c2fc81524a830079ddd8bd8990da684d2dd767dc75",
-                "sha256:f754d68084b132e39098bd1c82f57bdfb2c54993920a85ab6eeded2e328fe88a"
+                "sha256:5d65c9b4894f2ac47ed1a4c6f330705f478ed9c8fbf9931be913390e638b3aa7",
+                "sha256:f644cf6383e83649544a1220412d168fb9d39030663d878558b8a6c337b26124"
             ],
             "index": "pypi",
-            "version": "==2.2.0"
+            "version": "==2.2.1"
         },
         "markupsafe": {
             "hashes": [
@@ -1634,7 +1634,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_full_version < '4.0.0'",
             "version": "==1.26.6"
         },
         "virtualenv": {
