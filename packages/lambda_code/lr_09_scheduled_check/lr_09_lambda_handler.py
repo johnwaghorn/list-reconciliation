@@ -20,21 +20,16 @@ class ScheduledCheck(LambdaApplication):
         super().__init__(additional_log_config=ADDITIONAL_LOG_FILE)
         self.job_timeout_hours = int(str(self.system_config["JOB_TIMEOUT_HOURS"]))
 
-    def initialise(self):
-        pass
-
     def start(self):
         try:
             self.log_object.set_internal_id(self._create_new_internal_id())
             self.response = self.process_finished_jobs()
-
         except KeyError as e:
             self.response = error(
                 f"LR09 Lambda tried to access missing key with error={traceback.format_exc()}",
                 self.log_object.internal_id,
             )
             raise e
-
         except Exception as e:
             self.response = error(
                 f"Unhandled exception caught in LR09 Lambda error='{traceback.format_exc()}",
@@ -57,7 +52,6 @@ class ScheduledCheck(LambdaApplication):
     def update_job_stats(self, job_id: str, total_records: int) -> None:
         job_stats = JobStats(job_id, TotalRecords=total_records)
         job_stats.save()
-
         self.log_object.write_log("LR09I02", log_row_dict={"job_id": job_id})
 
     def update_job_status(self, job_id: str, status: str) -> None:
@@ -65,7 +59,6 @@ class ScheduledCheck(LambdaApplication):
         for j in job:
             j.StatusId = status
             j.save()
-
         self.log_object.write_log("LR09I03", log_row_dict={"job_id": job_id})
 
     def trigger_step_function(self, job_id: str) -> None:
@@ -74,7 +67,6 @@ class ScheduledCheck(LambdaApplication):
             stateMachineArn=self.system_config["LR_10_STEP_FUNCTION_ARN"],
             input=json.dumps({"job_id": job_id}),
         )
-
         self.log_object.write_log("LR09I04", log_row_dict={"job_id": job_id})
 
     def process_finished_jobs(self) -> Message:
@@ -91,37 +83,27 @@ class ScheduledCheck(LambdaApplication):
         timed_out_jobs = []
 
         in_flight = InFlight.scan()
-
-        if not in_flight:
+        if in_flight.total_count == 0:
             self.log_object.write_log("LR09I05")
-
-            return success(f"LR09 Lambda application stopped", self.log_object.internal_id)
 
         for item in in_flight:
             if self.is_job_complete(item.JobId, int(item.TotalRecords)):
                 InFlight.delete(item)
-
                 self.update_job_stats(item.JobId, int(item.TotalRecords))
                 self.update_job_status(item.JobId, JobStatus.RECORDS_PROCESSED.value)
                 self.trigger_step_function(item.JobId)
-
                 processed_jobs.append(item.JobId)
-
             elif self.is_job_timed_out(item.Timestamp, self.job_timeout_hours):
                 InFlight.delete(item)
-
                 self.log_object.write_log("LR09I06", log_row_dict={"job_id": item.JobId})
-
                 self.update_job_status(item.JobId, JobStatus.TIMED_OUT.value)
                 timed_out_jobs.append(item.JobId)
-
             else:
                 skipped_jobs.append(item.JobId)
                 self.log_object.write_log("LR09I01", log_row_dict={"job_id": item.JobId})
-
                 continue
 
-        response: dict = success(f"LR09 Lambda application stopped", self.log_object.internal_id)
+        response: dict = success("LR09 Lambda application stopped", self.log_object.internal_id)
         response.update(
             processed_jobs=processed_jobs, skipped_jobs=skipped_jobs, timed_out_jobs=timed_out_jobs
         )

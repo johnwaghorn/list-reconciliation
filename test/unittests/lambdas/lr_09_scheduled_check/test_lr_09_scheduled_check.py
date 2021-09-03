@@ -1,11 +1,25 @@
 import json
-import pytest
 from datetime import datetime, timedelta
 
+import pytest
+
+from .conftest import JOB_ID
 from utils.database.models import InFlight, Jobs, JobStats
 from utils.statuses import JobStatus
 
-from .conftest import JOB_ID
+
+def test_lambda_handler_runs_successfully_no_errors_thrown(
+    create_dynamo_tables, lambda_handler, lambda_context
+):
+    response = lambda_handler.main({}, lambda_context)
+
+    assert response is not None
+    assert response["status"] == "success"
+    assert response["message"] == "LR09 Lambda application stopped"
+
+    assert len(response["processed_jobs"]) == 0
+    assert len(response["skipped_jobs"]) == 0
+    assert len(response["timed_out_jobs"]) == 0
 
 
 def test_empty_inflight_doesnt_process_jobs(create_dynamo_tables, lambda_handler):
@@ -97,3 +111,8 @@ def test_is_job_timed_out_timestamp_in_the_future(lambda_handler):
     timestamp = datetime.now() + timedelta(days=3)
     job_timeout_hours = 1
     assert lambda_handler.is_job_timed_out(timestamp, job_timeout_hours) == False
+
+
+def test_process_finished_jobs_no_inflight(lambda_handler, create_dynamo_tables):
+    output = lambda_handler.process_finished_jobs()
+    assert output["message"] == "LR09 Lambda application stopped"
