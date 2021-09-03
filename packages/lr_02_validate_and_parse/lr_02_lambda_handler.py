@@ -39,15 +39,17 @@ class ValidateAndParse(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR02 Lambda tried to access missing key with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR02 Lambda tried to access missing key",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR02 Lambda with error='{traceback.format_exc()}'",
-                self.log_object.internal_id,
+                message="LR02 Lambda unhandled exception caught",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -104,8 +106,9 @@ class ValidateAndParse(LambdaApplication):
             )
 
             return success(
-                f"LR02 Lambda application stopped for jobId='{self.job_id}'",
-                self.log_object.internal_id,
+                message="LR02 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
             )
 
     def handle_validated_records(self, validated_file: dict) -> Message:
@@ -190,8 +193,9 @@ class ValidateAndParse(LambdaApplication):
             self.handle_extract(InputFolderType.PASS)
 
             return success(
-                f"LR02 Lambda application stopped for jobId='{self.job_id}'",
-                self.log_object.internal_id,
+                message="LR02 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
             )
 
     def write_to_dynamodb(self, practice_code: str, num_of_records: int):

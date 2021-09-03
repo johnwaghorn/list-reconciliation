@@ -32,15 +32,16 @@ class GPRegistrations(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR11 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR11 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
-
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR11 Lambda with error={traceback.format_exc()}",
+                "LR11 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -143,10 +144,9 @@ class GPRegistrations(LambdaApplication):
             },
         )
 
-        response = success(
-            f"LR11 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
+        return success(
+            message="LR11 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
+            filename=f"s3://{self.bucket}/{key}",
         )
-        response.update(filename=f"s3://{self.bucket}/{key}")
-
-        return response

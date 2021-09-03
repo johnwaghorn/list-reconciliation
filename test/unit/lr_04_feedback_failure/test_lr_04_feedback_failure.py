@@ -64,7 +64,8 @@ def test_lr04_lambda_handler_process_valid_log_successfully(
     )
 
     assert result["status"] == "success"
-    assert result["message"] == f"LR04 Lambda application stopped for jobId='{JOB_ID}'"
+    assert result["message"] == "LR04 Lambda application stopped"
+    assert result["job_id"] == JOB_ID
     assert result["email_subject"] == expected_subject
     assert result["email_body"] == expected_body
 

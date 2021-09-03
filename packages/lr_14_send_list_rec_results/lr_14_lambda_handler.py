@@ -41,15 +41,16 @@ class SendListRecResults(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR14 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR14 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
-
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR14 Lambda with error='{traceback.format_exc()}'",
+                "LR14 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -68,16 +69,15 @@ class SendListRecResults(LambdaApplication):
 
         self.send_email(email_subject, email_body)
 
-        output = success(
-            f"Email and files sent to {self.system_config['PCSE_EMAIL']}, MESH: {self.pcse_mesh_id}",
-            self.log_object.internal_id,
+        return success(
+            message="LR14 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            to=self.system_config["PCSE_EMAIL"],
+            mesh_id=self.pcse_mesh_id,
+            email_subject=email_subject,
+            email_body=email_body,
+            files=filenames,
         )
-
-        output.update(
-            email_subject=email_subject, email_body=email_body, files=filenames
-        )
-
-        return output
 
     def get_registration_and_demographic_outputs(self):
         s3 = boto3.client("s3")

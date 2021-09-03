@@ -30,15 +30,17 @@ class DemographicComparison(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR08 Lambda tried to access missing key with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR08 Lambda tried to access missing key",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR08 Lambda with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR08 Lambda unhandled exception caught",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -78,8 +80,9 @@ class DemographicComparison(LambdaApplication):
             record.update(actions=[Demographics.IsComparisonCompleted.set(True)])
 
             return success(
-                f'LR08 Lambda application stopped for jobId="{self.job_id}"',
-                self.log_object.internal_id,
+                message="LR08 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
             )
 
         results = compare_records(listrec_comparison_engine, gp_record, pds_record)
@@ -120,6 +123,7 @@ class DemographicComparison(LambdaApplication):
         )
 
         return success(
-            f"LR08 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
+            message="LR08 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
         )

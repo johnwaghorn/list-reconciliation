@@ -40,7 +40,7 @@ def test_lr02_lambda_handler_valid_file(
 
     result = app.main(event=lr_02_valid_file_event, context=lambda_context)
 
-    assert "LR02 Lambda application stopped for jobId=" in result["message"]
+    assert "LR02 Lambda application stopped" in result["message"]
 
 
 @freeze_time("2021-04-06 13:40:00")
@@ -56,7 +56,7 @@ def test_lr02_lambda_handler_invalid_file(
 
     result = app.main(event=lr_02_invalid_file_event, context=lambda_context)
 
-    assert "LR02 Lambda application stopped for jobId=" in result["message"]
+    assert "LR02 Lambda application stopped" in result["message"]
 
 
 @pytest.mark.xfail(reason="utils.database.models.Jobs.DoesNotExist: None")
@@ -126,9 +126,8 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
 
     response = app.validate_and_process_extract()
 
-    expected = f"LR02 Lambda application stopped for jobId='{JOB_ID}'"
-
-    assert response["message"] == expected
+    assert response["message"] == "LR02 Lambda application stopped"
+    assert response["job_id"] == JOB_ID
 
     # Test S3 validity
     with open(os.path.join(DATA, f"{INVALID_FILE}")) as f:

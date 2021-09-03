@@ -39,18 +39,18 @@ class DemographicDifferences(LambdaApplication):
             self.log_object.set_internal_id(self.job_id)
 
             self.response = self.process_demographic_differences()
-
         except KeyError as e:
             self.response = error(
-                f"LR15 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR15 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
-
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR15 Lambda with error={traceback.format_exc()}",
+                "LR15 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -368,16 +368,6 @@ class DemographicDifferences(LambdaApplication):
             },
         )
 
-        response = success(
-            f"LR15 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
-        )
-
-        response.update(
-            work_items_count=len(out_files),
-            summary=f"s3://{self.lr13_bucket}/{csv_key}",
-        )
-
         self.log_object.write_log(
             "LR12I04",
             log_row_dict={
@@ -388,7 +378,13 @@ class DemographicDifferences(LambdaApplication):
             },
         )
 
-        return response
+        return success(
+            message="LR15 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
+            work_items_count=len(out_files),
+            summary=f"s3://{self.lr13_bucket}/{csv_key}",
+        )
 
     @staticmethod
     def process_sensitive_patients(job_id) -> dict[str, list[Any]]:

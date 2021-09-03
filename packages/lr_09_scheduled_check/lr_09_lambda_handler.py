@@ -21,14 +21,16 @@ class ScheduledCheck(LambdaApplication):
             self.response = self.process_finished_jobs()
         except KeyError as e:
             self.response = error(
-                f"LR09 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR09 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR09 Lambda error='{traceback.format_exc()}",
+                "LR09 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -105,13 +107,10 @@ class ScheduledCheck(LambdaApplication):
                 )
                 continue
 
-        response: dict = success(
-            "LR09 Lambda application stopped", self.log_object.internal_id
-        )
-        response.update(
+        return success(
+            message="LR09 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
             processed_jobs=processed_jobs,
             skipped_jobs=skipped_jobs,
             timed_out_jobs=timed_out_jobs,
         )
-
-        return response

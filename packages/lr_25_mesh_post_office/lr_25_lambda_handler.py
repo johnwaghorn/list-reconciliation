@@ -26,15 +26,16 @@ class MeshPostOffice(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR25 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR25 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
-
         except Exception as e:
             self.response = error(
-                "Unhandled exception in LR25 Lambda with error={traceback.format_exc()}",
+                "LR25 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -56,7 +57,8 @@ class MeshPostOffice(LambdaApplication):
             )
 
             return success(
-                "LR25 Lambda application stopped", self.log_object.internal_id
+                message="LR25 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
             )
 
         # for each mapping picked up from SSM
@@ -86,7 +88,10 @@ class MeshPostOffice(LambdaApplication):
             },
         )
 
-        return success("LR25 Lambda application stopped", self.log_object.internal_id)
+        return success(
+            message="LR25 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+        )
 
     def get_mesh_messages(self, bucket: str, key: str):
         messages = self.s3_list_files_in_bucket(bucket, key)

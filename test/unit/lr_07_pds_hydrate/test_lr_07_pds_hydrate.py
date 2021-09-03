@@ -47,9 +47,8 @@ def test_write_into_table(
 
     response = lambda_handler.pds_hydrate(record)
 
-    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
-
-    assert response["message"] == expected_response
+    assert response["message"] == "LR07 Lambda application stopped"
+    assert response["job_id"] == JOB_ID
 
     actual = Demographics.get("50", "50").attribute_values
 
@@ -135,9 +134,8 @@ def test_gp_registration_Partnership_Mismatch_in_demographics_table(
 
     response = lambda_handler.pds_hydrate(record)
 
-    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
-
-    assert response["message"] == expected_response
+    assert response["message"] == "LR07 Lambda application stopped"
+    assert response["job_id"] == JOB_ID
 
     actual = Demographics.get("51", "50").attribute_values
 
@@ -223,9 +221,8 @@ def test_gp_registration_Deducted_Patient_Match_in_demographics_table(
 
     response = lambda_handler.pds_hydrate(record)
 
-    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
-
-    assert response["message"] == expected_response
+    assert response["message"] == "LR07 Lambda application stopped"
+    assert response["job_id"] == JOB_ID
 
     actual = Demographics.get("52", "50").attribute_values
 
@@ -306,9 +303,8 @@ def test_gp_registration_Unmatched_in_demographics_table(
 
     response = lambda_handler.pds_hydrate(record)
 
-    expected_response = f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
-
-    assert response["message"] == expected_response
+    assert response["message"] == "LR07 Lambda application stopped"
+    assert response["job_id"] == JOB_ID
 
     actual = Demographics.get("53", "50").attribute_values
     expected = {
@@ -470,6 +466,5 @@ def test_sensitive_patients(
     response = lambda_handler.pds_hydrate(record)
 
     assert response["status"] == "success"
-    assert (
-        response["message"] == f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
-    )
+    assert response["message"] == "LR07 Lambda application stopped"
+    assert response["job_id"] == JOB_ID

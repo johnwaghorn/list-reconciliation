@@ -64,22 +64,25 @@ class FeedbackFailure(LambdaApplication):
                 },
             )
             self.response = error(
-                f"LR04 Lambda accessed invalid log file with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR04 Lambda accessed invalid log file",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except KeyError as e:
             self.response = error(
-                f"LR04 Lambda tried to access missing key with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR04 Lambda tried to access missing key",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR04 Lambda with error='{traceback.format_exc()}'",
-                self.log_object.internal_id,
+                message="LR04 Lambda unhandled exception caught",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -99,14 +102,13 @@ class FeedbackFailure(LambdaApplication):
 
         self.cleanup_files()
 
-        output = success(
-            f"LR04 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
+        return success(
+            message="LR04 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
+            email_subject=email_subject,
+            email_body=email_body,
         )
-
-        output.update(email_subject=email_subject, email_body=email_body)
-
-        return output
 
     def read_log(self):
         """Read LOG file and extract error information into a dictionary"""

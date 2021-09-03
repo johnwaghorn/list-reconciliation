@@ -108,22 +108,28 @@ class PdsHydrate(LambdaApplication):
                 },
             )
             self.response = error(
-                f"Error fetching PDS record for patientId='{patient.Id}' for nhsNumber='{patient.NhsNumber}' for jobId='{self.job_id}' with error='{traceback.format_exc()}'",
-                self.log_object.internal_id,
+                message="LR07 Lambda error fetching PDS record",
+                internal_id=self.log_object.internal_id,
+                patient_id=patient.Id,
+                nhs_number=patient.NhsNumber,
+                job_id=self.job_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except KeyError as e:
             self.response = error(
-                f"LR07 Lambda tried to access missing key with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR07 Lambda tried to access missing key",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR07 Lambda with error={traceback.format_exc()}",
-                self.log_object.internal_id,
+                message="LR07 Lambda unhandled exception caught",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -167,8 +173,9 @@ class PdsHydrate(LambdaApplication):
             )
 
             return success(
-                f"LR07 Lambda application stopped for jobId='{self.job_id}'",
-                self.log_object.internal_id,
+                message="LR07 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
             )
 
         retry_func(
@@ -212,6 +219,7 @@ class PdsHydrate(LambdaApplication):
         )
 
         return success(
-            f"LR07 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
+            message="LR07 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
         )

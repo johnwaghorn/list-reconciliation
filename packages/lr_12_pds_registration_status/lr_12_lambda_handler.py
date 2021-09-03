@@ -36,15 +36,16 @@ class PDSRegistrationStatus(LambdaApplication):
 
         except KeyError as e:
             self.response = error(
-                f"LR12 Lambda tried to access missing key with error={traceback.format_exc()}",
+                "LR12 Lambda tried to access missing key",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
-
         except Exception as e:
             self.response = error(
-                f"Unhandled exception caught in LR12 Lambda with error={traceback.format_exc()}",
+                "LR12 Lambda unhandled exception caught",
                 self.log_object.internal_id,
+                error=traceback.format_exc(),
             )
             raise e
 
@@ -218,10 +219,9 @@ class PDSRegistrationStatus(LambdaApplication):
             },
         )
 
-        response = success(
-            f"LR12 Lambda application stopped for jobId='{self.job_id}'",
-            self.log_object.internal_id,
+        return success(
+            message="LR12 Lambda application stopped",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
+            filename=f"s3://{self.lr13_bucket}/{key}",
         )
-        response.update(filename=f"s3://{self.lr13_bucket}/{key}")
-
-        return response
