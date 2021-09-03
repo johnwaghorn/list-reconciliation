@@ -18,11 +18,11 @@
     "default": {
         "aws-lambda-powertools": {
             "hashes": [
-                "sha256:53dc305557483076c3868d300ef29b02e02550802bac43e5cb8f0e96dd254429",
-                "sha256:c6823bcd1a52610abd5dffd2a084fdc47fd514b150cc0acc6f17b6ab188283b4"
+                "sha256:5bf811059176142b64981fc96ff5a9ed4608aa424e3a0671d547771bdde629ea",
+                "sha256:6c60bd2f03952b0edeae53683904d024e7a7b4a05696f3ddc9b53e0cac329996"
             ],
-            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
-            "version": "==1.20.1"
+            "index": "pypi",
+            "version": "==1.20.2"
         },
         "aws-xray-sdk": {
             "hashes": [
@@ -41,11 +41,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:1b4999fb0e1a4c050c4d9118ebdaac8d83761ef32c3c0f13a25f9204045998fe",
-                "sha256:ec2cdf1c8ed64a7f392f352125d248c76103fa9d137b275b7c76836776cedf56"
+                "sha256:29741509b19a6873e7f916fc0d9954e6433428d64669961f1daf322ce5254912",
+                "sha256:f60f8e10292dd509c5576eb42628656b72157375295d7f92120989b9f103857d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==1.21.34"
+            "version": "==1.21.35"
         },
         "cached-property": {
             "hashes": [
@@ -479,11 +479,11 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:1b4999fb0e1a4c050c4d9118ebdaac8d83761ef32c3c0f13a25f9204045998fe",
-                "sha256:ec2cdf1c8ed64a7f392f352125d248c76103fa9d137b275b7c76836776cedf56"
+                "sha256:29741509b19a6873e7f916fc0d9954e6433428d64669961f1daf322ce5254912",
+                "sha256:f60f8e10292dd509c5576eb42628656b72157375295d7f92120989b9f103857d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==1.21.34"
+            "version": "==1.21.35"
         },
         "brotli": {
             "hashes": [
@@ -1143,11 +1143,11 @@
         },
         "more-itertools": {
             "hashes": [
-                "sha256:2cf89ec599962f2ddc4d568a05defc40e0a587fbc10d5989713638864c36be4d",
-                "sha256:83f0308e05477c68f56ea3a888172c78ed5d5b3c282addb67508e7ba6c8f813a"
+                "sha256:70401259e46e216056367a0a6034ee3d3f95e0bf59d3aa6a4eb77837171ed996",
+                "sha256:8c746e0d09871661520da4f1241ba6b908dc903839733c8203b552cffaf173bd"
             ],
             "markers": "python_version >= '3.5'",
-            "version": "==8.8.0"
+            "version": "==8.9.0"
         },
         "moto": {
             "hashes": [
