@@ -20,6 +20,7 @@ def lr_12_event():
     return {"job_id": "blah"}
 
 
+@mock_s3
 @pytest.fixture(scope="module")
 def lambda_handler():
     app = GPRegistrations()
@@ -207,3 +208,4 @@ def s3_bucket():
             Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": AWS_REGION},
         )
+        return client

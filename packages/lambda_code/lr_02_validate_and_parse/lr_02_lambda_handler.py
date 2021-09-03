@@ -19,8 +19,6 @@ from utils.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
 cwd = os.path.dirname(__file__)
 ADDITIONAL_LOG_FILE = os.path.join(cwd, "..", "..", "utils/cloudlogbase.cfg")
 
-s3 = boto3.client("s3")
-
 
 class ValidateAndParse(LambdaApplication):
     def __init__(self):
@@ -30,6 +28,8 @@ class ValidateAndParse(LambdaApplication):
         self.upload_key = None
         self.upload_filename = None
         self.upload_date = None
+
+        self.s3 = boto3.client("s3")
 
     def initialise(self):
         pass
@@ -77,7 +77,7 @@ class ValidateAndParse(LambdaApplication):
 
         try:
             validated_file = parse_gp_extract_file_s3(
-                s3,
+                self.s3,
                 self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"],
                 self.upload_key,
                 self.upload_date,
@@ -230,19 +230,19 @@ class ValidateAndParse(LambdaApplication):
         bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
         key = f"{prefix.value}{self.upload_filename}"
 
-        s3.copy_object(
+        self.s3.copy_object(
             Bucket=bucket,
             Key=key,
             CopySource={"Bucket": bucket, "Key": self.upload_key},
         )
 
-        s3.delete_object(Bucket=bucket, Key=self.upload_key)
+        self.s3.delete_object(Bucket=bucket, Key=self.upload_key)
 
         if error_message:
             log_filename = f"{self.upload_filename}-FailedFile-{self.job_id}.json"
             log_key = f"{InputFolderType.FAIL.value}logs/{log_filename}"
 
-            s3.put_object(Body=error_message, Bucket=bucket, Key=log_key)
+            self.s3.put_object(Body=error_message, Bucket=bucket, Key=log_key)
 
     def process_invalid_message(self, exception: Exception) -> str:
         """Create a formatted error message string based on raised
