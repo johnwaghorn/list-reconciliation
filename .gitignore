@@ -21,6 +21,9 @@ test/integrationtests/.gauge
 test/integrationtests/logs
 test/integrationtests/reports
 
+# Test Data
+test/data/generator/tmp/*
+
 ### direnv ###
 .direnv
 .envrc
