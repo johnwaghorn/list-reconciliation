@@ -14,8 +14,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Create empty dependency directories
         run: |
-          mkdir -p ./packages_layer
-          mkdir -p ./dependencies_layer
+          mkdir -p ./build/packages_layer
+          mkdir -p ./build/dependencies_layer
       - name: Terraform Init
         run: |
           make init
