@@ -4,7 +4,7 @@ import os
 from collections import Counter
 from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Iterable, Union
 
 from botocore.client import BaseClient
 
@@ -50,11 +50,11 @@ logging.basicConfig(level=logging.INFO)
 
 Columns = Iterable[str]
 FileGroup = Iterable[str]
-Record = Dict[str, Union[str, date, int, float, dict]]
-Records = List[Record]
-Row = List[str]
-RowPair = Tuple[str, str]
-RowColumns = Tuple[List[str], List[str]]
+Record = dict[str, Union[str, date, int, float, dict]]
+Records = list[Record]
+Row = list[str]
+RowPair = tuple[str, str]
+RowColumns = tuple[list[str], list[str]]
 
 __all__ = [
     "InvalidGPExtract",
@@ -75,7 +75,7 @@ def _validate_record(
     record: Record,
     process_datetime: datetime,
     gp_ha_cipher: str = None,
-    other_ids: List[str] = None,
+    other_ids: list[str] = None,
 ) -> Record:
     """Run pre-mapped validation function against a record.
 
@@ -319,7 +319,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     valid_file = validate_filename(os.path.basename(filepath), process_datetime)
 
     results = parse_gp_extract_text(
-        open(filepath, "r").read(),
+        open(filepath).read(),
         process_datetime=process_datetime or datetime.now(),
         gp_ha_cipher=valid_file["ha_cipher"],
     )
@@ -327,7 +327,7 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     return results
 
 
-def process_invalid_records(records: Records, include_reason: bool = False) -> Tuple[Dict, Records]:
+def process_invalid_records(records: Records, include_reason: bool = False) -> tuple[dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more informative validation fail reason.

@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import boto3
 
@@ -10,8 +10,8 @@ class ChunkSizeError(Exception):
 
 
 def split_records_to_s3(
-    records: List[str],
-    id_cols: List[str],
+    records: list[str],
+    id_cols: list[str],
     destination_bucket: str,
     source: str,
     max_size: int = 128 * 1024,
@@ -55,7 +55,7 @@ def split_records_to_s3(
         )
 
 
-def _chunk_list(inlist: List[Any], chunk_size: int, sizing_func: Callable) -> List[List[Any]]:
+def _chunk_list(inlist: list[Any], chunk_size: int, sizing_func: Callable) -> list[list[Any]]:
     """Reduce a list of elements to a list of sub-lists, with each sub-list containing
     elements whose size totals no more than `chunk_size`, using `sizing_func` on each element
     to calculate the size required. Elements are evaluated in sequence and no attempt is made

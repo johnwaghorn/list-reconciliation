@@ -42,7 +42,7 @@ class DataGenerator:
         )
 
         with open(file_name, "w") as f:
-            header = "503\*\n"
+            header = "503\\*\n"
             f.write(header)
             for row in self.data:
                 record_1 = f"DOW~1~1111111,1234~LNA~20210623~1500~{self.transaction_id()}~{row['NHS_NUMBER']}~{row['FAMILY_NAME']}~{row['GIVEN_NAME']}~{row['OTHER_GIVEN_NAME']}~{row['TITLE']}~{PATIENT_GENDER[row['GENDER']]}~{row['DATE_OF_BIRTH']}~{row['ADDRESS_LINE_1']}~{row['ADDRESS_LINE_2']} "

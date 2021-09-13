@@ -1,7 +1,7 @@
 import datetime
 
 from dateutil import parser
-from typing import Any, List, Union, Tuple
+from typing import Any, Union
 
 
 class ConfigurationError(Exception):
@@ -26,7 +26,7 @@ class _Record:
         if not self.primary_key:
             raise ConfigurationError("Record must have exactly one primary_key.")
 
-    def __getitem__(self, val: str) -> Union[Any, List[Any]]:
+    def __getitem__(self, val: str) -> Union[Any, list[Any]]:
         def get_val(val):
             cols = getattr(self, val).val
             func = getattr(self, val).format
@@ -54,7 +54,7 @@ class _Record:
                 continue
 
     @property
-    def _class_attrs(self) -> List[Tuple[str, callable]]:
+    def _class_attrs(self) -> list[tuple[str, callable]]:
         return [i for i in self.__class__.__dict__.items() if not i[0].startswith("__")]
 
 

@@ -21,7 +21,7 @@ def respond():
         return 200, True
 
 
-class MockResponse(object):
+class MockResponse:
     def __init__(self, mock_url):
 
         self.patient_id = mock_url[0].split("/")[7]
@@ -81,7 +81,7 @@ class MockResponse(object):
                 "birthDate": "1982-05-25",
                 "deceasedDateTime": "",
             }
-            return {**data, **restricted}
+            return data | restricted
         else:
             return data
 

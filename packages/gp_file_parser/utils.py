@@ -1,9 +1,9 @@
-from typing import Any, List, Generator, Tuple
+from typing import Any, Generator
 
 __all__ = ["pairs", "empty_string"]
 
 
-def pairs(in_list: List[Any]) -> Generator[Tuple[Any], None, None]:
+def pairs(in_list: list[Any]) -> Generator[tuple[Any], None, None]:
     """Create a pairwise generator from input list.
 
     Args:
@@ -16,8 +16,7 @@ def pairs(in_list: List[Any]) -> Generator[Tuple[Any], None, None]:
     >>> list(pairs(in_list))
     [(1, 2), (3, 4), (5, 6)]
     """
-    for k, v in zip(in_list[::2], in_list[1::2]):
-        yield k, v
+    yield from zip(in_list[::2], in_list[1::2])
 
 
 def empty_string(s: str) -> str:

@@ -1,6 +1,4 @@
-from typing import Dict
-
-Message = Dict[str, str]
+Message = dict[str, str]
 
 
 def success(message: str, internal_id: str) -> Message:

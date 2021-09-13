@@ -22,7 +22,7 @@ s3 = boto3.client("s3", REGION_NAME)
 
 
 def update_exp_patient_record_lr23(exp_path, patient_id, job_id):
-    with open(exp_path, "r") as infile:
+    with open(exp_path) as infile:
         exp_data = json.load(infile)
         exp_data["system"]["patientId"] = patient_id
         exp_data["system"]["jobId"] = job_id

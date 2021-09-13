@@ -2,7 +2,6 @@ import csv
 import io
 import traceback
 from datetime import datetime
-from typing import List
 
 import boto3
 import botocore
@@ -51,7 +50,7 @@ class PDSRegistrationStatus(LambdaApplication):
             )
             raise e
 
-    def get_practice_patients(self, practice_code: str) -> List[str]:
+    def get_practice_patients(self, practice_code: str) -> list[str]:
         """Get NHS numbers for patients registered at a practice from PDS extract.
 
         Args:

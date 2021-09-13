@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict
 
 
 from jobs.statuses import RegistrationType
@@ -12,7 +11,7 @@ class GPRegistrationStatus(Enum):
     DEDUCTED_PATIENT_MATCH = "Deducted Patient Match"
 
 
-def get_gp_registration_status(gp_gppracticecode: str, pds_record: Dict) -> str:
+def get_gp_registration_status(gp_gppracticecode: str, pds_record: dict) -> str:
     """Determine the GP registration status given a GP file gp code and a pds record.
 
     Args:

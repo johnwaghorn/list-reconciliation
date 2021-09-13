@@ -1,15 +1,15 @@
 from functools import wraps
 from inspect import getmembers, isclass, isfunction
 from types import ModuleType
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable
 
 import textwrap
 
 from comparison_engine.schema import LeftRecord, RightRecord, ConfigurationError
 
-DecoratedFuncs = Tuple[str, str, Callable]
-ComparisonResult = Dict[str, Dict[str, str]]
-RecordPair = Tuple[LeftRecord, RightRecord]
+DecoratedFuncs = tuple[str, str, Callable]
+ComparisonResult = dict[str, dict[str, str]]
+RecordPair = tuple[LeftRecord, RightRecord]
 
 
 def module_from_string(name: str, source: str) -> ModuleType:
@@ -192,7 +192,7 @@ def get_decorated_funcs(module: ModuleType, decorator: Callable) -> DecoratedFun
 
 
 def compare_records(
-    module: ModuleType, left: Dict[str, Any], right: Dict[str, Any]
+    module: ModuleType, left: dict[str, Any], right: dict[str, Any]
 ) -> ComparisonResult:
     """Apply comparisons to objects defined in module to the left and right records.
 

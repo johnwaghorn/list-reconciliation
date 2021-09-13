@@ -4,7 +4,7 @@ import uuid
 from enum import Enum
 from json import JSONDecodeError
 from time import time
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import jwt
 import requests
@@ -156,7 +156,7 @@ class PDSAPI:
         ),
         stop_max_attempt_number=20,
     )
-    def get_pds_record(self, nhs_number: str, job_id: uuid) -> Optional[Dict[str, str]]:
+    def get_pds_record(self, nhs_number: str, job_id: uuid) -> Optional[dict[str, str]]:
         """
         Calls FHIR/PDS API URL using patient's NHS NUMBER and returns the JSON including
         patients patients
@@ -215,7 +215,7 @@ class PDSAPI:
             base_url = self.pds_url.split("/")[2]
             return kid.get(base_url)
 
-    def convert_pds_to_list_rec_data(self) -> Dict[str, str]:
+    def convert_pds_to_list_rec_data(self) -> dict[str, str]:
         """
         creates the pds json data from PDS API data
         It sets value to empty string '' for fields
@@ -256,7 +256,7 @@ class PDSAPI:
 
     def process_non_2xx_responses(
         self, response: requests, status_code: int, nhs_number: str, job_id: uuid
-    ) -> Union[Dict[str, str], None]:
+    ) -> Union[dict[str, str], None]:
         """
         Process all http status codes with non-2xx responses
         if status code is not 2xx and there is JSONDecodeError

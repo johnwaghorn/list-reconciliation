@@ -10,7 +10,7 @@ SPECIFICATION section 3.10 OUT-GOING GENERATED DOWNLOAD TRANSACTIONS.
 import re
 import string
 
-from typing import Tuple, Union, List
+from typing import Union
 from datetime import datetime, timedelta
 
 __all__ = [
@@ -98,7 +98,7 @@ INVALID_WALKING_UNITS = "Walking Units - Must be between 3 and 99 inclusive and 
 INVALID_RESIDENTIAL_INSTITUTE_CODE = "Residential Institute Code - Must be a 2-character string and valid code for the patients Health Authority."
 INVALID_TRANS_ID = "Transaction/Record Number - Must be a unique, not-null integer greater than 0."
 
-ValidatedRecord = Tuple[str, Union[str, None]]
+ValidatedRecord = tuple[str, Union[str, None]]
 
 
 def first_record_type(record_type_val: str, **kwargs) -> ValidatedRecord:
@@ -673,7 +673,7 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     return residential_institute_code_val, invalid_reason
 
 
-def transaction_id(transaction_id_val: str, other_ids: List[int], **kwargs) -> ValidatedRecord:
+def transaction_id(transaction_id_val: str, other_ids: list[int], **kwargs) -> ValidatedRecord:
     """Coerce and validate transaction id.
 
     Validation rules: Must be a unique not-null 2-character integer greater than 0.

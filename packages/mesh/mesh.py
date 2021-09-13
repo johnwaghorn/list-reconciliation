@@ -1,5 +1,5 @@
 import os
-from typing import Generator, IO, List, Tuple
+from typing import Generator, IO
 
 import boto3
 import botocore
@@ -32,7 +32,7 @@ class AWSMESHMailbox:
 
         if not overwrite:
             if filename in self.get_pending_messages(destination_id):
-                raise IOError(f"File {key} already exists, message not sent")
+                raise OSError(f"File {key} already exists, message not sent")
 
         self.log_object.write_log(
             "UTI9995",
@@ -46,7 +46,7 @@ class AWSMESHMailbox:
         self.s3.put_object(Bucket=MESH_BUCKET, Key=key, Body=file)
         return f"s3://{MESH_BUCKET}/{key}"
 
-    def send_messages(self, destination_id: str, files: List[Tuple[str, IO]], overwrite=False):
+    def send_messages(self, destination_id: str, files: list[tuple[str, IO]], overwrite=False):
         for filename, file in files:
             self.send_message(destination_id, filename, file, overwrite=overwrite)
 
@@ -57,7 +57,7 @@ class AWSMESHMailbox:
     def inbox(self) -> str:
         return f"inbound_{self.mailbox_id}"
 
-    def list_messages(self, prefix=None) -> List[str]:
+    def list_messages(self, prefix=None) -> list[str]:
         self.log_object.write_log(
             "UTI9995",
             None,

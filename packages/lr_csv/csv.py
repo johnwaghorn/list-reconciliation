@@ -1,9 +1,8 @@
 import csv
 import io
-from typing import Dict, List
 
 
-def write_to_mem_csv(rows: List[Dict], header: List[str]) -> io.StringIO:
+def write_to_mem_csv(rows: list[dict], header: list[str]) -> io.StringIO:
     """Writes a list of rows and header to an in-memory CSV string.
 
     Args:

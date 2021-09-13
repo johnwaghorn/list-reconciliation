@@ -893,14 +893,14 @@ def test_output_invalid_records_no_invalid_reason_correct(tmp_path, records, exp
         "STREET,DOW,,EAST,,E1   1AA,,3,,,\n"
     )
 
-    with open(out_file_path, "r") as out_file:
+    with open(out_file_path) as out_file:
         actual_out_file = out_file.read()
 
     assert actual_out_file == expected_out_file
 
     count_path = os.path.join(tmp_path, "invalid_counts.csv")
 
-    with open(count_path, "r") as count_file:
+    with open(count_path) as count_file:
         actual_counts = count_file.read()
 
     assert actual_counts == expected_counts_csv
@@ -925,14 +925,14 @@ def test_output_invalid_records_with_invalid_reason_low_threshold_correct(
         "STREET,DOW,,EAST,,E1   1AA,,3,,,\n"
     )
 
-    with open(out_file_path, "r") as out_file:
+    with open(out_file_path) as out_file:
         actual_out_file = out_file.read()
 
     assert actual_out_file == expected_out_file
 
     count_path = os.path.join(tmp_path, "invalid_counts.csv")
 
-    with open(count_path, "r") as count_file:
+    with open(count_path) as count_file:
         actual_counts = count_file.read()
 
     assert actual_counts == expected_counts_csv
@@ -957,14 +957,14 @@ def test_output_invalid_records_no_invalid_reason_high_threshold_correct(
         "STREET,DOW,,EAST,,E1   1AA,,3,,,\n"
     )
 
-    with open(out_file_path, "r") as out_file:
+    with open(out_file_path) as out_file:
         actual_out_file = out_file.read()
 
     assert actual_out_file == expected_out_file
 
     count_path = os.path.join(tmp_path, "invalid_counts.csv")
 
-    with open(count_path, "r") as count_file:
+    with open(count_path) as count_file:
         actual_counts = count_file.read()
 
     assert actual_counts == expected_counts_csv

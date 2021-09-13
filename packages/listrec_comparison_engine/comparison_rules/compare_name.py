@@ -1,6 +1,5 @@
 import re
 
-from typing import Tuple
 
 ACTION_UPDATE_PDS = "Update PDS name with GP name"
 ACTION_UPDATE_GP = "Update GP name with PDS name"
@@ -13,7 +12,7 @@ BOTH_NAMES = "Both names mismatched"
 
 def compare_patient_name(
     gp_forename: str, gp_surname: str, pds_givenNames: str, pds_familyName: str
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """Check for name differences between PDS and GP data and flag data
     for further action.
 

@@ -125,7 +125,7 @@ def assert_expected_file_in_lr13(filetype, expected_data_file):
     sorted_job_data = sorted(job_object["Body"].read().decode("utf-8").splitlines())
 
     expected_data_path = os.path.join(DATA, expected_data_file)
-    with open(expected_data_path, "r") as expected_data:
+    with open(expected_data_path) as expected_data:
         sorted_expected_data = sorted(expected_data)
         for job_row, expected_row in zip(sorted_job_data, sorted_expected_data):
             assert (

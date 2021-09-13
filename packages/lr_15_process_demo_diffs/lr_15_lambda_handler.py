@@ -1,7 +1,7 @@
 import json
 import traceback
 from collections import defaultdict
-from typing import Dict, List, Tuple, Any
+from typing import Any
 
 import boto3
 from spine_aws_common.lambda_application import LambdaApplication
@@ -57,8 +57,8 @@ class DemographicDifferences(LambdaApplication):
 
     @staticmethod
     def create_dsa_payload(
-        patient_record: Demographics, demo_diffs: List[DemographicsDifferences]
-    ) -> Tuple[Dict, int, int, int, int, int]:
+        patient_record: Demographics, demo_diffs: list[DemographicsDifferences]
+    ) -> tuple[dict, int, int, int, int, int]:
         """Creates a DSA work item payload containing a single patient record with
         one or more demographic differences identified.
         Demographic differences list is empty for Sensitive patients
@@ -151,7 +151,7 @@ class DemographicDifferences(LambdaApplication):
         )
 
     @staticmethod
-    def summarise_dsa_work_item(dsa_work_item: Dict):
+    def summarise_dsa_work_item(dsa_work_item: dict):
         patient = dsa_work_item["patient"]
         summary_record_dict = {
             "nhsNumber": patient["nhsNumber"],
@@ -182,7 +182,7 @@ class DemographicDifferences(LambdaApplication):
         demographic_diffs = dsa_work_item["differences"]
 
         if demographic_diffs:
-            return [{**summary_record_dict, **difference} for difference in demographic_diffs]
+            return [summary_record_dict | difference for difference in demographic_diffs]
         else:
             # Sensitive patients
             return [{**summary_record_dict, "ruleId": "sensitive", "guidance": "Manual Validation"}]
@@ -384,7 +384,7 @@ class DemographicDifferences(LambdaApplication):
         return response
 
     @staticmethod
-    def process_sensitive_patients(job_id) -> Dict[str, List[Any]]:
+    def process_sensitive_patients(job_id) -> dict[str, list[Any]]:
         """
         Get sensitive patient details from Demographic table , the sensitive status could be
         "R","V", "REDACTED"

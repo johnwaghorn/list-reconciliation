@@ -121,9 +121,7 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
-            raise RuntimeError(
-                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
-            )
+            raise RuntimeError(f"Could not put records after {str(maxAttempts)} attempts. {errMsg}")
 
 
 def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAttempts):
@@ -161,9 +159,7 @@ def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAtte
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
-            raise RuntimeError(
-                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
-            )
+            raise RuntimeError(f"Could not put records after {str(maxAttempts)} attempts. {errMsg}")
 
 
 def createReingestionRecord(isSas, originalRecord):

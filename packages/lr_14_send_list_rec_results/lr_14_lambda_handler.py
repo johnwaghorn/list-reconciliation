@@ -1,7 +1,6 @@
 import json
 import os
 import traceback
-from typing import List
 
 import boto3
 import pytz
@@ -109,7 +108,7 @@ class SendListRecResults(LambdaApplication):
 
         return filenames, files
 
-    def generate_email(self, filenames: List[str]):
+    def generate_email(self, filenames: list[str]):
         diffs = list(DemographicsDifferences.JobIdIndex.query(self.job_id))
         unique_patients = {d.PatientId for d in diffs}
         job = Jobs.IdIndex.query(self.job_id).next()
@@ -136,7 +135,7 @@ class SendListRecResults(LambdaApplication):
 
         return email_subject, email_body
 
-    def send_mesh_files(self, filenames: List[str], files: List[str]):
+    def send_mesh_files(self, filenames: list[str], files: list[str]):
         listrec_mesh_id, pcse_mesh_id = get_mesh_mailboxes(
             json.loads(self.mesh_params["mesh_mappings"]),
             self.mesh_params["listrec_pcse_workflow"],

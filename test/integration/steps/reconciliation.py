@@ -1,6 +1,6 @@
 from behave import then
 
 
-@then(u"a successful reconciliation is produced")
+@then("a successful reconciliation is produced")
 def step_impl(context):
-    raise NotImplementedError(u"STEP: Then a successful reconciliation is produced")
+    raise NotImplementedError("STEP: Then a successful reconciliation is produced")
