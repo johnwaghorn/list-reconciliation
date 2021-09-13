@@ -1,14 +1,12 @@
-from getgauge.python import step
-from datetime import timedelta
-from datetime import datetime
-from .tf_aws_resources import get_terraform_output
-from .lr_03_dynamodb import get_latest_jobid
-
-import os
-
-import boto3
 import os
 import sys
+from datetime import datetime, timedelta
+
+import boto3
+from getgauge.python import step
+
+from .lr_03_dynamodb import get_latest_jobid
+from .tf_aws_resources import get_terraform_output
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

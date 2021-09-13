@@ -5,7 +5,6 @@ import botocore
 
 from .aws import get_terraform_output
 
-
 dynamodb = boto3.resource("dynamodb")
 s3 = boto3.client("s3")
 stepfunctions = boto3.client("stepfunctions")

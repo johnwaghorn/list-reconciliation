@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from tempfile import gettempdir
 
 import boto3
@@ -7,7 +8,6 @@ from getgauge.python import step
 
 from .test_helpers import PDS_API_ENV
 from .tf_aws_resources import get_terraform_output
-from datetime import datetime
 
 test_datetime = datetime.now()
 temp_dir = gettempdir()

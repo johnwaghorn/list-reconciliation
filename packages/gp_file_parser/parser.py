@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Iterable, Union
 
 from botocore.client import BaseClient
-
 from gp_file_parser.file_name_parser import validate_filename
 from gp_file_parser.utils import pairs
 from gp_file_parser.validators import (

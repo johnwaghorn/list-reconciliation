@@ -1,16 +1,12 @@
-from datetime import datetime
-
 import json
 import os
-
-from moto import mock_s3, mock_dynamodb2, mock_ssm
+from datetime import datetime
 
 import boto3
 import pytest
-
-
-from lr_14_send_list_rec_results.lr_14_lambda_handler import SendListRecResults
 from database.models import DemographicsDifferences, Jobs, JobStats
+from lr_14_send_list_rec_results.lr_14_lambda_handler import SendListRecResults
+from moto import mock_dynamodb2, mock_s3, mock_ssm
 
 REGION_NAME = os.environ.get("AWS_REGION")
 MESH_BUCKET = os.getenv("MESH_BUCKET")

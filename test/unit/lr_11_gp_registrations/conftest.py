@@ -3,13 +3,9 @@ from datetime import datetime
 
 import boto3
 import pytest
-from moto import mock_dynamodb2, mock_s3
-
-from lr_11_gp_registration_status.lr_11_lambda_handler import (
-    GPRegistrations,
-)
 from database.models import Demographics, Jobs, JobStats
-
+from lr_11_gp_registration_status.lr_11_lambda_handler import GPRegistrations
+from moto import mock_dynamodb2, mock_s3
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

@@ -1,10 +1,10 @@
+import json
 import os
 import urllib.parse
 import urllib.request
-import requests
-import json
 from tempfile import gettempdir
 
+import requests
 from getgauge.python import step
 
 TEMP_DIR = gettempdir()

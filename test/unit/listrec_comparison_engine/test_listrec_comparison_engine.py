@@ -1,5 +1,5 @@
-from listrec_comparison_engine import listrec_comparisons
 from comparison_engine.core import compare_records
+from listrec_comparison_engine import listrec_comparisons
 
 
 def test_compare_records_all_equal():

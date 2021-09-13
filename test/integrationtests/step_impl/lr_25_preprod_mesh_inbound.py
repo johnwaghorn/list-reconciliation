@@ -3,8 +3,8 @@ import os
 
 import boto3
 from getgauge.python import Messages, step
-
 from jobs.statuses import InputFolderType
+
 from .lr_02_lambda_val_parse import create_gp_file
 from .tf_aws_resources import get_terraform_output
 

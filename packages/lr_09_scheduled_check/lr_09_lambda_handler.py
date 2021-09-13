@@ -4,12 +4,10 @@ from datetime import datetime, timedelta
 
 import boto3
 import pytz
-from spine_aws_common.lambda_application import LambdaApplication
-
 from database.models import Demographics, InFlight, Jobs, JobStats
-from lr_logging import error, Message, success
 from jobs.statuses import JobStatus
-from lr_logging import get_cloudlogbase_config
+from lr_logging import Message, error, get_cloudlogbase_config, success
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class ScheduledCheck(LambdaApplication):

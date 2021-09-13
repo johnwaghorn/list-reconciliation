@@ -1,13 +1,7 @@
-from exchangelib import (
-    Account,
-    Credentials,
-    Mailbox,
-    Message,
-    FaultTolerance,
-)
 import logging
 import sys
 
+from exchangelib import Account, Credentials, FaultTolerance, Mailbox, Message
 from exchangelib.autodiscover import Autodiscovery
 from spine_aws_common.logger import Logger
 

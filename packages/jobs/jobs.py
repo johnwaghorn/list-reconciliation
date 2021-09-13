@@ -1,5 +1,4 @@
 import pynamodb
-
 from database.models import Jobs
 from jobs.statuses import JobNotFound
 

@@ -2,12 +2,11 @@ import os
 
 import boto3
 import pytest
-from dateutil.parser import parse
-from moto import mock_dynamodb2, mock_s3
-
-from lr_27_job_cleanup.lr_27_lambda_handler import JobCleanup
 from database.models import InFlight, Jobs
+from dateutil.parser import parse
 from jobs.statuses import JobStatus
+from lr_27_job_cleanup.lr_27_lambda_handler import JobCleanup
+from moto import mock_dynamodb2, mock_s3
 
 REGION_NAME = os.environ.get("AWS_REGION")
 

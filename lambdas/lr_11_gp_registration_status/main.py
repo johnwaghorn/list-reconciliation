@@ -1,6 +1,4 @@
-from lr_11_gp_registration_status.lr_11_lambda_handler import (
-    GPRegistrations,
-)
+from lr_11_gp_registration_status.lr_11_lambda_handler import GPRegistrations
 
 app = GPRegistrations()
 

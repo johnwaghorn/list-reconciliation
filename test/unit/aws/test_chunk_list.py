@@ -1,6 +1,5 @@
 import pytest
-
-from aws.split_records_to_s3 import _chunk_list, ChunkSizeError
+from aws.split_records_to_s3 import ChunkSizeError, _chunk_list
 
 
 @pytest.mark.parametrize(

@@ -3,18 +3,16 @@ import os
 import traceback
 
 import boto3
-import pytz
-from spine_aws_common.lambda_application import LambdaApplication
-
 import nhs_mail_relay
-from .listrec_results_email_template import BODY
+import pytz
+from aws.ssm import get_ssm_params
+from database.models import DemographicsDifferences, Jobs, JobStats
+from lr_logging import get_cloudlogbase_config
+from lr_logging.responses import Message, error, success
 from mesh import AWSMESHMailbox, get_mesh_mailboxes
 from spine_aws_common.lambda_application import LambdaApplication
-from database.models import DemographicsDifferences, Jobs, JobStats
-from aws.ssm import get_ssm_params
-from lr_logging.responses import error, Message, success
 
-from lr_logging import get_cloudlogbase_config
+from .listrec_results_email_template import BODY
 
 
 class SendListRecResults(LambdaApplication):

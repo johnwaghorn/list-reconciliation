@@ -2,10 +2,8 @@ import os
 
 import boto3
 import pytest
-
-from moto import mock_s3
-
 from lr_24_save_records_to_s3.lr24_lambda_handler import SaveRecordsToS3
+from moto import mock_s3
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

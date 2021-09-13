@@ -1,21 +1,15 @@
 import datetime
 
 import pytest
-
-from comparison_engine.core import (
-    get_records,
-    comparison,
-    get_decorated_funcs,
-    module_from_string,
-)
+from comparison_engine.core import comparison, get_decorated_funcs, get_records, module_from_string
 from comparison_engine.schema import (
+    ConfigurationError,
+    DateTimeColumn,
+    FloatColumn,
+    IntegerColumn,
     LeftRecord,
     RightRecord,
-    ConfigurationError,
-    IntegerColumn,
-    FloatColumn,
     StringColumn,
-    DateTimeColumn,
 )
 
 

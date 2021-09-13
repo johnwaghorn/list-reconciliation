@@ -1,16 +1,13 @@
-from io import StringIO
-
 import csv
 import json
 import os
-
-from freezegun import freeze_time
+from io import StringIO
 
 import boto3
 import pytest
-
-from jobs.jobs import JobNotFound
 from database.models import JobStats
+from freezegun import freeze_time
+from jobs.jobs import JobNotFound
 
 MESH_BUCKET = os.getenv("MESH_BUCKET")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

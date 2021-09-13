@@ -5,12 +5,9 @@ import zipfile
 
 import boto3
 import pytest
-
-from moto import mock_dynamodb2, mock_s3, mock_lambda, mock_iam
-
-from lr_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
-
 from database.models import Demographics
+from lr_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
+from moto import mock_dynamodb2, mock_iam, mock_lambda, mock_s3
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

@@ -1,6 +1,6 @@
 import os
-import pytest
 
+import pytest
 from database.models import Demographics
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

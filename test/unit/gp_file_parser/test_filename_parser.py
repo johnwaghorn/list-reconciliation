@@ -1,8 +1,7 @@
-import pytest
-
 from datetime import datetime
-from freezegun import freeze_time
 
+import pytest
+from freezegun import freeze_time
 from gp_file_parser.file_name_parser import validate_filename
 from lr_logging.exceptions import InvalidFilename
 

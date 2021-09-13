@@ -3,8 +3,8 @@ import datetime
 import logging
 from datetime import datetime
 
-from gp_file_parser.parser import process_gp_extract, LOG, InvalidGPExtract
 from gp_file_parser.file_name_parser import InvalidFilename
+from gp_file_parser.parser import LOG, InvalidGPExtract, process_gp_extract
 
 
 def main():

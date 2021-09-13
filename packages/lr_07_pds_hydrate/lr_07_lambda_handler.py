@@ -2,15 +2,13 @@ import json
 import traceback
 
 import boto3
-from spine_aws_common.lambda_application import LambdaApplication
-
-from gp_file_parser.utils import empty_string
-from pds_api.pds_api import PDSAPIError, PDSAPI
-from lr_retry import retry_func
 from database.models import Demographics
-from lr_logging import error, Message, success
+from gp_file_parser.utils import empty_string
+from lr_logging import Message, error, get_cloudlogbase_config, success
+from lr_retry import retry_func
+from pds_api.pds_api import PDSAPI, PDSAPIError
 from registration import GPRegistrationStatus, get_gp_registration_status
-from lr_logging import get_cloudlogbase_config
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class PdsHydrate(LambdaApplication):

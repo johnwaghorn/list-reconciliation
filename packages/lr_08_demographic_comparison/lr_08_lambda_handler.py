@@ -1,15 +1,13 @@
 import traceback
 from uuid import uuid4
 
-from spine_aws_common.lambda_application import LambdaApplication
-
 from comparison_engine.core import compare_records
+from database.models import Demographics, DemographicsDifferences
 from listrec_comparison_engine import listrec_comparisons
-from database.models import DemographicsDifferences, Demographics
-from lr_logging.responses import error, Message, success
-from registration import GPRegistrationStatus
-
 from lr_logging import get_cloudlogbase_config
+from lr_logging.responses import Message, error, success
+from registration import GPRegistrationStatus
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class DemographicComparison(LambdaApplication):

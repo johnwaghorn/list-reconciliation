@@ -1,11 +1,10 @@
 import traceback
 
 import boto3
-from spine_aws_common.lambda_application import LambdaApplication
-
-from database.models import Jobs, InFlight
-from lr_logging.responses import error, Message, success
+from database.models import InFlight, Jobs
 from jobs.statuses import JobStatus
+from lr_logging.responses import Message, error, success
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class JobCleanup(LambdaApplication):

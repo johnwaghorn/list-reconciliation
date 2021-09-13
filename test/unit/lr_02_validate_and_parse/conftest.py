@@ -5,11 +5,9 @@ import zipfile
 
 import boto3
 import pytest
-
-from moto import mock_dynamodb2, mock_s3, mock_iam, mock_lambda
-
+from database.models import InFlight, Jobs
 from lr_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
-from database.models import Jobs, InFlight
+from moto import mock_dynamodb2, mock_iam, mock_lambda, mock_s3
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

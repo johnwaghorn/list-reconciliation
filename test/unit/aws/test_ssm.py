@@ -1,9 +1,8 @@
 import json
 
 import boto3
-
 from aws.ssm import get_ssm_params, put_ssm_params
-from unit.conftest import SSM_PARAM_PREFIX, REGION_NAME
+from unit.conftest import REGION_NAME, SSM_PARAM_PREFIX
 
 
 def test_get_ssm(mock_pds_private_key, mock_pds_app_key, mock_pds_access_token):

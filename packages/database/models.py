@@ -1,15 +1,15 @@
 import os
-
 from datetime import datetime
+
 from pynamodb.attributes import (
-    UnicodeAttribute,
-    NumberAttribute,
-    ListAttribute,
     BooleanAttribute,
+    ListAttribute,
+    NumberAttribute,
+    UnicodeAttribute,
     UTCDateTimeAttribute,
 )
+from pynamodb.indexes import AllProjection, GlobalSecondaryIndex
 from pynamodb.models import Model
-from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 
 AWS_REGION = os.getenv("AWS_REGION")
 

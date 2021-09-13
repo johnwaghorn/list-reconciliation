@@ -2,9 +2,8 @@ import io
 
 import pytest
 from freezegun import freeze_time
-
-from lr_csv.csv import write_to_mem_csv
 from jobs.statuses import RegistrationType
+from lr_csv.csv import write_to_mem_csv
 from registration import get_registration_filename
 
 

@@ -2,10 +2,10 @@ import json
 from datetime import datetime, timedelta
 
 import pytest
-
-from .conftest import JOB_ID
 from database.models import InFlight, Jobs, JobStats
 from jobs.statuses import JobStatus
+
+from .conftest import JOB_ID
 
 
 def test_lambda_handler_runs_successfully_no_errors_thrown(

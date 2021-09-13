@@ -1,18 +1,16 @@
 import os
-import pytest
 from datetime import datetime
 
+import pytest
 from freezegun import freeze_time
-
 from gp_file_parser.parser import (
-    parse_gp_extract_text,
-    parse_gp_extract_file,
     _validate_columns,
     output_records,
+    parse_gp_extract_file,
+    parse_gp_extract_text,
     process_invalid_records,
 )
-from lr_logging.exceptions import InvalidStructure, InvalidGPExtract
-
+from lr_logging.exceptions import InvalidGPExtract, InvalidStructure
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "gp_file_parser")

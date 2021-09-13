@@ -3,7 +3,6 @@ import os
 import boto3
 import pytest
 from freezegun import freeze_time
-
 from lr_21_split_dps_extract.lr_21_lambda_handler import InvalidPDSData
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

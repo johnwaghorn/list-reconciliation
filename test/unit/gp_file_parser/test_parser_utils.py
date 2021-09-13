@@ -1,5 +1,4 @@
 import pytest
-
 from gp_file_parser.utils import empty_string
 
 

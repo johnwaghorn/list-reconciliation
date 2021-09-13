@@ -4,16 +4,15 @@ from datetime import datetime
 from uuid import uuid4
 
 import boto3
-from pynamodb.exceptions import PynamoDBConnectionError, PutError
-from spine_aws_common.lambda_application import LambdaApplication
-
-from gp_file_parser.parser import parse_gp_extract_file_s3
 from aws.split_records_to_s3 import split_records_to_s3
+from database.models import InFlight, Jobs
+from gp_file_parser.parser import parse_gp_extract_file_s3
 from jobs.statuses import InputFolderType, InvalidErrorType
-from database.models import Jobs, InFlight
 from lr_logging import get_cloudlogbase_config
-from lr_logging.responses import error, Message, success
-from lr_logging.exceptions import InvalidGPExtract, InvalidFilename, InvalidStructure
+from lr_logging.exceptions import InvalidFilename, InvalidGPExtract, InvalidStructure
+from lr_logging.responses import Message, error, success
+from pynamodb.exceptions import PutError, PynamoDBConnectionError
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class ValidateAndParse(LambdaApplication):

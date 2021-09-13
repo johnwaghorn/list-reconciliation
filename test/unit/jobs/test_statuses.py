@@ -1,5 +1,4 @@
 import pytest
-
 from jobs.statuses import JobStatus
 
 

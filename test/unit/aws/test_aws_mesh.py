@@ -2,9 +2,8 @@ import os
 
 import boto3
 import pytest
-from moto import mock_s3
-
 from mesh import AWSMESHMailbox, InvalidFilename
+from moto import mock_s3
 
 AWS_REGION = os.getenv("AWS_REGION")
 MESH_BUCKET = os.getenv("MESH_BUCKET")

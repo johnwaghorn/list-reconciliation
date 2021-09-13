@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 from jobs.statuses import RegistrationType
 
 

@@ -1,10 +1,10 @@
+import argparse
+import csv
+import random
 import string
+from datetime import datetime, timedelta
 
 from config import config
-import csv
-from datetime import datetime, timedelta
-import random
-import argparse
 
 PATIENT_GENDER = {"Male": 1, "Female": 2, "Not known": 3, "Indeterminate": 3, "Not Specified": 9}
 MONTHS = "ABCDEFGHIJKL"

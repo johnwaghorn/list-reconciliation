@@ -1,9 +1,8 @@
 import os
-from typing import Generator, IO
+from typing import IO, Generator
 
 import boto3
 import botocore
-
 from spine_aws_common.logger import Logger
 
 MESH_BUCKET = os.environ["MESH_BUCKET"]

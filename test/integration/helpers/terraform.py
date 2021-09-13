@@ -1,7 +1,6 @@
 import json
 import os
 
-
 OUTPUTS_FILE = os.path.join(
     os.path.dirname(__file__), "..", "..", "..", "terraform_outputs_list-reconciliation.json"
 )

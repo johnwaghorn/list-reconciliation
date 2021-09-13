@@ -1,11 +1,10 @@
+import textwrap
 from functools import wraps
 from inspect import getmembers, isclass, isfunction
 from types import ModuleType
 from typing import Any, Callable
 
-import textwrap
-
-from comparison_engine.schema import LeftRecord, RightRecord, ConfigurationError
+from comparison_engine.schema import ConfigurationError, LeftRecord, RightRecord
 
 DecoratedFuncs = tuple[str, str, Callable]
 ComparisonResult = dict[str, dict[str, str]]

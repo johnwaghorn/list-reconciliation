@@ -8,10 +8,9 @@ from typing import Optional, Union
 
 import jwt
 import requests
+from aws.ssm import get_ssm_params, put_ssm_params
 from jsonpath_ng import parse
 from retrying import retry
-
-from aws.ssm import get_ssm_params, put_ssm_params
 
 SIGNING_ALG = "RS512"
 PDS_URL_PATH = "personal-demographics/FHIR/R4"

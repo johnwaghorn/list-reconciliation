@@ -4,10 +4,9 @@ from io import StringIO
 
 import boto3
 import pytest
-from freezegun import freeze_time
-
-from jobs.jobs import JobNotFound
 from database.models import JobStats
+from freezegun import freeze_time
+from jobs.jobs import JobNotFound
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

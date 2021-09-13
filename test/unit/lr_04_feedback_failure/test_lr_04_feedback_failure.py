@@ -3,7 +3,6 @@ import os
 import boto3
 import pytest
 from freezegun import freeze_time
-
 from lr_logging.exceptions import FeedbackLogError
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

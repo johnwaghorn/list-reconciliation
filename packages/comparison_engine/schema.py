@@ -1,7 +1,7 @@
 import datetime
+from typing import Any, Union
 
 from dateutil import parser
-from typing import Any, Union
 
 
 class ConfigurationError(Exception):

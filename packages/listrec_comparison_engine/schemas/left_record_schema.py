@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from comparison_engine.schema import LeftRecord, StringColumn, DateTimeColumn
+from comparison_engine.schema import DateTimeColumn, LeftRecord, StringColumn
 from listrec_comparison_engine.utils import strip_ws
 
 

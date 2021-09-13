@@ -1,6 +1,7 @@
-from getgauge.python import step, Messages, data_store
-from .tf_aws_resources import get_terraform_output
 import boto3
+from getgauge.python import Messages, data_store, step
+
+from .tf_aws_resources import get_terraform_output
 
 REGION_NAME = "eu-west-2"
 JOBS_TABLE = get_terraform_output("jobs_table")

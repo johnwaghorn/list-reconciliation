@@ -1,6 +1,8 @@
-import boto3
 import time
+
+import boto3
 from getgauge.python import Messages, step
+
 from .tf_aws_resources import get_terraform_output
 
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")

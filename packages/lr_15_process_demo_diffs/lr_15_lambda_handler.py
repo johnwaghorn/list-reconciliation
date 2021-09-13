@@ -1,21 +1,20 @@
 import json
 import traceback
 from collections import defaultdict
+from datetime import datetime
 from typing import Any
 
 import boto3
-from spine_aws_common.lambda_application import LambdaApplication
-
-from mesh import AWSMESHMailbox, get_mesh_mailboxes
-from jobs.jobs import get_job
-from pds_api.pds_api import SensitiveMarkers
-from lr_csv.csv import write_to_mem_csv
-from database.models import JobStats, Jobs, DemographicsDifferences, Demographics
-from datetime import datetime
-from lr_logging.responses import error, Message, success
-from jobs.statuses import JobStatus
 from aws.ssm import get_ssm_params
+from database.models import Demographics, DemographicsDifferences, Jobs, JobStats
+from jobs.jobs import get_job
+from jobs.statuses import JobStatus
+from lr_csv.csv import write_to_mem_csv
 from lr_logging import get_cloudlogbase_config
+from lr_logging.responses import Message, error, success
+from mesh import AWSMESHMailbox, get_mesh_mailboxes
+from pds_api.pds_api import SensitiveMarkers
+from spine_aws_common.lambda_application import LambdaApplication
 
 MANUAL_VALIDATION = "Manual Validation"
 

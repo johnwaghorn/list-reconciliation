@@ -1,12 +1,13 @@
-from .lr_beforehooks import use_waiters_check_object_exists
-from getgauge.python import step, Messages, data_store
-from datetime import datetime
-from .tf_aws_resources import get_terraform_output
-from .test_helpers import PDS_API_ENV, get_latest_jobid, await_stepfunction_succeeded
-
-import boto3
 import json
 import os
+from datetime import datetime
+
+import boto3
+from getgauge.python import Messages, data_store, step
+
+from .lr_beforehooks import use_waiters_check_object_exists
+from .test_helpers import PDS_API_ENV, await_stepfunction_succeeded, get_latest_jobid
+from .tf_aws_resources import get_terraform_output
 
 REGION_NAME = "eu-west-2"
 TEST_DATETIME = datetime.now()

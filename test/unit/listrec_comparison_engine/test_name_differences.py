@@ -1,11 +1,11 @@
 from listrec_comparison_engine.comparison_rules.compare_name import (
-    compare_patient_name,
-    ACTION_UPDATE_PDS,
-    ACTION_UPDATE_GP,
     ACTION_REQUIRES_VALIDATION,
+    ACTION_UPDATE_GP,
+    ACTION_UPDATE_PDS,
+    BOTH_NAMES,
     FORENAME,
     SURNAME,
-    BOTH_NAMES,
+    compare_patient_name,
 )
 
 

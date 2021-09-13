@@ -5,15 +5,13 @@ from datetime import datetime
 
 import boto3
 import botocore
-from spine_aws_common.lambda_application import LambdaApplication
-
-from jobs.jobs import get_job
-from pds_api.pds_api import PDSAPIError, PDSAPI, SensitiveMarkers
-from registration import RegistrationType, get_registration_filename
-from lr_csv.csv import write_to_mem_csv
 from database.models import Demographics, JobStats
-from lr_logging import error, Message, success
-from lr_logging import get_cloudlogbase_config
+from jobs.jobs import get_job
+from lr_csv.csv import write_to_mem_csv
+from lr_logging import Message, error, get_cloudlogbase_config, success
+from pds_api.pds_api import PDSAPI, PDSAPIError, SensitiveMarkers
+from registration import RegistrationType, get_registration_filename
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class PDSRegistrationStatus(LambdaApplication):

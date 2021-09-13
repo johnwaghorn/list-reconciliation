@@ -3,13 +3,9 @@ from datetime import datetime
 
 import boto3
 import pytest
-from moto import mock_dynamodb2, mock_s3
-
-from lr_12_pds_registration_status.lr_12_lambda_handler import (
-    PDSRegistrationStatus,
-)
 from database.models import Demographics, Jobs, JobStats
-
+from lr_12_pds_registration_status.lr_12_lambda_handler import PDSRegistrationStatus
+from moto import mock_dynamodb2, mock_s3
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

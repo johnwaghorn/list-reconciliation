@@ -1,12 +1,13 @@
-from getgauge.python import step, Messages, data_store
-from .tf_aws_resources import get_terraform_output
-from .lr_03_dynamodb import get_latest_jobid
-from .test_helpers import PDS_API_ENV
-
-import boto3
+import base64
 import json
 import os
-import base64
+
+import boto3
+from getgauge.python import Messages, data_store, step
+
+from .lr_03_dynamodb import get_latest_jobid
+from .test_helpers import PDS_API_ENV
+from .tf_aws_resources import get_terraform_output
 
 REGION_NAME = "eu-west-2"
 LR_09_LAMBDA_ARN = get_terraform_output("lr_09_lambda")

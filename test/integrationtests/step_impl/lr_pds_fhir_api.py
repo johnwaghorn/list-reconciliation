@@ -1,9 +1,10 @@
-import os
-import requests
 import json
-from .test_helpers import PDS_API_ENV
+import os
 
+import requests
 from getgauge.python import step
+
+from .test_helpers import PDS_API_ENV
 
 URL = "https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4/Patient"
 ROOT = os.path.dirname(os.path.abspath(__file__))

@@ -1,10 +1,9 @@
 from datetime import datetime
 
 import pytest
-from moto import mock_dynamodb2
-
-from jobs.jobs import get_job, JobNotFound
 from database.models import Jobs
+from jobs.jobs import JobNotFound, get_job
+from moto import mock_dynamodb2
 
 
 @pytest.fixture

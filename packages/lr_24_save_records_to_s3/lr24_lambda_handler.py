@@ -2,11 +2,10 @@ import json
 import traceback
 
 import boto3
-from spine_aws_common.lambda_application import LambdaApplication
-
-from lr_retry import retry_func
-from lr_logging.responses import error, Message, success
 from lr_logging import get_cloudlogbase_config
+from lr_logging.responses import Message, error, success
+from lr_retry import retry_func
+from spine_aws_common.lambda_application import LambdaApplication
 
 
 class SaveRecordsToS3(LambdaApplication):

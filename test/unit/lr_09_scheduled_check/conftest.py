@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
+
 import boto3
 import pytest
+from database.models import Demographics, InFlight, Jobs, JobStats
 from dateutil.parser import parse
+from lr_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
 from moto import mock_dynamodb2, mock_stepfunctions
 from moto.core import ACCOUNT_ID
-
-from lr_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
-from database.models import Demographics, InFlight, Jobs, JobStats
 
 JOB_ID = {
     1: "b204b5f4-6762-414e-bb6b-a05c37f52956",

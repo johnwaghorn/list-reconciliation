@@ -1,8 +1,8 @@
 import pytest
+from database.models import InFlight, Jobs
+from jobs.statuses import JobStatus
 
 from .conftest import JOB_ID, MOCK_REGISTRATIONS_OUTPUT_BUCKET
-from database.models import Jobs, InFlight
-from jobs.statuses import JobStatus
 
 
 def test_validate_job_id(job_cleanup, create_job_item):

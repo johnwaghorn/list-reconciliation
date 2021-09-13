@@ -9,9 +9,8 @@ SPECIFICATION section 3.10 OUT-GOING GENERATED DOWNLOAD TRANSACTIONS.
 
 import re
 import string
-
-from typing import Union
 from datetime import datetime, timedelta
+from typing import Union
 
 __all__ = [
     "INVALID",

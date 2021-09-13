@@ -1,10 +1,9 @@
 import os
+
 import boto3
 import pytest
-
-from moto import mock_s3, mock_ssm
-
 from lr_04_feedback_failure.lr_04_lambda_handler import FeedbackFailure
+from moto import mock_s3, mock_ssm
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

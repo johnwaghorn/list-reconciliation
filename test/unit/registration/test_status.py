@@ -1,5 +1,4 @@
 import pytest
-
 from registration import get_gp_registration_status
 
 

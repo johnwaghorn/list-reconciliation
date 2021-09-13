@@ -1,6 +1,4 @@
-from lr_15_process_demo_diffs.lr_15_lambda_handler import (
-    DemographicDifferences,
-)
+from lr_15_process_demo_diffs.lr_15_lambda_handler import DemographicDifferences
 
 app = DemographicDifferences()
 

@@ -1,7 +1,6 @@
-import pytest
-
 from datetime import datetime
 
+import pytest
 from gp_file_parser import validators as v
 from gp_file_parser.parser import _validate_record
 

@@ -3,9 +3,8 @@ import os
 
 import boto3
 import pytest
-from moto import mock_s3, mock_ssm
-
 from lr_25_mesh_post_office.lr_25_lambda_handler import MeshPostOffice
+from moto import mock_s3, mock_ssm
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

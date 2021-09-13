@@ -1,4 +1,4 @@
-from lr_logging import success, error
+from lr_logging import error, success
 
 
 def test_success_ok():

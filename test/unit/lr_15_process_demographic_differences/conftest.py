@@ -1,22 +1,12 @@
-from datetime import datetime
-
 import json
 import os
+from datetime import datetime
 
 import boto3
 import pytest
+from database.models import Demographics, DemographicsDifferences, Jobs, JobStats
+from lr_15_process_demo_diffs.lr_15_lambda_handler import DemographicDifferences
 from moto import mock_dynamodb2, mock_s3, mock_ssm
-
-from lr_15_process_demo_diffs.lr_15_lambda_handler import (
-    DemographicDifferences,
-)
-from database.models import (
-    Demographics,
-    Jobs,
-    JobStats,
-    DemographicsDifferences,
-)
-
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
