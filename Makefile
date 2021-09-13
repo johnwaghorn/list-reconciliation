@@ -55,12 +55,29 @@ syntax-check:
 error-check:
 	flake8 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics lambdas/ packages/ test/
 
-# Formatting
+# Formatting and linting
 black:
 	python -m black --line-length 100 lambdas/ packages/ test/
 
 black-check:
 	python -m black --line-length 100 --check lambdas/ packages/ test/
+
+autoflake:
+	autoflake --in-place --remove-unused-variables --recursive lambdas/ packages/ test/
+
+pyupgrade:
+	find lambdas packages test -name "*.py" | xargs pyupgrade --py39-plus
+
+isort:
+	isort --gitignore --atomic lambdas/ packages/ test/
+
+pybetter:
+	pybetter lambdas/ packages/ test/
+
+com2ann:
+	com2ann lambdas/
+	com2ann packages/
+	com2ann test/
 
 #
 # Terraform

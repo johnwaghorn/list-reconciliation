@@ -34,6 +34,11 @@ pytest = "*"
 pytest-cov = "*"
 pytest-env = "*"
 pytest-html = "*"
+autoflake = "*"
+pyupgrade = "*"
+isort = "*"
+pybetter = "*"
+com2ann = "*"
 
 [requires]
 python_version = "3.9"
