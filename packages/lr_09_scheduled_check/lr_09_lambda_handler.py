@@ -35,7 +35,7 @@ class ScheduledCheck(LambdaApplication):
     @staticmethod
     def is_job_complete(job_id: str, total_records: int) -> bool:
         response = Demographics.JobIdIndex.count(
-            job_id, filter_condition=Demographics.IsComparisonCompleted
+            job_id, filter_condition=Demographics.IsComparisonCompleted == True
         )
         return response == total_records
 
