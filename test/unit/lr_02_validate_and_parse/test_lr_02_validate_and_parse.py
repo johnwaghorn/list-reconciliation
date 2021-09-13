@@ -41,7 +41,7 @@ def test_lr02_lambda_handler_valid_file(
 
     result = app.main(event=lr_02_valid_file_event, context=lambda_context)
 
-    assert f"LR02 Lambda application stopped for jobId=" in result["message"]
+    assert "LR02 Lambda application stopped for jobId=" in result["message"]
 
 
 @freeze_time("2021-04-06 13:40:00")
@@ -57,7 +57,7 @@ def test_lr02_lambda_handler_invalid_file(
 
     result = app.main(event=lr_02_invalid_file_event, context=lambda_context)
 
-    assert f"LR02 Lambda application stopped for jobId=" in result["message"]
+    assert "LR02 Lambda application stopped for jobId=" in result["message"]
 
 
 @pytest.mark.xfail(reason="utils.database.models.Jobs.DoesNotExist: None")

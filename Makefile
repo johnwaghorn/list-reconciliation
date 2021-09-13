@@ -71,8 +71,9 @@ pyupgrade:
 isort:
 	isort --gitignore --atomic lambdas/ packages/ test/
 
+# Exclude "B004: __all__ attribute is missing" (https://pypi.org/project/pybetter/)
 pybetter:
-	pybetter lambdas/ packages/ test/
+	pybetter --exclude B004 lambdas/ packages/ test/
 
 com2ann:
 	com2ann lambdas/

@@ -98,19 +98,19 @@ def test_four_inflight_records_one_processed_correctly_one_timed_out_two_skipped
 def test_is_job_timed_out_timestamp_less_than_job_timeout_hours(lambda_handler):
     timestamp = datetime.now()
     job_timeout_hours = 1
-    assert lambda_handler.is_job_timed_out(timestamp, job_timeout_hours) == False
+    assert not lambda_handler.is_job_timed_out(timestamp, job_timeout_hours)
 
 
 def test_is_job_timed_out_timestamp_more_than_job_timeout_hours(lambda_handler):
     timestamp = datetime.now() - timedelta(hours=2)
     job_timeout_hours = 1
-    assert lambda_handler.is_job_timed_out(timestamp, job_timeout_hours) == True
+    assert lambda_handler.is_job_timed_out(timestamp, job_timeout_hours)
 
 
 def test_is_job_timed_out_timestamp_in_the_future(lambda_handler):
     timestamp = datetime.now() + timedelta(days=3)
     job_timeout_hours = 1
-    assert lambda_handler.is_job_timed_out(timestamp, job_timeout_hours) == False
+    assert not lambda_handler.is_job_timed_out(timestamp, job_timeout_hours)
 
 
 def test_process_finished_jobs_no_inflight(lambda_handler, create_dynamo_tables):

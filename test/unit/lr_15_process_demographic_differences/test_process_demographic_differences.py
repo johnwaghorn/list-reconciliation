@@ -101,7 +101,7 @@ def test_process_demographic_differences(
         StringIO(
             s3.get_object(
                 Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
-                Key=f"7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-CDD-20200406134000.csv",
+                Key="7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-CDD-20200406134000.csv",
             )["Body"]
             .read()
             .decode()

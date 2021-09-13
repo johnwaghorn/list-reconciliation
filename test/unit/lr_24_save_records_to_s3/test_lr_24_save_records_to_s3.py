@@ -21,7 +21,7 @@ def test_save_records_to_s3_saves_records(s3, lambda_handler, lambda_context, re
 
     response = lambda_handler.main(event=event, context=lambda_context)
 
-    expected = f"LR24 Lambda application stopped"
+    expected = "LR24 Lambda application stopped"
 
     assert response["message"] == expected
 

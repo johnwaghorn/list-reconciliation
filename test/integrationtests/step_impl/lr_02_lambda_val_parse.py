@@ -92,7 +92,7 @@ def create_gp_file(testfile, row, invalid_item=None, field_loc=None):
                 if field_loc != "4":
                     split_line[4] = ldate
                     split_line[5] = ltime
-            elif (invalid_item and field_loc) == None:
+            elif (invalid_item and field_loc) is None:
                 split_line[4] = ldate
                 split_line[5] = ltime
             line = "~".join(split_line)

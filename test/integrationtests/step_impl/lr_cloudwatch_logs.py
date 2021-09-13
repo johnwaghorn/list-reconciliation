@@ -34,7 +34,7 @@ def connect_to_cloudwatch_get_request_id():
     query_id = start_query_response["queryId"]
     response = None
 
-    while response == None or response["status"] == "Running":
+    while response is None or response["status"] == "Running":
         print("Waiting for query to complete ...")
         response = client.get_query_results(queryId=query_id)
         print(response)

@@ -116,7 +116,7 @@ class FeedbackFailure(LambdaApplication):
             log = json.loads(log_data)
 
         except (UnicodeDecodeError, ValueError):
-            msg = f"LOG file contains invalid data. Could not read file contents"
+            msg = "LOG file contains invalid data. Could not read file contents"
             raise FeedbackLogError(msg)
 
         self.log = log
@@ -168,7 +168,7 @@ class FeedbackFailure(LambdaApplication):
             )
 
         except (ValueError, KeyError):
-            msg = f"LOG file contains invalid data. Could not read file contents"
+            msg = "LOG file contains invalid data. Could not read file contents"
             raise FeedbackLogError(msg)
 
     def send_email(self):

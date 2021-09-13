@@ -24,7 +24,7 @@ def test_get_gp_exclusive_registrations_ok(demographics, jobs, s3_bucket, jobsta
 
     assert JobStats.get("1").OnlyOnGpRecords == 3
 
-    assert response["message"] == f"LR11 Lambda application stopped for jobId='50'"
+    assert response["message"] == "LR11 Lambda application stopped for jobId='50'"
 
     assert (
         response["filename"]
@@ -62,7 +62,7 @@ def test_get_gp_exclusive_registrations_no_diffs_ok(
 
     assert JobStats.get("2").OnlyOnGpRecords == 0
 
-    assert response["message"] == f"LR11 Lambda application stopped for jobId='50'"
+    assert response["message"] == "LR11 Lambda application stopped for jobId='50'"
 
     assert (
         response["filename"]
