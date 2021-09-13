@@ -14,9 +14,10 @@ job_id ?= 00000000-0000-0000-0000-000000000000
 #
 
 all: python-package init apply
-test: integrationtests unittests
 format: fmt black
+lint: com2ann pybetter isort pyupgrade autoflake black
 python-package: packages-layer dependencies-layer
+test: integrationtests unittests
 
 #
 # Python
@@ -56,29 +57,29 @@ error-check:
 	flake8 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics lambdas/ packages/ test/
 
 # Formatting and linting
+autoflake:
+	autoflake --in-place --remove-unused-variables --recursive lambdas/ packages/ test/
+
 black:
 	python -m black --line-length 100 lambdas/ packages/ test/
 
 black-check:
 	python -m black --line-length 100 --check lambdas/ packages/ test/
 
-autoflake:
-	autoflake --in-place --remove-unused-variables --recursive lambdas/ packages/ test/
-
-pyupgrade:
-	find lambdas packages test -name "*.py" | xargs pyupgrade --py39-plus
-
-isort:
-	isort --gitignore --atomic lambdas/ packages/ test/
-
-# Exclude "B004: __all__ attribute is missing" (https://pypi.org/project/pybetter/)
-pybetter:
-	pybetter --exclude B004 lambdas/ packages/ test/
-
 com2ann:
 	com2ann lambdas/
 	com2ann packages/
 	com2ann test/
+
+isort:
+	isort --gitignore --atomic lambdas/ packages/ test/
+
+pybetter:
+	# Exclude "B004: __all__ attribute is missing" (https://pypi.org/project/pybetter/)
+	pybetter --exclude B004 lambdas/ packages/ test/
+
+pyupgrade:
+	find lambdas packages test -name "*.py" | xargs pyupgrade --py39-plus
 
 #
 # Terraform
