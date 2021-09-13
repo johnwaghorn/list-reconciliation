@@ -65,7 +65,7 @@ jobs:
 
   create-list-reconciliation-stack:
     name: Create List Reconciliation Stack
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
       - create-python-package
     steps:
@@ -82,6 +82,20 @@ jobs:
       - name: Terraform Format Check
         run: |
           make fmt-check
+      - name: Assume Role in Dev Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Assume Role in PreProd Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Terraform Init
         run: |
           make init
@@ -101,13 +115,27 @@ jobs:
 
   create-mesh-stack:
     name: Create Mesh Stack
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Terraform Format Check
         run: |
           make fmt-check
+      - name: Assume Role in Dev Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Assume Role in PreProd Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Terraform Init
         run: |
           make init stack="mesh"
@@ -122,7 +150,7 @@ jobs:
 
   run-integration-tests:
     name: Run Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
       - create-list-reconciliation-stack
       - create-mesh-stack
@@ -147,25 +175,33 @@ jobs:
       - name: Install dependencies
         run: |
           make python-deps
-      - name: Assume Role in Dev Account for Integration Tests
-        uses: aws-actions/configure-aws-credentials@v1
-        if: github.ref != 'ref/head/master'
-        with:
-          aws-region: eu-west-2
-          role-to-assume: "arn:aws:iam::092420156801:role/LRTerraformDeploy"
-          role-duration-seconds: 1200
-      - name: Assume Role in PreProd Account for Integration Tests
-        uses: aws-actions/configure-aws-credentials@v1
-        if: github.ref == 'ref/head/master'
-        with:
-          aws-region: eu-west-2
-          role-to-assume: "arn:aws:iam::287634746327:role/LRTerraformDeploy"
-          role-duration-seconds: 1200
       - name: Download Terraform Output
         uses: actions/download-artifact@v2
         with:
           name: terraform-outputs
           path: ./build/
+      - name: Assume Role in Dev Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: "arn:aws:iam::092420156801:role/LRTerraformDeploy"
+          role-duration-seconds: 1200
+      - name: Assume Role in PreProd Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: "arn:aws:iam::287634746327:role/LRTerraformDeploy"
+          role-duration-seconds: 1200
+      - name: Get Gauge
+        uses: getgauge/setup-gauge@master
+        with:
+          gauge-plugins: python, screenshot, html-report, xml-report
       - name: Run Integration tests
         run: |
           # Ensure gpextract and mock_data install location is available to Gauge

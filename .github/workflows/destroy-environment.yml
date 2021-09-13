@@ -8,7 +8,7 @@ on:
 jobs:
   destroy-list-reconciliation-stack:
     name: Destroy List Reconciliation Stack
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -16,6 +16,20 @@ jobs:
         run: |
           mkdir -p ./build/packages_layer
           mkdir -p ./build/dependencies_layer
+      - name: Assume Role in Dev Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Assume Role in PreProd Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Terraform Init
         run: |
           make init
@@ -29,10 +43,24 @@ jobs:
 
   destroy-mesh-stack:
     name: Destroy Mesh Stack
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Assume Role in Dev Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref != 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Assume Role in PreProd Account
+        uses: aws-actions/configure-aws-credentials@v1
+        if: github.ref == 'ref/head/master'
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Terraform Init
         run: |
           make init stack="mesh"
