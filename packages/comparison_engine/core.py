@@ -1,7 +1,7 @@
 from functools import wraps
 from inspect import getmembers, isclass, isfunction
 from types import ModuleType
-from typing import Callable, Dict, Tuple, List, Any
+from typing import Any, Callable, Dict, Tuple
 
 import textwrap
 

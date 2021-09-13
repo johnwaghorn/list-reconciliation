@@ -129,7 +129,7 @@ class PDSRegistrationStatus(LambdaApplication):
                         )
                         continue
 
-                except PDSAPIError as err:
+                except PDSAPIError:
                     self.log_object.write_log(
                         "LR12C02",
                         log_row_dict={

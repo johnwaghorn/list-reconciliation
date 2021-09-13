@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Dict
 
-from datetime import datetime
 
 from jobs.statuses import RegistrationType
 

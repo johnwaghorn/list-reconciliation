@@ -139,7 +139,7 @@ class ValidateAndParse(LambdaApplication):
                 log_row_dict={"upload_filename": self.upload_filename, "job_id": self.job_id},
             )
 
-        except (PynamoDBConnectionError, PutError) as exc:
+        except (PynamoDBConnectionError, PutError):
             self.handle_extract(InputFolderType.RETRY)
 
             self.log_object.write_log(
@@ -174,7 +174,7 @@ class ValidateAndParse(LambdaApplication):
                     },
                 )
 
-            except Exception as exc:
+            except Exception:
                 self.handle_extract(InputFolderType.RETRY)
 
                 self.log_object.write_log(

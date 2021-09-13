@@ -1,7 +1,6 @@
 import string
 
 from config import config
-import os
 import csv
 from datetime import datetime, timedelta
 import random
