@@ -1,4 +1,4 @@
-from lambda_code.lr_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
+from lr_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
 
 app = PdsHydrate()
 

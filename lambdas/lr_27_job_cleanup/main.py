@@ -1,4 +1,4 @@
-from lambda_code.lr_27_job_cleanup.lr_27_lambda_handler import JobCleanup
+from lr_27_job_cleanup.lr_27_lambda_handler import JobCleanup
 
 app = JobCleanup()
 

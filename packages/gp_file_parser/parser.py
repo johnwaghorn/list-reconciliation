@@ -41,8 +41,8 @@ from gp_file_parser.validators import (
     VALIDATORS,
     WALKING_UNITS,
 )
-from utils import InputFolderType
-from utils.exceptions import InvalidGPExtract, InvalidStructure
+from jobs.statuses import InputFolderType
+from lr_logging.exceptions import InvalidGPExtract, InvalidStructure
 
 LOG = logging.getLogger("listrec")
 LOG.setLevel(logging.INFO)

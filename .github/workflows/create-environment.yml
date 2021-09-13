@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: unit-test-report
-          path: ./report/*
+          path: ./build/pytest/*
           retention-days: 2
       - name: Create packages
         run: |
@@ -60,8 +60,8 @@ jobs:
           name: python-packages
           retention-days: 1
           path: |
-            ./dependencies_layer.tgz
-            ./packages_layer.tgz
+            ./build/dependencies_layer.tgz
+            ./build/packages_layer.tgz
 
   create-list-reconciliation-stack:
     name: Create List Reconciliation Stack
@@ -75,6 +75,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: python-packages
+          path: ./build/
       - name: Uncompress packages
         run: |
           make uncompress-packages
@@ -95,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: terraform-outputs
-          path: ./terraform_outputs_list-reconciliation.json
+          path: ./build/terraform_outputs_list-reconciliation.json
           retention-days: 2
 
   create-mesh-stack:
@@ -164,6 +165,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: terraform-outputs
+          path: ./build/
       - name: Run Integration tests
         run: |
           # Ensure gpextract and mock_data install location is available to Gauge

@@ -10,7 +10,7 @@ from .test_helpers import (
 from .lr_02_lambda_val_parse import create_gp_file
 from .lr_beforehooks import use_waiters_check_object_exists
 from .tf_aws_resources import get_terraform_output
-from utils import InputFolderType
+from jobs.statuses import InputFolderType
 
 import json
 import os

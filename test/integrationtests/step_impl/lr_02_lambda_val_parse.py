@@ -1,5 +1,5 @@
 from .lr_beforehooks import use_waiters_check_object_exists
-from utils import InputFolderType
+from jobs.statuses import InputFolderType
 from getgauge.python import step
 from getgauge.python import Messages
 from datetime import datetime

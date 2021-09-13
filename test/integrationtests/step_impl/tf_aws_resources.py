@@ -3,8 +3,10 @@ import os
 
 from getgauge.python import Messages
 
-cwd = os.path.dirname(__file__)
-OUTPUT_FILE = os.path.join(cwd, "..", "..", "..", "terraform_outputs_list-reconciliation.json")
+cwd: str = os.path.dirname(__file__)
+OUTPUT_FILE: str = os.path.join(
+    cwd, "..", "..", "..", "build", "terraform_outputs_list-reconciliation.json"
+)
 
 
 def get_aws_resources():

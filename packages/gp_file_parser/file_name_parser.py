@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 
-from utils.exceptions import InvalidFilename
+from lr_logging.exceptions import InvalidFilename
 
 
 def validate_filename(filename: str, process_datetime: datetime = None) -> dict:

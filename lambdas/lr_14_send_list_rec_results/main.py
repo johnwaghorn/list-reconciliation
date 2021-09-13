@@ -1,4 +1,4 @@
-from lambda_code.lr_14_send_list_rec_results.lr_14_lambda_handler import (
+from lr_14_send_list_rec_results.lr_14_lambda_handler import (
     SendListRecResults,
 )
 

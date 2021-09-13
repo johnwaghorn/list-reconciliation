@@ -1,4 +1,4 @@
-from lambda_code.lr_24_save_records_to_s3.lr24_lambda_handler import SaveRecordsToS3
+from lr_24_save_records_to_s3.lr24_lambda_handler import SaveRecordsToS3
 
 app = SaveRecordsToS3()
 

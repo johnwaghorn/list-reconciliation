@@ -1,4 +1,4 @@
-from lambda_code.lr_04_feedback_failure.lr_04_lambda_handler import FeedbackFailure
+from lr_04_feedback_failure.lr_04_lambda_handler import FeedbackFailure
 
 app = FeedbackFailure()
 

@@ -1,4 +1,6 @@
 ### List Reconciliation ###
+# Build outputs
+build/*
 
 # Terraform
 terraform_outputs_*.json

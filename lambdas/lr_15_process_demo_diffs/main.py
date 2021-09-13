@@ -1,4 +1,4 @@
-from lambda_code.lr_15_process_demo_diffs.lr_15_lambda_handler import (
+from lr_15_process_demo_diffs.lr_15_lambda_handler import (
     DemographicDifferences,
 )
 

@@ -28,26 +28,26 @@ python-deps:
 
 # Packaging
 dependencies-layer:
-	rm -r ./dependencies_layer || true
-	mkdir -p ./dependencies_layer/python/
-	pipenv lock -r | pipenv run pip install --cache-dir .pip_cache --target ./dependencies_layer/python/ -r /dev/stdin
+	rm -r ./build/dependencies_layer || true
+	mkdir -p ./build/dependencies_layer/python/
+	pipenv lock -r | pipenv run pip install --cache-dir .pip_cache --target ./build/dependencies_layer/python/ -r /dev/stdin
 
 packages-layer:
-	rm -r ./packages_layer || true
-	mkdir -p ./packages_layer/python/
-	cp -r ./packages/* ./packages_layer/python/
+	rm -r ./build/packages_layer || true
+	mkdir -p ./build/packages_layer/python/
+	cp -r ./packages/* ./build/packages_layer/python/
 
 compress-packages:
-	tar czf ./dependencies_layer.tgz ./dependencies_layer/*
-	tar czf ./packages_layer.tgz ./packages_layer/*
+	tar czf ./build/dependencies_layer.tgz ./build/dependencies_layer/*
+	tar czf ./build/packages_layer.tgz ./build/packages_layer/*
 
 uncompress-packages:
-	tar xzf ./dependencies_layer.tgz ./dependencies_layer/
-	tar xzf ./packages_layer.tgz ./packages_layer/
+	tar xzf ./build/dependencies_layer.tgz ./build/dependencies_layer/
+	tar xzf ./build/packages_layer.tgz ./build/packages_layer/
 
 # Testing
 unittests:
-	pytest -v --doctest-modules --cov=packages --html=report/reports.html
+	pytest -v --doctest-modules --cov=packages --html=build/pytest/reports.html
 
 syntax-check:
 	flake8 --count --select=E9,F63,F7,F82 --show-source --statistics lambdas/ packages/ test/
@@ -85,13 +85,13 @@ plan:
 apply:
 	terraform -chdir=./terraform/stacks/${stack} apply -auto-approve
 	rm -f ./terraform_outputs_${stack}.json|| true
-	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
+	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json
 
 apply-lambda: packages-layer
 	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.${lambda}
 
 output:
-	terraform -chdir=./terraform/stacks/${stack} output -json > ./terraform_outputs_${stack}.json
+	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json
 
 destroy:
 	terraform -chdir=./terraform/stacks/${stack} destroy -auto-approve
@@ -121,7 +121,6 @@ integrationtests-preprod:
 # TODO rename this and replace above once migrated
 behave-integration-tests:
 	behave ./test/integration
-
 
 #
 # Security
