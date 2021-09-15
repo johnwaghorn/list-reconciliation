@@ -11,7 +11,7 @@ from moto import mock_dynamodb2, mock_s3
 REGION_NAME = os.environ.get("AWS_REGION")
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "..", "..", "_data", "lr-13")
+DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
 
 JOB_ID = "00000000-0000-0000-0000-000000000000"
 PRACTICE_CODE = "A82023"

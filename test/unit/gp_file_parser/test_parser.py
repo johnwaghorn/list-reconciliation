@@ -13,7 +13,7 @@ from gp_file_parser.parser import (
 from lr_logging.exceptions import InvalidGPExtract, InvalidStructure
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "..", "..", "_data", "gp_file_parser")
+DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
 
 
 def test_parse_gp_extract_text_parses_correctly():
