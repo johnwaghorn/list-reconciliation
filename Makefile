@@ -153,10 +153,8 @@ tfsec:
 #
 
 get-branch-env:
-	@echo $(shell if echo ${branch} | grep -qo 'develop'; then \
+	@echo $(shell if echo ${branch} | grep -qo 'main'; then \
 		echo "test"; \
-	elif echo ${branch} | grep -qo 'master'; then \
-		echo "preprod"; \
 	elif echo ${branch} | grep -qEo '^(\w+/)?(\w+[-_])?[0-9]+'; then \
 		ENV_BRANCH_NAME=$$(echo ${branch} | grep -Eo '^(\w+/)?(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]"); \
 		ENV_HASH=$$(echo ${branch} | sha1sum | head -c 8); \
