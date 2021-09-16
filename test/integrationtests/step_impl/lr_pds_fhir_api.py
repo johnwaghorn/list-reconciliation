@@ -22,7 +22,7 @@ def run_prd_fhir_get_patient_details_api(patient_id):
         "X-Correlation-ID": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA",
     }
 
-    response = requests.get(url, headers=pds_url_headers)
+    response = requests.get(url, headers=pds_url_headers, timeout=30)
 
     response.raise_for_status()
     expected_response_file = os.path.join(DATA, PDSPATIENTFILE)
@@ -44,7 +44,7 @@ def run_prd_fhir_get_patient_details_api_asssert_412(patient_id):
         "X-Correlation-ID": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA",
     }
 
-    response = requests.get(url, headers=pds_url_headers)
+    response = requests.get(url, headers=pds_url_headers, timeout=30)
     assert (
         response.status_code == 412
     ), f"Invalid code raised other than 412, instead raised {response.status_code}"

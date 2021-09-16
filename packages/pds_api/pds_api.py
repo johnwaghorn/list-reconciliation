@@ -131,7 +131,7 @@ class PDSAPI:
 
                 # TODO ensure this response is not an error
                 # {"error": "invalid_request", "error_description": "Invalid iss/sub claims in JWT", "message_id": "rrt-6068836616924912677-c-geu2-30273-4334972-1"}
-                response = requests.post(self.pds_token_url, data=form_data)
+                response = requests.post(self.pds_token_url, data=form_data, timeout=30)
                 token = response.json()
                 put_ssm_params(
                     f"{self.ssm_store_path}{PDSParamStore.PDS_ACCESS_TOKEN.value}",
@@ -182,7 +182,7 @@ class PDSAPI:
                 auth_header = {"Authorization": f"Bearer {token['access_token']}"}
                 headers.update(auth_header)
 
-            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers)
+            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers, timeout=30)
         except requests.exceptions.ConnectionError:
             raise PDSAPIError(f"Connection error: {self.pds_url}")
 
