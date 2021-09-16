@@ -2,6 +2,22 @@
 
 Part of Primary Care Registration Management (PCRM)
 
+## Documentation
+
+### Overview
+
+* [List Reconciliation Components](docs/list-reconciliation-components.md)
+* [Security](docs/security.md)
+
+### Style Guides
+
+* [Terraform Style Guide](docs/terraform-style-guide.md)
+* [Python Style Guide](docs/python-style-guide.md)
+
+### Packages
+
+* [GP File Parser](packages/gp_file_parser/README.md)
+
 ## Links
 
 [List Reconciliation Solution Walkthrough](https://nhsd-confluence.digital.nhs.uk/display/PCRM/List+Reconciliation+Solution+Walkthrough)
