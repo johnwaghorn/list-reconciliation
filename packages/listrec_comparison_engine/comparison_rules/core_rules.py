@@ -9,27 +9,27 @@ def date_of_birth_not_equal(left: LeftRecord, right: RightRecord):
 
 @comparison("MN-BR-SN-01")
 def surname_not_equal(left: LeftRecord, right: RightRecord):
-    return left["SURNAME"].lower() != right["SURNAME"].lower()
+    return left["SURNAME"] != right["SURNAME"]
 
 
 @comparison("MN-BR-FN-01")
 def forenames_not_equal(left: LeftRecord, right: RightRecord):
-    return left["FORENAMES"].lower() != right["FORENAMES"].lower()
+    return left["FORENAMES"] != right["FORENAMES"]
 
 
 @comparison("MN-BR-TL-01")
 def title_not_equal(left: LeftRecord, right: RightRecord):
-    return left["TITLE"].lower() != right["TITLE"].lower()
+    return left["TITLE"] != right["TITLE"]
 
 
 @comparison("MN-BR-SX-01")
 def gender_not_equal(left: LeftRecord, right: RightRecord):
-    return left["GENDER"].lower() != right["GENDER"].lower()
+    return left["GENDER"] != right["GENDER"]
 
 
 @comparison("MN-BR-AD-01")
 def address_not_equal(left: LeftRecord, right: RightRecord):
-    return left["ADDRESS"].lower() != right["ADDRESS"].lower()
+    return left["ADDRESS"] != right["ADDRESS"]
 
 
 @comparison("MN-BR-AD-02")

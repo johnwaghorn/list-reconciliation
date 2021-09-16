@@ -117,13 +117,13 @@ def test_record_data_types():
         ID = IntegerColumn("id", primary_key=True)
         AMOUNT = FloatColumn("amt")
         NAME = StringColumn("name")
-        NAME_WITH_DASH = StringColumn("name", format=lambda x: "-".join(x.lower().split()))
+        NAME_WITH_DASH = StringColumn("name", formatters=lambda x: "-".join(x.lower().split()))
         DATE = DateTimeColumn("date")
         US_DATE = DateTimeColumn(
-            "us_date", format=lambda x: datetime.datetime.strptime(str(x), "%Y-%d-%m")
+            "us_date", formatters=lambda x: datetime.datetime.strptime(str(x), "%Y-%d-%m")
         )
         FORMATTED_NAME = StringColumn(
-            ["name", "surname"], format=lambda x: ", ".join(x[::-1]).strip()
+            ["name", "surname"], formatters=lambda x: ", ".join(x[::-1]).strip()
         )
 
     record = ARecord(

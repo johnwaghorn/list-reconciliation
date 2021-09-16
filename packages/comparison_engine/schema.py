@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Union
+from typing import Any, Callable, Optional, Union
 
 from dateutil import parser
 
@@ -29,14 +29,20 @@ class _Record:
     def __getitem__(self, val: str) -> Union[Any, list[Any]]:
         def get_val(val):
             cols = getattr(self, val).val
-            func = getattr(self, val).format
+            formatters = getattr(self, val).formatters
 
             if isinstance(cols, (list, tuple)):
                 data = [self._data[col] for col in cols]
             else:
                 data = self._data[cols]
 
-            return func(data)
+            if isinstance(formatters, list):
+                for formatter in formatters:
+                    data = formatter(data)
+            elif isinstance(formatters, Callable):
+                data = formatters(data)
+
+            return data
 
         if isinstance(val, list):
             return [get_val(v) for v in val]
@@ -45,7 +51,9 @@ class _Record:
             return get_val(val)
 
     @property
-    def primary_key(self) -> Union[str, float, int, datetime.datetime]:
+    def primary_key(
+        self,
+    ) -> Union[Optional[str], Optional[float], Optional[int], Optional[datetime.datetime]]:
         for attr, obj in self._class_attrs:
             try:
                 if getattr(obj, "primary_key"):
@@ -54,7 +62,8 @@ class _Record:
                 continue
 
     @property
-    def _class_attrs(self) -> list[tuple[str, callable]]:
+    def _class_attrs(self) -> list[tuple[str, Callable]]:
+
         return [i for i in self.__class__.__dict__.items() if not i[0].startswith("__")]
 
 
@@ -75,22 +84,22 @@ class _Column:
 class IntegerColumn(_Column):
     def __init__(self, val, primary_key=False):
         super().__init__(val, primary_key=primary_key)
-        self.format = int
+        self.formatters = None
 
 
 class FloatColumn(_Column):
     def __init__(self, val, primary_key=False):
         super().__init__(val, primary_key=primary_key)
-        self.format = float
+        self.formatters = None
 
 
 class StringColumn(_Column):
-    def __init__(self, val, primary_key=False, format=None):
+    def __init__(self, val, primary_key=False, formatters=None):
         super().__init__(val, primary_key=primary_key)
-        self.format = format or str
+        self.formatters = formatters or None
 
 
 class DateTimeColumn(_Column):
-    def __init__(self, val, primary_key=False, format=None):
+    def __init__(self, val, primary_key=False, formatters=None):
         super().__init__(val, primary_key=primary_key)
-        self.format = format or (lambda x: parser.parse(str(x)))
+        self.formatters = formatters or (lambda x: parser.parse(str(x)))
