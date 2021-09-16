@@ -6,11 +6,11 @@ from datetime import datetime
 import boto3
 import botocore
 from database.models import Demographics, JobStats
-from jobs.jobs import get_job
+from jobs import RegistrationType, get_job
 from lr_csv.csv import write_to_mem_csv
 from lr_logging import Message, error, get_cloudlogbase_config, success
 from pds_api.pds_api import PDSAPI, PDSAPIError, SensitiveMarkers
-from registration import RegistrationType, get_registration_filename
+from registration import get_registration_filename
 from spine_aws_common.lambda_application import LambdaApplication
 
 

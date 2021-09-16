@@ -61,10 +61,10 @@ autoflake:
 	autoflake --in-place --remove-unused-variables --recursive lambdas/ packages/ test/
 
 black:
-	python -m black --line-length 100 lambdas/ packages/ test/
+	python -m black lambdas/ packages/ test/
 
 black-check:
-	python -m black --line-length 100 --check lambdas/ packages/ test/
+	python -m black --check lambdas/ packages/ test/
 
 com2ann:
 	com2ann lambdas/

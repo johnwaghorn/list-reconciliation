@@ -55,7 +55,9 @@ class _Record:
     @property
     def primary_key(
         self,
-    ) -> Union[Optional[str], Optional[float], Optional[int], Optional[datetime.datetime]]:
+    ) -> Union[
+        Optional[str], Optional[float], Optional[int], Optional[datetime.datetime]
+    ]:
         for attr, obj in self._class_attrs:
             try:
                 if getattr(obj, "primary_key"):

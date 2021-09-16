@@ -5,7 +5,6 @@ from io import StringIO
 import boto3
 from database.models import JobStats
 from freezegun import freeze_time
-from moto import mock_s3
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")

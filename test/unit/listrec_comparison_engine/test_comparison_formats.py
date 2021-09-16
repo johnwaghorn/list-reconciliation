@@ -80,7 +80,11 @@ def test_pds_address(val, expected):
 
 @pytest.mark.parametrize(
     "val,expected",
-    (("LOREM", "LOREM"), ("LOREM                   ", "LOREM"), (["IPSUM             "], "IPSUM")),
+    (
+        ("LOREM", "LOREM"),
+        ("LOREM                   ", "LOREM"),
+        (["IPSUM             "], "IPSUM"),
+    ),
 )
 def test_strip_whitespace(val, expected):
     actual = format.strip_whitespace(val)

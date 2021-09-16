@@ -1,7 +1,7 @@
 from dps_pds.dps_pds import (
-    NHSNumber,
-    GPPractice,
     DispensingFlag,
+    GPPractice,
+    NHSNumber,
     create_filename,
     create_patient,
 )

@@ -6,7 +6,6 @@ import boto3
 import pytest
 from database.models import InFlight, Jobs
 from freezegun import freeze_time
-from moto import mock_dynamodb2
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

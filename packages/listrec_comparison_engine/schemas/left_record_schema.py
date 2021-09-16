@@ -1,10 +1,10 @@
-from comparison_engine.schema import LeftRecord, StringColumn, DateTimeColumn
+from comparison_engine.schema import DateTimeColumn, LeftRecord, StringColumn
 from listrec_comparison_engine.format import (
+    gp_address,
     gp_dob,
+    gp_gender,
     strip_whitespace,
     to_lower,
-    gp_gender,
-    gp_address,
 )
 
 

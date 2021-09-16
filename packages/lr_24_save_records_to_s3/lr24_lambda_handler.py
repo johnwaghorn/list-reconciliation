@@ -3,7 +3,7 @@ import traceback
 
 import boto3
 from lr_logging import get_cloudlogbase_config
-from lr_logging.responses import Message, error, success
+from lr_logging.responses import error, success
 from lr_retry import retry_func
 from spine_aws_common.lambda_application import LambdaApplication
 

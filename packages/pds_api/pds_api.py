@@ -182,7 +182,9 @@ class PDSAPI:
                 auth_header = {"Authorization": f"Bearer {token['access_token']}"}
                 headers.update(auth_header)
 
-            response = requests.get(f"{self.pds_url}/{nhs_number}", headers=headers, timeout=30)
+            response = requests.get(
+                f"{self.pds_url}/{nhs_number}", headers=headers, timeout=30
+            )
         except requests.exceptions.ConnectionError:
             raise PDSAPIError(f"Connection error: {self.pds_url}")
 

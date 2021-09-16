@@ -1,5 +1,5 @@
+import listrec_comparison_engine
 from comparison_engine.core import compare_records
-from listrec_comparison_engine import listrec_comparisons
 
 
 def test_compare_records_all_equal():
@@ -31,7 +31,7 @@ def test_compare_records_all_equal():
     }
 
     expected = []
-    actual = compare_records(listrec_comparisons, left, right)
+    actual = compare_records(listrec_comparison_engine, left, right)
 
     assert actual == expected
 
@@ -72,6 +72,6 @@ def test_compare_records_some_unequal():
         "MN-BR-AD-01",
     }
 
-    actual = set(compare_records(listrec_comparisons, left, right))
+    actual = set(compare_records(listrec_comparison_engine, left, right))
 
     assert actual == expected

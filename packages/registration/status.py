@@ -1,7 +1,5 @@
 from enum import Enum
 
-from jobs.statuses import RegistrationType
-
 
 class GPRegistrationStatus(Enum):
     UNMATCHED = "Unmatched"

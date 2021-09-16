@@ -1,9 +1,9 @@
 import traceback
 from uuid import uuid4
 
+import listrec_comparison_engine
 from comparison_engine.core import compare_records
 from database.models import Demographics, DemographicsDifferences
-from listrec_comparison_engine import listrec_comparisons
 from lr_logging import get_cloudlogbase_config
 from lr_logging.responses import Message, error, success
 from registration import GPRegistrationStatus
@@ -82,7 +82,7 @@ class DemographicComparison(LambdaApplication):
                 self.log_object.internal_id,
             )
 
-        results = compare_records(listrec_comparisons, gp_record, pds_record)
+        results = compare_records(listrec_comparison_engine, gp_record, pds_record)
 
         self.log_object.write_log(
             "LR08I01",

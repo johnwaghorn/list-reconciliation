@@ -148,6 +148,6 @@ def test_bad_config_raises_ConfigurationError(demographics_record, lambda_handle
     lambda_handler.job_id = "50"
     lambda_handler.patient_id = "50"
 
-    lr_08_demographic_comparison.lr_08_lambda_handler.listrec_comparisons = None
+    lr_08_demographic_comparison.lr_08_lambda_handler.listrec_comparison_engine = None
     with pytest.raises(ConfigurationError):
         lambda_handler.demographic_comparisons()

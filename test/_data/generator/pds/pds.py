@@ -1,7 +1,7 @@
 from typing import OrderedDict
+
 from faker import Faker
 from faker.providers import BaseProvider, date_time
-
 from pds.address import (
     address_line_1,
     address_line_2,
@@ -10,8 +10,8 @@ from pds.address import (
     address_line_5,
     post_code,
 )
-from pds.name import family_name, given_name, other_given_name
 from pds.gp import gp_practice_codes
+from pds.name import family_name, given_name, other_given_name
 
 
 class PDS(BaseProvider):

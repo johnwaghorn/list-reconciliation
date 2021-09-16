@@ -1,7 +1,6 @@
+import dps_pds.gp_practices
 from faker import Faker
 from faker.providers import BaseProvider
-
-import dps_pds.gp_practices
 
 
 class NHSNumber(BaseProvider):
