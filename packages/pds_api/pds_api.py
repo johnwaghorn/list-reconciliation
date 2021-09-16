@@ -347,5 +347,7 @@ class PDSAPI:
             # Token issued doesn't have required field
             return True
         issue_datetime = datetime.datetime.fromtimestamp(int(token_issue_time))
-        token_expiry_time = issue_datetime + datetime.timedelta(0, token_expire_in_seconds)
+        token_expiry_time = issue_datetime + datetime.timedelta(
+            0, token_expire_in_seconds
+        )
         return time_now > token_expiry_time

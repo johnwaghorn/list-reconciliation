@@ -16,7 +16,14 @@ JOBID = "7b207bdb-2937-4e17-a1a9-57a2bbf3e358"
 
 @freeze_time("2020-04-06 13:40:00+00:00")
 def test_process_demographic_differences(
-    demographics, demographics_differences, jobstats, jobs, s3, lambda_handler, ssm, mesh_ssm
+    demographics,
+    demographics_differences,
+    jobstats,
+    jobs,
+    s3,
+    lambda_handler,
+    ssm,
+    mesh_ssm,
 ):
     lambda_handler.job_id = JOBID
     lambda_handler.log_object.set_internal_id(JOBID)

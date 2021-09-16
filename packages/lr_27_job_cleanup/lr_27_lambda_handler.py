@@ -82,7 +82,9 @@ class JobCleanup(LambdaApplication):
 
     def maybe_delete_from_registrations_output_bucket(self) -> None:
         s3 = boto3.client("s3")
-        objects = s3.list_objects_v2(Bucket=self.registrations_output_bucket, Prefix=self.job_id)
+        objects = s3.list_objects_v2(
+            Bucket=self.registrations_output_bucket, Prefix=self.job_id
+        )
         for object in objects.get("Contents", []):
             key = object["Key"]
             object = s3.delete_object(Bucket=self.registrations_output_bucket, Key=key)
@@ -103,13 +105,19 @@ class JobCleanup(LambdaApplication):
 
             self.log_object.write_log(
                 "LR27I04",
-                log_row_dict={"inflight_table": InFlight.Meta.table_name, "job_id": self.job_id},
+                log_row_dict={
+                    "inflight_table": InFlight.Meta.table_name,
+                    "job_id": self.job_id,
+                },
             )
 
         except InFlight.DoesNotExist:
             self.log_object.write_log(
                 "LR27C01",
-                log_row_dict={"inflight_table": InFlight.Meta.table_name, "job_id": self.job_id},
+                log_row_dict={
+                    "inflight_table": InFlight.Meta.table_name,
+                    "job_id": self.job_id,
+                },
             )
 
     def update_job_status(self) -> None:

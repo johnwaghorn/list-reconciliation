@@ -63,7 +63,13 @@ def test_pds_record(
         "title": ["Mrs"],
         "date_of_birth": "2010-10-22",
         "gender": "female",
-        "address": ["1 Trevelyan Square", "Boar Lane", "Leeds", "City Centre", "West Yorkshire"],
+        "address": [
+            "1 Trevelyan Square",
+            "Boar Lane",
+            "Leeds",
+            "City Centre",
+            "West Yorkshire",
+        ],
         "postcode": "LS1 6AE",
         "gp_practicecode": "Y123452",
         "gp_registered_date": "2012-05-22",
@@ -77,13 +83,31 @@ def test_pds_record(
     "id,url,expected",
     [
         ("prod", "https://api.service.nhs.uk/personal-demographics/FHIR/R4/", "prod-1"),
-        ("ref", "https://ref.api.service.nhs.uk/personal-demographics/FHIR/R4/", "ref-1"),
-        ("int", "https://int.api.service.nhs.uk/personal-demographics/FHIR/R4/", "int-1"),
-        ("sandbox", "https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4/", None),
+        (
+            "ref",
+            "https://ref.api.service.nhs.uk/personal-demographics/FHIR/R4/",
+            "ref-1",
+        ),
+        (
+            "int",
+            "https://int.api.service.nhs.uk/personal-demographics/FHIR/R4/",
+            "int-1",
+        ),
+        (
+            "sandbox",
+            "https://sandbox.api.service.nhs.uk/personal-demographics/FHIR/R4/",
+            None,
+        ),
     ],
 )
 def test_key_identifier(
-    id, url, expected, mock_pds_app_key, mock_pds_private_key, mock_pds_access_token, pds_api
+    id,
+    url,
+    expected,
+    mock_pds_app_key,
+    mock_pds_private_key,
+    mock_pds_access_token,
+    pds_api,
 ):
     pds_api.pds_url = url
     kid = pds_api.get_key_identifier()

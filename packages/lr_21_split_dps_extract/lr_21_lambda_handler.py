@@ -92,7 +92,9 @@ class SplitDPSExtract(LambdaApplication):
         gp_practices = []
         for event in s3_select["Payload"]:
             if "Records" in event:
-                for gp_practice in event["Records"]["Payload"].decode("utf-8").splitlines():
+                for gp_practice in (
+                    event["Records"]["Payload"].decode("utf-8").splitlines()
+                ):
                     gp_practices.append(gp_practice)
 
         # For each GP Practice invoke this Lambda again to split out the data
@@ -118,7 +120,9 @@ class SplitDPSExtract(LambdaApplication):
                 ).encode("utf-8"),
             )
 
-    def invoked(self, gp_practice: str, bucket: str, key: str, is_compressed: bool = True):
+    def invoked(
+        self, gp_practice: str, bucket: str, key: str, is_compressed: bool = True
+    ):
         self.log_object.write_log(
             "LR21I05",
             log_row_dict={
@@ -154,7 +158,9 @@ class SplitDPSExtract(LambdaApplication):
                 csv_data += event["Records"]["Payload"]
 
         # write to S3 file named gp_practice
-        self.s3.put_object(Body=csv_data, Bucket=self.output_bucket, Key=f"{gp_practice}.csv")
+        self.s3.put_object(
+            Body=csv_data, Bucket=self.output_bucket, Key=f"{gp_practice}.csv"
+        )
         self.log_object.write_log(
             "LR21I06",
             log_row_dict={
@@ -168,7 +174,11 @@ class SplitDPSExtract(LambdaApplication):
     #   Having this delete GP Files after 4 hours will mean unless we recieve new data from DPS every 4 hours, we will have no PDS data to compare against for the GP
     #   However, this cleanup only happens when we recieve a new file, so it may only cleanup when we recieve daily(?) from DPS
     def cleanup_files(
-        self, input_bucket: str, input_key: str, output_bucket: str, maximum_age_hours: int = 4
+        self,
+        input_bucket: str,
+        input_key: str,
+        output_bucket: str,
+        maximum_age_hours: int = 4,
     ):
         """Cleanup any file from the LR-22 output bucket, which haven't been recently modified
         Remove the DSA upload file from LR-20 input bucket"""

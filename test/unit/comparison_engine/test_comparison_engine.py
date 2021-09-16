@@ -1,7 +1,12 @@
 import datetime
 
 import pytest
-from comparison_engine.core import comparison, get_decorated_funcs, get_records, module_from_string
+from comparison_engine.core import (
+    comparison,
+    get_decorated_funcs,
+    get_records,
+    module_from_string,
+)
 from comparison_engine.schema import (
     ConfigurationError,
     DateTimeColumn,
@@ -46,7 +51,10 @@ def test_get_records_exactly_one_right_record_required_in_object():
     with pytest.raises(ConfigurationError) as err:
         get_records(mod)
 
-    assert str(err.value) == "Exactly one LeftRecord and RightRecord object must be defined."
+    assert (
+        str(err.value)
+        == "Exactly one LeftRecord and RightRecord object must be defined."
+    )
 
 
 def test_get_records_only_one_left_record_allowed_in_object():
@@ -81,7 +89,10 @@ def test_get_records_exactly_one_left_record_required_in_object():
     with pytest.raises(ConfigurationError) as err:
         get_records(mod)
 
-    assert str(err.value) == "Exactly one LeftRecord and RightRecord object must be defined."
+    assert (
+        str(err.value)
+        == "Exactly one LeftRecord and RightRecord object must be defined."
+    )
 
 
 def test_record_has_exactly_one_primary_key_required():
@@ -117,10 +128,13 @@ def test_record_data_types():
         ID = IntegerColumn("id", primary_key=True)
         AMOUNT = FloatColumn("amt")
         NAME = StringColumn("name")
-        NAME_WITH_DASH = StringColumn("name", formatters=lambda x: "-".join(x.lower().split()))
+        NAME_WITH_DASH = StringColumn(
+            "name", formatters=lambda x: "-".join(x.lower().split())
+        )
         DATE = DateTimeColumn("date")
         US_DATE = DateTimeColumn(
-            "us_date", formatters=lambda x: datetime.datetime.strptime(str(x), "%Y-%d-%m")
+            "us_date",
+            formatters=lambda x: datetime.datetime.strptime(str(x), "%Y-%d-%m"),
         )
         FORMATTED_NAME = StringColumn(
             ["name", "surname"], formatters=lambda x: ", ".join(x[::-1]).strip()

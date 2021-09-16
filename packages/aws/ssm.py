@@ -12,7 +12,9 @@ def ssm_client(region):
 
 def ssm_retry_exception(exception):
     if isinstance(exception, (ClientError)):
-        if "ThrottlingException" in str(exception) or "ConnectionClosedError" in str(exception):
+        if "ThrottlingException" in str(exception) or "ConnectionClosedError" in str(
+            exception
+        ):
             return True
 
 
@@ -50,7 +52,10 @@ def put_ssm_params(ssm_path, data_string, region, string_type="SecureString"):
     try:
         ssm = ssm_client(region)
         ssm.put_parameter(
-            Name=ssm_path, Value=json.dumps(data_string), Type=string_type, Overwrite=True
+            Name=ssm_path,
+            Value=json.dumps(data_string),
+            Type=string_type,
+            Overwrite=True,
         )
         return True
     except ClientError as err:

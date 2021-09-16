@@ -15,7 +15,9 @@ LISTREC_EMAIL_PASSWORD = os.getenv("LISTREC_EMAIL_PASSWORD")
 
 FAILED_FILE = "A12023_GPR4LNA1.CSB"
 LOG_FILE = "A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
-INVALID_LOG_FILE = "A12023_GPR4LNA1.CSB-FailedFile-00000000-0000-0000-0000-0000000000000.json"
+INVALID_LOG_FILE = (
+    "A12023_GPR4LNA1.CSB-FailedFile-00000000-0000-0000-0000-0000000000000.json"
+)
 
 
 @pytest.fixture
@@ -26,7 +28,9 @@ def create_bucket():
             Bucket=MOCK_BUCKET,
             CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
         )
-        client.upload_file(os.path.join(DATA, f"{FAILED_FILE}"), MOCK_BUCKET, f"fail/{FAILED_FILE}")
+        client.upload_file(
+            os.path.join(DATA, f"{FAILED_FILE}"), MOCK_BUCKET, f"fail/{FAILED_FILE}"
+        )
         yield
 
 
@@ -34,14 +38,18 @@ def create_bucket():
 def upload_invalid_log_to_s3(create_bucket):
     client = boto3.client("s3")
     client.upload_file(
-        os.path.join(DATA, f"{INVALID_LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{INVALID_LOG_FILE}"
+        os.path.join(DATA, f"{INVALID_LOG_FILE}"),
+        MOCK_BUCKET,
+        f"fail/logs/{INVALID_LOG_FILE}",
     )
 
 
 @pytest.fixture
 def upload_valid_log_to_s3(create_bucket):
     client = boto3.client("s3")
-    client.upload_file(os.path.join(DATA, f"{LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{LOG_FILE}")
+    client.upload_file(
+        os.path.join(DATA, f"{LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{LOG_FILE}"
+    )
 
 
 @pytest.fixture(scope="module")

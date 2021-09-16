@@ -150,9 +150,7 @@ def test_validate_and_process_with_invalid_upload_handles_correctly(
         "message": [r"Header must be 503\*"],
     }
 
-    expected_log_key = (
-        "fail/logs/A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
-    )
+    expected_log_key = "fail/logs/A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
     actual_log_key = f"fail/logs/{INVALID_FILE}-FailedFile-{JOB_ID}.json"
 
     assert expected_log_key == actual_log_key

@@ -135,7 +135,10 @@ class ValidateAndParse(LambdaApplication):
 
             self.log_object.write_log(
                 "LR02I03",
-                log_row_dict={"upload_filename": self.upload_filename, "job_id": self.job_id},
+                log_row_dict={
+                    "upload_filename": self.upload_filename,
+                    "job_id": self.job_id,
+                },
             )
 
         except (PynamoDBConnectionError, PutError):
@@ -253,7 +256,10 @@ class ValidateAndParse(LambdaApplication):
         fail_log = {"file": self.upload_filename, "upload_date": str(self.upload_date)}
 
         if isinstance(exception, InvalidStructure):
-            error = {"error_type": InvalidErrorType.STRUCTURE.value, "message": [exception.args[0]]}
+            error = {
+                "error_type": InvalidErrorType.STRUCTURE.value,
+                "message": [exception.args[0]],
+            }
 
         elif isinstance(exception, InvalidGPExtract):
             msg = exception.args[0]

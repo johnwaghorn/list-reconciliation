@@ -149,16 +149,22 @@ def get_records(module: ModuleType) -> RecordPair:
     for _, member in getmembers(module, isclass):
         if issubclass(member, LeftRecord) and member != LeftRecord:
             if left:
-                raise ConfigurationError("A LeftRecord object has already been defined.")
+                raise ConfigurationError(
+                    "A LeftRecord object has already been defined."
+                )
             left = member
 
         elif issubclass(member, RightRecord) and member != RightRecord:
             if right:
-                raise ConfigurationError("A RightRecord object has already been defined.")
+                raise ConfigurationError(
+                    "A RightRecord object has already been defined."
+                )
             right = member
 
     if not all([left, right]):
-        raise ConfigurationError("Exactly one LeftRecord and RightRecord object must be defined.")
+        raise ConfigurationError(
+            "Exactly one LeftRecord and RightRecord object must be defined."
+        )
 
     return left, right
 

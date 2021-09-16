@@ -22,7 +22,9 @@ lambda_ = boto3.client("lambda", REGION_NAME)
 @step("trigger lr09 and expected statuscode is <expstatuscode>")
 def trigger_lr09(expstatuscode):
 
-    response = lambda_.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
+    response = lambda_.invoke(
+        FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({})
+    )
     for key, _ in response.items():
         if key == "ResponseMetadata":
             assert response["ResponseMetadata"]["HTTPStatusCode"] == int(expstatuscode)
@@ -32,7 +34,9 @@ def trigger_lr09(expstatuscode):
 def trigger_lr09_get_requestid():
     expected_job_id = get_latest_jobid()
 
-    response = lambda_.invoke(FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload="{}")
+    response = lambda_.invoke(
+        FunctionName=LR_09_LAMBDA_ARN, LogType="Tail", Payload="{}"
+    )
     for key, _ in response.items():
         if key == "ResponseMetadata":
             tail_output = base64.b64decode(

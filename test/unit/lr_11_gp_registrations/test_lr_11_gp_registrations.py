@@ -12,7 +12,9 @@ LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET
 
 
 @freeze_time("2020-02-01 13:40:00")
-def test_get_gp_exclusive_registrations_ok(demographics, jobs, s3_bucket, jobstats, lambda_handler):
+def test_get_gp_exclusive_registrations_ok(
+    demographics, jobs, s3_bucket, jobstats, lambda_handler
+):
     lambda_handler.job_id = "50"
     lambda_handler.bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
 
@@ -69,7 +71,9 @@ def test_get_gp_exclusive_registrations_no_diffs_ok(
         == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/2/Y23456-OnlyOnGP-20200201135000.csv"
     )
 
-    actual = csv.reader(StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode()))
+    actual = csv.reader(
+        StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode())
+    )
     expected = csv.reader(
         StringIO(
             """SURNAME,FORENAMES,DOB,NHS NO.,ADD 1,ADD 2,ADD 3,ADD 4,ADD 5,POSTCODE,TITLE,SEX,STATUS,STATUS DATE"""

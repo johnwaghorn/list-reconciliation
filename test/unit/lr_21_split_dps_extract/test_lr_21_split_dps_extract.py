@@ -18,7 +18,9 @@ EXISTING_GP_FILE = "C86543.csv"
 
 
 @pytest.mark.xfail(reason="Not yet rewritten")
-def test_lr_21_handler_expect_success(upload_valid_dps_data_to_s3, lambda_handler, lambda_context):
+def test_lr_21_handler_expect_success(
+    upload_valid_dps_data_to_s3, lambda_handler, lambda_context
+):
     event = {"Records": [{"s3": {"object": {"key": f"{VALID_DATA_FILE}"}}}]}
 
     response = lambda_handler.main(event, lambda_context)

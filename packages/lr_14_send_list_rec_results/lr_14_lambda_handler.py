@@ -73,7 +73,9 @@ class SendListRecResults(LambdaApplication):
             self.log_object.internal_id,
         )
 
-        output.update(email_subject=email_subject, email_body=email_body, files=filenames)
+        output.update(
+            email_subject=email_subject, email_body=email_body, files=filenames
+        )
 
         return output
 
@@ -83,7 +85,8 @@ class SendListRecResults(LambdaApplication):
         filenames = [
             os.path.basename(obj["Key"])
             for obj in s3.list_objects_v2(
-                Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"], Prefix=self.job_id
+                Bucket=self.system_config["LR_13_REGISTRATIONS_OUTPUT_BUCKET"],
+                Prefix=self.job_id,
             )["Contents"]
         ]
 

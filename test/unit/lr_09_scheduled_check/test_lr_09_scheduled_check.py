@@ -47,7 +47,10 @@ def test_four_inflight_records_one_processed_correctly_one_timed_out_two_skipped
         before_job_stats.next()
 
     before_validated_and_queued_job = Jobs.query(JOB_ID[1])
-    assert before_validated_and_queued_job.next().StatusId == JobStatus.VALIDATED_AND_QUEUED.value
+    assert (
+        before_validated_and_queued_job.next().StatusId
+        == JobStatus.VALIDATED_AND_QUEUED.value
+    )
 
     before_timed_out_job = Jobs.query(JOB_ID[4])
     assert before_timed_out_job.next().StatusId == JobStatus.VALIDATED_AND_QUEUED.value
@@ -78,7 +81,9 @@ def test_four_inflight_records_one_processed_correctly_one_timed_out_two_skipped
     assert after_job_stats.next().TotalRecords == 6
 
     after_records_processed_job = Jobs.query(JOB_ID[1])
-    assert after_records_processed_job.next().StatusId == JobStatus.RECORDS_PROCESSED.value
+    assert (
+        after_records_processed_job.next().StatusId == JobStatus.RECORDS_PROCESSED.value
+    )
 
     after_timed_out_job = Jobs.query(JOB_ID[4])
     assert after_timed_out_job.next().StatusId == JobStatus.TIMED_OUT.value

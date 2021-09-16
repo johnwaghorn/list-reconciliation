@@ -94,7 +94,9 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
     # response will prevent this
     response = None
     try:
-        response = client.put_record_batch(DeliveryStreamName=streamName, Records=records)
+        response = client.put_record_batch(
+            DeliveryStreamName=streamName, Records=records
+        )
     except Exception as e:
         failedRecords = records
         errMsg = str(e)
@@ -121,7 +123,9 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
-            raise RuntimeError(f"Could not put records after {str(maxAttempts)} attempts. {errMsg}")
+            raise RuntimeError(
+                f"Could not put records after {str(maxAttempts)} attempts. {errMsg}"
+            )
 
 
 def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAttempts):
@@ -159,7 +163,9 @@ def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAtte
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
-            raise RuntimeError(f"Could not put records after {str(maxAttempts)} attempts. {errMsg}")
+            raise RuntimeError(
+                f"Could not put records after {str(maxAttempts)} attempts. {errMsg}"
+            )
 
 
 def createReingestionRecord(isSas, originalRecord):
@@ -203,7 +209,9 @@ def handler(event, context):
         # 6000000 instead of 6291456 to leave ample headroom for the stuff we didn't account for
         if projectedSize > 6000000:
             totalRecordsToBeReingested += 1
-            recordsToReingest.append(getReingestionRecord(isSas, dataByRecordId[rec["recordId"]]))
+            recordsToReingest.append(
+                getReingestionRecord(isSas, dataByRecordId[rec["recordId"]])
+            )
             records[idx]["result"] = "Dropped"
             del records[idx]["data"]
 
@@ -231,7 +239,11 @@ def handler(event, context):
             recordsReingestedSoFar += len(recordBatch)
             print(
                 "Reingested %d/%d records out of %d"
-                % (recordsReingestedSoFar, totalRecordsToBeReingested, len(event["records"]))
+                % (
+                    recordsReingestedSoFar,
+                    totalRecordsToBeReingested,
+                    len(event["records"]),
+                )
             )
     else:
         print("No records to be reingested")

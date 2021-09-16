@@ -60,7 +60,11 @@ class SaveRecordsToS3(LambdaApplication):
 
                     self.log_object.write_log(
                         "LR24I02",
-                        log_row_dict={"id": id_, "bucket": destination_bucket, "source": source},
+                        log_row_dict={
+                            "id": id_,
+                            "bucket": destination_bucket,
+                            "source": source,
+                        },
                     )
 
                 except Exception as e:
@@ -88,4 +92,6 @@ class SaveRecordsToS3(LambdaApplication):
                 },
             )
 
-            self.response = success("LR24 Lambda application stopped", self.log_object.internal_id)
+            self.response = success(
+                "LR24 Lambda application stopped", self.log_object.internal_id
+            )

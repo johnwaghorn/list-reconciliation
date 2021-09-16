@@ -83,9 +83,7 @@ class GPData(FileType):
         gp_code = "GPCODE"  # TODO [A-Z][0-9]{5}
         ha_cipher = "LNA"  # TODO [A-Z0-9]{3}
         valid_date = gp.generate_valid_date()
-        file_letter = (
-            "A"  # this is the multi-file identifier, which is not currently supported in List Rec
-        )
+        file_letter = "A"  # this is the multi-file identifier, which is not currently supported in List Rec
 
         filename = gp.create_filename(gp_code, ha_cipher, valid_date, file_letter)
         file = os.path.join(TEMP_DIR, filename)

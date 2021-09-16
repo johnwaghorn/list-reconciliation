@@ -470,4 +470,6 @@ def test_sensitive_patients(
     response = lambda_handler.pds_hydrate(record)
 
     assert response["status"] == "success"
-    assert response["message"] == f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
+    assert (
+        response["message"] == f"LR07 Lambda application stopped for jobId='{JOB_ID}'"
+    )

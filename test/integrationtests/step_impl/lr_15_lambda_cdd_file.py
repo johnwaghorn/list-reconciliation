@@ -58,7 +58,9 @@ def upload_gpextract_file_into_s3(testfile):
     gp_file = create_gp_file(testfile, "DOW~1")
     destination_filename = os.path.basename(gp_file)
     try:
-        s3.upload_file(gp_file, LR_01_BUCKET, f"{InputFolderType.IN.value}{destination_filename}")
+        s3.upload_file(
+            gp_file, LR_01_BUCKET, f"{InputFolderType.IN.value}{destination_filename}"
+        )
         use_waiters_check_object_exists(
             LR_01_BUCKET, f"{InputFolderType.PASS.value}{destination_filename}"
         )
@@ -109,7 +111,9 @@ def assert_expected_file_in_lr13(filetype, expected_data_file):
     if not lr_10:
         assert False
     try:
-        expected_filename = next(file for file in lr_10["output"]["files"] if filetype in file)
+        expected_filename = next(
+            file for file in lr_10["output"]["files"] if filetype in file
+        )
         bucket = LR_13_BUCKET
         key = f"{job_id}/{expected_filename}"
 

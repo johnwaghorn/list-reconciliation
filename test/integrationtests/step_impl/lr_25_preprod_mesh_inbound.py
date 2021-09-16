@@ -44,7 +44,9 @@ def send_file_to_mesh_outbound_folder(filename):
 
 @step("invoke lambda LR-25")
 def invoke_lambda_lr_25():
-    response = lambda_.invoke(FunctionName=LR_25_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({}))
+    response = lambda_.invoke(
+        FunctionName=LR_25_LAMBDA_ARN, LogType="Tail", Payload=json.dumps({})
+    )
     for key, value in response.items():
         if key == "ResponseMetadata":
             assert int(value["HTTPStatusCode"]) == int(200)

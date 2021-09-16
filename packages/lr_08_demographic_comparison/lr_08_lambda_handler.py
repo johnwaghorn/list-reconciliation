@@ -96,7 +96,10 @@ class DemographicComparison(LambdaApplication):
         with DemographicsDifferences.batch_write() as batch:
             items = [
                 DemographicsDifferences(
-                    str(uuid4()), JobId=self.job_id, PatientId=self.patient_id, RuleId=result
+                    str(uuid4()),
+                    JobId=self.job_id,
+                    PatientId=self.patient_id,
+                    RuleId=result,
                 )
                 for result in results
             ]
@@ -105,13 +108,15 @@ class DemographicComparison(LambdaApplication):
                 batch.save(item)
 
         self.log_object.write_log(
-            "LR08I02", log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id}
+            "LR08I02",
+            log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id},
         )
 
         record.update(actions=[Demographics.IsComparisonCompleted.set(True)])
 
         self.log_object.write_log(
-            "LR08I03", log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id}
+            "LR08I03",
+            log_row_dict={"patient_id": self.patient_id, "job_id": self.job_id},
         )
 
         return success(

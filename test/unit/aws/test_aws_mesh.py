@@ -18,7 +18,13 @@ class LoggerStub:
         severity_threshold_override=None,
         process_name=None,
     ):
-        print(log_reference, error_list, log_row_dict, severity_threshold_override, process_name)
+        print(
+            log_reference,
+            error_list,
+            log_row_dict,
+            severity_threshold_override,
+            process_name,
+        )
 
 
 @pytest.fixture
@@ -37,12 +43,16 @@ def test_AWSMESHMailbox_send_message(s3):
     s3_client = boto3.client("s3")
 
     # Overwrite ignores existing file
-    s3_client.put_object(Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt", Body="")
+    s3_client.put_object(
+        Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt", Body=""
+    )
 
     mesh.send_message("ABC123", "test.txt", "content", overwrite=True)
 
     file = (
-        s3_client.get_object(Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt")["Body"]
+        s3_client.get_object(
+            Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt"
+        )["Body"]
         .read()
         .decode("utf-8")
     )
@@ -74,15 +84,17 @@ def test_AWSMESHMailbox_send_messages(s3):
 
     s3_client = boto3.client("s3")
     file1 = (
-        s3_client.get_object(Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt")["Body"]
+        s3_client.get_object(
+            Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test.txt"
+        )["Body"]
         .read()
         .decode("utf-8")
     )
 
     file2 = (
-        s3_client.get_object(Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test2.txt")[
-            "Body"
-        ]
+        s3_client.get_object(
+            Bucket=MESH_BUCKET, Key="outbound_X26OT188_to_ABC123/test2.txt"
+        )["Body"]
         .read()
         .decode("utf-8")
     )
@@ -113,7 +125,13 @@ def test_AWSMESHMailbox_bucket(s3):
 def test_AWSMESHMailbox_list_messages(s3):
     mesh = AWSMESHMailbox("X26OT188", LoggerStub())
     s3_client = boto3.client("s3")
-    s3_client.put_object(Bucket=MESH_BUCKET, Key="inbound_X26OT188/inbound_message.txt", Body="")
-    s3_client.put_object(Bucket=MESH_BUCKET, Key="inbound_X26OT188/another_message.txt", Body="")
+    s3_client.put_object(
+        Bucket=MESH_BUCKET, Key="inbound_X26OT188/inbound_message.txt", Body=""
+    )
+    s3_client.put_object(
+        Bucket=MESH_BUCKET, Key="inbound_X26OT188/another_message.txt", Body=""
+    )
 
-    assert sorted(mesh.list_messages()) == sorted(["another_message.txt", "inbound_message.txt"])
+    assert sorted(mesh.list_messages()) == sorted(
+        ["another_message.txt", "inbound_message.txt"]
+    )

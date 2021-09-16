@@ -35,7 +35,9 @@ def split_records_to_s3(
     lambda_ = boto3.client("lambda", region_name=os.getenv("AWS_REGION"))
 
     reserved_len = utf8len(
-        json.dumps({"records": "", "destination_bucket": "", "id_cols": "", "source": ""})
+        json.dumps(
+            {"records": "", "destination_bucket": "", "id_cols": "", "source": ""}
+        )
     )
 
     chunks = _chunk_list(records, max_size - reserved_len, utf8len)
@@ -55,7 +57,9 @@ def split_records_to_s3(
         )
 
 
-def _chunk_list(inlist: list[Any], chunk_size: int, sizing_func: Callable) -> list[list[Any]]:
+def _chunk_list(
+    inlist: list[Any], chunk_size: int, sizing_func: Callable
+) -> list[list[Any]]:
     """Reduce a list of elements to a list of sub-lists, with each sub-list containing
     elements whose size totals no more than `chunk_size`, using `sizing_func` on each element
     to calculate the size required. Elements are evaluated in sequence and no attempt is made

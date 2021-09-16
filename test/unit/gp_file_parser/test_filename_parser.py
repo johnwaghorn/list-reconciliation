@@ -226,7 +226,9 @@ def test_validate_filename_invalid_date_indicator_raises_ValueError():
     # BV = February 31
     invalid_date_indicator = "BV"
 
-    filename = f"A82023_GPR4BRF1.{invalid_date_indicator[0]}{invalid_date_indicator[1]}A"
+    filename = (
+        f"A82023_GPR4BRF1.{invalid_date_indicator[0]}{invalid_date_indicator[1]}A"
+    )
 
     expected = {"message": ["Filename contains invalid date"]}
 

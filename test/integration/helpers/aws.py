@@ -23,9 +23,13 @@ def await_s3_object_exists(bucket, key):
         return False
 
 
-def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll_sleep=10):
+def await_stepfunction_succeeded(
+    execution_arn, poll_limit=6, poll_count=0, poll_sleep=10
+):
     while True:
-        describe_execution = stepfunctions.describe_execution(executionArn=execution_arn)
+        describe_execution = stepfunctions.describe_execution(
+            executionArn=execution_arn
+        )
         status = describe_execution["status"]
         output = describe_execution.get("output")
 
@@ -60,7 +64,8 @@ def empty_dynamodb_table(table):
 
     counter = 0
     page = table.scan(
-        ProjectionExpression=projectionexpression, ExpressionAttributeNames=expressionattrnames
+        ProjectionExpression=projectionexpression,
+        ExpressionAttributeNames=expressionattrnames,
     )
     with table.batch_writer() as batch:
         while page["Count"] > 0:

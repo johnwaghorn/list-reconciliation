@@ -87,6 +87,8 @@ def _get_account(credentials: Credentials, log_object: Logger):
         },
     )
     account = Account(
-        primary_smtp_address=credentials.username, credentials=credentials, autodiscover=True
+        primary_smtp_address=credentials.username,
+        credentials=credentials,
+        autodiscover=True,
     )
     return account

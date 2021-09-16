@@ -134,7 +134,9 @@ def test_demographics_comparison_not_matched_ok(demographics_record, lambda_hand
     assert actual == expected
 
 
-def test_record_doesnt_exist_raises_DemographicsDoesNotExist(demographics_record, lambda_handler):
+def test_record_doesnt_exist_raises_DemographicsDoesNotExist(
+    demographics_record, lambda_handler
+):
     lambda_handler.job_id = "500"
     lambda_handler.patient_id = "500"
 

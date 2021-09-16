@@ -62,13 +62,17 @@ def assert_lambda_lr_02_response_statuscode(expstatuscode):
             assert value == int(expstatuscode)
 
 
-@step("trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>")
+@step(
+    "trigger lambda LR-02  and assert responsemetadata HTTPStatusCode response is <StatusCode>"
+)
 def assert_lambda_lr_02_response_metadata_httpstatuscode(expstatuscode):
     lr_02_response = connect_to_lambda_lr02_with_invalid_payload()
 
     for key in lr_02_response.items():
         if key == "ResponseMetadata":
-            assert lr_02_response["ResponseMetadata"]["HTTPStatusCode"] == int(expstatuscode)
+            assert lr_02_response["ResponseMetadata"]["HTTPStatusCode"] == int(
+                expstatuscode
+            )
 
 
 @step("create gpextract file")
@@ -120,7 +124,9 @@ def upload_gpextract_file_into_s3(testfile):
     s3 = boto3.client("s3", REGION_NAME)
     try:
         s3.upload_file(
-            temp_destdir, LR_01_BUCKET, f"{InputFolderType.IN.value}{destination_filename}"
+            temp_destdir,
+            LR_01_BUCKET,
+            f"{InputFolderType.IN.value}{destination_filename}",
         )
         use_waiters_check_object_exists(
             LR_01_BUCKET, f"{InputFolderType.PASS.value}{destination_filename}"
@@ -144,7 +150,9 @@ def upload_gpextract_file_into_s3_with_invalid_item(invalid_item, row, fieldlc):
 
     s3 = boto3.client("s3", REGION_NAME)
     try:
-        s3.upload_file(temp_destdir, LR_01_BUCKET, InputFolderType.IN.value + destination_filename)
+        s3.upload_file(
+            temp_destdir, LR_01_BUCKET, InputFolderType.IN.value + destination_filename
+        )
         Messages.write_message("Upload Successful")
 
     except FileNotFoundError:

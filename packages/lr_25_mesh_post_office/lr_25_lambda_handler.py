@@ -9,10 +9,14 @@ from spine_aws_common.lambda_application import LambdaApplication
 
 class MeshPostOffice(LambdaApplication):
     def __init__(self):
-        super().__init__(additional_log_config=get_cloudlogbase_config(), load_ssm_params=True)
+        super().__init__(
+            additional_log_config=get_cloudlogbase_config(), load_ssm_params=True
+        )
         self.s3 = boto3.resource("s3")
         self.mappings: dict = json.loads(str(self.system_config["mappings"]))
-        self.mesh_post_office_open: str = str(self.system_config["mesh_post_office_open"])
+        self.mesh_post_office_open: str = str(
+            self.system_config["mesh_post_office_open"]
+        )
 
     def start(self):
         try:
@@ -51,7 +55,9 @@ class MeshPostOffice(LambdaApplication):
                 },
             )
 
-            return success("LR25 Lambda application stopped", self.log_object.internal_id)
+            return success(
+                "LR25 Lambda application stopped", self.log_object.internal_id
+            )
 
         # for each mapping picked up from SSM
         for mapping in self.mappings:
@@ -63,7 +69,9 @@ class MeshPostOffice(LambdaApplication):
 
             # move each message to the mappings outbound bucket and key
             for message in messages:
-                new_key = message.replace(mapping["inbound"]["key"], mapping["outbound"]["key"])
+                new_key = message.replace(
+                    mapping["inbound"]["key"], mapping["outbound"]["key"]
+                )
                 self.s3_move_file(
                     old_bucket=mapping["inbound"]["bucket"],
                     old_key=message,
@@ -124,7 +132,8 @@ class MeshPostOffice(LambdaApplication):
         )
 
         self.s3.Object(new_bucket, new_key).copy_from(
-            ACL="bucket-owner-full-control", CopySource={"Bucket": old_bucket, "Key": old_key}
+            ACL="bucket-owner-full-control",
+            CopySource={"Bucket": old_bucket, "Key": old_key},
         )
 
         if delete_original:

@@ -53,7 +53,10 @@ class MockResponse:
             "resourceType": "Patient",
             "id": self.patient_id,
             "identifier": [
-                {"value": self.patient_id, "system": "https://fhir.nhs.uk/Id/nhs-number"}
+                {
+                    "value": self.patient_id,
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                }
             ],
             "meta": {
                 "versionId": "2",
@@ -134,7 +137,10 @@ class MockResponse:
             "resourceType": "Patient",
             "id": self.patient_id,
             "identifier": [
-                {"value": self.patient_id, "system": "https://fhir.nhs.uk/Id/nhs-number"}
+                {
+                    "value": self.patient_id,
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                }
             ],
             "meta": {
                 "versionId": "1",
@@ -191,7 +197,10 @@ class MockResponse:
             "resourceType": "Patient",
             "id": self.patient_id,
             "identifier": [
-                {"value": self.patient_id, "system": "https://fhir.nhs.uk/Id/nhs-number"}
+                {
+                    "value": self.patient_id,
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                }
             ],
             "meta": {
                 "versionId": "6",
@@ -267,7 +276,10 @@ class MockResponse:
             "resourceType": "Patient",
             "id": self.patient_id,
             "identifier": [
-                {"value": self.patient_id, "system": "https://fhir.nhs.uk/Id/nhs-number"}
+                {
+                    "value": self.patient_id,
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                }
             ],
             "meta": {
                 "versionId": "2",

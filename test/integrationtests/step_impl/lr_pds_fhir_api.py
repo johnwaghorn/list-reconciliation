@@ -12,7 +12,9 @@ DATA = os.path.join(ROOT, "data", PDS_API_ENV)
 PDSPATIENTFILE = "pds_api_response.json"
 
 
-@step("trigger fhir r4 patient api for patient_id <patient_id> and assert response as expected")
+@step(
+    "trigger fhir r4 patient api for patient_id <patient_id> and assert response as expected"
+)
 def run_prd_fhir_get_patient_details_api(patient_id):
     url = URL + "/" + patient_id
     pds_url_headers = {
@@ -30,7 +32,9 @@ def run_prd_fhir_get_patient_details_api(patient_id):
     with open(expected_response_file) as jsonfile:
         expected_response_body = json.load(jsonfile)
         actual_response_body = response.json()
-        assert expected_response_body == actual_response_body, "Response payload doesnt match"
+        assert (
+            expected_response_body == actual_response_body
+        ), "Response payload doesnt match"
 
 
 @step(

@@ -102,8 +102,14 @@ def create_mock_ssm_param_mappings_multiple(ssm):
                 "outbound": {"bucket": MOCK_OUTPUT_BUCKET, "key": MOCK_OUTPUT_KEY},
             },
             {
-                "inbound": {"bucket": f"{MOCK_INBOUND_BUCKET}2", "key": f"{MOCK_INBOUND_KEY}2"},
-                "outbound": {"bucket": f"{MOCK_OUTPUT_BUCKET}2", "key": f"{MOCK_OUTPUT_KEY}2"},
+                "inbound": {
+                    "bucket": f"{MOCK_INBOUND_BUCKET}2",
+                    "key": f"{MOCK_INBOUND_KEY}2",
+                },
+                "outbound": {
+                    "bucket": f"{MOCK_OUTPUT_BUCKET}2",
+                    "key": f"{MOCK_OUTPUT_KEY}2",
+                },
             },
         ]
     )

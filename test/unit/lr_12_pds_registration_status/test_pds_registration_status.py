@@ -10,7 +10,9 @@ from jobs.jobs import JobNotFound
 
 AWS_REGION = os.getenv("AWS_REGION")
 LR_13_REGISTRATIONS_OUTPUT_BUCKET = os.getenv("LR_13_REGISTRATIONS_OUTPUT_BUCKET")
-LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv("LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET")
+LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET = os.getenv(
+    "LR_22_PDS_PRACTICE_REGISTRATIONS_BUCKET"
+)
 PDS_API_RETRIES = os.getenv("PDS_API_RETRIES")
 JOB_ID = "ABC123"
 
@@ -32,7 +34,13 @@ def test_get_practice_patients(s3, lambda_handler):
 
 
 def test_get_pds_exclusive_registrations_with_no_existing_job_stats_ok(
-    demographics, jobs, s3, lambda_handler, mock_jwt_encode, mock_auth_post, mock_response
+    demographics,
+    jobs,
+    s3,
+    lambda_handler,
+    mock_jwt_encode,
+    mock_auth_post,
+    mock_response,
 ):
     lambda_handler.job_id = JOB_ID
     lambda_handler.lr13_bucket = LR_13_REGISTRATIONS_OUTPUT_BUCKET
@@ -99,7 +107,9 @@ def test_get_pds_exclusive_registrations_ok(
         == f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/ABC123/Y123452-OnlyOnPDS-20200201134000.csv"
     )
 
-    actual = csv.reader(StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode()))
+    actual = csv.reader(
+        StringIO(s3.get_object(Bucket=bucket, Key=key)["Body"].read().decode())
+    )
     expected = csv.reader(
         StringIO(
             """SURNAME,FORENAMES,DOB,NHS NO.,ADD 1,ADD 2,ADD 3,ADD 4,ADD 5,POSTCODE,TITLE,SEX,DATE ACCEPT.

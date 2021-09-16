@@ -181,10 +181,18 @@ class DemographicDifferences(LambdaApplication):
         demographic_diffs = dsa_work_item["differences"]
 
         if demographic_diffs:
-            return [summary_record_dict | difference for difference in demographic_diffs]
+            return [
+                summary_record_dict | difference for difference in demographic_diffs
+            ]
         else:
             # Sensitive patients
-            return [{**summary_record_dict, "ruleId": "sensitive", "guidance": "Manual Validation"}]
+            return [
+                {
+                    **summary_record_dict,
+                    "ruleId": "sensitive",
+                    "guidance": "Manual Validation",
+                }
+            ]
 
     def process_demographic_differences(self) -> Message:
         """Process and output demographic differences for a job, creating DSA work

@@ -26,15 +26,18 @@ def test_lr_04_handler_invalid_event_raises_key_error(
 
 @freeze_time("2020-04-06 13:40:00")
 def test_lr04_lambda_handler_process_valid_log_successfully(
-    upload_valid_log_to_s3, lr_04_event_valid_file, lambda_context, lambda_handler, ssm, email_ssm
+    upload_valid_log_to_s3,
+    lr_04_event_valid_file,
+    lambda_context,
+    lambda_handler,
+    ssm,
+    email_ssm,
 ):
     app = lambda_handler
 
     result = app.main(event=lr_04_event_valid_file, context=lambda_context)
 
-    expected_subject = (
-        "Validation Failure - PDS Comparison validation failure against 'A12023_GPR4LNA1.CSB'"
-    )
+    expected_subject = "Validation Failure - PDS Comparison validation failure against 'A12023_GPR4LNA1.CSB'"
     expected_body = (
         "The GP file: A12023_GPR4LNA1.CSB failed validation at 14:40:00 on 06/04/2020.\n"
         "As a result, no records in this file have been processed."

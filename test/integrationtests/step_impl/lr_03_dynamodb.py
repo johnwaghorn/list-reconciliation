@@ -42,12 +42,15 @@ def get_inflight_table_itemcount():
 )
 def check_patient_sensitivity(exp_pds_sensitive, exp_nhsnumber):
     demographics_table = dynamodb.Table(DEMOGRAPHICS_TABLE)
-    demographic_data = demographics_table.scan(ProjectionExpression="NhsNumber, PDS_Sensitive, Id")
+    demographic_data = demographics_table.scan(
+        ProjectionExpression="NhsNumber, PDS_Sensitive, Id"
+    )
     data_store.scenario["demographic_data"] = demographic_data
     sensitive_found = [
         Item
         for Item in demographic_data["Items"]
-        if Item["NhsNumber"] == exp_nhsnumber and Item["PDS_Sensitive"] == exp_pds_sensitive
+        if Item["NhsNumber"] == exp_nhsnumber
+        and Item["PDS_Sensitive"] == exp_pds_sensitive
     ]
     assert (
         len(sensitive_found) > 0

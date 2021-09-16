@@ -40,7 +40,9 @@ class FeedbackFailure(LambdaApplication):
             self.log_filename = str(self.log_key).replace(prefix, "")
 
             try:
-                self.job_id = self.log_filename.split("-FailedFile-")[1].replace(".json", "")
+                self.job_id = self.log_filename.split("-FailedFile-")[1].replace(
+                    ".json", ""
+                )
 
                 # Check job_id string is a valid UUID
                 UUID(str(self.job_id))
@@ -129,7 +131,9 @@ class FeedbackFailure(LambdaApplication):
         """
 
         try:
-            self.upload_date = datetime.strptime(self.log["upload_date"], "%Y-%m-%d %H:%M:%S.%f%z")
+            self.upload_date = datetime.strptime(
+                self.log["upload_date"], "%Y-%m-%d %H:%M:%S.%f%z"
+            )
             self.failed_key = f"{InputFolderType.FAIL.value}{self.log['file']}"
 
             try:
@@ -156,8 +160,13 @@ class FeedbackFailure(LambdaApplication):
                     raise FeedbackLogError("LOG file contains unusable record total")
 
                 total_invalid_records = self.log["total_invalid_records"]
-                if not isinstance(total_invalid_records, int) and not total_invalid_records > 0:
-                    raise FeedbackLogError("LOG file contains unusable invalid record total")
+                if (
+                    not isinstance(total_invalid_records, int)
+                    and not total_invalid_records > 0
+                ):
+                    raise FeedbackLogError(
+                        "LOG file contains unusable invalid record total"
+                    )
 
             if not self.log["message"]:
                 raise FeedbackLogError("LOG file contains invalid error message")
@@ -175,9 +184,7 @@ class FeedbackFailure(LambdaApplication):
         """Send an email based on LOG file info"""
 
         to = self.system_config["PCSE_EMAIL"]
-        subject = (
-            f"Validation Failure - PDS Comparison validation failure against '{self.log['file']}'"
-        )
+        subject = f"Validation Failure - PDS Comparison validation failure against '{self.log['file']}'"
         body = self.create_email_body()
 
         nhs_mail_relay.send_email(
@@ -255,9 +262,10 @@ class FeedbackFailure(LambdaApplication):
             del record["_INVALID_"]["ON_LINES"]
 
             invalid_records_msg += f"Invalid Record on lines {line_number}\n"
-            invalid_records_msg += (
-                "\n".join([f"   • {record['_INVALID_'][r]}" for r in record["_INVALID_"]]) + "\n"
+            invalid_records_msg += "\n".join(
+                [f"   • {record['_INVALID_'][r]}" for r in record["_INVALID_"]]
             )
+            invalid_records_msg += "\n"
 
         body += (
             f"Total records: {self.log['total_records']}\n"

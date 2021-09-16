@@ -27,11 +27,15 @@ def test_save_records_to_s3_saves_records(s3, lambda_handler, lambda_context, re
 
     s3_client = boto3.client("s3")
 
-    files = [obj["Key"] for obj in s3_client.list_objects_v2(Bucket=LR_06_BUCKET)["Contents"]]
+    files = [
+        obj["Key"] for obj in s3_client.list_objects_v2(Bucket=LR_06_BUCKET)["Contents"]
+    ]
 
     actual = [
         json.loads(
-            s3_client.get_object(Bucket=LR_06_BUCKET, Key=file)["Body"].read().decode("utf-8")
+            s3_client.get_object(Bucket=LR_06_BUCKET, Key=file)["Body"]
+            .read()
+            .decode("utf-8")
         )
         for file in files
     ]
@@ -43,7 +47,9 @@ def test_save_records_to_s3_saves_records(s3, lambda_handler, lambda_context, re
     )
 
 
-def test_save_records_to_s3_raises_Exception(s3, lambda_handler, lambda_context, records):
+def test_save_records_to_s3_raises_Exception(
+    s3, lambda_handler, lambda_context, records
+):
     event = {
         "id_cols": ["col_doesnt_exist", "practice_code", "id"],
         "destination_bucket": LR_06_BUCKET,

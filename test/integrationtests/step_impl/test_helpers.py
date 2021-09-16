@@ -37,9 +37,13 @@ def create_timestamp():
     return datetime.now().strftime("%Y%m%d%H%M%S%f")
 
 
-def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll_sleep=10):
+def await_stepfunction_succeeded(
+    execution_arn, poll_limit=6, poll_count=0, poll_sleep=10
+):
     while True:
-        describe_execution = stepfunctions.describe_execution(executionArn=execution_arn)
+        describe_execution = stepfunctions.describe_execution(
+            executionArn=execution_arn
+        )
         status = describe_execution["status"]
         output = describe_execution.get("output")
 
@@ -49,7 +53,9 @@ def await_stepfunction_succeeded(execution_arn, poll_limit=6, poll_count=0, poll
             poll_count += 1
 
         if poll_count >= poll_limit:
-            Messages.write_message(f"LR 10 StepFunction arn: {execution_arn} status: {status}")
+            Messages.write_message(
+                f"LR 10 StepFunction arn: {execution_arn} status: {status}"
+            )
             return describe_execution
 
         time.sleep(poll_sleep)

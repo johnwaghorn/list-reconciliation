@@ -45,7 +45,9 @@ def test_maybe_delete_from_registrations_output_bucket(
     job_cleanup.maybe_delete_from_registrations_output_bucket()
 
     with pytest.raises(KeyError):
-        objects = s3.list_objects_v2(Bucket=MOCK_REGISTRATIONS_OUTPUT_BUCKET, Prefix=JOB_ID)
+        objects = s3.list_objects_v2(
+            Bucket=MOCK_REGISTRATIONS_OUTPUT_BUCKET, Prefix=JOB_ID
+        )
         return objects["Contents"]
 
 
@@ -56,7 +58,9 @@ def test_maybe_delete_from_registrations_output_bucket_no_files(job_cleanup, s3)
     job_cleanup.job_id = JOB_ID
 
     with pytest.raises(KeyError):
-        objects = s3.list_objects_v2(Bucket=MOCK_REGISTRATIONS_OUTPUT_BUCKET, Prefix=JOB_ID)
+        objects = s3.list_objects_v2(
+            Bucket=MOCK_REGISTRATIONS_OUTPUT_BUCKET, Prefix=JOB_ID
+        )
         return objects["Contents"]
 
 

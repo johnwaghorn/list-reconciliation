@@ -1,6 +1,6 @@
 # Gauge Integration Tests For List Recon Project
 
-## Pre-requisite 
+## Pre-requisite
 Gauge, Python, Pip
 
 ## Installation
@@ -8,7 +8,7 @@ Gauge, Python, Pip
 Gauge Instalation
 Install Gauge - https://docs.gauge.org/getting_started/installing-gauge.html?os=windows&language=javascript&ide=vscode
 
-Gauge Python Instalation 
+Gauge Python Instalation
 
 `gauge install python`
 
@@ -30,11 +30,11 @@ Install specific version
 # Vscode / IntelliJ
 
 1. Open the project in Vscode / IntelliJ.
-2. To run all the tests in spec, navigate to the dir containing specs (`..tests/integrationtests/specs`) and 
-   click on the 'run spec' button on the spec title to run all the scenarios in the spec file. 
+2. To run all the tests in spec, navigate to the dir containing specs (`..tests/integrationtests/specs`) and
+   click on the 'run spec' button on the spec title to run all the scenarios in the spec file.
 3. To run individual tests, Goto the specific test in the spec and click on the 'run scenario'.
 4. To view the execution results : `../reports/html-report/index.html`
- 
+
 
 ### Tagging
 
@@ -44,7 +44,7 @@ Tags are written as comma separated values in the specification with a prefix Ta
 
 1. `wip` - for those scenarios which are under development and ready to be released.
 
-**Note :** we can start giving the respective tags once its deployed to different environments 
+**Note :** we can start giving the respective tags once its deployed to different environments
 in the format : `env-(envName)`. For E.g. 'env-Staging', 'env-Production'
 
 

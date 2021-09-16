@@ -273,7 +273,9 @@ def parse_gp_extract_text(
         )
 
         if INVALID in validated_record.keys():
-            validated_record[INVALID].update({"ON_LINES": f"{line_number}-{line_number + 1}"})
+            validated_record[INVALID].update(
+                {"ON_LINES": f"{line_number}-{line_number + 1}"}
+            )
 
         validated_records.append(validated_record)
 
@@ -326,7 +328,9 @@ def parse_gp_extract_file(filepath: Path, process_datetime: datetime = None) -> 
     return results
 
 
-def process_invalid_records(records: Records, include_reason: bool = False) -> tuple[dict, Records]:
+def process_invalid_records(
+    records: Records, include_reason: bool = False
+) -> tuple[dict, Records]:
     """Filter out valid records from a set of records.
 
     Optionally include a more informative validation fail reason.
@@ -479,7 +483,9 @@ def parse_gp_extract_file_s3(
         Records: List of records: [{record1: ...}, {record2: ...}, ...]
     """
 
-    valid_file = validate_filename(file_key.replace(InputFolderType.IN.value, ""), process_datetime)
+    valid_file = validate_filename(
+        file_key.replace(InputFolderType.IN.value, ""), process_datetime
+    )
 
     file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
     file_data = file_obj["Body"].read()
@@ -493,7 +499,9 @@ def parse_gp_extract_file_s3(
     invalid_records = [r for r in results if INVALID in list(r.keys())]
 
     if invalid_records:
-        raise InvalidGPExtract({"total_records": len(results), "invalid_records": invalid_records})
+        raise InvalidGPExtract(
+            {"total_records": len(results), "invalid_records": invalid_records}
+        )
 
     valid_file.update({"records": results})
 

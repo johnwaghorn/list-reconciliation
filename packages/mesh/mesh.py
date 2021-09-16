@@ -22,7 +22,9 @@ class AWSMESHMailbox:
     def bucket(self) -> str:
         return MESH_BUCKET
 
-    def send_message(self, destination_id: str, filename: str, file: IO, overwrite=False):
+    def send_message(
+        self, destination_id: str, filename: str, file: IO, overwrite=False
+    ):
         if "/" in filename:
             raise InvalidFilename("Filename cannot contain '/'")
 
@@ -45,7 +47,9 @@ class AWSMESHMailbox:
         self.s3.put_object(Bucket=MESH_BUCKET, Key=key, Body=file)
         return f"s3://{MESH_BUCKET}/{key}"
 
-    def send_messages(self, destination_id: str, files: list[tuple[str, IO]], overwrite=False):
+    def send_messages(
+        self, destination_id: str, files: list[tuple[str, IO]], overwrite=False
+    ):
         for filename, file in files:
             self.send_message(destination_id, filename, file, overwrite=overwrite)
 
@@ -68,9 +72,9 @@ class AWSMESHMailbox:
         )
         return [
             os.path.basename(obj["Key"])
-            for obj in self.s3.list_objects_v2(Bucket=MESH_BUCKET, Prefix=prefix or self.inbox).get(
-                "Contents", []
-            )
+            for obj in self.s3.list_objects_v2(
+                Bucket=MESH_BUCKET, Prefix=prefix or self.inbox
+            ).get("Contents", [])
         ]
 
     def get_messages(self) -> Generator[botocore.response.StreamingBody, None, None]:

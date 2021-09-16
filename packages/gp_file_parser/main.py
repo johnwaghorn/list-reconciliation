@@ -15,7 +15,9 @@ def main():
         help="Output directory, will contain the files 'records.csv' and 'invalid_counts.csv",
     )
 
-    parser.add_argument("files", type=str, help="List of GP extract files to be processed")
+    parser.add_argument(
+        "files", type=str, help="List of GP extract files to be processed"
+    )
 
     parser.add_argument(
         "-t",
@@ -40,7 +42,9 @@ def main():
         help="Set the processing datetime. (default: today's date)",
     )
 
-    parser.add_argument("-d", "--debug", action="store_true", help="Set logging level to debug")
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Set logging level to debug"
+    )
     args = parser.parse_args()
 
     if args.debug:

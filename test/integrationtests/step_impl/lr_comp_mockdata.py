@@ -29,7 +29,9 @@ def run_mock_api(count, key):
 
     response = requests.get(url)
 
-    with open(os.path.join(TEMP_DIR, "gpdata.json"), "w", newline="\n", encoding="utf-8") as f:
+    with open(
+        os.path.join(TEMP_DIR, "gpdata.json"), "w", newline="\n", encoding="utf-8"
+    ) as f:
         f.writelines(response.text)
         f.close()
 

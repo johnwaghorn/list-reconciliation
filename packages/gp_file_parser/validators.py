@@ -47,7 +47,9 @@ INVALID = "_INVALID_"
 
 INVALID_RECORD = "INVALID_RECORD"
 INVALID_RECORD_DATA = "Record contains invalid data/structure, and could not be read"
-INVALID_RECORD_LEN = "Record - Must contain the correct number of data fields for parsing"
+INVALID_RECORD_LEN = (
+    "Record - Must contain the correct number of data fields for parsing"
+)
 INVALID_RECORD_TYPE_1 = "Transaction/Record Type - Row 1 of record must be 'DOW~1'."
 INVALID_RECORD_TYPE_2 = "Transaction/Record Type - Row 2 of record must be 'DOW~2'."
 INVALID_GP_PRACTICECODE = (
@@ -76,10 +78,10 @@ INVALID_TITLE = (
     "Title - must contain only uppercase alphabetic characters and space, apostrophe "
     "or hyphen. Max length 35."
 )
-INVALID_SEX = (
-    "Sex - Must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+INVALID_SEX = "Sex - Must be 1 for Male, 2 for Female, 0 for Indeterminate/Not Known or 9 for Not Specified."
+INVALID_DATE_OF_BIRTH = (
+    "Date of Birth - Must be a date in the past, and in the format YYYYMMDD."
 )
-INVALID_DATE_OF_BIRTH = "Date of Birth - Must be a date in the past, and in the format YYYYMMDD."
 INVALID_ADDRESS_LINE = (
     "Address Lines - Must contain only uppercase alphabetic characters and space, apostrophe, "
     "hyphen, comma or full-stop. Max length 35."
@@ -93,9 +95,13 @@ INVALID_RPP_MILEAGE = "RRP Mileage - Must be between 3 and 50 inclusive."
 INVALID_BLOCKED_ROUTE_SPECIAL_DISTRICT_MARKER = (
     "Blocked Route Special District Marker - Must be 'B' or 'S'."
 )
-INVALID_WALKING_UNITS = "Walking Units - Must be between 3 and 99 inclusive and be divisible by 3."
+INVALID_WALKING_UNITS = (
+    "Walking Units - Must be between 3 and 99 inclusive and be divisible by 3."
+)
 INVALID_RESIDENTIAL_INSTITUTE_CODE = "Residential Institute Code - Must be a 2-character string and valid code for the patients Health Authority."
-INVALID_TRANS_ID = "Transaction/Record Number - Must be a unique, not-null integer greater than 0."
+INVALID_TRANS_ID = (
+    "Transaction/Record Number - Must be a unique, not-null integer greater than 0."
+)
 
 ValidatedRecord = tuple[str, Union[str, None]]
 
@@ -172,7 +178,9 @@ def gp_practicecode(gp_practicecode_val: str, **kwargs) -> ValidatedRecord:
     return gp_practicecode_val, invalid_reason
 
 
-def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> ValidatedRecord:
+def ha_cipher(
+    ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs
+) -> ValidatedRecord:
     """Coerce and validate HA cipher.
 
     Validation rules: Must be a not-null 3-digit alphanumeric code.
@@ -192,7 +200,9 @@ def ha_cipher(ha_cipher_val: str, gp_ha_cipher: str = None, **kwargs) -> Validat
         invalid_reason = INVALID_HA_CIPHER
 
     else:
-        if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (ha_cipher_val != gp_ha_cipher):
+        if not re.match(r"^([A-Z0-9]{3})$", ha_cipher_val) or (
+            ha_cipher_val != gp_ha_cipher
+        ):
             invalid_reason = INVALID_HA_CIPHER
 
     return ha_cipher_val, invalid_reason
@@ -225,7 +235,9 @@ def transaction_datetime(
 
     else:
         try:
-            transaction_datetime_val = datetime.strptime(transaction_datetime_val, "%Y%m%d%H%M")
+            transaction_datetime_val = datetime.strptime(
+                transaction_datetime_val, "%Y%m%d%H%M"
+            )
 
         except (TypeError, ValueError):
             invalid_reason = INVALID_TRANS_DATETIME
@@ -445,7 +457,9 @@ def date_of_birth(date_of_birth_val: str, **kwargs) -> ValidatedRecord:
 
         else:
             try:
-                date_of_birth_val = datetime.strptime(date_of_birth_val, "%Y%m%d").date()
+                date_of_birth_val = datetime.strptime(
+                    date_of_birth_val, "%Y%m%d"
+                ).date()
                 if date_of_birth_val > datetime.now().date():
                     invalid_reason = INVALID_DATE_OF_BIRTH
 
@@ -535,7 +549,9 @@ def postcode(postcode_val: str, **kwargs) -> ValidatedRecord:
     return postcode_val, invalid_reason
 
 
-def drugs_dispensed_marker(drugs_dispensed_marker_val: str, **kwargs) -> ValidatedRecord:
+def drugs_dispensed_marker(
+    drugs_dispensed_marker_val: str, **kwargs
+) -> ValidatedRecord:
     """Coerce and validate drugs dispensed marker.
 
     Validation rules: Must be 'Y' or blank.
@@ -589,7 +605,9 @@ def rpp_mileage(rpp_mileage_val: str, **kwargs) -> ValidatedRecord:
     return rpp_mileage_val, invalid_reason
 
 
-def blocked_route_special_district_marker(blocked_route_special_district_marker_val: str, **kwargs):
+def blocked_route_special_district_marker(
+    blocked_route_special_district_marker_val: str, **kwargs
+):
     """Coerce and validate blocked route special district marker.
 
     Validation rules: Must be 'B' or 'S'.
@@ -644,7 +662,9 @@ def walking_units(walking_units_val: str, **kwargs) -> ValidatedRecord:
     return walking_units_val, invalid_reason
 
 
-def residential_institute_code(residential_institute_code_val: str, **kwargs) -> ValidatedRecord:
+def residential_institute_code(
+    residential_institute_code_val: str, **kwargs
+) -> ValidatedRecord:
     """Coerce and validate residential institute code.
 
     Validation rules: Must be a 2-character string and valid code for the
@@ -672,7 +692,9 @@ def residential_institute_code(residential_institute_code_val: str, **kwargs) ->
     return residential_institute_code_val, invalid_reason
 
 
-def transaction_id(transaction_id_val: str, other_ids: list[int], **kwargs) -> ValidatedRecord:
+def transaction_id(
+    transaction_id_val: str, other_ids: list[int], **kwargs
+) -> ValidatedRecord:
     """Coerce and validate transaction id.
 
     Validation rules: Must be a unique not-null 2-character integer greater than 0.

@@ -14,7 +14,9 @@ class GPRecord(LeftRecord):
     FORENAMES = StringColumn("GP_Forenames", formatters=[strip_whitespace, to_lower])
     SURNAME = StringColumn("GP_Surname", formatters=[strip_whitespace, to_lower])
     TITLE = StringColumn("GP_Title", formatters=[strip_whitespace, to_lower])
-    GENDER = StringColumn("GP_Gender", formatters=[strip_whitespace, to_lower, gp_gender])
+    GENDER = StringColumn(
+        "GP_Gender", formatters=[strip_whitespace, to_lower, gp_gender]
+    )
     ADDRESS = StringColumn(
         [
             "GP_AddressLine1",

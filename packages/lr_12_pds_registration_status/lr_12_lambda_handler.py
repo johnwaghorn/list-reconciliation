@@ -106,7 +106,9 @@ class PDSRegistrationStatus(LambdaApplication):
 
         rows = []
 
-        job_nhs_numbers = [r.NhsNumber for r in Demographics.JobIdIndex.query(self.job_id)]
+        job_nhs_numbers = [
+            r.NhsNumber for r in Demographics.JobIdIndex.query(self.job_id)
+        ]
 
         for patient in practice_patients:
             nhs_number = patient["nhs_number"]
@@ -115,7 +117,8 @@ class PDSRegistrationStatus(LambdaApplication):
                 try:
                     pds_record = self.api.get_pds_record(nhs_number, self.job_id)
                     if pds_record and any(
-                        marker.value == pds_record.get("sensitive") for marker in SensitiveMarkers
+                        marker.value == pds_record.get("sensitive")
+                        for marker in SensitiveMarkers
                     ):
                         self.log_object.write_log(
                             "LR12I02",
@@ -139,7 +142,9 @@ class PDSRegistrationStatus(LambdaApplication):
                 if pds_record:
                     pds_record["address"].extend([None, None, None, None, None])
                     date_accept = (
-                        datetime.strptime(pds_record["gp_registered_date"], "%Y-%m-%d").date()
+                        datetime.strptime(
+                            pds_record["gp_registered_date"], "%Y-%m-%d"
+                        ).date()
                         if pds_record["gp_registered_date"]
                         else ""
                     )

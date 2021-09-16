@@ -29,7 +29,9 @@ def test_s3_list_files_in_bucket(mesh_post_office_open):
     """
     Make sure we find the files on a prefix in a bucket, ignoring any "directories (/)"
     """
-    response = mesh_post_office_open.s3_list_files_in_bucket(MOCK_INBOUND_BUCKET, MOCK_INBOUND_KEY)
+    response = mesh_post_office_open.s3_list_files_in_bucket(
+        MOCK_INBOUND_BUCKET, MOCK_INBOUND_KEY
+    )
     assert len(response) == 1
     assert response[0] == f"{MOCK_INBOUND_KEY}/{DATA_FILE}"
 
@@ -38,7 +40,9 @@ def test_get_mesh_messages(mesh_post_office_open):
     """
     Ensure we get the correct list of expected Mesh messages
     """
-    response = mesh_post_office_open.get_mesh_messages(MOCK_INBOUND_BUCKET, MOCK_INBOUND_KEY)
+    response = mesh_post_office_open.get_mesh_messages(
+        MOCK_INBOUND_BUCKET, MOCK_INBOUND_KEY
+    )
     assert len(response) == 1
     assert response[0] == f"{MOCK_INBOUND_KEY}/{DATA_FILE}"
 
@@ -53,7 +57,9 @@ def test_s3_move_file(s3, mesh_post_office_open):
         new_bucket=MOCK_OUTPUT_BUCKET,
         new_key=f"{MOCK_OUTPUT_KEY}/{DATA_FILE}",
     )
-    response = s3.get_object(Bucket=MOCK_OUTPUT_BUCKET, Key=f"{MOCK_OUTPUT_KEY}/{DATA_FILE}")
+    response = s3.get_object(
+        Bucket=MOCK_OUTPUT_BUCKET, Key=f"{MOCK_OUTPUT_KEY}/{DATA_FILE}"
+    )
     assert response["ContentLength"] > 0
 
 

@@ -40,7 +40,9 @@ def update_exp_patient_record_lr23(exp_path, patient_id, job_id):
 def assert_expected_file_in_mesh_bucket(patientid, exp_datafile):
     result = s3.list_objects(Bucket=MESH_BUCKET)
     for filename in result.get("Contents"):
-        if OUTBOUND_INTERNALSPINE in filename.get("Key") and patientid in filename.get("Key"):
+        if OUTBOUND_INTERNALSPINE in filename.get("Key") and patientid in filename.get(
+            "Key"
+        ):
             data = s3.get_object(Bucket=MESH_BUCKET, Key=filename.get("Key"))
             data_content = data["Body"]
             act_contents = json.loads(data_content.read().decode("utf-8"))
@@ -53,7 +55,9 @@ def assert_expected_file_in_mesh_bucket(patientid, exp_datafile):
                 update_exp_patient_record_lr23(exp_path, patient_id, job_id), indent=4
             )
 
-            act_contents = sorted(act_contents["differences"], key=lambda x: x["ruleId"])
+            act_contents = sorted(
+                act_contents["differences"], key=lambda x: x["ruleId"]
+            )
             act_content = json.dumps(act_contents, indent=4)
             assert (
                 act_content == exp_data

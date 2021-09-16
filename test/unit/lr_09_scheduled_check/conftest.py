@@ -135,10 +135,18 @@ def populate_demographics_table(create_dynamo_tables):
 @pytest.fixture
 def populate_inflight_table(create_dynamo_tables):
     items = [
-        InFlight(JOB_ID[1], TotalRecords=6, Timestamp=datetime.now() - timedelta(hours=1)),
-        InFlight(JOB_ID[2], TotalRecords=1, Timestamp=datetime.now() - timedelta(hours=1)),
-        InFlight(JOB_ID[3], TotalRecords=1, Timestamp=datetime.now() - timedelta(hours=1)),
-        InFlight(JOB_ID[4], TotalRecords=7, Timestamp=datetime.now() - timedelta(hours=9)),
+        InFlight(
+            JOB_ID[1], TotalRecords=6, Timestamp=datetime.now() - timedelta(hours=1)
+        ),
+        InFlight(
+            JOB_ID[2], TotalRecords=1, Timestamp=datetime.now() - timedelta(hours=1)
+        ),
+        InFlight(
+            JOB_ID[3], TotalRecords=1, Timestamp=datetime.now() - timedelta(hours=1)
+        ),
+        InFlight(
+            JOB_ID[4], TotalRecords=7, Timestamp=datetime.now() - timedelta(hours=9)
+        ),
     ]
 
     with InFlight.batch_write() as batch:

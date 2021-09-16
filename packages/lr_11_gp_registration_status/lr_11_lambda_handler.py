@@ -7,7 +7,11 @@ from lr_csv.csv import write_to_mem_csv
 from lr_logging import get_cloudlogbase_config
 from lr_logging.responses import Message, error, success
 from pds_api.pds_api import SensitiveMarkers
-from registration import GPRegistrationStatus, RegistrationType, get_registration_filename
+from registration import (
+    GPRegistrationStatus,
+    RegistrationType,
+    get_registration_filename,
+)
 from spine_aws_common.lambda_application import LambdaApplication
 
 

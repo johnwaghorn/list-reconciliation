@@ -41,7 +41,12 @@ class PDS(BaseProvider):
     def gender(self) -> str:
         return self.random_elements(
             elements=OrderedDict(
-                [("Female", 0.51), ("Male", 0.48), ("Not known", 0.005), ("Indeterminate", 0.005)]
+                [
+                    ("Female", 0.51),
+                    ("Male", 0.48),
+                    ("Not known", 0.005),
+                    ("Indeterminate", 0.005),
+                ]
             ),
             length=1,
             unique=False,
