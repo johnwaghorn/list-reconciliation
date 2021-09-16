@@ -1,11 +1,9 @@
 name: Create Environment
 
 on:
-  pull_request:
-    branches:
-      - main
+  push:
   schedule:
-    - cron: "24 20 * * 3"
+    - cron: "0 8 * * 1,2,3,4,5"
 
 jobs:
   create-python-package:
