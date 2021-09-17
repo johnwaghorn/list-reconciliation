@@ -1,6 +1,7 @@
 import traceback
 from typing import Union
 
+import boto3
 from fastapi import FastAPI, Response, status
 from mangum import Mangum
 from pds_api_mock.errors import error_response_404, error_response_500
@@ -10,7 +11,6 @@ from pds_api_mock.pds_data import (
     filter_restricted_patients,
     filter_unrestricted_patients,
     filter_very_restricted_patients,
-    get_mock_data,
 )
 from pydantic import BaseModel
 
@@ -23,6 +23,7 @@ sensitive_marker_filter_funcs = {
 
 app = FastAPI(title="PDS API Mock", root_path="/")
 handler = Mangum(app)
+dynamodb = boto3.resource("dynamodb")
 
 
 @app.get(
@@ -44,18 +45,17 @@ def get_pds_patient_record(nhs_number: str, response: Response):
         return resp
 
 
-# TODO this needs to be rewritten: store and retrieve from Dynamo? S3 Select? Some sort of local lookup?
 def _get_patient(nhs_number):
     try:
-        for row in get_mock_data():
-            if row["NHS_NUMBER"] == nhs_number:
-                return row
+        table = dynamodb.Table("pds-api-mock")
+        response = table.get_item(Key={"nhs_number": str(nhs_number)})
+        return response["Item"]
     except Exception:
-        raise ValueError("PDS data unavailable")
+        raise ValueError("Patient data unavailable")
 
 
 def _filter_patient(patient_record) -> tuple[BaseModel, int]:
-    patient_sensitive_marker = patient_record["SENSITIVE_FLAG"]
+    patient_sensitive_marker = patient_record["sensitive_flag"]
 
     filter_func = sensitive_marker_filter_funcs.get(patient_sensitive_marker, None)
     if filter_func:

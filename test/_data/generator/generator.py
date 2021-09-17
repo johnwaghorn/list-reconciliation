@@ -9,6 +9,7 @@ class Generator:
         # file = DPSPDSData()
         file = PDSData()
         storage = LocalStorage()
+        # storage = DynamoDBStorage()
 
         storage.store(file.create_file(size))
 

@@ -1,9 +1,5 @@
-import csv
-import os
 from typing import Union
 
-import boto3
-import botocore.exceptions
 from fastapi import status
 from pds_api_mock.errors import error_response_404, error_response_500
 from pds_api_mock.model import (
@@ -30,28 +26,6 @@ class SensitiveMarkers(Enum):
     UNRESTRICTED = "U"
 
 
-PDS_DATA_BUCKET = os.getenv("PDS_BUCKET")
-PDS_DATA_FILE = os.getenv("PDS_DATA_FILE")
-
-s3_client = boto3.resource("s3")
-
-# TODO remove this when _get_patient is rewritten
-def get_mock_data():
-    try:
-        bucket = s3_client.Bucket(PDS_DATA_BUCKET)
-        obj = bucket.Object(key=PDS_DATA_FILE)
-
-        pds_api_data = obj.get()["Body"].read().decode("utf-8-sig").splitlines()
-        reader = csv.DictReader(pds_api_data, delimiter=",")
-        return reader
-
-    except (
-        botocore.exceptions.ClientError,
-        botocore.exceptions.ParamValidationError,
-    ) as exc:
-        raise exc
-
-
 def filter_redacted_patients(record):
     resp = error_response_404(record)
     return resp, status.HTTP_404_NOT_FOUND
@@ -63,28 +37,28 @@ def filter_restricted_patients(
     try:
         return (
             MockFHIRResponse(
-                id=record["NHS_NUMBER"],
-                identifier=[Identifier(value=record["NHS_NUMBER"])],
+                id=record["nhs_number"],
+                identifier=[Identifier(value=record["nhs_number"])],
                 meta=Meta(
                     security=[
                         MetaSecurity(
-                            code=record["SENSITIVE_FLAG"],
-                            display=SensitiveMarkers[record["SENSITIVE_FLAG"]].value,
+                            code=record["sensitive_flag"],
+                            display=SensitiveMarkers[record["sensitive_flag"]].value,
                         )
                     ]
                 ),
-                gender=record["GENDER"],
+                gender=record["gender"],
                 name=[
                     Name(
                         id="124",
                         use="usual",
-                        given=[record["GIVEN_NAME"]],
-                        family=record["FAMILY_NAME"],
-                        prefix=[record["TITLE"]],
+                        given=[record["given_name"]],
+                        family=record["family_name"],
+                        prefix=[record["title"]],
                     )
                 ],
-                birthDate=record["DATE_OF_BIRTH"],
-                deceasedDateTime=record["DATE_OF_DEATH"],
+                birthDate=record["date_of_birth"],
+                deceasedDateTime=record["date_of_death"],
             ),
             status.HTTP_200_OK,
         )
@@ -96,13 +70,13 @@ def filter_very_restricted_patients(record):
     try:
         return (
             MockFHIRResponse(
-                id=record["NHS_NUMBER"],
-                identifier=[Identifier(value=record["NHS_NUMBER"])],
+                id=record["nhs_number"],
+                identifier=[Identifier(value=record["nhs_number"])],
                 meta=Meta(
                     security=[
                         MetaSecurity(
-                            code=record["SENSITIVE_FLAG"],
-                            display=SensitiveMarkers[record["SENSITIVE_FLAG"]].value,
+                            code=record["sensitive_flag"],
+                            display=SensitiveMarkers[record["sensitive_flag"]].value,
                         )
                     ]
                 ),
@@ -118,33 +92,33 @@ def filter_unrestricted_patients(record):
     try:
         return (
             MockFHIRResponse(
-                id=record["NHS_NUMBER"],
-                identifier=[Identifier(value=record["NHS_NUMBER"])],
+                id=record["nhs_number"],
+                identifier=[Identifier(value=record["nhs_number"])],
                 meta=Meta(
                     security=[
                         MetaSecurity(
-                            code=record["SENSITIVE_FLAG"],
-                            display=SensitiveMarkers[record["SENSITIVE_FLAG"]].value,
+                            code=record["sensitive_flag"],
+                            display=SensitiveMarkers[record["sensitive_flag"]].value,
                         )
                     ]
                 ),
-                gender=record["GENDER"],
+                gender=record["gender"],
                 name=[
                     Name(
                         id="124",
                         use="usual",
-                        given=[record["GIVEN_NAME"]],
-                        family=record["FAMILY_NAME"],
-                        prefix=[record["TITLE"]],
+                        given=[record["given_name"]],
+                        family=record["family_name"],
+                        prefix=[record["title"]],
                     )
                 ],
-                birthDate=record["DATE_OF_BIRTH"],
-                deceasedDateTime=record["DATE_OF_DEATH"],
+                birthDate=record["date_of_birth"],
+                deceasedDateTime=record["date_of_death"],
                 generalPractitioner=[
                     GP(
                         identifier=Identifier(
                             system="https://fhir.nhs.uk/Id/ods-organization-code",
-                            value=record["PRIMARY_CARE_CODE"],
+                            value=record["primary_care_code"],
                             period=Period(),
                         )
                     )
@@ -153,13 +127,13 @@ def filter_unrestricted_patients(record):
                     Address(
                         id="456",
                         line=[
-                            record["ADDRESS_LINE_1"],
-                            record["ADDRESS_LINE_2"],
-                            record["ADDRESS_LINE_3"],
-                            record["ADDRESS_LINE_4"],
-                            record["ADDRESS_LINE_5"],
+                            record["address_line_1"],
+                            record["address_line_2"],
+                            record["address_line_3"],
+                            record["address_line_4"],
+                            record["address_line_5"],
                         ],
-                        postalCode=record["POST_CODE"],
+                        postalCode=record["post_code"],
                     )
                 ],
             ),

@@ -3,9 +3,9 @@
 build/*
 
 # Terraform
-terraform_outputs_*.json
-packages_layer/
-dependencies_layer/
+build/terraform_outputs_*.json
+build/packages_layer/
+build/dependencies_layer/
 
 # Large file types
 *.zip
@@ -22,7 +22,7 @@ test/integrationtests/logs
 test/integrationtests/reports
 
 # Test Data
-test/data/generator/tmp/*
+test/_data/generator/tmp/*
 
 ### direnv ###
 .direnv
