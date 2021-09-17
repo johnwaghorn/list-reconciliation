@@ -102,11 +102,11 @@ output "lr_24_lambda_arn" {
   value = module.lr_24_save_records_to_s3.lambda.arn
 }
 
-output "LR_25_lambda" {
+output "lr_25_lambda" {
   value = module.lr_25_mesh_post_office.lambda.function_name
 }
 
-output "LR_25_lambda_arn" {
+output "lr_25_lambda_arn" {
   value = module.lr_25_mesh_post_office.lambda.arn
 }
 

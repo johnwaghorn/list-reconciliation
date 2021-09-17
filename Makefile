@@ -99,10 +99,10 @@ workspace-delete:
 	terraform -chdir=./terraform/stacks/${stack} workspace delete ${env}
 
 plan:
-	terraform -chdir=./terraform/stacks/${stack} plan -lock-timeout=30m
+	terraform -chdir=./terraform/stacks/${stack} plan -lock-timeout=45m
 
 apply:
-	terraform -chdir=./terraform/stacks/${stack} apply -lock-timeout=30m -parallelism=30 -auto-approve
+	terraform -chdir=./terraform/stacks/${stack} apply -lock-timeout=45m -parallelism=30 -auto-approve
 	rm -f ./terraform_outputs_${stack}.json|| true
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json
 
@@ -113,7 +113,7 @@ output:
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json
 
 destroy:
-	terraform -chdir=./terraform/stacks/${stack} destroy -auto-approve
+	terraform -chdir=./terraform/stacks/${stack} destroy -lock-timeout=45m -auto-approve
 
 # Testing
 validate:

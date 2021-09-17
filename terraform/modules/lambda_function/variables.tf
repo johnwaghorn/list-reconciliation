@@ -160,7 +160,7 @@ variable "security_group_egresses_length" {
 
 variable "security_group_egresses" {
   description = "Security Group Egresses"
-  type        = list(object({ id = string, port = number }))
+  type        = list(object({ ids = list(string), port = number }))
   default     = []
 }
 

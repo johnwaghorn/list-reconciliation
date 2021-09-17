@@ -158,6 +158,12 @@ locals {
     prod    = false
   }
 
+  shared_vpc_name = {
+    default = "dev-vpc"
+    preprod = "preprod-vpc"
+    prod    = "prod-vpc"
+  }
+
   tags = {
     TagVersion         = "1"
     Programme          = "PCRM"

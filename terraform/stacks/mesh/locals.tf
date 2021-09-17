@@ -38,11 +38,11 @@ locals {
 
   tags = {
     TagVersion         = "1"
-    Programme          = "SpinePod5"
-    Project            = "ListReconciliationMesh"
+    Programme          = "PCRM"
+    Project            = "ListReconciliation"
     DataClassification = local.data_classification
     Environment        = local.environment
     ServiceCategory    = local.environment == "prod" ? "Silver" : "N/A"
-    Tool               = "terraform"
+    Tool               = "Terraform"
   }
 }

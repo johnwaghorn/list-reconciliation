@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "data")
 
 LR_01_BUCKET = get_terraform_output("lr_01_bucket")
-LR_25_LAMBDA_ARN = get_terraform_output("LR_25_lambda_arn")
+LR_25_LAMBDA_ARN = get_terraform_output("lr_25_lambda_arn")
 MESH_BUCKET = "list-rec-preprod-mesh"
 MESH_INBOUND = get_terraform_output("mesh_inbound")
 
