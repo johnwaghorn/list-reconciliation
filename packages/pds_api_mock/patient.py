@@ -3,7 +3,6 @@ from typing import Union
 
 import boto3
 from fastapi import FastAPI, Response, status
-from mangum import Mangum
 from pds_api_mock.errors import error_response_404, error_response_500
 from pds_api_mock.model import ErrorResponse, MockFHIRResponse
 from pds_api_mock.pds_data import (
@@ -22,7 +21,6 @@ sensitive_marker_filter_funcs = {
 }
 
 app = FastAPI(title="PDS API Mock", root_path="/")
-handler = Mangum(app)
 dynamodb = boto3.resource("dynamodb")
 
 

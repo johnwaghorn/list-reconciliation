@@ -16,7 +16,8 @@ locals {
   }
 
   pds_fhir_api_url = {
-    default = "https://sandbox.api.service.nhs.uk",
+    default = "https://${data.aws_api_gateway_rest_api.pds_api_mock[0].id}.execute-api.eu-west-2.amazonaws.com/api"
+    # default = "https://sandbox.api.service.nhs.uk",
     preprod = "https://int.api.service.nhs.uk"
     # prod    = ""
   }

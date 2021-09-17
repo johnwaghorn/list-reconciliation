@@ -2,6 +2,13 @@ locals {
   name                = "list-reconciliation-${local.environment}"
   environment         = lower(terraform.workspace)
   data_classification = local.environment == "prod" ? "5" : "1"
+
+  log_retention_in_days = {
+    default = 3
+    preprod = 14
+    prod    = 365
+  }
+
   tags = {
     TagVersion         = "1"
     Programme          = "PCRM"
