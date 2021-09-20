@@ -7,6 +7,10 @@ build/terraform_outputs_*.json
 build/packages_layer/
 build/dependencies_layer/
 
+# Test data
+*.csv
+*_GPR4*.*
+
 # Large file types
 *.zip
 *.gz
