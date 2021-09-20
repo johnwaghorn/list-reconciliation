@@ -1,4 +1,4 @@
-from pds_api_mock.main import handler
+from pds_api_mock.patient import handler
 
 
 def lambda_handler(event, context):

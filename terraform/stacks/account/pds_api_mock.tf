@@ -9,6 +9,14 @@ module "pds_api_mock" {
   vpc_subnet_ids               = module.vpc.intra_subnets
 }
 
+module "packages" {
+  source = "../../modules/lambda_layer"
+  count  = local.environment == "prod" ? 0 : 1
+
+  name       = "packages_layer_${local.environment}"
+  source_dir = "packages_layer"
+}
+
 module "pds_api_mock_dependencies_layer" {
   source = "../../modules/lambda_layer"
   count  = local.environment == "prod" ? 0 : 1
@@ -39,7 +47,7 @@ module "pds_api_mock_lambda" {
 
   dynamodb_read_write   = [module.pds_api_mock_table[0].table.arn]
   kms_read_write        = [module.kms["dynamodb"].key.arn]
-  lambda_layers         = [module.pds_api_mock_dependencies_layer[0].layer.arn]
+  lambda_layers         = [module.packages[0].layer.arn, module.pds_api_mock_dependencies_layer[0].layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 }
 

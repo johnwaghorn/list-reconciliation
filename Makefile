@@ -41,7 +41,7 @@ packages-layer:
 pds-api-mock-dependencies-layer:
 	rm -r ./build/pds_api_mock_dependencies_layer || true
 	mkdir -p ./build/pds_api_mock_dependencies_layer/python/
-	pip install --cache-dir .pip_cache --target ./build/pds_api_mock_dependencies_layer/python/ fastapi pydantic
+	pip install --cache-dir .pip_cache --target ./build/pds_api_mock_dependencies_layer/python/ fastapi mangum pydantic
 
 compress-packages:
 	tar czf ./build/dependencies_layer.tgz ./build/dependencies_layer/*

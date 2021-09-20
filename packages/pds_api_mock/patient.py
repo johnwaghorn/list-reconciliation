@@ -3,6 +3,7 @@ from typing import Union
 
 import boto3
 from fastapi import FastAPI, Response, status
+from mangum import Mangum
 from pds_api_mock.errors import error_response_404, error_response_500
 from pds_api_mock.model import ErrorResponse, MockFHIRResponse
 from pds_api_mock.pds_data import (
@@ -25,7 +26,7 @@ dynamodb = boto3.resource("dynamodb")
 
 
 @app.get(
-    "/patient/{nhs_number}",
+    "/personal-demographics/FHIR/R4/Patient/{nhs_number}",
     response_model=Union[MockFHIRResponse, ErrorResponse],
     response_model_exclude_none=True,
 )
@@ -60,3 +61,6 @@ def _filter_patient(patient_record) -> tuple[BaseModel, int]:
         return filter_func(patient_record)
 
     return error_response_500("Patient Sensitive Status unknown")
+
+
+handler = Mangum(app)

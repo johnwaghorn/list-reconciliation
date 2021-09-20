@@ -20,10 +20,15 @@ resource "aws_api_gateway_rest_api" "pds_api_mock" {
 # Policy build by the AWS API Gateway Console
 data "aws_iam_policy_document" "policy" {
   statement {
-    sid       = ""
-    effect    = "Deny"
-    resources = ["execute-api:/*/*/*"]
-    actions   = ["execute-api:Invoke"]
+    effect = "Deny"
+
+    actions = [
+      "execute-api:Invoke"
+    ]
+
+    resources = [
+      "*"
+    ]
 
     condition {
       test     = "StringNotEquals"
@@ -38,10 +43,15 @@ data "aws_iam_policy_document" "policy" {
   }
 
   statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["execute-api:/*/*/*"]
-    actions   = ["execute-api:Invoke"]
+    effect = "Allow"
+
+    actions = [
+      "execute-api:Invoke"
+    ]
+
+    resources = [
+      "*"
+    ]
 
     principals {
       type        = "*"
@@ -95,5 +105,6 @@ resource "aws_api_gateway_deployment" "pds_api_mock_deployment" {
   depends_on = [
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
+    aws_api_gateway_rest_api.pds_api_mock
   ]
 }

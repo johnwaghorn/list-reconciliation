@@ -97,7 +97,9 @@ class PDSAPI:
         self.pds_base_url = system_config["PDS_BASE_URL"]
         self.pds_url = f"{self.pds_base_url}/{PDS_URL_PATH}/Patient"
         self.pds_token_url = f"{self.pds_base_url}/{PDS_TOKEN_URL_PATH}"
-        self.auth_required = "sandbox" not in self.pds_url
+        self.auth_required = (
+            "sandbox" not in self.pds_base_url and "amazonaws" not in self.pds_base_url
+        )
         self.ssm_params = get_ssm_params(self.ssm_store_path, self.region)
 
     def get_access_token(self):
@@ -106,7 +108,6 @@ class PDSAPI:
 
         Return: Bearer Token
         """
-
         try:
             if self._is_token_invalid():
                 claims = {

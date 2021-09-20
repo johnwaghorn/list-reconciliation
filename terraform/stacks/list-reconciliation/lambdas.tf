@@ -108,12 +108,13 @@ module "lr_07_pds_hydrate" {
     { id = data.aws_vpc_endpoint.s3.prefix_list_id, port = 443 },
     { id = data.aws_vpc_endpoint.dynamodb.prefix_list_id, port = 443 }
   ]
-  security_group_egresses_length = 4
+  security_group_egresses_length = 5
   security_group_egresses = [
     { ids = data.aws_vpc_endpoint.cloudwatch.security_group_ids, port = 443 },
     { ids = data.aws_vpc_endpoint.kms.security_group_ids, port = 443 },
     { ids = data.aws_vpc_endpoint.ssm.security_group_ids, port = 443 },
     { ids = data.aws_vpc_endpoint.lambda.security_group_ids, port = 443 },
+    { ids = [data.aws_security_group.pds_api_mock[0].id], port = 443 },
   ]
 
   dynamodb_read_write            = [module.lr_30_demographics.table.arn]
@@ -265,11 +266,12 @@ module "lr_12_pds_registration_status" {
     { id = data.aws_vpc_endpoint.s3.prefix_list_id, port = 443 },
     { id = data.aws_vpc_endpoint.dynamodb.prefix_list_id, port = 443 }
   ]
-  security_group_egresses_length = 3
+  security_group_egresses_length = 4
   security_group_egresses = [
     { ids = data.aws_vpc_endpoint.cloudwatch.security_group_ids, port = 443 },
     { ids = data.aws_vpc_endpoint.kms.security_group_ids, port = 443 },
     { ids = data.aws_vpc_endpoint.ssm.security_group_ids, port = 443 },
+    { ids = [data.aws_security_group.pds_api_mock[0].id], port = 443 },
   ]
 
   dynamodb_read_write = [

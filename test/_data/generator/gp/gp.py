@@ -8,8 +8,8 @@ from faker.providers import BaseProvider
 GENDER = {
     "Male": "1",
     "Female": "2",
-    "Not known": "3",
-    "Indeterminate": "3",
+    "Not known": "0",
+    "Indeterminate": "0",
     "Not Specified": "9",
 }
 
@@ -58,14 +58,14 @@ class RecordPartOne:
             self.export_time,
             self.transaction_id,
             self.nhs_number,
-            self.family_name,
-            self.given_name,
-            self.other_given_name,
+            self.family_name.upper(),
+            self.given_name.upper(),
+            self.other_given_name.upper(),
             self.title,
             GENDER[self.gender],
             self.date_of_birth,
-            self.address_line_1,
-            self.address_line_2,
+            self.address_line_1.upper(),
+            self.address_line_2.upper(),
         ]
 
 
@@ -87,9 +87,9 @@ class RecordPartTwo:
         return [
             self.record_identifier,
             self.record_part,
-            self.address_line_3,
-            self.address_line_4,
-            self.address_line_5,
+            self.address_line_3.upper(),
+            self.address_line_4.upper(),
+            self.address_line_5.upper(),
             self.post_code,
             DRUGS_DISPENSED_MARKER[self.drugs_dispensed_marker],
             self.rpp_mileage,

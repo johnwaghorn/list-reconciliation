@@ -690,7 +690,6 @@ given_name = [
     "NIKOLE",
 ]
 
-
 family_name = [
     "AINDOW",
     "CHISLETT",
