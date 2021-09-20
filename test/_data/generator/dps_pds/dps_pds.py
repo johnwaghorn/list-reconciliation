@@ -28,3 +28,5 @@ def create_patient():
     fake.add_provider(GPPractice)
     fake.add_provider(DispensingFlag)
     return [fake.nhs_number(), fake.gp_practice(), fake.dispensing_flag()]
+
+def split_from_pds():
