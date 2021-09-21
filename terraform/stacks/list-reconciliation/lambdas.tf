@@ -283,6 +283,7 @@ module "lr_12_pds_registration_status" {
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn, module.lr_22_pds_reg_output.bucket.arn]
+  timeout               = 15 * 60 # 15 minutes
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/pds/*"]
   ssm_read_write        = [module.pds_api_access_token.parameter.arn]
   environment_variables = {
@@ -382,6 +383,7 @@ module "lr_15_process_demo_diffs" {
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   s3_read_write         = [module.lr_13_reg_diffs_output.bucket.arn, module.mesh_bucket.bucket.arn]
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/mesh/*"]
+  timeout               = 15 * 60 # 15 minutes
   environment_variables = {
     DEMOGRAPHICS_DIFFERENCES_TABLE    = module.lr_31_demographics_differences.table.name
     DEMOGRAPHICS_TABLE                = module.lr_30_demographics.table.name
