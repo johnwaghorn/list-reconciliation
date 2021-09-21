@@ -1,6 +1,6 @@
 # List Reconciliation E2E PreProd Scenarios
 
-tags: preprod
+tags: preprod, disabled
 
 * Empty all buckets
 * Empty all database tables

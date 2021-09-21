@@ -1,6 +1,6 @@
 # List Reconciliation E2E Scenarios
 
-tags: e2e
+tags: e2e, disabled
 
 * Empty all buckets
 * Empty all database tables

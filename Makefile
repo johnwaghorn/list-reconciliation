@@ -137,10 +137,10 @@ fmt-check:
 
 # Running
 integrationtests:
-	gauge run --verbose --tags "!wip,e2e" ./test/integrationtests/specs
+	gauge run --verbose --tags "!disabled,!wip,e2e" ./test/integrationtests/specs
 
 integrationtests-preprod:
-	gauge run --verbose --tags "!wip,preprod" ./test/integrationtests/specs
+	gauge run --verbose --tags "!disabled,!wip,preprod" ./test/integrationtests/specs
 
 # TODO rename this and replace above once migrated
 behave-integration-tests:
