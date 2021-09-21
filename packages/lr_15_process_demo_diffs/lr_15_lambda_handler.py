@@ -374,7 +374,7 @@ class DemographicDifferences(LambdaApplication):
         )
 
         response.update(
-            work_items=out_files,
+            work_items_count=len(out_files),
             summary=f"s3://{self.lr13_bucket}/{csv_key}",
         )
 

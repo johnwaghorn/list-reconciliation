@@ -139,9 +139,7 @@ def test_process_demographic_differences(
     expected_response = {
         "status": "success",
         "message": f"LR15 Lambda application stopped for jobId='{JOBID}'",
-        "work_items": [
-            f"s3://{MESH_BUCKET}/outbound_X26OT178TEST_to_INTERNALSPINE/Y123452-WIP-7b207bdb-2937-4e17-a1a9-57a2bbf3e358-1234567890-20200406134000.json"
-        ],
+        "work_items_count": 1,
         "summary": f"s3://{LR_13_REGISTRATIONS_OUTPUT_BUCKET}/7b207bdb-2937-4e17-a1a9-57a2bbf3e358/Y123452-CDD-20200406134000.csv",
         "internal_id": JOBID,
     }
