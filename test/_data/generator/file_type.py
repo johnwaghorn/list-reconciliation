@@ -60,7 +60,8 @@ class DPSPDSData(FileType):
             data.writerow(["nhs_number", "gp_practice", "dispensing_flag"])
 
             for _ in range(row_count):
-                data.writerow(self._create_row())
+                record = dps_pds.Record().get()
+                data.writerow(record)
 
         # compress with gzip
         with open(file, "rb") as csvfile:
@@ -73,89 +74,64 @@ class DPSPDSData(FileType):
         # return filepath of gzipped file
         return output
 
-    # TODO: **************************** THIS ********************************
     def split_from_pds(
         self,
         pds_filename,
+        not_on_pds_differences_count=0,
+        demographic_differences_count=0,
     ):
-        filename = dps_pds.create_filename(row_count)
-        file = os.path.join(TEMP_DIR, filename)
-        output = f"{file}.gz"
-
-        # create csv of given size
-        with open(file, "w", newline="") as csvfile:
-            data = csv.writer(csvfile)
-            data.writerow(["nhs_number", "gp_practice", "dispensing_flag"])
-
-            for _ in range(row_count):
-                data.writerow(self._create_row())
-
-        # compress with gzip
-        with open(file, "rb") as csvfile:
-            with gzip.open(output, "wb") as f_out:
-                shutil.copyfileobj(csvfile, f_out)
-
-        # delete uncompressed file
-        os.remove(file)
-
-        # return filepath of gzipped file
-        return output
-
-        ha_cipher = "LNA"  # TODO [A-Z0-9]{3}
-        valid_date = gp.generate_valid_date()
-        file_letter = "A"  # this is the multi-file identifier, which is not currently supported in List Rec
-
-        filename = gp.create_filename(
-            gp_practice_code, ha_cipher, valid_date, file_letter
-        )
+        filename = dps_pds.create_filename("from_pds_data")
         file = os.path.join(TEMP_DIR, filename)
 
         pds_file = open(pds_filename)
-        gp_file = open(file, "w")
+        pds_dps_file = open(file, "w")
 
-        data = csv.writer(gp_file, delimiter="~", quoting=csv.QUOTE_NONE)
-        data.writerow([r"503\*"])
+        data = csv.writer(pds_dps_file)
+        # TODO get headers from Record
+        data.writerow(["nhs_number", "gp_practice", "dispensing_flag"])
 
         pds_file_reader = csv.reader(pds_file)
 
         for patient in pds_file_reader:
-            if patient[15] != gp_practice_code:
+            if patient[0] == "NHS_NUMBER":
                 continue
 
-            first, second = gp.create_record(
-                ha_cipher=ha_cipher,
+            record = dps_pds.Record(
                 nhs_number=patient[0],
-                family_name=patient[3],
-                given_name=patient[4],
-                other_given_name=patient[5],
-                title=patient[6],
-                gender=patient[7],
-                date_of_birth=patient[1],
-                address_line_1=patient[8],
-                address_line_2=patient[9],
-                address_line_3=patient[10],
-                address_line_4=patient[11],
-                address_line_5=patient[12],
-                post_code=patient[17],
-                drugs_dispensed_marker=patient[18],
-            )
-            data.writerow(first)
-            data.writerow(second)
+                gp_practice=patient[15],
+                dispensing_flag=patient[18],
+            ).get()
+            data.writerow(record)
 
         pds_file.close()
 
-        # remove X number of rows from gp_file to create notInGP differences
-        self._create_not_on_gp_differences(gp_file, not_on_gp_differences_count)
         # create X number of new rows, via the PDS Generator, to create notInPDS differences
-        self._create_not_on_pds_differences(gp_file, not_on_pds_differences_count)
-        # mutate X number of rows, changing names/addresses/gender etc, to create demographic differences
-        self._create_demographic_differences(gp_file, demographic_differences_count)
+        self._create_not_on_pds_differences(pds_dps_file, not_on_pds_differences_count)
+        # mutate X number of rows, changing dispensing_flag, to create demographic differences
+        self._create_demographic_differences(
+            pds_dps_file, demographic_differences_count
+        )
 
-        gp_file.close()
+        pds_dps_file.close()
 
-        print(f"created file {file}")
+        # compress with gzip
+        output = f"{file}.gz"
+        with open(file, "rb") as csvfile:
+            with gzip.open(output, "wb") as f_out:
+                shutil.copyfileobj(csvfile, f_out)
 
-        return file
+        # delete uncompressed file
+        os.remove(file)
+
+        # return filepath of gzipped file
+        print(f"created file {output}")
+        return output
+
+    def _create_not_on_pds_differences(self, file, count):
+        print(f"Creating {count} Not on PDS Differences in {file.name}")
+
+    def _create_demographic_differences(self, file, count):
+        print(f"Creating {count} Demographic Differences in {file.name}")
 
 
 class GPData(FileType):
@@ -179,9 +155,9 @@ class GPData(FileType):
             # Write "header" row
             data.writerow([r"503\*"])
             for _ in range(row_count):
-                first, second = gp.create_record()
-                data.writerow(first)
-                data.writerow(second)
+                record = gp.Record().get()
+                data.writerow(record[:16])
+                data.writerow(record[16:])
 
         return file
 
@@ -214,7 +190,7 @@ class GPData(FileType):
             if patient[15] != gp_practice_code:
                 continue
 
-            first, second = gp.create_record(
+            record = gp.Record(
                 ha_cipher=ha_cipher,
                 nhs_number=patient[0],
                 family_name=patient[3],
@@ -230,9 +206,9 @@ class GPData(FileType):
                 address_line_5=patient[12],
                 post_code=patient[17],
                 drugs_dispensed_marker=patient[18],
-            )
-            data.writerow(first)
-            data.writerow(second)
+            ).get()
+            data.writerow(record[:16])
+            data.writerow(record[16:])
 
         pds_file.close()
 

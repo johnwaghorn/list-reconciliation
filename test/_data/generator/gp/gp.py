@@ -5,16 +5,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 from faker.providers import BaseProvider
 
-GENDER = {
-    "Male": "1",
-    "Female": "2",
-    "Not known": "0",
-    "Indeterminate": "0",
-    "Not Specified": "9",
-}
-
-DRUGS_DISPENSED_MARKER = {"1": "Y", "0": "N"}
-
 
 class GP(BaseProvider):
     def transaction_id(self):
@@ -22,22 +12,22 @@ class GP(BaseProvider):
 
     def patient_gender(self):
         return str(self.random_element([1, 2, 3, 3, 9]))
-        # return self.random_element({"Male": 1, "Female": 2, "Not known": 3, "Indeterminate": 3, "Not Specified": 9})
 
 
 fake = Faker()
+Faker.seed(0)
 fake.add_provider(GP)
 
 
 @dataclass
-class RecordPartOne:
-    record_identifier: str = "DOW"
-    record_part: str = "1"
+class Record:
+    record_identifier_1: str = "DOW"
+    record_part_1: str = "1"
     gp_practice_codes: str = "1111111,1234"
     ha_cipher: str = "LNA"
     export_date: str = "20210919"  # TODO always be yesterday?
     export_time: str = "1500"
-    transaction_id: str = ""
+    transaction_id: str = fake.unique.transaction_id()
     nhs_number: str = ""
     family_name: str = ""
     given_name: str = ""
@@ -47,32 +37,8 @@ class RecordPartOne:
     date_of_birth: str = ""
     address_line_1: str = ""
     address_line_2: str = ""
-
-    def get_formatted_record(self) -> list[str]:
-        return [
-            self.record_identifier,
-            self.record_part,
-            self.gp_practice_codes,
-            self.ha_cipher,
-            self.export_date,
-            self.export_time,
-            self.transaction_id,
-            self.nhs_number,
-            self.family_name.upper(),
-            self.given_name.upper(),
-            self.other_given_name.upper(),
-            self.title,
-            GENDER[self.gender],
-            self.date_of_birth,
-            self.address_line_1.upper(),
-            self.address_line_2.upper(),
-        ]
-
-
-@dataclass
-class RecordPartTwo:
-    record_identifier: str = "DOW"
-    record_part: str = "2"
+    record_identifier_2: str = "DOW"
+    record_part_2: str = "2"
     address_line_3: str = ""
     address_line_4: str = ""
     address_line_5: str = ""
@@ -83,15 +49,40 @@ class RecordPartTwo:
     walking_units: str = ""
     residential_institute_code: str = ""
 
-    def get_formatted_record(self) -> list[str]:
+    GENDER = {
+        "Male": "1",
+        "Female": "2",
+        "Not known": "0",
+        "Indeterminate": "0",
+        "Not Specified": "9",
+    }
+    DRUGS_DISPENSED_MARKER = {"1": "Y", "0": "N"}
+
+    def get(self):
         return [
-            self.record_identifier,
-            self.record_part,
+            self.record_identifier_1,
+            self.record_part_1,
+            self.gp_practice_codes,
+            self.ha_cipher,
+            self.export_date,
+            self.export_time,
+            self.transaction_id,
+            self.nhs_number,
+            self.family_name.upper(),
+            self.given_name.upper(),
+            self.other_given_name.upper(),
+            self.title,
+            self.GENDER[self.gender],
+            self.date_of_birth,
+            self.address_line_1.upper(),
+            self.address_line_2.upper(),
+            self.record_identifier_2,
+            self.record_part_2,
             self.address_line_3.upper(),
             self.address_line_4.upper(),
             self.address_line_5.upper(),
             self.post_code,
-            DRUGS_DISPENSED_MARKER[self.drugs_dispensed_marker],
+            self.DRUGS_DISPENSED_MARKER[self.drugs_dispensed_marker],
             self.rpp_mileage,
             self.special_district_marker,
             self.walking_units,
@@ -110,82 +101,3 @@ def create_filename(gp_code, ha_cipher, valid_date, file_letter):
     months = "ABCDEFGHIJKL"
     days = "123456789ABCDEFGHIJKLMNOPQRSTUV"
     return f"{gp_code}_GPR4{ha_cipher}1.{months[valid_date.month-1]}{days[valid_date.day-1]}{file_letter}"
-
-
-def create_record(
-    ha_cipher=None,
-    nhs_number=None,
-    family_name=None,
-    given_name=None,
-    other_given_name=None,
-    title=None,
-    gender=None,
-    date_of_birth=None,
-    address_line_1=None,
-    address_line_2=None,
-    address_line_3=None,
-    address_line_4=None,
-    address_line_5=None,
-    post_code=None,
-    drugs_dispensed_marker=None,
-):
-    return (
-        _record_first_part(
-            ha_cipher=ha_cipher,
-            nhs_number=nhs_number,
-            family_name=family_name,
-            given_name=given_name,
-            other_given_name=other_given_name,
-            title=title,
-            gender=gender,
-            date_of_birth=date_of_birth,
-            address_line_1=address_line_1,
-            address_line_2=address_line_2,
-        ),
-        _record_second_part(
-            address_line_3=address_line_3,
-            address_line_4=address_line_4,
-            address_line_5=address_line_5,
-            post_code=post_code,
-            drugs_dispensed_marker=drugs_dispensed_marker,
-        ),
-    )
-
-
-def _record_first_part(
-    ha_cipher,
-    nhs_number,
-    family_name,
-    given_name,
-    other_given_name,
-    title,
-    gender,
-    date_of_birth,
-    address_line_1,
-    address_line_2,
-) -> list[str]:
-    return RecordPartOne(
-        ha_cipher=ha_cipher,
-        transaction_id=fake.unique.transaction_id(),
-        nhs_number=nhs_number,
-        family_name=family_name,
-        given_name=given_name,
-        other_given_name=other_given_name,
-        title=title,
-        gender=gender,
-        date_of_birth=date_of_birth,
-        address_line_1=address_line_1,
-        address_line_2=address_line_2,
-    ).get_formatted_record()
-
-
-def _record_second_part(
-    address_line_3, address_line_4, address_line_5, post_code, drugs_dispensed_marker
-) -> list[str]:
-    return RecordPartTwo(
-        address_line_3=address_line_3,
-        address_line_4=address_line_4,
-        address_line_5=address_line_5,
-        post_code=post_code,
-        drugs_dispensed_marker=drugs_dispensed_marker,
-    ).get_formatted_record()

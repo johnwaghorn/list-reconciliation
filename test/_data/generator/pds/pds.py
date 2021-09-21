@@ -99,10 +99,6 @@ fake.add_provider(date_time)
 fake.add_provider(PDS)
 
 
-def create_filename(row_count):
-    return f"pds_data_{row_count}.csv"
-
-
 def create_patient():
     return {
         "NHS_NUMBER": fake.unique.nhs_number(),
@@ -125,3 +121,7 @@ def create_patient():
         "POST_CODE": fake.post_code(),
         "DISPENSING_FLAG": fake.dispensing_flag(),
     }
+
+
+def create_filename(row_count):
+    return f"pds_data_{row_count}.csv"

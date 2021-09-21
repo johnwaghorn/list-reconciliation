@@ -1,7 +1,6 @@
 import os
 
-from file_type import GPData
-from generator.file_type import DPSPDSData
+from file_type import DPSPDSData, GPData
 from storage import LocalStorage
 
 

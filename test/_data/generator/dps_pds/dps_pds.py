@@ -1,32 +1,39 @@
+from dataclasses import dataclass
+
 import dps_pds.gp_practices
 from faker import Faker
 from faker.providers import BaseProvider
 
 
-class NHSNumber(BaseProvider):
+class DPSPDS(BaseProvider):
     def nhs_number(self):
         return self.random_number(digits=10, fix_len=True)
 
-
-class GPPractice(BaseProvider):
     def gp_practice(self):
         return self.random_element(dps_pds.gp_practices.ref)
 
-
-class DispensingFlag(BaseProvider):
     def dispensing_flag(self):
         return self.random_element([0, 1])
 
 
-def create_filename(row_count):
-    return f"dps_pds_data_{row_count}.csv"
+fake = Faker()
+Faker.seed(0)
+fake.add_provider(DPSPDS)
 
 
-def create_patient():
-    fake = Faker()
-    fake.add_provider(NHSNumber)
-    fake.add_provider(GPPractice)
-    fake.add_provider(DispensingFlag)
-    return [fake.nhs_number(), fake.gp_practice(), fake.dispensing_flag()]
+@dataclass
+class Record:
+    nhs_number: str = fake.nhs_number()
+    gp_practice: str = fake.gp_practice()
+    dispensing_flag: str = fake.dispensing_flag()
 
-def split_from_pds():
+    def get(self):
+        return [
+            self.nhs_number,
+            self.gp_practice,
+            self.dispensing_flag,
+        ]
+
+
+def create_filename(name):
+    return f"dps_pds_data_{name}.csv"

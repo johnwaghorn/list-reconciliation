@@ -1,3 +1,3 @@
-from gp.gp import create_filename, create_record, generate_valid_date
+from gp.gp import Record, create_filename, generate_valid_date
 
-__all__ = ["create_filename", "generate_valid_date", "create_record"]
+__all__ = ["create_filename", "generate_valid_date", "Record"]
