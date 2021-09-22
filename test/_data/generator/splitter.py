@@ -1,6 +1,7 @@
 import os
 
-from file_type import DPSPDSData, GPData
+from dps_pds import DPSPDSData
+from gp import GPData
 from storage import LocalStorage
 
 

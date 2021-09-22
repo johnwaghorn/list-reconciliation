@@ -1,22 +1,11 @@
-import random
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 from faker import Faker
-from faker.providers import BaseProvider
-
-
-class GP(BaseProvider):
-    def transaction_id(self):
-        return str(self.random_number(digits=6, fix_len=True))
-
-    def patient_gender(self):
-        return str(self.random_element([1, 2, 3, 3, 9]))
-
+from gp.faker import GPProvider
 
 fake = Faker()
 Faker.seed(0)
-fake.add_provider(GP)
+fake.add_provider(GPProvider)
 
 
 @dataclass
@@ -88,16 +77,3 @@ class Record:
             self.walking_units,
             self.residential_institute_code,
         ]
-
-
-def generate_valid_date():
-    random_day = random.randint(1, 14)
-    now = datetime.now()
-    days_ago = now - timedelta(days=random_day)
-    return days_ago
-
-
-def create_filename(gp_code, ha_cipher, valid_date, file_letter):
-    months = "ABCDEFGHIJKL"
-    days = "123456789ABCDEFGHIJKLMNOPQRSTUV"
-    return f"{gp_code}_GPR4{ha_cipher}1.{months[valid_date.month-1]}{days[valid_date.day-1]}{file_letter}"

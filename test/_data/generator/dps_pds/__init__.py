@@ -1,6 +1,3 @@
-from dps_pds.dps_pds import Record, create_filename
+from dps_pds.data import DPSPDSData
 
-__all__ = [
-    "create_filename",
-    "Record",
-]
+__all__ = ["DPSPDSData"]

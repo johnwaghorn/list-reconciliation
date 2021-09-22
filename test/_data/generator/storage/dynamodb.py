@@ -1,55 +1,10 @@
 import csv
 import os
-from abc import ABC, abstractmethod
 
 import boto3
 
-# TODO put somewhere better
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-
-class Storage(ABC):
-    """Abstract Storage Class"""
-
-    @abstractmethod
-    def list():
-        """list stored data"""
-
-    @abstractmethod
-    def store(tmp_file):
-        """store a tmp_file"""
-
-    @abstractmethod
-    def retrieve(data):
-        """retrive data"""
-
-
-class LocalStorage(Storage):
-    def list(self):
-        pass
-
-    def store(self, tmp_file):
-        name = os.path.basename(tmp_file)
-        os.rename(tmp_file, os.path.join(OUTPUT_DIR, name))
-
-    def retrieve(self, file):
-        pass
-
-
-class S3Storage(Storage):
-    def list(self):
-        pass
-
-    def store(self, tmp_file):
-        # upload to S3
-        # delete tmp file
-        pass
-
-    def retrieve(self, data):
-        pass
-
-
-class DynamoDBStorage(Storage):
+class DynamoDBStorage:
     def list(self):
         pass
 

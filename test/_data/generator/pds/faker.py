@@ -121,7 +121,3 @@ def create_patient():
         "POST_CODE": fake.post_code(),
         "DISPENSING_FLAG": fake.dispensing_flag(),
     }
-
-
-def create_filename(row_count):
-    return f"pds_data_{row_count}.csv"
