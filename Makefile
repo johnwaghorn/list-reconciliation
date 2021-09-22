@@ -137,14 +137,7 @@ fmt-check:
 
 # Running
 integrationtests:
-	gauge run --verbose --tags "!disabled,!wip,e2e" ./test/integrationtests/specs
-
-integrationtests-preprod:
-	gauge run --verbose --tags "!disabled,!wip,preprod" ./test/integrationtests/specs
-
-# TODO rename this and replace above once migrated
-behave-integration-tests:
-	behave ./test/integration
+	behave --junit --junit-directory ./build/behave ./test/integration
 
 #
 # Security

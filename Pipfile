@@ -27,7 +27,6 @@ faker = "*"
 fastapi= "==0.68.1"
 flake8 = "*"
 freezegun = "*"
-getgauge = "==0.3.17"
 isort = "*"
 listrec = {editable = true, path = "."}
 locust = "==2.2.3"

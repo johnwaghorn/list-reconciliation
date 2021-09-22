@@ -48,7 +48,7 @@ jobs:
         with:
           name: unit-test-report
           path: ./build/pytest/*
-          retention-days: 2
+          retention-days: 7
       - name: Create packages
         run: |
           make python-package
@@ -201,27 +201,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-to-assume: "arn:aws:iam::092420156801:role/LRTerraformDeploy"
-          role-duration-seconds: 1200
-      - name: Get Gauge
-        uses: getgauge/setup-gauge@master
-        with:
-          gauge-plugins: python, screenshot, html-report, xml-report
+          role-duration-seconds: 1800
       - name: Run Integration tests
         run: |
-          # Ensure gpextract and mock_data install location is available to Gauge
-          export PATH=$PATH:/opt/github_runner/.local/bin
           pipenv run make integrationtests
       - name: Upload Integration tests result artifact
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: integration-test-report
-          path: ./test/integrationtests/reports/html-report/*
-          retention-days: 2
-      - name: Upload Integration tests logs artifact
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: integration-test-logs
-          path: ./test/integrationtests/logs/*
-          retention-days: 2
+          path: ./build/behave/*
+          retention-days: 7
