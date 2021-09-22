@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from database.models import Jobs
+from database import Jobs
 from jobs.jobs import JobNotFound, get_job
 from moto import mock_dynamodb2
 

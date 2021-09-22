@@ -4,7 +4,7 @@ from io import StringIO
 
 import boto3
 import pytest
-from database.models import JobStats
+from database import JobStats
 from freezegun import freeze_time
 from jobs.jobs import JobNotFound
 

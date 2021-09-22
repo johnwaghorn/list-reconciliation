@@ -6,7 +6,7 @@ from typing import Any
 
 import boto3
 from aws.ssm import get_ssm_params
-from database.models import Demographics, DemographicsDifferences, Jobs, JobStats
+from database import Demographics, DemographicsDifferences, Jobs, JobStats
 from jobs.jobs import get_job
 from jobs.statuses import JobStatus
 from lr_csv.csv import write_to_mem_csv

@@ -4,7 +4,7 @@ from datetime import datetime
 
 import boto3
 import pytest
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from freezegun import freeze_time
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

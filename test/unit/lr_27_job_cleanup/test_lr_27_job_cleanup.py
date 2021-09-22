@@ -1,5 +1,5 @@
 import pytest
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from jobs.statuses import JobStatus
 
 from .conftest import JOB_ID, MOCK_REGISTRATIONS_OUTPUT_BUCKET

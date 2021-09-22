@@ -2,7 +2,7 @@ import os
 
 import boto3
 import pytest
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from dateutil.parser import parse
 from jobs.statuses import JobStatus
 from lr_27_job_cleanup.lr_27_lambda_handler import JobCleanup

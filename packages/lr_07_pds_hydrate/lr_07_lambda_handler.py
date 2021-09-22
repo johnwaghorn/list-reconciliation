@@ -2,7 +2,7 @@ import json
 import traceback
 
 import boto3
-from database.models import Demographics
+from database import Demographics
 from gp_file_parser.utils import empty_string
 from lr_logging import Message, error, get_cloudlogbase_config, success
 from lr_retry import retry_func

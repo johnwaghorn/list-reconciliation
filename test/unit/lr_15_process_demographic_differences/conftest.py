@@ -4,7 +4,7 @@ from datetime import datetime
 
 import boto3
 import pytest
-from database.models import Demographics, DemographicsDifferences, Jobs, JobStats
+from database import Demographics, DemographicsDifferences, Jobs, JobStats
 from lr_15_process_demo_diffs.lr_15_lambda_handler import DemographicDifferences
 from moto import mock_dynamodb2, mock_s3, mock_ssm
 

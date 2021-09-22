@@ -1,7 +1,7 @@
 import traceback
 
 import boto3
-from database.models import Demographics, JobStats
+from database import Demographics, JobStats
 from jobs import RegistrationType, get_job
 from lr_csv.csv import write_to_mem_csv
 from lr_logging import get_cloudlogbase_config

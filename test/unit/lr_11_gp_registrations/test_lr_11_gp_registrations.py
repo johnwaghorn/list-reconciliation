@@ -3,7 +3,7 @@ import os
 from io import StringIO
 
 import boto3
-from database.models import JobStats
+from database import JobStats
 from freezegun import freeze_time
 
 AWS_REGION = os.getenv("AWS_REGION")

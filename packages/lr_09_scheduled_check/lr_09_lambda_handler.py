@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import boto3
 import pytz
-from database.models import Demographics, InFlight, Jobs, JobStats
+from database import Demographics, InFlight, Jobs, JobStats
 from jobs.statuses import JobStatus
 from lr_logging import Message, error, get_cloudlogbase_config, success
 from spine_aws_common.lambda_application import LambdaApplication

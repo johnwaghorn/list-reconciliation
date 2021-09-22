@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import boto3
 import pytest
-from database.models import Demographics, InFlight, Jobs, JobStats
+from database import Demographics, InFlight, Jobs, JobStats
 from dateutil.parser import parse
 from lr_09_scheduled_check.lr_09_lambda_handler import ScheduledCheck
 from moto import mock_dynamodb2, mock_stepfunctions

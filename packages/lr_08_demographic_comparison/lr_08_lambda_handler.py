@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import listrec_comparison_engine
 from comparison_engine.core import compare_records
-from database.models import Demographics, DemographicsDifferences
+from database import Demographics, DemographicsDifferences
 from lr_logging import get_cloudlogbase_config
 from lr_logging.responses import Message, error, success
 from registration import GPRegistrationStatus

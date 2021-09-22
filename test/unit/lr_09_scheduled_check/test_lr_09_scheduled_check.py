@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 import pytest
-from database.models import InFlight, Jobs, JobStats
+from database import InFlight, Jobs, JobStats
 from jobs.statuses import JobStatus
 
 from .conftest import JOB_ID

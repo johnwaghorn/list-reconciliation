@@ -6,7 +6,7 @@ import boto3
 import nhs_mail_relay
 import pytz
 from aws.ssm import get_ssm_params
-from database.models import DemographicsDifferences, Jobs, JobStats
+from database import DemographicsDifferences, Jobs, JobStats
 from lr_logging import get_cloudlogbase_config
 from lr_logging.responses import Message, error, success
 from mesh import AWSMESHMailbox, get_mesh_mailboxes

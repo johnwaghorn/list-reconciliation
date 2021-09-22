@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from database.models import Demographics
+from database import Demographics
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")

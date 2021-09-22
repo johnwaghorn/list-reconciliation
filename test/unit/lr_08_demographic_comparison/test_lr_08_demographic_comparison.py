@@ -1,7 +1,7 @@
 import lr_08_demographic_comparison.lr_08_lambda_handler
 import pytest
 from comparison_engine.schema import ConfigurationError
-from database.models import Demographics, DemographicsDifferences
+from database import Demographics, DemographicsDifferences
 from lr_08_demographic_comparison.lr_08_lambda_handler import DemographicComparison
 from moto import mock_dynamodb2
 

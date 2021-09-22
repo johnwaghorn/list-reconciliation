@@ -5,7 +5,7 @@ import zipfile
 
 import boto3
 import pytest
-from database.models import Demographics
+from database import Demographics
 from lr_07_pds_hydrate.lr_07_lambda_handler import PdsHydrate
 from moto import mock_dynamodb2, mock_iam, mock_lambda, mock_s3
 

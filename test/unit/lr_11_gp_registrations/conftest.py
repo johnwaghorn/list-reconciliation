@@ -3,7 +3,7 @@ from datetime import datetime
 
 import boto3
 import pytest
-from database.models import Demographics, Jobs, JobStats
+from database import Demographics, Jobs, JobStats
 from lr_11_gp_registration_status.lr_11_lambda_handler import GPRegistrations
 from moto import mock_dynamodb2, mock_s3
 

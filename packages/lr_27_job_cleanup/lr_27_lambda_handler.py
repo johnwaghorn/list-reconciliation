@@ -1,7 +1,7 @@
 import traceback
 
 import boto3
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from jobs.statuses import JobStatus
 from lr_logging.responses import Message, error, success
 from spine_aws_common.lambda_application import LambdaApplication

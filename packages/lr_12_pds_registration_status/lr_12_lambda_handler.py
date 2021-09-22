@@ -5,7 +5,7 @@ from datetime import datetime
 
 import boto3
 import botocore
-from database.models import Demographics, JobStats
+from database import Demographics, JobStats
 from jobs import RegistrationType, get_job
 from lr_csv.csv import write_to_mem_csv
 from lr_logging import Message, error, get_cloudlogbase_config, success

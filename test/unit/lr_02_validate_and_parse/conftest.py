@@ -5,7 +5,7 @@ import zipfile
 
 import boto3
 import pytest
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from lr_02_validate_and_parse.lr_02_lambda_handler import ValidateAndParse
 from moto import mock_dynamodb2, mock_iam, mock_lambda, mock_s3
 

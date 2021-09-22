@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import boto3
 from aws.split_records_to_s3 import split_records_to_s3
-from database.models import InFlight, Jobs
+from database import InFlight, Jobs
 from gp_file_parser.parser import parse_gp_extract_file_s3
 from jobs.statuses import InputFolderType, InvalidErrorType
 from lr_logging import get_cloudlogbase_config
