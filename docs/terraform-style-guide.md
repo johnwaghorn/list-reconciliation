@@ -16,11 +16,11 @@ As terraform is not platform agnostic and to be consistent with the rest of the 
 
 ## Terraform naming conventions
 
-* Names of AWS things have hypens in them, not underscores
-* Unless the service only allows `[A-Za-z0-9]` then use CamelCase naming
-* Names of terraform resources are lowercase and use underscores, not hypens
-* File names should be plurals (eg outputs.tf)
-* Don't use only the component ID (`LR-[0-9]*`) in code, use the full name
+- Names of AWS things have hypens in them, not underscores
+- Unless the service only allows `[A-Za-z0-9]` then use CamelCase naming
+- Names of terraform resources are lowercase and use underscores, not hypens
+- File names should be plurals (eg outputs.tf)
+- Don't use only the component ID (`LR-[0-9]*`) in code, use the full name
 
 ## Use top level variables for only things to dynamically change on each build
 

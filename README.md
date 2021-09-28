@@ -1,22 +1,44 @@
 # List Reconciliation
 
-Part of Primary Care Registration Management (PCRM)
+_Part of Primary Care Registration Management (PCRM)_
+
+The List Reconciliation Solution is intended to compare the patient list including the registration and demographic data to facilitate the correction of differences.
 
 ## Documentation
 
 ### Overview
 
-* [List Reconciliation Components](docs/list-reconciliation-components.md)
-* [Security](docs/security.md)
+- [List Reconciliation Components](docs/list-reconciliation-components.md)
+- [Glossary](docs/glossary.md)
+- [Security](docs/security.md)
+
+### Specifications
+
+- [Input Specification](docs/specifications/input-specification.md)
+- [Differences Specification](docs/specifications/differences-specification.md)
+- [Output Specification](docs/specifications/output-specification.md)
 
 ### Style Guides
 
-* [Terraform Style Guide](docs/terraform-style-guide.md)
-* [Python Style Guide](docs/python-style-guide.md)
+- [Terraform Style Guide](docs/terraform-style-guide.md)
+- [Python Style Guide](docs/python-style-guide.md)
+
+### Key Architectural Designs
+
+- [List Reconciliation v0.1](docs/kad/list-rec-v0.1.md)
+- [List Reconciliation v0.2](docs/kad/list-rec-v0.2.md)
+
+### Key Design Decisions
+
+- [Event Processing](docs/kdd/event-processing.md)
 
 ### Packages
 
-* [GP File Parser](packages/gp_file_parser/README.md)
+- [GP File Parser](packages/gp_file_parser/README.md)
+
+## Architecture Diagram
+
+![Architecture Diagram](docs/diagrams/ListReconciliation.png)
 
 ## Links
 
