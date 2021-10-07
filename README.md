@@ -38,7 +38,7 @@ The List Reconciliation Solution is intended to compare the patient list includi
 
 ## Architecture Diagram
 
-![Architecture Diagram](docs/diagrams/ListReconciliation.png)
+![Architecture Diagram](docs/diagrams/List_Reconciliation.png)
 
 ## Links
 

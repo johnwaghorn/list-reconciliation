@@ -53,6 +53,10 @@ Estimate: ~40 days / ~8 weeks
 - Still requires security remediation work and a Pen Test
 - APIGEE, which fronts the PDS API, per request resource usage and costings
 
+### Potential Architecture
+
+![Architecture Diagram](../diagrams/List_Reconciliation_v0.1.png)
+
 ## DPS Service
 
 ### Summary
@@ -128,7 +132,7 @@ Estimate: ~50 days / ~10 weeks
 
 ### Potential Architecture
 
-![Target Architecture Diagram](../diagrams/ListReconciliationTarget.png)
+![Architecture Diagram](../diagrams/List_Reconciliation_v0.2.png)
 
 ## Suggestion
 
