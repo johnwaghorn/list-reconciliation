@@ -4,17 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-boto3 = "==1.18.53"
+boto3 = "==1.18.62"
 cryptography = "==35.0.0"
 exchangelib = "==3.2.0"
 jsonpath-ng = "==1.5.3"
 PyJWT = "==2.1.0"
 pynamodb = "==5.1.0"
 python-dateutil = "==2.8.2"
-pytz = "==2021.1"
+pytz = "==2021.3"
 requests = "==2.26.0"
 retrying = "==1.3.3"
-spine-aws-common = {file = "https://github.com/NHSDigital/spine-core-aws-common/releases/download/v0.1.1/spine_aws_common-0.1.1-py3-none-any.whl"}
+spine-aws-common = "==0.1.2"
 tzlocal = "==2.1"
 
 [dev-packages]
