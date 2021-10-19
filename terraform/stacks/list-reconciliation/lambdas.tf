@@ -545,3 +545,39 @@ module "lr_29_firehose_transform" {
     SPLUNK_SOURCETYPE = "pcrm-listrecon:aws:cloudwatch_logs"
   }
 }
+
+#tfsec:ignore:aws-vpc-no-public-egress-sgr
+module "lambda_send_email" {
+  source = "../../modules/lambda_function"
+
+  name                   = "send_email"
+  environment            = local.environment
+  kms_cloudwatch_key_arn = module.kms["cloudwatch"].key.arn
+  vpc_id                 = data.aws_vpc.account.id
+  vpc_subnet_ids         = data.aws_subnet_ids.private.ids
+
+  cidr_block_egresses_length = 1
+  cidr_block_egresses = [
+    { cidr_block = "0.0.0.0/0", port = 443 }
+  ]
+  prefix_list_egresses_length = 1
+  prefix_list_egresses = [
+    { id = data.aws_vpc_endpoint.s3.prefix_list_id, port = 443 },
+  ]
+  security_group_egresses_length = 3
+  security_group_egresses = [
+    { ids = data.aws_vpc_endpoint.cloudwatch.security_group_ids, port = 443 },
+    { ids = data.aws_vpc_endpoint.kms.security_group_ids, port = 443 },
+    { ids = data.aws_vpc_endpoint.ssm.security_group_ids, port = 443 },
+  ]
+  kms_read_write        = [module.kms["ssm"].key.arn, module.kms["s3"].key.arn]
+  s3_read_write         = [module.lr_send_email_bucket.bucket.arn]
+  lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
+  log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
+  ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/email/*"]
+  environment_variables = {
+    EMAIL_SSM_PREFIX = "/${local.environment}/email/"
+    LISTREC_EMAIL    = try(local.listrec_email[local.environment], local.listrec_email["default"])
+
+  }
+}

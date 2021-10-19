@@ -1,7 +1,6 @@
 import os
 
-from exchangelib import Account, Credentials, FaultTolerance, Mailbox, Message
-from exchangelib.autodiscover import Autodiscovery
+from exchangelib import DELEGATE, Account, Configuration, Credentials, Mailbox, Message
 from send_email.outbox import generate_filename, to_json, upload_to_s3
 
 
@@ -29,23 +28,24 @@ def to_outbox(service: str, to: list, subject: str, body, bucket=None) -> bool:
 
 def send(username: str, password: str, event: dict):
     """
-    Args:
+     Args:
         username: Usernames for authentication are of one of these forms:
             * PrimarySMTPAddress
             * WINDOMAIN\\username
             * User Principal Name (UPN)
         password: Clear-text password`
         event: {
-            "email_addresses": ["rand@nhs.com", "rands@nhs.com"],
+            "email_addresses": ["example@nhs.com", "example2@nhs.com"],
             "subject": subject,
             "message": body,
             }
+    Returns: None
 
     """
-    Autodiscovery.INITIAL_RETRY_POLICY = FaultTolerance(max_wait=10)
     credentials = Credentials(username, password)
     try:
-        account = _get_account(credentials)
+        config = _get_config(credentials)
+        account = _get_account(username, config)
 
     except Exception as e:
         raise e
@@ -58,16 +58,21 @@ def send(username: str, password: str, event: dict):
             body=f"{event['message']}",
             to_recipients=recipients,
         )
-
         message.send()
     except Exception as e:
         raise e
 
 
-def _get_account(credentials: Credentials):
+def _get_config(credentials: Credentials):
+    config = Configuration(server="outlook.office365.com", credentials=credentials)
+    return config
+
+
+def _get_account(username, configuration: Configuration):
     account = Account(
-        primary_smtp_address=credentials.username,
-        credentials=credentials,
-        autodiscover=True,
+        primary_smtp_address=username,
+        config=configuration,
+        autodiscover=False,
+        access_type=DELEGATE,
     )
     return account

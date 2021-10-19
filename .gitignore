@@ -191,6 +191,7 @@ terraform.rc
 
 # Project-specific stuff
 .idea/list-reconciliation.iml
+.idea/.gitignore
 
 # User-specific stuff
 .idea/**/workspace.xml

@@ -30,6 +30,10 @@ output "mesh_bucket" {
   value = module.mesh_bucket.bucket.bucket
 }
 
+output "lr_send_email_bucket" {
+  value = module.lr_send_email_bucket.bucket.bucket
+}
+
 output "lr_02_lambda" {
   value = module.lr_02_validate_and_parse.lambda.function_name
 }
@@ -116,6 +120,14 @@ output "lr_10_sfn" {
 
 output "lr_10_sfn_arn" {
   value = module.lr_10_registration_orchestration.step_function.arn
+}
+
+output "lambda_send_email_lambda" {
+  value = module.lambda_send_email.lambda.function_name
+}
+
+output "lambda_send_email_lambda_arn" {
+  value = module.lambda_send_email.lambda.arn
 }
 
 output "jobs_table" {

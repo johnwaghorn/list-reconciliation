@@ -5,7 +5,7 @@ module "lr_01_gp_extract_input" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 
   s3_triggers = [
@@ -30,7 +30,7 @@ module "lr_06_patient_records" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
 
@@ -48,7 +48,7 @@ module "lr_13_reg_diffs_output" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
 }
 
@@ -60,7 +60,7 @@ module "lr_20_pds_reg_input" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
 
@@ -81,7 +81,7 @@ module "lr_22_pds_reg_output" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
 }
@@ -95,7 +95,7 @@ module "lr_23_firehose_failure" {
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_enabled      = false
   s3_logging_bucket_name  = "N/A"
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
 }
@@ -110,7 +110,7 @@ module "lr_26_access_logs" {
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_enabled      = false
   s3_logging_bucket_name  = "N/A"
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
 }
@@ -123,7 +123,26 @@ module "mesh_bucket" {
   environment             = local.environment
   s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
   s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
-  s3_logging_kms_arn      = module.kms["s3"].key.arn
+  s3_kms_arn              = module.kms["s3"].key.arn
   log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
   versioning_enabled      = false
+}
+
+module "lr_send_email_bucket" {
+  source = "../../modules/s3_bucket"
+
+  name                    = "lr-send-email-bucket"
+  environment             = local.environment
+  s3_force_destroy_bucket = try(local.s3_force_destroy_bucket[local.environment], local.s3_force_destroy_bucket["default"])
+  s3_logging_bucket_name  = module.lr_26_access_logs.bucket.bucket
+  s3_kms_arn              = module.kms["s3"].key.arn
+  log_retention_in_days   = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
+
+  s3_triggers = [
+    {
+      events              = ["s3:ObjectCreated:*"],
+      lambda_function_arn = module.lambda_send_email.lambda.arn
+      key_prefix          = null
+    }
+  ]
 }

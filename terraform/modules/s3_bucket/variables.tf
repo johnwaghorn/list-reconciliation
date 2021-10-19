@@ -11,7 +11,7 @@ variable "s3_logging_bucket_name" {
   type        = string
 }
 
-variable "s3_logging_kms_arn" {
+variable "s3_kms_arn" {
   description = ""
   type        = string
 }

@@ -1,0 +1,8 @@
+{
+	"service": "test",
+	"to": [
+		"example@nhs.net"
+	],
+	"subject": "testing lambda_send_email",
+	"body": "Lorem Ipsum is simply dummy text of the printing and typesetting industry"
+}
