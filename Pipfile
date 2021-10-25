@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-boto3 = "==1.18.65"
+boto3 = "==1.19.2"
 cryptography = "==35.0.0"
 exchangelib = "==3.2.0"
 jsonpath-ng = "==1.5.3"
@@ -24,7 +24,7 @@ black = "==21.7b0"
 com2ann = "*"
 docker = "*"
 faker = "*"
-fastapi= "==0.68.1"
+fastapi= "==0.70.0"
 flake8 = "*"
 freezegun = "*"
 isort = "*"
