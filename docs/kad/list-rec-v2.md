@@ -1,4 +1,4 @@
-# List Reconciliation v0.2
+# List Reconciliation v2
 
 ## Problem
 
@@ -16,12 +16,12 @@ The options below outline potential long term architectural changes for List Rec
 
 ## Options
 
-- [AWS Service v0.1](#aws-service-v01)
+- [AWS Service](#aws-service)
 - [DPS Service](#dps-service)
 - [Spine Service](#spine-service)
-- [AWS Service v0.2](#aws-service-v02)
+- [AWS Service v2](#aws-service-v2)
 
-## AWS Service v0.1
+## AWS Service
 
 ### Summary
 
@@ -103,7 +103,7 @@ Estimate: ~40 days / ~8 weeks (To be confirmed. Potentially based on smaller req
 - Removes an opportunity for Engineers to work with AWS
 - Resource requirements need adding to overall capacity planning
 
-## AWS Service v0.2
+## AWS Service v2
 
 ### Summary
 
@@ -132,12 +132,12 @@ Estimate: ~50 days / ~10 weeks
 
 ### Potential Architecture
 
-![Architecture Diagram](../diagrams/List_Reconciliation_v0.2.png)
-
-## Suggestion
-
-TBC
+![Architecture Diagram](../diagrams/List_Reconciliation_v2.png)
 
 ## Decision
 
-TBC
+[DPS Service](#dps-service)
+
+Placing the data processing within a system designed for processing large scale datasets and which has the PDS dataset reduces the amount of duplicate work, to build a data processing capability, and transfer and storage costs of data, as PDS is accessed locally inside DPS rather than an exported copy being sent to List Rec.
+
+However the processing of the reports and downstream actions, like DSA Work Item creation, summary emails and MESH Sending of files will still be handled in a set of AWS built services.

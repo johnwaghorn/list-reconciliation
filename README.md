@@ -25,12 +25,13 @@ The List Reconciliation Solution is intended to compare the patient list includi
 
 ### Key Architectural Designs
 
-- [List Reconciliation v0.1](docs/kad/list-rec-v0.1.md)
-- [List Reconciliation v0.2](docs/kad/list-rec-v0.2.md)
+- [List Reconciliation v1](docs/kad/list-rec-v1.md)
+- [List Reconciliation v2](docs/kad/list-rec-v2.md)
 
 ### Key Design Decisions
 
 - [Event Processing](docs/kdd/event-processing.md)
+- [List Reconciliation v2](docs/kdd/list-rec-v2.md)
 
 ### Packages
 
