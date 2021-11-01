@@ -164,6 +164,18 @@ variable "security_group_egresses" {
   default     = []
 }
 
+variable "security_group_ingresses_length" {
+  description = "Hack for creating Security Group Ingresses"
+  type        = number
+  default     = 0
+}
+
+variable "security_group_ingresses" {
+  description = "Security Group Ingresses"
+  type        = list(object({ ids = list(string), port = number }))
+  default     = []
+}
+
 variable "cidr_block_egresses_length" {
   description = "Hack for creating CIDR Block Egresses"
   type        = number
