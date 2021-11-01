@@ -17,13 +17,13 @@ resource "aws_security_group_rule" "egress_security_groups" {
 }
 
 resource "aws_security_group_rule" "ingress_source_security_groups" {
-  count = var.security_group_egresses_length
+  count = var.security_group_ingresses_length
 
   description              = "Allow ingress from Security Groups"
-  security_group_id        = var.security_group_egresses[count.index].ids[0]
+  security_group_id        = var.security_group_ingresses[count.index].ids[0]
   type                     = "ingress"
-  from_port                = var.security_group_egresses[count.index].port
-  to_port                  = var.security_group_egresses[count.index].port
+  from_port                = var.security_group_ingresses[count.index].port
+  to_port                  = var.security_group_ingresses[count.index].port
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.lambda.id
 }
