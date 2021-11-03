@@ -1,16 +1,16 @@
 import json
 import traceback
+import uuid
 from datetime import datetime
 from uuid import UUID
 
 import boto3
-import nhs_mail_relay
-from aws.ssm import get_ssm_params
 from botocore.exceptions import ClientError
 from jobs.statuses import InputFolderType, InvalidErrorType
 from lr_logging import get_cloudlogbase_config
-from lr_logging.exceptions import FeedbackLogError
+from lr_logging.exceptions import FeedbackLogError, SendEmailError
 from lr_logging.responses import Message, error, success
+from send_email.send import to_outbox
 from spine_aws_common.lambda_application import LambdaApplication
 
 
@@ -19,25 +19,24 @@ class FeedbackFailure(LambdaApplication):
         super().__init__(additional_log_config=get_cloudlogbase_config())
         self.s3 = boto3.client("s3")
         self.bucket = self.system_config["AWS_S3_REGISTRATION_EXTRACT_BUCKET"]
-        self.email_params = get_ssm_params(
-            self.system_config["EMAIL_SSM_PREFIX"], self.system_config["AWS_REGION"]
-        )
+        self.outbox_bucket = self.system_config["AWS_S3_SEND_EMAIL_BUCKET"]
+        self.to = self.system_config["PCSE_EMAIL"]
         self.job_id = None
         self.log_key = None
         self.log_filename = None
         self.failed_key = None
         self.log = None
         self.upload_date = None
+        self.prefix = f"{InputFolderType.FAIL.value}logs/"
 
     def initialise(self):
         pass
 
     def start(self):
         try:
-            prefix = f"{InputFolderType.FAIL.value}logs/"
 
             self.log_key = self.event["Records"][0]["s3"]["object"]["key"]
-            self.log_filename = str(self.log_key).replace(prefix, "")
+            self.log_filename = str(self.log_key).replace(self.prefix, "")
 
             try:
                 self.job_id = self.log_filename.split("-FailedFile-")[1].replace(
@@ -65,6 +64,23 @@ class FeedbackFailure(LambdaApplication):
             )
             self.response = error(
                 message="LR04 Lambda accessed invalid log file",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
+            )
+            raise e
+
+        except SendEmailError as e:
+            self.log_object.write_log(
+                "LR04C02",
+                log_row_dict={
+                    "email_address": self.to,
+                    "upload_filename": self.log["file"],
+                    "job_id": self.job_id,
+                    "error": traceback.format_exc(),
+                },
+            )
+            self.response = error(
+                message="LR04 Lambda failed to Send_Email",
                 internal_id=self.log_object.internal_id,
                 error=traceback.format_exc(),
             )
@@ -98,17 +114,26 @@ class FeedbackFailure(LambdaApplication):
 
         self.validate_log()
 
-        email_subject, email_body = self.send_email()
+        email_subject, email_body, sent = self.send_email()
 
         self.cleanup_files()
 
-        return success(
-            message="LR04 Lambda application stopped",
-            internal_id=self.log_object.internal_id,
-            job_id=self.job_id,
-            email_subject=email_subject,
-            email_body=email_body,
-        )
+        if sent:
+            return success(
+                message="LR04 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
+                email_subject=email_subject,
+                email_body=email_body,
+            )
+        else:
+            return error(
+                message="lr-04 failed to send alert email",
+                internal_id=self.log_object.internal_id,
+                job_id=self.job_id,
+                email_subject=email_subject,
+                email_body=email_body,
+            )
 
     def read_log(self):
         """Read LOG file and extract error information into a dictionary"""
@@ -185,31 +210,30 @@ class FeedbackFailure(LambdaApplication):
     def send_email(self):
         """Send an email based on LOG file info"""
 
-        to = self.system_config["PCSE_EMAIL"]
+        service = "LR-04"
+        to = self.to
         subject = f"Validation Failure - PDS Comparison validation failure against '{self.log['file']}'"
         body = self.create_email_body()
+        outbox_filename = str(uuid.uuid4())
+        bucket = self.outbox_bucket
 
-        nhs_mail_relay.send_email(
-            self.system_config["LISTREC_EMAIL"],
-            self.email_params["list_rec_email_password"],
-            {
-                "email_addresses": [to],
-                "subject": subject,
-                "message": body,
-            },
-            self.log_object,
-        )
+        try:
+            sent = to_outbox(service, [to], subject, body, outbox_filename, bucket)
+            self.log_object.write_log(
+                "LR04I02",
+                log_row_dict={
+                    "email_address": self.to,
+                    "upload_filename": self.log["file"],
+                    "job_id": self.job_id,
+                    "outbox_filename": outbox_filename,
+                },
+            )
+            return subject, body, sent
+        except:
 
-        self.log_object.write_log(
-            "LR04I02",
-            log_row_dict={
-                "email_address": self.log_key,
-                "upload_filename": self.log["file"],
-                "job_id": self.job_id,
-            },
-        )
-
-        return subject, body
+            raise SendEmailError(
+                f"Failed to send email with subject='{subject}' to='{to} for '{self.job_id}'"
+            )
 
     def create_email_body(self) -> str:
         """Create body of email using LOG's error type and log data
@@ -278,7 +302,6 @@ class FeedbackFailure(LambdaApplication):
         return body
 
     def cleanup_files(self):
-        """Cleanup failed GP file and failed log file from s3"""
 
         self.s3.delete_object(Bucket=self.bucket, Key=self.failed_key)
 

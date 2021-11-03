@@ -16,3 +16,7 @@ class InvalidPDSData(Exception):
 
 class FeedbackLogError(Exception):
     pass
+
+
+class SendEmailError(Exception):
+    pass

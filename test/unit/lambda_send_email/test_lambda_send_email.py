@@ -1,8 +1,7 @@
 import boto3
 import pytest
 
-EMAIL_BUCKET = "mock-send-email"
-EMAIL_FILE = "email.json"
+from .conftest import EMAIL_BUCKET, EMAIL_FILE
 
 
 def test_send_email_raises_key_error(lambda_handler, lambda_context):
@@ -11,11 +10,7 @@ def test_send_email_raises_key_error(lambda_handler, lambda_context):
         lambda_handler.main(event, lambda_context)
 
 
-def test_send_email_ok(
-    lambda_handler,
-    lambda_context,
-    upload_email_file,
-):
+def test_send_email_ok(lambda_handler, lambda_context, upload_email_file):
 
     event = {
         "Records": [

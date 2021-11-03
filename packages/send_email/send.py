@@ -1,10 +1,12 @@
 import os
 
 from exchangelib import DELEGATE, Account, Configuration, Credentials, Mailbox, Message
-from send_email.outbox import generate_filename, to_json, upload_to_s3
+from send_email.outbox import to_json, upload_to_s3
 
 
-def to_outbox(service: str, to: list, subject: str, body, bucket=None) -> bool:
+def to_outbox(
+    service: str, to: list, subject: str, body, filename: str, bucket=None
+) -> bool:
     """
     Send an email to an outbox, ready to be later relayed.
     Args:
@@ -12,6 +14,7 @@ def to_outbox(service: str, to: list, subject: str, body, bucket=None) -> bool:
         to (list) : recipients of the email
         subject (str): subject line of email
         body: body of email
+        filename (str): object name that is stored in s3, uuid4 is recommneded
         bucket: provide a s3 bucket to use an outbox or use a environment variable
 
     Returns:
@@ -20,9 +23,8 @@ def to_outbox(service: str, to: list, subject: str, body, bucket=None) -> bool:
 
     if bucket is None:
         bucket = os.environ["EMAIL_BUCKET"]
-
+    filename = f"{filename}.json"
     email = to_json(service, to, subject, body)
-    filename = generate_filename()
     return upload_to_s3(email, filename, bucket)
 
 

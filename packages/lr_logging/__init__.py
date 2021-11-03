@@ -6,6 +6,7 @@ from lr_logging.exceptions import (
     InvalidGPExtract,
     InvalidPDSData,
     InvalidStructure,
+    SendEmailError,
 )
 from lr_logging.responses import Message, error, success
 
@@ -16,6 +17,7 @@ __all__ = [
     "InvalidFilename",
     "InvalidPDSData",
     "FeedbackLogError",
+    "SendEmailError",
     "Message",
     "success",
     "error",

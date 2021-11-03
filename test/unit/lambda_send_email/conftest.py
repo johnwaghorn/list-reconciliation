@@ -8,6 +8,8 @@ from moto import mock_s3, mock_ssm
 REGION_NAME = os.environ.get("AWS_REGION")
 EMAIL_SSM_PREFIX = os.getenv("EMAIL_SSM_PREFIX")
 LISTREC_EMAIL_PASSWORD = os.getenv("LISTREC_EMAIL_PASSWORD")
+EMAIL_BUCKET = os.environ.get("AWS_S3_SEND_EMAIL_BUCKET")
+EMAIL_FILE = "email.json"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
@@ -22,7 +24,7 @@ def s3():
 @pytest.fixture
 def create_bucket(s3):
     s3.create_bucket(
-        Bucket="mock-send-email",
+        Bucket=EMAIL_BUCKET,
         CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
     )
 
@@ -33,7 +35,7 @@ def create_bucket(s3):
 def upload_email_file(create_bucket, s3):
     s3.upload_file(
         os.path.join(DATA, "email.json"),
-        "mock-send-email",
+        EMAIL_BUCKET,
         "email.json",
     )
 

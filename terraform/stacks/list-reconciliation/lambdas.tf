@@ -50,7 +50,6 @@ module "lr_02_validate_and_parse" {
   }
 }
 
-#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_04_feedback_failure" {
   source = "../../modules/lambda_function"
 
@@ -60,10 +59,6 @@ module "lr_04_feedback_failure" {
   vpc_id                 = data.aws_vpc.account.id
   vpc_subnet_ids         = data.aws_subnet_ids.private.ids
 
-  cidr_block_egresses_length = 1
-  cidr_block_egresses = [
-    { cidr_block = "0.0.0.0/0", port = 443 }
-  ]
   prefix_list_egresses_length = 2
   prefix_list_egresses = [
     { id = data.aws_vpc_endpoint.s3.prefix_list_id, port = 443 },
@@ -79,12 +74,11 @@ module "lr_04_feedback_failure" {
   kms_read_write        = [module.kms["ssm"].key.arn, module.kms["s3"].key.arn]
   lambda_layers         = [module.packages.layer.arn, module.dependencies.layer.arn]
   log_retention_in_days = try(local.log_retention_in_days[local.environment], local.log_retention_in_days["default"])
-  s3_read_write         = [module.lr_01_gp_extract_input.bucket.arn]
+  s3_read_write         = [module.lr_01_gp_extract_input.bucket.arn, module.lr_send_email_bucket.bucket.arn]
   ssm_read_by_path      = ["arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/email/*"]
   environment_variables = {
     AWS_S3_REGISTRATION_EXTRACT_BUCKET = module.lr_01_gp_extract_input.bucket.bucket
-    EMAIL_SSM_PREFIX                   = "/${local.environment}/email/"
-    LISTREC_EMAIL                      = try(local.listrec_email[local.environment], local.listrec_email["default"])
+    AWS_S3_SEND_EMAIL_BUCKET           = module.lr_send_email_bucket.bucket.bucket
     PCSE_EMAIL                         = try(local.pcse_email[local.environment], local.pcse_email["default"])
   }
 }

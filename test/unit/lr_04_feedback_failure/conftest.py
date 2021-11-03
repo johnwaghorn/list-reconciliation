@@ -10,9 +10,9 @@ DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
 
 REGION_NAME = os.environ.get("AWS_REGION")
 MOCK_BUCKET = os.environ.get("AWS_S3_REGISTRATION_EXTRACT_BUCKET")
-EMAIL_SSM_PREFIX = os.getenv("EMAIL_SSM_PREFIX")
-LISTREC_EMAIL_PASSWORD = os.getenv("LISTREC_EMAIL_PASSWORD")
-
+MOCK_OUTBOX = os.environ.get("AWS_S3_SEND_EMAIL_BUCKET")
+EMAIL_FILE = "email.json"
+JOB_ID = "50e1b957-2fc4-44b0-8e60-d8f9ca162099"
 FAILED_FILE = "A12023_GPR4LNA1.CSB"
 LOG_FILE = "A12023_GPR4LNA1.CSB-FailedFile-50e1b957-2fc4-44b0-8e60-d8f9ca162099.json"
 INVALID_LOG_FILE = (
@@ -21,23 +21,40 @@ INVALID_LOG_FILE = (
 
 
 @pytest.fixture
-def create_bucket():
+def s3():
     with mock_s3():
-        client = boto3.client("s3")
-        client.create_bucket(
-            Bucket=MOCK_BUCKET,
-            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
-        )
-        client.upload_file(
-            os.path.join(DATA, f"{FAILED_FILE}"), MOCK_BUCKET, f"fail/{FAILED_FILE}"
-        )
-        yield
+        yield boto3.client("s3", region_name=REGION_NAME)
 
 
 @pytest.fixture
-def upload_invalid_log_to_s3(create_bucket):
-    client = boto3.client("s3")
-    client.upload_file(
+def create_outbox_bucket(s3):
+    s3.create_bucket(
+        Bucket=MOCK_OUTBOX,
+        CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
+    )
+    yield
+
+
+@pytest.fixture
+def create_bucket(s3):
+    s3.create_bucket(
+        Bucket=MOCK_BUCKET,
+        CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
+    )
+
+    yield
+
+
+@pytest.fixture
+def upload_failed_file_to_s3(s3, create_bucket):
+    s3.upload_file(
+        os.path.join(DATA, f"{FAILED_FILE}"), MOCK_BUCKET, f"fail/{FAILED_FILE}"
+    )
+
+
+@pytest.fixture
+def upload_invalid_log_to_s3(s3, create_bucket):
+    s3.upload_file(
         os.path.join(DATA, f"{INVALID_LOG_FILE}"),
         MOCK_BUCKET,
         f"fail/logs/{INVALID_LOG_FILE}",
@@ -45,9 +62,8 @@ def upload_invalid_log_to_s3(create_bucket):
 
 
 @pytest.fixture
-def upload_valid_log_to_s3(create_bucket):
-    client = boto3.client("s3")
-    client.upload_file(
+def upload_valid_log_to_s3(s3, create_bucket):
+    s3.upload_file(
         os.path.join(DATA, f"{LOG_FILE}"), MOCK_BUCKET, f"fail/logs/{LOG_FILE}"
     )
 
@@ -63,7 +79,7 @@ def lr_04_event_invalid_file():
 
 
 @pytest.fixture
-def lambda_handler(ssm, email_ssm, mock_email):
+def lambda_handler(ssm, create_outbox_bucket):
     app = FeedbackFailure()
     return app
 
@@ -72,14 +88,3 @@ def lambda_handler(ssm, email_ssm, mock_email):
 def ssm():
     with mock_ssm():
         yield boto3.client("ssm", region_name=REGION_NAME)
-
-
-@pytest.fixture
-def email_ssm(ssm):
-    ssm.put_parameter(
-        Name=f"{EMAIL_SSM_PREFIX}/list_rec_email_password",
-        Value=LISTREC_EMAIL_PASSWORD,
-        Type="SecureString",
-        Overwrite=True,
-    )
-    yield

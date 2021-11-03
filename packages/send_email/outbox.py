@@ -1,5 +1,4 @@
 import json
-import uuid
 from datetime import datetime
 
 import boto3
@@ -16,19 +15,14 @@ def upload_to_s3(email: str, filename: str, bucket) -> bool:
         raise e
 
 
-def to_json(service_index: str, to: list, subject: str, body) -> str:
+def to_json(service: str, to: list, subject: str, body) -> str:
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     return json.dumps(
         {
-            "service_index": service_index.upper(),
+            "service": service.upper(),
             "timestamp": timestamp,
             "to": to,
             "subject": subject,
             "body": body,
         }
     )
-
-
-def generate_filename() -> str:
-    guid = str(uuid.uuid4())
-    return f"{guid}.json"
