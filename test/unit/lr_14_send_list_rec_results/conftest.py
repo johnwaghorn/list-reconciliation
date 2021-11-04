@@ -15,6 +15,9 @@ MESH_SSM_PREFIX = os.getenv("MESH_SSM_PREFIX")
 EMAIL_SSM_PREFIX = os.getenv("EMAIL_SSM_PREFIX")
 LISTREC_EMAIL_PASSWORD = os.getenv("LISTREC_EMAIL_PASSWORD")
 
+MESH_BUCKET = os.getenv("MESH_BUCKET")
+MOCK_OUTBOX = os.environ.get("AWS_S3_SEND_EMAIL_BUCKET")
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
 
@@ -22,36 +25,59 @@ DATA = os.path.join(ROOT, "..", "..", "_data", "unit")
 @pytest.fixture
 def s3():
     with mock_s3():
-        client = boto3.client("s3")
-        client.create_bucket(
-            Bucket=MESH_BUCKET,
-            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
-        )
-        client.create_bucket(
-            Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
-            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
-        )
-
-        client.upload_file(
-            os.path.join(DATA, "pds_api_data.csv"),
-            LR_13_REGISTRATIONS_OUTPUT_BUCKET,
-            "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/gponly.csv",
-        )
-        client.upload_file(
-            os.path.join(DATA, "pds_api_data.csv"),
-            LR_13_REGISTRATIONS_OUTPUT_BUCKET,
-            "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/pdsonly.csv",
-        )
-        client.upload_file(
-            os.path.join(DATA, "pds_api_data.csv"),
-            LR_13_REGISTRATIONS_OUTPUT_BUCKET,
-            "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/cdd.csv",
-        )
-        yield
+        yield boto3.client("s3", region_name=REGION_NAME)
 
 
 @pytest.fixture
-def lambda_handler(ssm, mesh_ssm, email_ssm, mock_email):
+def create_outbox_bucket(s3):
+    s3.create_bucket(
+        Bucket=MOCK_OUTBOX,
+        CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
+    )
+    yield
+
+
+@pytest.fixture
+def create_mesh_bucket(s3):
+    s3.create_bucket(
+        Bucket=MESH_BUCKET,
+        CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
+    )
+    yield
+
+
+@pytest.fixture
+def create_lr13_bucket(s3):
+    s3.create_bucket(
+        Bucket=LR_13_REGISTRATIONS_OUTPUT_BUCKET,
+        CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
+    )
+    yield
+
+
+@pytest.fixture
+def upload_lr13_files(s3, create_lr13_bucket):
+
+    s3.upload_file(
+        os.path.join(DATA, "pds_api_data.csv"),
+        LR_13_REGISTRATIONS_OUTPUT_BUCKET,
+        "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/gponly.csv",
+    )
+    s3.upload_file(
+        os.path.join(DATA, "pds_api_data.csv"),
+        LR_13_REGISTRATIONS_OUTPUT_BUCKET,
+        "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/pdsonly.csv",
+    )
+    s3.upload_file(
+        os.path.join(DATA, "pds_api_data.csv"),
+        LR_13_REGISTRATIONS_OUTPUT_BUCKET,
+        "7b207bdb-2937-4e17-a1a9-57a2bbf3e358/cdd.csv",
+    )
+    yield
+
+
+@pytest.fixture
+def lambda_handler(ssm, mesh_ssm):
     app = SendListRecResults()
     return app
 
@@ -143,17 +169,6 @@ def mesh_ssm(ssm):
         Name=f"{MESH_SSM_PREFIX}/listrec_pcse_workflow",
         Value="RSLISTRECONCILIATIONPCSE",
         Type="String",
-        Overwrite=True,
-    )
-    yield
-
-
-@pytest.fixture
-def email_ssm(ssm):
-    ssm.put_parameter(
-        Name=f"{EMAIL_SSM_PREFIX}/list_rec_email_password",
-        Value=LISTREC_EMAIL_PASSWORD,
-        Type="SecureString",
         Overwrite=True,
     )
     yield

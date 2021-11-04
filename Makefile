@@ -111,8 +111,8 @@ apply:
 	rm -f ./terraform_outputs_${stack}.json|| true
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json
 
-apply-lambda: packages-layer
-	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.${lambda}
+apply-module: packages-layer
+	terraform -chdir=./terraform/stacks/list-reconciliation apply -auto-approve --target=module.${module}
 
 output:
 	terraform -chdir=./terraform/stacks/${stack} output -json > ./build/terraform_outputs_${stack}.json

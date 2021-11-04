@@ -292,7 +292,6 @@ module "lr_12_pds_registration_status" {
   }
 }
 
-#tfsec:ignore:aws-vpc-no-public-egress-sgr
 module "lr_14_send_list_rec_results" {
   source = "../../modules/lambda_function"
 
@@ -302,10 +301,6 @@ module "lr_14_send_list_rec_results" {
   vpc_id                 = data.aws_vpc.account.id
   vpc_subnet_ids         = data.aws_subnet_ids.private.ids
 
-  cidr_block_egresses_length = 1
-  cidr_block_egresses = [
-    { cidr_block = "0.0.0.0/0", port = 443 }
-  ]
   prefix_list_egresses_length = 2
   prefix_list_egresses = [
     { id = data.aws_vpc_endpoint.s3.prefix_list_id, port = 443 },
@@ -330,14 +325,14 @@ module "lr_14_send_list_rec_results" {
     "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/email/*",
     "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/${local.environment}/mesh/*"
   ]
-  s3_read_write = [module.lr_13_reg_diffs_output.bucket.arn, module.mesh_bucket.bucket.arn]
+  s3_read_write = [module.lr_13_reg_diffs_output.bucket.arn, module.mesh_bucket.bucket.arn, module.lr_send_email_bucket.bucket.arn]
   environment_variables = {
     DEMOGRAPHICS_DIFFERENCES_TABLE    = module.lr_31_demographics_differences.table.name
-    EMAIL_SSM_PREFIX                  = "/${local.environment}/email/"
     JOB_STATS_TABLE                   = module.lr_28_jobs_stats.table.name
     JOBS_TABLE                        = module.lr_03_jobs.table.name
     LISTREC_EMAIL                     = try(local.listrec_email[local.environment], local.listrec_email["default"])
     LR_13_REGISTRATIONS_OUTPUT_BUCKET = module.lr_13_reg_diffs_output.bucket.bucket
+    AWS_S3_SEND_EMAIL_BUCKET          = module.lr_send_email_bucket.bucket.bucket
     MESH_BUCKET                       = module.mesh_bucket.bucket.bucket
     MESH_SSM_PREFIX                   = "/${local.environment}/mesh/"
     PCSE_EMAIL                        = try(local.pcse_email[local.environment], local.pcse_email["default"])

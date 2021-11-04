@@ -1,15 +1,17 @@
 import json
 import os
 import traceback
+import uuid
 
 import boto3
-import nhs_mail_relay
 import pytz
 from aws.ssm import get_ssm_params
 from database import DemographicsDifferences, Jobs, JobStats
 from lr_logging import get_cloudlogbase_config
+from lr_logging.exceptions import SendEmailError
 from lr_logging.responses import Message, error, success
 from mesh import AWSMESHMailbox, get_mesh_mailboxes
+from send_email.send import to_outbox
 from spine_aws_common.lambda_application import LambdaApplication
 
 from .listrec_results_email_template import BODY
@@ -22,11 +24,11 @@ class SendListRecResults(LambdaApplication):
         self.mesh_params = get_ssm_params(
             self.system_config["MESH_SSM_PREFIX"], self.system_config["AWS_REGION"]
         )
-        self.email_params = get_ssm_params(
-            self.system_config["EMAIL_SSM_PREFIX"], self.system_config["AWS_REGION"]
-        )
+        self.outbox_bucket = self.system_config["AWS_S3_SEND_EMAIL_BUCKET"]
+        self.to = self.system_config["PCSE_EMAIL"]
         self.job_id = None
         self.pcse_mesh_id = None
+        self.job = None
 
     def initialise(self):
         pass
@@ -38,6 +40,22 @@ class SendListRecResults(LambdaApplication):
             self.log_object.set_internal_id(self.job_id)
 
             self.response = self.send_list_rec_results()
+
+        except SendEmailError as e:
+            self.log_object.write_log(
+                "LR14C01",
+                log_row_dict={
+                    "email_address": self.to,
+                    "job_id": self.job_id,
+                    "error": traceback.format_exc(),
+                },
+            )
+            self.response = error(
+                message="LR14 Lambda failed to relay email via the send_email package",
+                internal_id=self.log_object.internal_id,
+                error=traceback.format_exc(),
+            )
+            raise e
 
         except KeyError as e:
             self.response = error(
@@ -67,12 +85,23 @@ class SendListRecResults(LambdaApplication):
 
         self.send_mesh_files(filenames, files)
 
-        self.send_email(email_subject, email_body)
+        sent = self.send_email(email_subject, email_body)
 
-        return success(
-            message="LR14 Lambda application stopped",
+        if sent:
+            return success(
+                message="LR14 Lambda application stopped",
+                internal_id=self.log_object.internal_id,
+                to=self.to,
+                mesh_id=self.pcse_mesh_id,
+                email_subject=email_subject,
+                email_body=email_body,
+                files=filenames,
+            )
+
+        return error(
+            message="LR14 Lambda failed to send list rec results",
             internal_id=self.log_object.internal_id,
-            to=self.system_config["PCSE_EMAIL"],
+            to=self.to,
             mesh_id=self.pcse_mesh_id,
             email_subject=email_subject,
             email_body=email_body,
@@ -112,17 +141,31 @@ class SendListRecResults(LambdaApplication):
     def generate_email(self, filenames: list[str]):
         diffs = list(DemographicsDifferences.JobIdIndex.query(self.job_id))
         unique_patients = {d.PatientId for d in diffs}
-        job = Jobs.IdIndex.query(self.job_id).next()
+        try:
+            self.job = Jobs.IdIndex.query(self.job_id).next()
+            self.log_object.write_log(
+                "LR14I04",
+                log_row_dict={
+                    "job_id": self.job_id,
+                },
+            )
+        except:
+            self.log_object.write_log(
+                "LR14C02",
+                log_row_dict={
+                    "job_id": self.job_id,
+                },
+            )
         job_stat = JobStats.get(self.job_id)
 
-        timestamp = job.Timestamp.astimezone(pytz.timezone("Europe/London")).strftime(
-            "%H:%M:%S on %d/%m/%Y"
-        )
-        email_subject = f"PDS Comparison run at {timestamp} against Practice: {job.PracticeCode} - {job.FileName} - Registrations Output"
+        timestamp = self.job.Timestamp.astimezone(
+            pytz.timezone("Europe/London")
+        ).strftime("%H:%M:%S on %d/%m/%Y")
+        email_subject = f"PDS Comparison run at {timestamp} against Practice: {self.job.PracticeCode} - {self.job.FileName} - Registrations Output"
 
         filelist = "\n    • ".join(filenames)
         email_body = BODY.format(
-            filename=job.FileName,
+            filename=self.job.FileName,
             timestamp=timestamp,
             only_on_pds=job_stat.OnlyOnPdsRecords,
             only_on_gp=job_stat.OnlyOnGpRecords,
@@ -157,36 +200,37 @@ class SendListRecResults(LambdaApplication):
         )
 
     def send_email(self, subject, body):
-        from_address = str(self.system_config["LISTREC_EMAIL"])
-        email = {
-            "email_addresses": [self.system_config["PCSE_EMAIL"]],
-            "subject": subject,
-            "message": body,
-        }
+
+        service = "LR-14"
+        to = self.to
+        outbox_filename = str(uuid.uuid4())
+        bucket = self.outbox_bucket
 
         if self.send_emails:
-            nhs_mail_relay.send_email(
-                from_address,
-                self.email_params["list_rec_email_password"],
-                email,
-                self.log_object,
-            )
-        else:
-            self.log_object.write_log(
-                "UTI9995",
-                None,
-                {
-                    "logger": "LR14.Lambda",
-                    "level": "INFO",
-                    "message": f"Email sending={self.send_emails}. Did not send message subject={email['subject']} from={from_address} to={','.join(email['email_addresses'])} with body={email['message']}",
-                },
-            )
+            try:
+                sent = to_outbox(service, [to], subject, body, outbox_filename, bucket)
+
+                self.log_object.write_log(
+                    "LR14I03",
+                    log_row_dict={
+                        "email_address": self.to,
+                        "subject": subject,
+                        "job_id": self.job_id,
+                        "outbox_filename": outbox_filename,
+                    },
+                )
+                return sent
+            except:
+                raise SendEmailError(
+                    f"Failed to send email with subject='{subject}' to='{to} for job='{self.job_id}'"
+                )
 
         self.log_object.write_log(
-            "LR14I03",
+            "LR14W01",
             log_row_dict={
-                "receiving_address": [self.system_config["PCSE_EMAIL"]],
+                "sending": self.send_emails,
                 "subject": subject,
+                "to": self.to,
                 "job_id": self.job_id,
             },
         )

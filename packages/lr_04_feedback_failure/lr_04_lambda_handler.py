@@ -80,7 +80,7 @@ class FeedbackFailure(LambdaApplication):
                 },
             )
             self.response = error(
-                message="LR04 Lambda failed to Send_Email",
+                message="LR04 Lambda failed to relay email via the send_email package",
                 internal_id=self.log_object.internal_id,
                 error=traceback.format_exc(),
             )
@@ -126,14 +126,13 @@ class FeedbackFailure(LambdaApplication):
                 email_subject=email_subject,
                 email_body=email_body,
             )
-        else:
-            return error(
-                message="lr-04 failed to send alert email",
-                internal_id=self.log_object.internal_id,
-                job_id=self.job_id,
-                email_subject=email_subject,
-                email_body=email_body,
-            )
+        return error(
+            message="lr-04 failed to send alert email",
+            internal_id=self.log_object.internal_id,
+            job_id=self.job_id,
+            email_subject=email_subject,
+            email_body=email_body,
+        )
 
     def read_log(self):
         """Read LOG file and extract error information into a dictionary"""
@@ -232,7 +231,7 @@ class FeedbackFailure(LambdaApplication):
         except:
 
             raise SendEmailError(
-                f"Failed to send email with subject='{subject}' to='{to} for '{self.job_id}'"
+                f"Failed to send email with subject='{subject}' to='{to} for job='{self.job_id}'"
             )
 
     def create_email_body(self) -> str:
